@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💧 Baba Su Takip Sistemi</title>
+    <title>💧 Su Düellosu: Atilla vs Yeliz</title>
     <style>
         :root {
             --water-blue: #0ea5e9;
-            --treasure-gold: #f59e0b;
-            --bg-color: #f0fdf4;
+            --atilla-color: #2563eb; /* Koyu Mavi */
+            --yeliz-color: #db2777; /* Pembe */
+            --bg-color: #f8fafc;
             --text-dark: #1e293b;
         }
 
@@ -39,29 +40,64 @@
             text-align: center;
         }
 
-        /* Hazine (Kasa) Alanı */
-        .treasure-box {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border: 2px solid var(--treasure-gold);
+        /* --- GİRİŞ EKRANI --- */
+        #loginScreen {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .title {
+            font-size: 24px;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+        }
+
+        .login-btn {
+            padding: 20px;
+            border: none;
+            border-radius: 16px;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .login-btn:active { transform: scale(0.95); }
+        .btn-atilla { background-color: var(--atilla-color); }
+        .btn-yeliz { background-color: var(--yeliz-color); }
+
+        /* --- ANA EKRAN (PANEL) --- */
+        #dashboardScreen {
+            display: none;
+            flex-direction: column;
+        }
+
+        /* Borç / Skor Tablosu */
+        .debt-board {
+            background: #f1f5f9;
+            border: 2px solid #cbd5e1;
             border-radius: 16px;
             padding: 15px;
             margin-bottom: 25px;
-            box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.2);
         }
 
-        .treasure-title {
+        .debt-title {
             font-size: 14px;
-            color: #b45309;
+            color: #64748b;
             font-weight: bold;
             text-transform: uppercase;
+            margin-bottom: 5px;
         }
 
-        .treasure-amount {
-            font-size: 32px;
+        .debt-amount {
+            font-size: 22px;
             font-weight: 900;
-            color: #92400e;
-            margin: 5px 0;
         }
+
+        .debt-red { color: #ef4444; }
+        .debt-green { color: #10b981; }
 
         /* Su Bardağı */
         .glass-container {
@@ -73,7 +109,6 @@
             position: relative;
             overflow: hidden;
             background-color: white;
-            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.05);
         }
 
         .water-level {
@@ -84,23 +119,21 @@
             height: 0%;
             background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
             transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 0 0 25px 25px;
         }
 
         .status-text {
             font-size: 22px;
             font-weight: bold;
-            color: var(--text-dark);
             margin-bottom: 5px;
         }
-        
-        .subtitle {
-            font-size: 14px;
-            color: #64748b;
-            margin-bottom: 25px;
+
+        .user-greeting {
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: bold;
         }
 
-        /* Ana Buton */
+        /* Etkileşim Butonu */
         .main-btn {
             width: 100%;
             padding: 20px;
@@ -109,40 +142,16 @@
             font-size: 20px;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             gap: 5px;
+            margin-bottom: 15px;
         }
 
-        .main-btn.ready {
-            background-color: var(--water-blue);
-            color: white;
-            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
-            animation: pulse 2s infinite;
-        }
-
-        .main-btn.waiting {
-            background-color: #f1f5f9;
-            color: #64748b;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        .main-btn.done {
-            background-color: #10b981;
-            color: white;
-            cursor: default;
-            box-shadow: none;
-        }
-
-        .timer-text {
-            font-size: 16px;
-            font-weight: normal;
-            font-family: monospace;
-        }
+        .main-btn.ready { animation: pulse 2s infinite; color: white; }
+        .main-btn.waiting { background-color: #f1f5f9; color: #64748b; cursor: not-allowed; }
+        .main-btn.done { background-color: #10b981; color: white; cursor: default; }
 
         @keyframes pulse {
             0% { transform: scale(1); }
@@ -150,121 +159,185 @@
             100% { transform: scale(1); }
         }
 
-        .reset-bank {
+        .logout-btn {
             background: none;
             border: none;
-            color: #ef4444;
-            margin-top: 30px;
+            color: #64748b;
             font-size: 14px;
             text-decoration: underline;
             cursor: pointer;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <div class="treasure-box">
-            <div class="treasure-title">💰 Baba'nın Hazinesi 💰</div>
-            <div class="treasure-amount" id="treasureDisplay">0 TL</div>
-            <div style="font-size: 12px; color: #b45309;">(Bugün 3x Yarım Litre bitince +10 TL)</div>
+        <div id="loginScreen">
+            <h1 class="title">⚔️ Su Düellosu</h1>
+            <p style="color: #64748b; margin-bottom: 10px;">Kim kime borçlanacak?</p>
+            
+            <button class="login-btn btn-atilla" onclick="login('atilla')">Atilla Girişi</button>
+            <button class="login-btn btn-yeliz" onclick="login('yeliz')">Yeliz Girişi</button>
         </div>
 
-        <div class="glass-container">
-            <div class="water-level" id="waterLevel"></div>
+        <div id="dashboardScreen">
+            
+            <div class="debt-board">
+                <div class="debt-title">Mevcut Durum</div>
+                <div id="debtDisplay" class="debt-amount">Hesaplanıyor...</div>
+                <div style="font-size: 12px; color: #94a3b8; margin-top:5px;">(Görevini yapmayan 50 TL ceza yer)</div>
+            </div>
+
+            <div class="user-greeting" id="greetingText"></div>
+
+            <div class="glass-container">
+                <div class="water-level" id="waterLevel"></div>
+            </div>
+            <div class="status-text" id="statusText">0 / 3 Yarım Litre</div>
+            
+            <button id="actionBtn" class="main-btn ready" onclick="drinkWater()">
+                <span id="btnMainText">🚰 Yarım Litre İçtim!</span>
+                <span id="btnSubText" style="font-size: 14px; font-weight: normal;"></span>
+            </button>
+
+            <button class="logout-btn" onclick="logout()">Çıkış Yap / Diğer Hesaba Geç</button>
         </div>
-        <div class="status-text" id="statusText">0 / 3 Yarım Litre</div>
-        <div class="subtitle">Her içişte araya 4 saat girer.</div>
-
-        <button id="actionBtn" class="main-btn ready" onclick="drinkWater()">
-            <span id="btnMainText">🚰 Yarım Litre İçtim!</span>
-            <span id="btnSubText" class="timer-text"></span>
-        </button>
-
-        <button class="reset-bank" onclick="emptyVault()">Ay Sonu: Kasayı Boşalt</button>
     </div>
 
     <script>
-        // 4 Saat = 4 * 60 * 60 * 1000 milisaniye
-        const COOLDOWN_MS = 4 * 60 * 60 * 1000; 
+        const COOLDOWN_MS = 4 * 60 * 60 * 1000; // 4 Saat
         
-        // Veritabanı
-        let db = JSON.parse(localStorage.getItem('babaSuDataV2')) || {
-            date: '',
-            intake: 0,
-            treasure: 0,
-            lastDrinkTime: 0,
-            rewardGivenToday: false
+        // Basit Şifreler (Buradan değiştirebilirsin)
+        const PASSWORDS = {
+            atilla: "1234",
+            yeliz: "5678"
         };
 
-        const actionBtn = document.getElementById('actionBtn');
-        const btnMainText = document.getElementById('btnMainText');
-        const btnSubText = document.getElementById('btnSubText');
-        const waterLevel = document.getElementById('waterLevel');
-        const statusText = document.getElementById('statusText');
-        const treasureDisplay = document.getElementById('treasureDisplay');
+        // Veritabanı (Ortak)
+        let db = JSON.parse(localStorage.getItem('suDuelloDB')) || {
+            lastDate: new Date().toLocaleDateString(),
+            atillaOwesYeliz: 0,
+            yelizOwesAtilla: 0,
+            atilla: { intake: 0, lastDrinkTime: 0 },
+            yeliz: { intake: 0, lastDrinkTime: 0 }
+        };
 
-        // Sayfa açıldığında ve her saniye çalışan döngü
-        function checkStatus() {
-            // 1. Yeni gün kontrolü (Gece 12'yi geçince görevler sıfırlanır, para kalır)
+        let currentUser = null; // 'atilla' veya 'yeliz'
+
+        // Sayfa açıldığında gün değişimini kontrol et
+        checkDayChange();
+
+        function checkDayChange() {
             const today = new Date().toLocaleDateString();
-            if (db.date !== today) {
-                db.date = today;
-                db.intake = 0;
-                db.lastDrinkTime = 0;
-                db.rewardGivenToday = false;
+            if (db.lastDate !== today) {
+                // YENİ GÜN! Dünkü borçları hesapla
+                // Atilla yapmış, Yeliz yapamamışsa:
+                if (db.atilla.intake === 3 && db.yeliz.intake < 3) {
+                    db.yelizOwesAtilla += 50;
+                }
+                // Yeliz yapmış, Atilla yapamamışsa:
+                else if (db.yeliz.intake === 3 && db.atilla.intake < 3) {
+                    db.atillaOwesYeliz += 50;
+                }
+                // (İkisi de yaptıysa veya ikisi de yapamadıysa ceza yok)
+
+                // Görevleri Sıfırla
+                db.atilla.intake = 0;
+                db.yeliz.intake = 0;
+                db.atilla.lastDrinkTime = 0;
+                db.yeliz.lastDrinkTime = 0;
+                db.lastDate = today;
+                
                 saveData();
             }
+        }
 
-            // Kasa ve bardak seviyesini güncelle
-            treasureDisplay.innerText = db.treasure + " TL";
-            waterLevel.style.height = (db.intake / 3 * 100) + '%';
-            statusText.innerText = db.intake + " / 3 Yarım Litre";
+        // Giriş İşlemi
+        function login(user) {
+            const enteredPass = prompt(`Lütfen ${user.toUpperCase()} şifresini girin:`);
+            if (enteredPass === PASSWORDS[user]) {
+                currentUser = user;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboardScreen').style.display = 'flex';
+                
+                // Rengi kullanıcıya göre ayarla
+                const btn = document.getElementById('actionBtn');
+                btn.style.backgroundColor = user === 'atilla' ? 'var(--atilla-color)' : 'var(--yeliz-color)';
+                
+                document.getElementById('greetingText').innerText = `Hoş geldin, ${user === 'atilla' ? 'Atilla' : 'Yeliz'}!`;
+                
+                updateUI();
+                setInterval(updateUI, 1000); // Sayacı başlat
+            } else {
+                alert("Hatalı şifre girdiniz!");
+            }
+        }
 
-            // Buton Durumunu Ayarla
-            if (db.intake >= 3) {
-                // Günlük görev bitti
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboardScreen').style.display = 'none';
+        }
+
+        function updateUI() {
+            if (!currentUser) return;
+
+            // Borç Durumunu Göster
+            const debtDisplay = document.getElementById('debtDisplay');
+            const netAtilla = db.yelizOwesAtilla - db.atillaOwesYeliz;
+
+            if (netAtilla > 0) {
+                debtDisplay.innerHTML = `<span style="color: var(--atilla-color)">Yeliz, Atilla'ya ${netAtilla} TL borçlu!</span>`;
+            } else if (netAtilla < 0) {
+                debtDisplay.innerHTML = `<span style="color: var(--yeliz-color)">Atilla, Yeliz'e ${Math.abs(netAtilla)} TL borçlu!</span>`;
+            } else {
+                debtDisplay.innerHTML = `<span style="color: #64748b">Borçlar Eşit (0 TL)</span>`;
+            }
+
+            // Bardak ve Hedef
+            const userData = db[currentUser];
+            document.getElementById('waterLevel').style.height = (userData.intake / 3 * 100) + '%';
+            document.getElementById('statusText').innerText = userData.intake + " / 3 Yarım Litre";
+
+            // Buton Durumu ve Geri Sayım
+            const actionBtn = document.getElementById('actionBtn');
+            const btnMainText = document.getElementById('btnMainText');
+            const btnSubText = document.getElementById('btnSubText');
+
+            if (userData.intake >= 3) {
                 actionBtn.className = 'main-btn done';
-                btnMainText.innerText = "🎉 Bugünlük Görev Tamam!";
-                btnSubText.innerText = "Yarın görüşmek üzere baba.";
+                btnMainText.innerText = "🎉 Görev Tamam!";
+                btnSubText.innerText = "Bugün ceza yemekten kurtuldun.";
                 actionBtn.disabled = true;
             } else {
-                // Görev devam ediyor, süreyi kontrol et
-                const timePassed = Date.now() - db.lastDrinkTime;
+                const timePassed = Date.now() - userData.lastDrinkTime;
                 const timeLeft = COOLDOWN_MS - timePassed;
 
-                if (timeLeft > 0 && db.lastDrinkTime !== 0) {
-                    // Bekleme süresindeyiz (Geri Sayım)
+                if (timeLeft > 0 && userData.lastDrinkTime !== 0) {
                     actionBtn.className = 'main-btn waiting';
                     btnMainText.innerText = "⏳ Sindirim Bekleniyor...";
-                    btnSubText.innerText = "Kalan Süre: " + formatTime(timeLeft);
+                    btnSubText.innerText = formatTime(timeLeft);
                     actionBtn.disabled = true;
                 } else {
-                    // İçmeye hazır
                     actionBtn.className = 'main-btn ready';
                     btnMainText.innerText = "🚰 Yarım Litre İçtim!";
-                    btnSubText.innerText = "Üzerine tıkla ve onayla";
+                    btnSubText.innerText = "4 Saatlik sayacı başlat";
                     actionBtn.disabled = false;
                 }
             }
         }
 
         function drinkWater() {
-            if (db.intake < 3) {
-                db.intake++;
-                db.lastDrinkTime = Date.now(); // Tıklanan anın saatini kaydet
-                
-                // Ödül Kontrolü (3 oldu mu?)
-                if (db.intake === 3 && !db.rewardGivenToday) {
-                    db.treasure += 10;
-                    db.rewardGivenToday = true;
-                    setTimeout(() => {
-                        alert("🎉 TEBRİKLER BABA! 🎉\n\nBugünkü 3. yarım litreyi de devirdin. Kasana 10 TL eklendi!");
-                    }, 500);
-                }
-                
+            if (db[currentUser].intake < 3) {
+                db[currentUser].intake++;
+                db[currentUser].lastDrinkTime = Date.now();
                 saveData();
-                checkStatus();
+                updateUI();
+                
+                if(db[currentUser].intake === 3) {
+                    setTimeout(() => alert("Tebrikler! Bugünkü görev bitti, artık ceza yemeyeceksin."), 300);
+                }
             }
         }
 
@@ -278,22 +351,9 @@
                    seconds.toString().padStart(2, '0');
         }
 
-        function emptyVault() {
-            if(confirm("Babanıza " + db.treasure + " TL nakit ödemeyi yaptıysanız kasayı sıfırlayabilirsiniz. Onaylıyor musunuz?")) {
-                db.treasure = 0;
-                saveData();
-                checkStatus();
-                alert("Kasa başarıyla boşaltıldı.");
-            }
-        }
-
         function saveData() {
-            localStorage.setItem('babaSuDataV2', JSON.stringify(db));
+            localStorage.setItem('suDuelloDB', JSON.stringify(db));
         }
-
-        // Sistemi başlat ve her 1 saniyede bir sayacı güncelle
-        checkStatus();
-        setInterval(checkStatus, 1000);
     </script>
 </body>
 </html>
