@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💧 Hazineli Su Takibi</title>
+    <title>💧 Baba Su Takip Sistemi</title>
     <style>
         :root {
             --water-blue: #0ea5e9;
             --treasure-gold: #f59e0b;
-            --bg-color: #f0fdf4; /* Hafif yeşil/mavi ferah arka plan */
+            --bg-color: #f0fdf4;
             --text-dark: #1e293b;
         }
 
@@ -65,14 +65,15 @@
 
         /* Su Bardağı */
         .glass-container {
-            width: 100px;
-            height: 160px;
+            width: 110px;
+            height: 180px;
             border: 4px solid #cbd5e1;
-            border-radius: 8px 8px 24px 24px;
+            border-radius: 10px 10px 30px 30px;
             margin: 0 auto 20px auto;
             position: relative;
             overflow: hidden;
             background-color: white;
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.05);
         }
 
         .water-level {
@@ -82,63 +83,65 @@
             width: 100%;
             height: 0%;
             background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
-            transition: height 0.8s ease-in-out;
-            border-radius: 0 0 20px 20px;
+            transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0 0 25px 25px;
         }
 
         .status-text {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
             color: var(--text-dark);
-            margin-bottom: 20px;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 25px;
         }
 
-        /* Saat Dilimi Butonları */
-        .slots-container {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .slot-btn {
+        /* Ana Buton */
+        .main-btn {
             width: 100%;
-            padding: 16px;
+            padding: 20px;
             border-radius: 16px;
             border: none;
-            font-size: 16px;
+            font-size: 20px;
             font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-            transition: transform 0.2s;
+            justify-content: center;
+            gap: 5px;
         }
 
-        /* Buton Durumları */
-        .slot-btn.active {
+        .main-btn.ready {
             background-color: var(--water-blue);
             color: white;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
             animation: pulse 2s infinite;
         }
 
-        .slot-btn.done {
-            background-color: #10b981; /* Yeşil */
+        .main-btn.waiting {
+            background-color: #f1f5f9;
+            color: #64748b;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .main-btn.done {
+            background-color: #10b981;
             color: white;
             cursor: default;
+            box-shadow: none;
         }
 
-        .slot-btn.waiting {
-            background-color: #f1f5f9; /* Gri */
-            color: #94a3b8;
-            cursor: not-allowed;
-        }
-
-        .slot-btn.missed {
-            background-color: #fee2e2; /* Kırmızımsı */
-            color: #ef4444;
-            cursor: not-allowed;
-            text-decoration: line-through;
+        .timer-text {
+            font-size: 16px;
+            font-weight: normal;
+            font-family: monospace;
         }
 
         @keyframes pulse {
@@ -151,8 +154,8 @@
             background: none;
             border: none;
             color: #ef4444;
-            margin-top: 25px;
-            font-size: 13px;
+            margin-top: 30px;
+            font-size: 14px;
             text-decoration: underline;
             cursor: pointer;
         }
@@ -164,144 +167,133 @@
         <div class="treasure-box">
             <div class="treasure-title">💰 Baba'nın Hazinesi 💰</div>
             <div class="treasure-amount" id="treasureDisplay">0 TL</div>
-            <div style="font-size: 12px; color: #b45309;">(3 Görev Tamamlanınca +10 TL Eklenir)</div>
+            <div style="font-size: 12px; color: #b45309;">(Bugün 3x Yarım Litre bitince +10 TL)</div>
         </div>
 
         <div class="glass-container">
             <div class="water-level" id="waterLevel"></div>
         </div>
-        <div class="status-text" id="statusText">0 / 3 İçildi</div>
+        <div class="status-text" id="statusText">0 / 3 Yarım Litre</div>
+        <div class="subtitle">Her içişte araya 4 saat girer.</div>
 
-        <div class="slots-container">
-            <button id="btn-w1" class="slot-btn waiting" onclick="drink('w1')">
-                <span>1. Bardak (08:00 - 12:00)</span>
-                <span id="txt-w1">Bekliyor</span>
-            </button>
-            
-            <button id="btn-w2" class="slot-btn waiting" onclick="drink('w2')">
-                <span>2. Bardak (12:00 - 18:00)</span>
-                <span id="txt-w2">Bekliyor</span>
-            </button>
-            
-            <button id="btn-w3" class="slot-btn waiting" onclick="drink('w3')">
-                <span>3. Bardak (18:00 - 24:00)</span>
-                <span id="txt-w3">Bekliyor</span>
-            </button>
-        </div>
+        <button id="actionBtn" class="main-btn ready" onclick="drinkWater()">
+            <span id="btnMainText">🚰 Yarım Litre İçtim!</span>
+            <span id="btnSubText" class="timer-text"></span>
+        </button>
 
-        <button class="reset-bank" onclick="emptyVault()">Ay Sonu: Kasayı Boşalt ve Parayı Ver</button>
+        <button class="reset-bank" onclick="emptyVault()">Ay Sonu: Kasayı Boşalt</button>
     </div>
 
     <script>
-        // Veritabanı (Telefonda Kayıtlı Tutar)
-        let db = JSON.parse(localStorage.getItem('babaSuData')) || {
+        // 4 Saat = 4 * 60 * 60 * 1000 milisaniye
+        const COOLDOWN_MS = 4 * 60 * 60 * 1000; 
+        
+        // Veritabanı
+        let db = JSON.parse(localStorage.getItem('babaSuDataV2')) || {
             date: '',
-            w1: false,
-            w2: false,
-            w3: false,
+            intake: 0,
             treasure: 0,
+            lastDrinkTime: 0,
             rewardGivenToday: false
         };
 
-        // Günü Kontrol Et (Yeni günse su görevlerini sıfırla, paraya dokunma)
-        const today = new Date().toLocaleDateString();
-        if (db.date !== today) {
-            db.date = today;
-            db.w1 = false;
-            db.w2 = false;
-            db.w3 = false;
-            db.rewardGivenToday = false;
-            saveData();
-        }
+        const actionBtn = document.getElementById('actionBtn');
+        const btnMainText = document.getElementById('btnMainText');
+        const btnSubText = document.getElementById('btnSubText');
+        const waterLevel = document.getElementById('waterLevel');
+        const statusText = document.getElementById('statusText');
+        const treasureDisplay = document.getElementById('treasureDisplay');
 
-        // Sayfa her açıldığında arayüzü güncelle
-        window.onload = updateUI;
-        // Her dakika kontrol et ki saat geçince buton otomatik kapansın/açılsın
-        setInterval(updateUI, 60000); 
-
-        function drink(slot) {
-            // Tıklanan butonu işaretle ve kaydet
-            db[slot] = true;
-            checkDailyReward();
-            saveData();
-            updateUI();
-        }
-
-        function checkDailyReward() {
-            // Eğer 3 görev de bittiyse ve bugün henüz ödül verilmediyse
-            if (db.w1 && db.w2 && db.w3 && !db.rewardGivenToday) {
-                db.treasure += 10;
-                db.rewardGivenToday = true;
-                
-                // Telefonda kutlama mesajı
-                setTimeout(() => {
-                    alert("🎉 TEBRİKLER BABA! 🎉\n\nBugünün tüm su görevlerini tamamladın ve kasana 10 TL daha eklendi. Böbrekler sana teşekkür ediyor!");
-                }, 500);
+        // Sayfa açıldığında ve her saniye çalışan döngü
+        function checkStatus() {
+            // 1. Yeni gün kontrolü (Gece 12'yi geçince görevler sıfırlanır, para kalır)
+            const today = new Date().toLocaleDateString();
+            if (db.date !== today) {
+                db.date = today;
+                db.intake = 0;
+                db.lastDrinkTime = 0;
+                db.rewardGivenToday = false;
+                saveData();
             }
-        }
 
-        function updateUI() {
-            const hour = new Date().getHours();
-            
-            // Kasa Miktarını Güncelle
-            document.getElementById('treasureDisplay').innerText = db.treasure + " TL";
+            // Kasa ve bardak seviyesini güncelle
+            treasureDisplay.innerText = db.treasure + " TL";
+            waterLevel.style.height = (db.intake / 3 * 100) + '%';
+            statusText.innerText = db.intake + " / 3 Yarım Litre";
 
-            // Bardak Seviyesini Güncelle
-            let completedCount = 0;
-            if(db.w1) completedCount++;
-            if(db.w2) completedCount++;
-            if(db.w3) completedCount++;
-            
-            document.getElementById('waterLevel').style.height = (completedCount / 3 * 100) + '%';
-            document.getElementById('statusText').innerText = completedCount + " / 3 İçildi";
-
-            // 1. Görev (08:00 - 12:00)
-            setupButton('w1', 8, 12, db.w1, hour);
-            // 2. Görev (12:00 - 18:00)
-            setupButton('w2', 12, 18, db.w2, hour);
-            // 3. Görev (18:00 - 24:00)
-            setupButton('w3', 18, 24, db.w3, hour);
-        }
-
-        function setupButton(id, startHour, endHour, isDone, currentHour) {
-            const btn = document.getElementById('btn-' + id);
-            const txt = document.getElementById('txt-' + id);
-
-            if (isDone) {
-                // Görev yapılmış
-                btn.className = 'slot-btn done';
-                txt.innerText = '✅ Tamamlandı';
-                btn.disabled = true;
-            } else if (currentHour >= startHour && currentHour < endHour) {
-                // Şu an tam zamanı!
-                btn.className = 'slot-btn active';
-                txt.innerText = '🚰 ŞİMDİ İÇ!';
-                btn.disabled = false;
-            } else if (currentHour < startHour) {
-                // Daha zamanı gelmemiş (Örn: Sabah 10'da Öğle butonuna bakılırsa)
-                btn.className = 'slot-btn waiting';
-                txt.innerText = 'Zamanı Gelmedi';
-                btn.disabled = true;
+            // Buton Durumunu Ayarla
+            if (db.intake >= 3) {
+                // Günlük görev bitti
+                actionBtn.className = 'main-btn done';
+                btnMainText.innerText = "🎉 Bugünlük Görev Tamam!";
+                btnSubText.innerText = "Yarın görüşmek üzere baba.";
+                actionBtn.disabled = true;
             } else {
-                // Zamanı geçmiş ve içilmemiş (Örn: Saat 14:00 olmuş ama sabahki içilmemiş)
-                btn.className = 'slot-btn missed';
-                txt.innerText = '❌ Süre Kaçtı';
-                btn.disabled = true;
+                // Görev devam ediyor, süreyi kontrol et
+                const timePassed = Date.now() - db.lastDrinkTime;
+                const timeLeft = COOLDOWN_MS - timePassed;
+
+                if (timeLeft > 0 && db.lastDrinkTime !== 0) {
+                    // Bekleme süresindeyiz (Geri Sayım)
+                    actionBtn.className = 'main-btn waiting';
+                    btnMainText.innerText = "⏳ Sindirim Bekleniyor...";
+                    btnSubText.innerText = "Kalan Süre: " + formatTime(timeLeft);
+                    actionBtn.disabled = true;
+                } else {
+                    // İçmeye hazır
+                    actionBtn.className = 'main-btn ready';
+                    btnMainText.innerText = "🚰 Yarım Litre İçtim!";
+                    btnSubText.innerText = "Üzerine tıkla ve onayla";
+                    actionBtn.disabled = false;
+                }
             }
+        }
+
+        function drinkWater() {
+            if (db.intake < 3) {
+                db.intake++;
+                db.lastDrinkTime = Date.now(); // Tıklanan anın saatini kaydet
+                
+                // Ödül Kontrolü (3 oldu mu?)
+                if (db.intake === 3 && !db.rewardGivenToday) {
+                    db.treasure += 10;
+                    db.rewardGivenToday = true;
+                    setTimeout(() => {
+                        alert("🎉 TEBRİKLER BABA! 🎉\n\nBugünkü 3. yarım litreyi de devirdin. Kasana 10 TL eklendi!");
+                    }, 500);
+                }
+                
+                saveData();
+                checkStatus();
+            }
+        }
+
+        function formatTime(ms) {
+            let totalSeconds = Math.floor(ms / 1000);
+            let hours = Math.floor(totalSeconds / 3600);
+            let minutes = Math.floor((totalSeconds % 3600) / 60);
+            let seconds = totalSeconds % 60;
+            return hours.toString().padStart(2, '0') + ":" + 
+                   minutes.toString().padStart(2, '0') + ":" + 
+                   seconds.toString().padStart(2, '0');
         }
 
         function emptyVault() {
-            if(confirm("Ay sonu geldi mi? Babanıza " + db.treasure + " TL nakit ödemeyi yaptıysanız kasayı sıfırlayabilirsiniz. Onaylıyor musunuz?")) {
+            if(confirm("Babanıza " + db.treasure + " TL nakit ödemeyi yaptıysanız kasayı sıfırlayabilirsiniz. Onaylıyor musunuz?")) {
                 db.treasure = 0;
                 saveData();
-                updateUI();
-                alert("Kasa başarıyla boşaltıldı. Yeni ay, yeni kazançlar!");
+                checkStatus();
+                alert("Kasa başarıyla boşaltıldı.");
             }
         }
 
         function saveData() {
-            localStorage.setItem('babaSuData', JSON.stringify(db));
+            localStorage.setItem('babaSuDataV2', JSON.stringify(db));
         }
+
+        // Sistemi başlat ve her 1 saniyede bir sayacı güncelle
+        checkStatus();
+        setInterval(checkStatus, 1000);
     </script>
 </body>
 </html>
