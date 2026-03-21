@@ -3,60 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bio-Chef Pro | Premium AI</title>
+    <title>Bio-Chef Pro | VIP Beslenme</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --primary: #10b981; --accent: #38bdf8; --premium: #f59e0b; --text: #f8fafc; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 15px; }
-        .container { width: 100%; max-width: 440px; background: var(--card); border-radius: 32px; padding: 25px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); }
+        :root { --bg: #0b0f1a; --card: #161b2a; --primary: #10b981; --accent: #0ea5e9; --premium: #f59e0b; --text: #f1f5f9; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
         
-        .auth-box { display: flex; flex-direction: column; gap: 12px; }
-        input, select { width: 100%; padding: 14px; border-radius: 12px; background: #0f172a; border: 1px solid #334155; color: white; text-align: center; }
-        .btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; color: white; }
-        .btn-green { background: var(--primary); }
-        .btn-blue { background: var(--accent); }
-        .btn-premium { background: var(--premium); margin-top: 10px; font-size: 1rem; border: 2px solid gold; }
+        .app-card { width: 100%; max-width: 420px; background: var(--card); border-radius: 35px; padding: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); height: fit-content; }
         
-        .cam-view { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 20px; overflow: hidden; border: 2px solid #334155; margin: 15px 0; }
+        /* Auth Styles */
+        .auth-container h1 { font-size: 2.5rem; text-align: center; margin-bottom: 20px; background: linear-gradient(45deg, var(--primary), var(--accent)); -webkit-background-clip: text; color: transparent; font-weight: 900; }
+        input, select { width: 100%; padding: 15px; border-radius: 15px; background: #0b0f1a; border: 1px solid #2d3748; color: white; margin-bottom: 12px; outline: none; transition: 0.3s; text-align: center; font-size: 1rem; }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(14, 165, 233, 0.2); }
+        
+        .btn { width: 100%; padding: 18px; border-radius: 18px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; color: white; font-size: 1rem; }
+        .btn-main { background: var(--primary); margin-top: 10px; }
+        .btn-sub { background: var(--accent); margin-top: 10px; }
+        .btn-outline { background: transparent; border: 1px solid #2d3748; color: #94a3b8; margin-top: 15px; font-size: 0.8rem; }
+        
+        /* Dashboard */
+        .header { text-align: center; margin-bottom: 20px; }
+        #clock { font-size: 2.2rem; font-weight: 800; color: var(--accent); }
+        .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 3px solid #1e293b; margin-bottom: 20px; position: relative; }
         video { width: 100%; height: 100%; object-fit: cover; }
         
-        #results { display: none; flex-direction: column; gap: 10px; margin-top: 15px; }
-        .result-card { background: rgba(15, 23, 42, 0.8); padding: 15px; border-radius: 15px; border-left: 4px solid var(--accent); border: 1px solid rgba(255,255,255,0.05); }
-        .card-tag { font-size: 0.7rem; font-weight: 900; color: var(--accent); text-transform: uppercase; margin-bottom: 5px; }
-        .card-txt { font-size: 0.9rem; line-height: 1.5; color: #cbd5e1; white-space: pre-line; }
+        /* Premium Section */
+        .premium-box { background: rgba(245, 158, 11, 0.1); border: 1px dashed var(--premium); border-radius: 20px; padding: 15px; margin-top: 15px; text-align: center; }
+        .btn-premium { background: var(--premium); color: #000; font-weight: 800; }
+        .lock-notice { color: var(--premium); font-size: 0.8rem; margin-top: 10px; font-weight: bold; display: none; }
 
-        .premium-badge { background: var(--premium); color: black; font-size: 0.6rem; padding: 2px 8px; border-radius: 10px; font-weight: bold; position: absolute; top: 10px; right: 10px; }
+        /* Results & Planning Cards */
+        #results { display: none; flex-direction: column; gap: 15px; margin-top: 25px; }
+        .day-card { background: #1e293b; border-radius: 20px; padding: 18px; border-left: 5px solid var(--accent); animation: slideIn 0.5s ease forwards; }
+        .day-title { font-size: 0.8rem; font-weight: 900; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
+        .day-content { font-size: 0.95rem; line-height: 1.6; color: #e2e8f0; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div id="loginScreen" class="auth-box">
-        <h1 style="text-align:center; color:var(--primary)">BIO-CHEF</h1>
+<div class="app-card">
+    <div id="loginView" class="auth-container">
+        <h1>BIO-CHEF</h1>
         <input type="email" id="lEmail" placeholder="E-posta">
         <input type="password" id="lPass" placeholder="Şifre">
-        <button class="btn btn-green" onclick="doLogin()">Giriş Yap</button>
-        <button style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:0.8rem;" onclick="toggleAuth('regScreen')">Hesap Oluştur</button>
+        <button class="btn btn-main" onclick="doLogin()">GİRİŞ YAP</button>
+        <button class="btn btn-outline" onclick="toggleView('regView')">Hesabın yok mu? Kayıt Ol</button>
     </div>
 
-    <div id="regScreen" class="auth-box" style="display:none;">
-        <h1 style="text-align:center; color:var(--accent)">Kayıt Ol</h1>
-        <input type="email" id="rEmail" placeholder="E-posta">
-        <input type="password" id="rPass" placeholder="Şifre">
-        <button class="btn btn-blue" onclick="doRegister()">Kayıt Ol</button>
-        <button style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:0.8rem;" onclick="toggleAuth('loginScreen')">Geri Dön</button>
+    <div id="regView" class="auth-container" style="display:none;">
+        <h1>KAYIT OL</h1>
+        <input type="email" id="rEmail" placeholder="E-posta Seç">
+        <input type="password" id="rPass" placeholder="Şifre Belirle">
+        <button class="btn btn-sub" onclick="doRegister()">HESABI OLUŞTUR</button>
+        <button class="btn btn-outline" onclick="toggleView('loginView')">Zaten üyeyim, Giriş yap</button>
     </div>
 
-    <div id="dashboard" style="display:none; position: relative;">
-        <div id="premiumTag" class="premium-badge" style="display:none;">PREMIUM ÜYE</div>
-        <div style="text-align:center;">
-            <div id="clock" style="font-size: 1.5rem; font-weight: 800; color: var(--accent);">00:00:00</div>
-            <p id="uMail" style="font-size:0.6rem; color:var(--muted)"></p>
+    <div id="mainView" style="display:none;">
+        <div class="header">
+            <div id="clock">00:00:00</div>
+            <p id="uMail" style="font-size:0.7rem; color:#64748b;"></p>
         </div>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
             <input type="number" id="uAge" placeholder="YAŞ">
             <input type="number" id="uWeight" placeholder="KİLO">
         </div>
@@ -66,89 +78,96 @@
             <option value="Kiloyu Korumak">Kiloyu Korumak (=)</option>
         </select>
 
-        <div class="cam-view"><video id="video" autoplay playsinline></video></div>
+        <div class="cam-box"><video id="video" autoplay playsinline></video></div>
         <canvas id="canvas" style="display:none;"></canvas>
+
+        <button class="btn btn-main" id="btnAnalyze" onclick="runAI('yemek')">📸 ANALİZ ET</button>
+        
+        <div class="premium-box">
+            <button class="btn btn-sub" style="margin-top:0;" onclick="handlePlanClick()">📅 HAFTALIK BESİN PLANI</button>
+            <div id="lockNotice" class="lock-notice">⚠️ BU ÖZELLİK PREMIUM ÜYELİK GEREKTİRİR!</div>
+            <button id="btnBuy" class="btn btn-premium" style="margin-top:10px;" onclick="buyPremium()">ABONE OL (0.99$)</button>
+        </div>
 
         <div id="results"></div>
 
-        <button class="btn btn-green" id="bY" onclick="runAI('yemek')">📸 ANALİZ ET</button>
-        
-        <button class="btn btn-premium" id="bPlan" onclick="getWeeklyPlan()">📅 HAFTALIK BESİN PLANI (PRO)</button>
-        
-        <div id="payArea" style="text-align:center; margin-top:15px; display:none;">
-            <p style="font-size:0.8rem; color:var(--premium)">Aylık sadece 0.99$ ile Premium'a geç!</p>
-            <button class="btn" style="background:#4ade80; color:black; margin-top:5px;" onclick="upgradePremium()">💳 ŞİMDİ ABONE OL</button>
-        </div>
-
-        <button onclick="auth.signOut(); location.reload();" style="background:none; border:none; color:red; margin-top:15px; width:100%; cursor:pointer; font-size:0.7rem;">ÇIKIŞ YAP</button>
+        <button class="btn btn-outline" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
     </div>
 </div>
 
 <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
-      authDomain: "voice2post-9e8ca.firebaseapp.com",
-      projectId: "voice2post-9e8ca",
-      storageBucket: "voice2post-9e8ca.firebasestorage.app",
-      messagingSenderId: "511446656614",
-      appId: "1:511446656614:web:32101ee70299543c716fa7"
+        apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
+        authDomain: "voice2post-9e8ca.firebaseapp.com",
+        projectId: "voice2post-9e8ca",
+        storageBucket: "voice2post-9e8ca.firebasestorage.app",
+        messagingSenderId: "511446656614",
+        appId: "1:511446656614:web:32101ee70299543c716fa7"
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    let isPremium = false; // Simülasyon abonelik durumu
+    let isVip = false;
+
+    // UI YÖNETİMİ
+    function toggleView(id) {
+        document.getElementById('loginView').style.display = 'none';
+        document.getElementById('regView').style.display = 'none';
+        document.getElementById('mainView').style.display = 'none';
+        document.getElementById(id).style.display = 'block';
+    }
 
     setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 
     auth.onAuthStateChanged(user => {
         if (user) {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('regScreen').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
+            toggleView('mainView');
             document.getElementById('uMail').innerText = user.email;
-            // Premium Kontrolü (LocalStorage üzerinden simüle)
-            isPremium = localStorage.getItem('premium_'+user.uid) === 'true';
-            updateUI();
+            isVip = localStorage.getItem('vip_' + user.uid) === 'true';
+            document.getElementById('btnBuy').style.display = isVip ? 'none' : 'block';
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
         } else {
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('loginScreen').style.display = 'block';
+            toggleView('loginView');
         }
     });
 
-    function updateUI() {
-        document.getElementById('premiumTag').style.display = isPremium ? 'block' : 'none';
-        document.getElementById('payArea').style.display = isPremium ? 'none' : 'block';
-        document.getElementById('bPlan').innerText = isPremium ? "📅 HAFTALIK BESİN PLANI" : "📅 HAFTALIK PLAN (0.99$)";
+    async function doLogin() {
+        try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); }
+    }
+    async function doRegister() {
+        try { await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); } catch(e) { alert(e.message); }
     }
 
-    function upgradePremium() {
-        if(confirm("0.99$ karşılığında Premium üyelik başlatılsın mı?")) {
-            localStorage.setItem('premium_'+auth.currentUser.uid, 'true');
-            isPremium = true;
-            alert("Tebrikler! Artık Premium üyesisiniz. Promosyon haftalık planınız hazır.");
-            updateUI();
+    function buyPremium() {
+        if(confirm("0.99$ ödeme onaylıyor musunuz?")) {
+            localStorage.setItem('vip_' + auth.currentUser.uid, 'true');
+            isVip = true;
+            document.getElementById('btnBuy').style.display = 'none';
+            document.getElementById('lockNotice').style.display = 'none';
+            alert("TEBRİKLER! ARTIK PREMIUM ÜYESİSİNİZ.");
         }
     }
 
-    async function getWeeklyPlan() {
-        if(!isPremium) return alert("Haftalık plan promosyonu için lütfen 0.99$ ile abone olun.");
+    function handlePlanClick() {
+        if(!isVip) {
+            document.getElementById('lockNotice').style.display = 'block';
+            return;
+        }
         runAI('plan');
     }
 
-    // --- ANALİZ VE PLAN ÇIKARMA MOTORU (AYNI KALDI, MOD EKLENDİ) ---
     async function runAI(mode) {
-        const btn = document.getElementById('bY');
         const resDiv = document.getElementById('results');
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
         if(!age || !weight) return alert("Bilgileri girin!");
-        
-        btn.disabled = true; btn.innerText = "Yükleniyor...";
-        
+
+        resDiv.innerHTML = '<p style="text-align:center;">🧠 İşleniyor...</p>';
+        resDiv.style.display = 'flex';
+
         let img = "";
         if(mode === 'yemek') {
             const vid = document.getElementById('video');
-            const canv = document.getElementById('canvas');
+            const canv = document.createElement('canvas');
             canv.width = 640; canv.height = 480;
             canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
             img = canv.toDataURL('image/jpeg', 0.7);
@@ -158,42 +177,23 @@
             const r = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ 
-                    mode, 
-                    image: img, 
-                    user_data: `Yaş: ${age}, Kilo: ${weight}, Hedef: ${document.getElementById('uGoal').value}`,
-                    is_premium: isPremium 
-                })
+                body: JSON.stringify({ mode, image: img, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}` })
             });
             const d = await r.json();
-            
-            resDiv.innerHTML = ''; resDiv.style.display = 'flex';
-            const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
-            const headers = mode === 'plan' ? ["PAZARTESİ-SALI", "ÇARŞAMBA-PERŞEMBE", "CUMA-CUMARTESİ", "PAZAR VE ÖZET"] : ["📊 ÖZET", "🧪 BESİN TABLOSU", "🎯 HEDEF ANALİZİ", "💡 TAVSİYE"];
+            resDiv.innerHTML = '';
+
+            // GÜN GÜN VEYA BAŞLIK BAŞLIK PARÇALAMA
+            const sections = d.analysis.split(/GÜN:|1\.|2\.|3\.|4\./).filter(s => s.trim().length > 5);
+            const titles = mode === 'plan' ? ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"] : ["ÖZET", "BESİN TABLOSU", "HEDEF ANALİZİ", "TAVSİYE"];
 
             sections.forEach((text, i) => {
                 const card = document.createElement('div');
-                card.className = 'result-card';
-                card.innerHTML = `<div class="card-tag">${headers[i] || 'DETAY'}</div><div class="card-txt">${text.trim()}</div>`;
+                card.className = 'day-card';
+                card.innerHTML = `<div class="day-title">${titles[i] || 'DETAY'}</div><div class="day-content">${text.trim().replace(/:/g, ': ')}</div>`;
                 resDiv.appendChild(card);
             });
             window.speechSynthesis.speak(new SpeechSynthesisUtterance(d.analysis));
-            resDiv.scrollIntoView({ behavior: 'smooth' });
-        } catch (e) { alert("Hata oluştu."); }
-        finally { btn.disabled = false; btn.innerText = "📸 ANALİZ ET"; }
-    }
-
-    function toggleAuth(id) {
-        document.getElementById('loginScreen').style.display = id === 'loginScreen' ? 'block' : 'none';
-        document.getElementById('regScreen').style.display = id === 'regScreen' ? 'block' : 'none';
-    }
-
-    async function doLogin() {
-        try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); }
-    }
-
-    async function doRegister() {
-        try { await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); } catch(e) { alert(e.message); }
+        } catch (e) { alert("Hata!"); }
     }
 </script>
 </body>
