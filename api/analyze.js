@@ -1,20 +1,18 @@
 // api/analyze.js
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-    const { image, user_data, mode } = req.body;
+    const { image, user_data, mode, is_premium } = req.body;
 
-    const systemPrompt = `Sen bir Gıda Mühendisi ve Beslenme Uzmanısın. 
-    Kullanıcı Verileri: ${user_data}.
-
-    GÖREV: Fotoğraftaki her türlü gıdayı analiz et. 
-    ÖNEMLİ: Cevabını MUTLAKA şu 4 ana başlık altında ver:
+    let systemPrompt = "";
     
-    1. GENEL ÖZET: (Yemeğin adı ve tahmini porsiyonu)
-    2. BESİN TABLOSU: (Kalori, Protein, Karbonhidrat, Yağ, Şeker değerlerini net bir liste yap)
-    3. HEDEF ANALİZİ: (Kullanıcının seçtiği HEDEFE göre bu besinin kilo/sağlık etkisi)
-    4. UZMAN TAVSİYESİ: (Tüketim önerisi veya sağlıklı alternatif)
-
-    NOT: Kişi analizi uyarısı yapma, doğrudan gıdaya odaklan.`;
+    if (mode === 'plan') {
+        systemPrompt = `Sen bir Beslenme Uzmanısın. Kullanıcı Profili: ${user_data}. 
+        GÖREV: Kullanıcıya özel 7 günlük, öğün öğün (Kahvaltı, Öğle, Akşam, Atıştırmalık) Besin Planı oluştur. 
+        HEDEFE odaklan (Kilo al/ver/koru). Planı tablo formatında ve çok net ver.`;
+    } else {
+        systemPrompt = `Sen bir Gıda Mühendisisin. Kullanıcı Profili: ${user_data}. 
+        GÖREV: Fotoğraftaki gıdayı 4 başlıkta analiz et: 1. Özet, 2. Besin Tablosu, 3. Hedef Analizi, 4. Tavsiye.`;
+    }
 
     try {
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -23,13 +21,13 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 model: "gpt-4o",
                 messages: [{ role: "system", content: systemPrompt }, 
-                           { role: "user", content: [{ type: "text", text: "Analiz et." }, { type: "image_url", image_url: { url: image } }] }],
-                max_tokens: 800, temperature: 0.2
+                           { role: "user", content: mode === 'plan' ? "Bana haftalık planımı çıkar." : [{ type: "text", text: "Analiz et." }, { type: "image_url", image_url: { url: image } }] }],
+                max_tokens: 1500, temperature: 0.3
             })
         });
         const data = await response.json();
         res.status(200).json({ analysis: data.choices[0].message.content });
     } catch (error) {
-        res.status(500).json({ error: "Görsel işlenemedi." });
+        res.status(500).json({ error: "Sistem meşgul." });
     }
 }
