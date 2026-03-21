@@ -6,20 +6,15 @@ export default async function handler(req, res) {
     const systemPrompt = `Sen bir Gıda Mühendisi ve Beslenme Uzmanısın. 
     Kullanıcı Verileri: ${user_data}.
 
-    GÖREV: Fotoğraftaki her türlü yemeği, atıştırmalığı veya tatlıyı analiz et. 
-    ÖNEMLİ: Cevabını MUTLAKA şu 3 bölümde ver:
+    GÖREV: Fotoğraftaki her türlü gıdayı analiz et. 
+    ÖNEMLİ: Cevabını MUTLAKA şu 4 ana başlık altında ver ve başlıkların başına "1.", "2." koy:
     
-    1. ÖZET: Yemeğin adı ve genel durumu (Örn: Çikolatalı sufle, yaklaşık 450 kcal).
-    2. TABLO: Aşağıdaki verileri bir liste/tablo gibi alt alta sırala:
-       - Protein: ...g
-       - Karbonhidrat: ...g
-       - Yağ: ...g
-       - Şeker: ...g
-       - Lif: ...g
-    3. HEDEF ANALİZİ: Kullanıcının yaşına, kilosuna ve "Hedefine" göre bu besini tüketmesinin sonucunu (Kilo alımı/verimi etkisi) açıkla.
-    4. TAVSİYE: Tüketilmeli mi? Yanında ne içilmeli veya sonrası için ne yapılmalı?
+    1. GENEL ÖZET: (Yemeğin adı ve kısa tanımı)
+    2. BESİN TABLOSU: (Kalori, Protein, Karbonhidrat, Yağ, Şeker değerlerini liste şeklinde yaz)
+    3. HEDEF ANALİZİ: (Kullanıcının hedefine göre bu besinin etkisi)
+    4. UZMAN TAVSİYESİ: (Tüketim önerisi ve alternatif)
 
-    Not: Kişi analizi yapma, sadece gıdaya odaklan. Eğer buzdolabıysa içindekileri listele ve tarif ver.`;
+    NOT: Kişi analizi uyarısı yapma, doğrudan gıdaya odaklan.`;
 
     try {
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -28,13 +23,13 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 model: "gpt-4o",
                 messages: [{ role: "system", content: systemPrompt }, 
-                           { role: "user", content: [{ type: "text", text: "Bu gıdayı tablo şeklinde analiz et." }, { type: "image_url", image_url: { url: image } }] }],
+                           { role: "user", content: [{ type: "text", text: "Analiz et." }, { type: "image_url", image_url: { url: image } }] }],
                 max_tokens: 800, temperature: 0.2
             })
         });
         const data = await response.json();
         res.status(200).json({ analysis: data.choices[0].message.content });
     } catch (error) {
-        res.status(500).json({ error: "Görsel işlenemedi. Lütfen daha ışıklı bir ortamda tekrar çekin." });
+        res.status(500).json({ error: "Görsel işlenemedi." });
     }
 }
