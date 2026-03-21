@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bio-Chef Pro | Full Stack AI Arena</title>
+    <title>Bio-Chef Pro | Full Stack AI</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
@@ -13,7 +13,6 @@
         
         .container { width: 100%; max-width: 440px; background: var(--card); border-radius: 28px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); height: fit-content; }
         
-        /* Saat ve Tarih */
         .header-main { text-align: center; margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #334155; }
         #clock { font-size: 1.8rem; font-weight: 800; color: var(--accent); }
         #date { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
@@ -69,18 +68,18 @@
     <div id="dashboard">
         <div class="header-main" style="border:none; margin:0; display:flex; justify-content: space-between; align-items: center;">
             <span id="uMail" style="font-size: 0.7rem; color: var(--muted);">...</span>
-            <button onclick="doLogout()" style="background:none; border:none; color:red; cursor:pointer; font-size:0.7rem;">ÇIKIŞ</button>
+            <button onclick="doLogout()" style="background:none; border:none; color:red; cursor:pointer; font-size:0.7rem;">ÇIKIŞ YAP</button>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div class="input-box"><label style="font-size:0.6rem">Yaş</label><input type="number" id="uAge" placeholder="Yaş"></div>
-            <div class="input-box"><label style="font-size:0.6rem">Kilo</label><input type="number" id="uWeight" placeholder="Kilo"></div>
+            <div class="input-box"><label style="font-size:0.6rem">YAŞ</label><input type="number" id="uAge" placeholder="Yaş"></div>
+            <div class="input-box"><label style="font-size:0.6rem">KİLO</label><input type="number" id="uWeight" placeholder="Kilo"></div>
         </div>
 
         <div class="stats-row">
-            <div class="input-box"><label style="font-size:0.6rem">Adım</label><input type="number" id="uSteps" value="6000"></div>
-            <div class="input-box"><label style="font-size:0.6rem">Ruh Hali</label>
-                <select id="uMood"><option>Normal</option><option>Yorgun</option><option>Stresli</option></select>
+            <div class="input-box"><label style="font-size:0.6rem">GÜNLÜK ADIM</label><input type="number" id="uSteps" value="6000"></div>
+            <div class="input-box"><label style="font-size:0.6rem">MODUNUZ</label>
+                <select id="uMood"><option>Normal</option><option>Yorgun</option><option>Stresli</option><option>Mutlu</option></select>
             </div>
         </div>
 
@@ -89,33 +88,35 @@
 
         <div id="results"></div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-            <button class="btn btn-green" id="bY" onclick="runAI('yemek')">📸 YEMEK</button>
-            <button class="btn btn-blue" id="bD" onclick="runAI('buzdolabi')">❄️ DOLAP</button>
+            <button class="btn btn-green" id="bY" onclick="runAI('yemek')">📸 YEMEK ANALİZİ</button>
+            <button class="btn btn-blue" id="bD" onclick="runAI('buzdolabi')">❄️ DOLAP ANALİZİ</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- FIREBASE KURULUMU (DEĞİŞTİRİN) ---
+    // --- FIREBASE KURULUMU (SENİN VERDİĞİN BİLGİLER) ---
     const firebaseConfig = {
-        apiKey: "SENİN_API_KEY",
-        authDomain: "SENİN_PROJE.firebaseapp.com",
-        projectId: "SENİN_PROJE_ID",
-        storageBucket: "SENİN_PROJE.appspot.com",
-        messagingSenderId: "SENDER_ID",
-        appId: "APP_ID"
+        apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
+        authDomain: "voice2post-9e8ca.firebaseapp.com",
+        projectId: "voice2post-9e8ca",
+        storageBucket: "voice2post-9e8ca.firebasestorage.app",
+        messagingSenderId: "511446656614",
+        appId: "1:511446656614:web:925aed5ec7d6f3fb716fa7",
+        measurementId: "G-RWZBXDR02Y"
     };
+    
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    // Saat
+    // Saat ve Tarih Güncelleme
     setInterval(() => {
         const n = new Date();
         document.getElementById('clock').innerText = n.toLocaleTimeString('tr-TR');
         document.getElementById('date').innerText = n.toLocaleDateString('tr-TR', {weekday:'long', day:'numeric', month:'long'});
     }, 1000);
 
-    // Auth Takibi
+    // Oturum Takibi
     auth.onAuthStateChanged(user => {
         if (user) {
             document.getElementById('uMail').innerText = user.email;
@@ -129,7 +130,7 @@
         }
     });
 
-    // Fonksiyonlar
+    // Auth Fonksiyonları
     function toggleAuth(id) {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('regScreen').style.display = 'none';
@@ -137,25 +138,33 @@
     }
 
     async function doLogin() {
-        try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); }
+        try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } 
+        catch(e) { alert("Giriş Hatası: " + e.message); }
     }
+    
     async function doRegister() {
-        try { await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); } catch(e) { alert(e.message); }
+        try { await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); } 
+        catch(e) { alert("Kayıt Hatası: " + e.message); }
     }
+    
     async function doReset() {
         const email = document.getElementById('lEmail').value;
-        if(!email) return alert("Mail girin.");
-        try { await auth.sendPasswordResetEmail(email); alert("Link gönderildi."); } catch(e) { alert(e.message); }
+        if(!email) return alert("Lütfen mail adresinizi yazın.");
+        try { await auth.sendPasswordResetEmail(email); alert("Şifre sıfırlama linki e-postanıza gönderildi."); } 
+        catch(e) { alert(e.message); }
     }
+    
     function doLogout() { auth.signOut(); location.reload(); }
 
+    // AI Analiz Fonksiyonu
     async function runAI(mode) {
         const bY = document.getElementById('bY'); const bD = document.getElementById('bD');
         const resDiv = document.getElementById('results');
         const age = document.getElementById('uAge').value; const weight = document.getElementById('uWeight').value;
-        if(!age || !weight) return alert("Profil bilgilerini girin.");
         
-        bY.disabled = bD.disabled = true; bY.innerText = "Bekleyin...";
+        if(!age || !weight) return alert("Lütfen Yaş ve Kilo bilgilerinizi girin.");
+        
+        bY.disabled = bD.disabled = true; bY.innerText = "İŞLENİYOR...";
         
         const vid = document.getElementById('video'); const canv = document.getElementById('canvas');
         canv.width = vid.videoWidth; canv.height = vid.videoHeight;
@@ -171,17 +180,20 @@
                 body: JSON.stringify({ mode, image: img, user_data: uStr })
             });
             const d = await r.json();
+            
             resDiv.innerHTML = ''; resDiv.style.display = 'flex';
             const blocks = d.analysis.split(/\d\./).filter(t => t.trim().length > 5);
             const tags = ["ANALİZ", "SAĞLIK", "HEDEF/KİLO", "TAVSİYE"];
+            
             blocks.forEach((txt, i) => {
                 const card = document.createElement('div'); card.className = 'analysis-card';
-                card.innerHTML = `<div class="card-tag">${tags[i] || 'NOT'}</div><div class="card-txt">${txt.trim()}</div>`;
+                card.innerHTML = `<div class="card-tag">${tags[i] || 'DETAY'}</div><div class="card-txt">${txt.trim()}</div>`;
                 resDiv.appendChild(card);
             });
+            
             window.speechSynthesis.speak(new SpeechSynthesisUtterance(d.analysis));
-        } catch (e) { alert("Hata oluştu."); }
-        finally { bY.disabled = bD.disabled = false; bY.innerText = "📸 YEMEK"; }
+        } catch (e) { alert("Analiz Hatası: Lütfen tekrar deneyin."); }
+        finally { bY.disabled = bD.disabled = false; bY.innerText = mode === 'yemek' ? "📸 YEMEK ANALİZİ" : "❄️ DOLAP ANALİZİ"; }
     }
 </script>
 </body>
