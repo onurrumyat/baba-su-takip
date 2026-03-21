@@ -5,12 +5,13 @@ export default async function handler(req, res) {
 
     let systemPrompt = mode === 'plan' 
         ? `Sen profesyonel bir diyetisyensin. Kullanıcı: ${user_data}. 7 günlük planı GÜN GÜN, sadece öğün ve yemek adı olarak kısa ve net ver.`
-        : `Sen kıdemli gıda uzmanısın. Kullanıcı: ${user_data}. Görseldeki gıdayı şu şekilde analiz et:
-           1. ÖZET: Ürünün adı ve porsiyon miktarı.
-           2. BESİN DEĞERLERİ: Sadece şu değerleri net rakamla ver: Kalori (kcal), Protein (g), Karbonhidrat (g), Yağ (g).
-           3. HEDEF ANALİZİ: Bu gıda kullanıcının hedefine uygun mu? (Evet/Hayır ve neden).
-           4. NET TAVSİYE: Tüketilmeli mi, alternatifi ne?
-           GEREKSİZ SÖZ VE KARMAŞIK SAYI DİZİLERİNDEN KAÇIN. NET OL.`;
+        : `Sen kıdemli bir gıda uzmanısın. Kullanıcı: ${user_data}. 
+           ÖNEMLİ: Görüntüdeki kişilere odaklanma, doğrudan gıdaya odaklan. "Tanımlayamam" deme. Gördüğün yemeği/atıştırmalığı mutlaka tanımla.
+           FORMAT:
+           1. ÜRÜN ÖZETİ: Gördüğün gıdanın tam adı ve porsiyonu.
+           2. BESİN DEĞERLERİ: Kalori (kcal), Protein (g), Karbonhidrat (g), Yağ (g) net rakamlarla.
+           3. HEDEF ANALİZİ: Kullanıcının hedefine uygunluk durumu.
+           4. NET TAVSİYE: Tüketim onayı ve profesyonel görüş.`;
 
     try {
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -19,7 +20,7 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 model: "gpt-4o",
                 messages: [{ role: "system", content: systemPrompt }, 
-                           { role: "user", content: mode === 'plan' ? "Haftalık planı tablo gibi çıkar." : [{ type: "text", text: "Net analiz raporu." }, { type: "image_url", image_url: { url: image } }] }],
+                           { role: "user", content: mode === 'plan' ? "Net beslenme planı çıkar." : [{ type: "text", text: "Gıdayı tanımla ve analiz et." }, { type: "image_url", image_url: { url: image } }] }],
                 max_tokens: 800, temperature: 0.1
             })
         });
