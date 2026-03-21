@@ -3,357 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💧 Su Düellosu: Atilla vs Yeliz</title>
+    <title>AI Bio-Chef | GERÇEK ANALİZ</title>
     <style>
-        :root {
-            --water-blue: #0ea5e9;
-            --atilla-color: #2563eb; /* Koyu Mavi */
-            --yeliz-color: #db2777; /* Pembe */
-            --bg-color: #f8fafc;
-            --text-dark: #1e293b;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-dark);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .card {
-            background: white;
-            width: 100%;
-            max-width: 420px;
-            border-radius: 24px;
-            padding: 30px 20px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        /* --- GİRİŞ EKRANI --- */
-        #loginScreen {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .title {
-            font-size: 24px;
-            color: var(--text-dark);
-            margin-bottom: 10px;
-        }
-
-        .login-btn {
-            padding: 20px;
-            border: none;
-            border-radius: 16px;
-            font-size: 20px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .login-btn:active { transform: scale(0.95); }
-        .btn-atilla { background-color: var(--atilla-color); }
-        .btn-yeliz { background-color: var(--yeliz-color); }
-
-        /* --- ANA EKRAN (PANEL) --- */
-        #dashboardScreen {
-            display: none;
-            flex-direction: column;
-        }
-
-        /* Borç / Skor Tablosu */
-        .debt-board {
-            background: #f1f5f9;
-            border: 2px solid #cbd5e1;
-            border-radius: 16px;
-            padding: 15px;
-            margin-bottom: 25px;
-        }
-
-        .debt-title {
-            font-size: 14px;
-            color: #64748b;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-
-        .debt-amount {
-            font-size: 22px;
-            font-weight: 900;
-        }
-
-        .debt-red { color: #ef4444; }
-        .debt-green { color: #10b981; }
-
-        /* Su Bardağı */
-        .glass-container {
-            width: 110px;
-            height: 180px;
-            border: 4px solid #cbd5e1;
-            border-radius: 10px 10px 30px 30px;
-            margin: 0 auto 20px auto;
-            position: relative;
-            overflow: hidden;
-            background-color: white;
-        }
-
-        .water-level {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 0%;
-            background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
-            transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .status-text {
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .user-greeting {
-            font-size: 18px;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-
-        /* Etkileşim Butonu */
-        .main-btn {
-            width: 100%;
-            padding: 20px;
-            border-radius: 16px;
-            border: none;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            margin-bottom: 15px;
-        }
-
-        .main-btn.ready { animation: pulse 2s infinite; color: white; }
-        .main-btn.waiting { background-color: #f1f5f9; color: #64748b; cursor: not-allowed; }
-        .main-btn.done { background-color: #10b981; color: white; cursor: default; }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
-
-        .logout-btn {
-            background: none;
-            border: none;
-            color: #64748b;
-            font-size: 14px;
-            text-decoration: underline;
-            cursor: pointer;
-            margin-top: 10px;
-        }
+        :root { --primary: #10b981; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
+        .app { width: 100%; max-width: 450px; background: var(--card); border-radius: 25px; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .camera-box { width: 100%; aspect-ratio: 4/3; background: #000; border-radius: 15px; overflow: hidden; position: relative; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        button { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #result { background: #0f172a; padding: 15px; border-radius: 12px; display: none; line-height: 1.5; font-size: 0.9rem; }
+        .loading { color: #38bdf8; text-align: center; display: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <div id="loginScreen">
-            <h1 class="title">⚔️ Su Düellosu</h1>
-            <p style="color: #64748b; margin-bottom: 10px;">Kim kime borçlanacak?</p>
-            
-            <button class="login-btn btn-atilla" onclick="login('atilla')">Atilla Girişi</button>
-            <button class="login-btn btn-yeliz" onclick="login('yeliz')">Yeliz Girişi</button>
-        </div>
-
-        <div id="dashboardScreen">
-            
-            <div class="debt-board">
-                <div class="debt-title">Mevcut Durum</div>
-                <div id="debtDisplay" class="debt-amount">Hesaplanıyor...</div>
-                <div style="font-size: 12px; color: #94a3b8; margin-top:5px;">(Görevini yapmayan 50 TL ceza yer)</div>
-            </div>
-
-            <div class="user-greeting" id="greetingText"></div>
-
-            <div class="glass-container">
-                <div class="water-level" id="waterLevel"></div>
-            </div>
-            <div class="status-text" id="statusText">0 / 3 Yarım Litre</div>
-            
-            <button id="actionBtn" class="main-btn ready" onclick="drinkWater()">
-                <span id="btnMainText">🚰 Yarım Litre İçtim!</span>
-                <span id="btnSubText" style="font-size: 14px; font-weight: normal;"></span>
-            </button>
-
-            <button class="logout-btn" onclick="logout()">Çıkış Yap / Diğer Hesaba Geç</button>
-        </div>
+<div class="app">
+    <h2 style="text-align: center;">🔬 AI Bio-Chef (Live)</h2>
+    
+    <div style="font-size: 0.8rem; background: rgba(16,185,129,0.1); padding: 10px; border-radius: 10px;">
+        <strong>Biyometri:</strong> Demir Düşük, Şeker 115 mg/dL.
     </div>
 
-    <script>
-        const COOLDOWN_MS = 4 * 60 * 60 * 1000; // 4 Saat
-        
-        // Basit Şifreler (Buradan değiştirebilirsin)
-        const PASSWORDS = {
-            atilla: "1234",
-            yeliz: "5678"
-        };
+    <div class="camera-box">
+        <video id="video" autoplay playsinline></video>
+    </div>
 
-        // Veritabanı (Ortak)
-        let db = JSON.parse(localStorage.getItem('suDuelloDB')) || {
-            lastDate: new Date().toLocaleDateString(),
-            atillaOwesYeliz: 0,
-            yelizOwesAtilla: 0,
-            atilla: { intake: 0, lastDrinkTime: 0 },
-            yeliz: { intake: 0, lastDrinkTime: 0 }
-        };
+    <div id="loading" class="loading">🧠 AI Analiz Ediyor...</div>
+    <div id="result"></div>
 
-        let currentUser = null; // 'atilla' veya 'yeliz'
+    <button id="btn" onclick="captureAndAnalyze()">📸 YEMEĞİ ANALİZ ET</button>
+    <canvas id="canvas" style="display:none;"></canvas>
+</div>
 
-        // Sayfa açıldığında gün değişimini kontrol et
-        checkDayChange();
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const btn = document.getElementById('btn');
+    const resultDiv = document.getElementById('result');
+    const loading = document.getElementById('loading');
 
-        function checkDayChange() {
-            const today = new Date().toLocaleDateString();
-            if (db.lastDate !== today) {
-                // YENİ GÜN! Dünkü borçları hesapla
-                // Atilla yapmış, Yeliz yapamamışsa:
-                if (db.atilla.intake === 3 && db.yeliz.intake < 3) {
-                    db.yelizOwesAtilla += 50;
-                }
-                // Yeliz yapmış, Atilla yapamamışsa:
-                else if (db.yeliz.intake === 3 && db.atilla.intake < 3) {
-                    db.atillaOwesYeliz += 50;
-                }
-                // (İkisi de yaptıysa veya ikisi de yapamadıysa ceza yok)
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .then(stream => video.srcObject = stream);
 
-                // Görevleri Sıfırla
-                db.atilla.intake = 0;
-                db.yeliz.intake = 0;
-                db.atilla.lastDrinkTime = 0;
-                db.yeliz.lastDrinkTime = 0;
-                db.lastDate = today;
-                
-                saveData();
-            }
+    async function captureAndAnalyze() {
+        btn.disabled = true;
+        loading.style.display = 'block';
+        resultDiv.style.display = 'none';
+
+        // Fotoğraf çek
+        const ctx = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
+        const base64Image = canvas.toDataURL('image/jpeg');
+
+        try {
+            const response = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    image: base64Image,
+                    biometrics: "Demir: Düşük, Şeker: 115mg/dL, Amaç: Enerji artışı"
+                })
+            });
+
+            const data = await response.json();
+            resultDiv.innerHTML = `<strong>AI Tavsiyesi:</strong><br>${data.analysis}`;
+            resultDiv.style.display = 'block';
+            
+            // Sesli oku
+            const speech = new SpeechSynthesisUtterance(data.analysis);
+            speech.lang = 'tr-TR';
+            window.speechSynthesis.speak(speech);
+
+        } catch (err) {
+            resultDiv.innerText = "Hata: " + err.message;
+            resultDiv.style.display = 'block';
+        } finally {
+            btn.disabled = false;
+            loading.style.display = 'none';
         }
+    }
+</script>
 
-        // Giriş İşlemi
-        function login(user) {
-            const enteredPass = prompt(`Lütfen ${user.toUpperCase()} şifresini girin:`);
-            if (enteredPass === PASSWORDS[user]) {
-                currentUser = user;
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('dashboardScreen').style.display = 'flex';
-                
-                // Rengi kullanıcıya göre ayarla
-                const btn = document.getElementById('actionBtn');
-                btn.style.backgroundColor = user === 'atilla' ? 'var(--atilla-color)' : 'var(--yeliz-color)';
-                
-                document.getElementById('greetingText').innerText = `Hoş geldin, ${user === 'atilla' ? 'Atilla' : 'Yeliz'}!`;
-                
-                updateUI();
-                setInterval(updateUI, 1000); // Sayacı başlat
-            } else {
-                alert("Hatalı şifre girdiniz!");
-            }
-        }
-
-        function logout() {
-            currentUser = null;
-            document.getElementById('loginScreen').style.display = 'flex';
-            document.getElementById('dashboardScreen').style.display = 'none';
-        }
-
-        function updateUI() {
-            if (!currentUser) return;
-
-            // Borç Durumunu Göster
-            const debtDisplay = document.getElementById('debtDisplay');
-            const netAtilla = db.yelizOwesAtilla - db.atillaOwesYeliz;
-
-            if (netAtilla > 0) {
-                debtDisplay.innerHTML = `<span style="color: var(--atilla-color)">Yeliz, Atilla'ya ${netAtilla} TL borçlu!</span>`;
-            } else if (netAtilla < 0) {
-                debtDisplay.innerHTML = `<span style="color: var(--yeliz-color)">Atilla, Yeliz'e ${Math.abs(netAtilla)} TL borçlu!</span>`;
-            } else {
-                debtDisplay.innerHTML = `<span style="color: #64748b">Borçlar Eşit (0 TL)</span>`;
-            }
-
-            // Bardak ve Hedef
-            const userData = db[currentUser];
-            document.getElementById('waterLevel').style.height = (userData.intake / 3 * 100) + '%';
-            document.getElementById('statusText').innerText = userData.intake + " / 3 Yarım Litre";
-
-            // Buton Durumu ve Geri Sayım
-            const actionBtn = document.getElementById('actionBtn');
-            const btnMainText = document.getElementById('btnMainText');
-            const btnSubText = document.getElementById('btnSubText');
-
-            if (userData.intake >= 3) {
-                actionBtn.className = 'main-btn done';
-                btnMainText.innerText = "🎉 Görev Tamam!";
-                btnSubText.innerText = "Bugün ceza yemekten kurtuldun.";
-                actionBtn.disabled = true;
-            } else {
-                const timePassed = Date.now() - userData.lastDrinkTime;
-                const timeLeft = COOLDOWN_MS - timePassed;
-
-                if (timeLeft > 0 && userData.lastDrinkTime !== 0) {
-                    actionBtn.className = 'main-btn waiting';
-                    btnMainText.innerText = "⏳ Sindirim Bekleniyor...";
-                    btnSubText.innerText = formatTime(timeLeft);
-                    actionBtn.disabled = true;
-                } else {
-                    actionBtn.className = 'main-btn ready';
-                    btnMainText.innerText = "🚰 Yarım Litre İçtim!";
-                    btnSubText.innerText = "4 Saatlik sayacı başlat";
-                    actionBtn.disabled = false;
-                }
-            }
-        }
-
-        function drinkWater() {
-            if (db[currentUser].intake < 3) {
-                db[currentUser].intake++;
-                db[currentUser].lastDrinkTime = Date.now();
-                saveData();
-                updateUI();
-                
-                if(db[currentUser].intake === 3) {
-                    setTimeout(() => alert("Tebrikler! Bugünkü görev bitti, artık ceza yemeyeceksin."), 300);
-                }
-            }
-        }
-
-        function formatTime(ms) {
-            let totalSeconds = Math.floor(ms / 1000);
-            let hours = Math.floor(totalSeconds / 3600);
-            let minutes = Math.floor((totalSeconds % 3600) / 60);
-            let seconds = totalSeconds % 60;
-            return hours.toString().padStart(2, '0') + ":" + 
-                   minutes.toString().padStart(2, '0') + ":" + 
-                   seconds.toString().padStart(2, '0');
-        }
-
-        function saveData() {
-            localStorage.setItem('suDuelloDB', JSON.stringify(db));
-        }
-    </script>
 </body>
 </html>
