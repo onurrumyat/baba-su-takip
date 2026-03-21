@@ -3,150 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bio-Chef Pro | AI Sağlık Girişimi</title>
+    <title>Bio-Chef Pro | Full Stack AI Arena</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --primary: #10b981; --accent: #38bdf8; --text: #f8fafc; --muted: #64748b; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 15px; }
         
-        .container { width: 100%; max-width: 440px; background: var(--card); border-radius: 28px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); height: fit-content; }
+        .container { width: 100%; max-width: 440px; background: var(--card); border-radius: 28px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); height: fit-content; }
         
         /* Saat ve Tarih */
-        .header { text-align: center; margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #334155; }
+        .header-main { text-align: center; margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #334155; }
         #clock { font-size: 1.8rem; font-weight: 800; color: var(--accent); }
         #date { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
 
-        /* Formlar */
-        #setup, #dashboard { display: none; flex-direction: column; gap: 15px; }
-        .input-box { display: flex; flex-direction: column; gap: 5px; }
-        label { font-size: 0.7rem; font-weight: bold; color: var(--muted); text-transform: uppercase; margin-left: 5px; }
-        input, select { width: 100%; padding: 12px; border-radius: 10px; background: #0f172a; border: 1px solid #334155; color: white; outline: none; font-size: 0.9rem; }
-
-        /* Dashboard */
-        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 15px; }
-        .cam-view { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 20px; overflow: hidden; border: 2px solid #334155; position: relative; margin-top: 5px; }
-        video { width: 100%; height: 100%; object-fit: cover; }
-        
-        .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .btn { padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; color: white; font-size: 0.85rem; }
+        /* Auth Ekranları */
+        .auth-box { display: flex; flex-direction: column; gap: 12px; animation: fadeIn 0.4s ease; }
+        input, select { width: 100%; padding: 14px; border-radius: 12px; background: #0f172a; border: 1px solid #334155; color: white; outline: none; text-align: center; font-size: 0.9rem; }
+        .btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; color: white; }
         .btn-green { background: var(--primary); }
         .btn-blue { background: var(--accent); }
         .btn:disabled { opacity: 0.5; }
+        .link { color: var(--accent); cursor: pointer; font-size: 0.8rem; text-align: center; display: block; margin-top: 10px; text-decoration: underline; }
 
-        /* Sade Analiz Kartları */
+        /* Dashboard */
+        #dashboard { display: none; flex-direction: column; gap: 15px; }
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 15px; }
+        .cam-view { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 20px; overflow: hidden; border: 2px solid #334155; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        
         #results { display: none; flex-direction: column; gap: 8px; margin-top: 15px; }
         .analysis-card { background: #0f172a; padding: 12px; border-radius: 12px; border-left: 4px solid var(--accent); }
-        .card-tag { font-size: 0.65rem; font-weight: 900; color: var(--accent); margin-bottom: 3px; }
+        .card-tag { font-size: 0.65rem; font-weight: 900; color: var(--accent); margin-bottom: 3px; text-transform: uppercase; }
         .card-txt { font-size: 0.85rem; line-height: 1.4; color: #cbd5e1; }
-        
-        #loading { display: none; text-align: center; font-size: 0.8rem; color: var(--accent); font-weight: bold; padding: 10px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">
+    <div class="header-main">
         <div id="date">Yükleniyor...</div>
         <div id="clock">00:00:00</div>
     </div>
 
-    <div id="setup">
-        <h3 style="text-align:center; margin-bottom:10px;">Profil Bilgileri</h3>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div class="input-box"><label>Yaş</label><input type="number" id="age" placeholder="25"></div>
-            <div class="input-box"><label>Kilo</label><input type="number" id="weight" placeholder="75"></div>
-        </div>
-        <div class="input-box"><label>Cinsiyet</label><select id="gender"><option value="Erkek">Erkek</option><option value="Kadın">Kadın</option></select></div>
-        <div class="input-box"><label>Hedef</label><select id="goal"><option value="Kilo Vermek">Kilo Vermek (-)</option><option value="Kilo Almak">Kilo Almak (+)</option></select></div>
-        <button class="btn btn-green" onclick="save()">SİSTEMİ AKTİF ET</button>
+    <div id="loginScreen" class="auth-box">
+        <h2 style="text-align:center; color:var(--primary)">Giriş Yap</h2>
+        <input type="email" id="lEmail" placeholder="E-posta">
+        <input type="password" id="lPass" placeholder="Şifre">
+        <button class="btn btn-green" onclick="doLogin()">Giriş Yap</button>
+        <span class="link" onclick="toggleAuth('regScreen')">Yeni Hesap Oluştur</span>
+        <span class="link" onclick="doReset()">Şifremi Unuttum?</span>
+    </div>
+
+    <div id="regScreen" class="auth-box" style="display:none;">
+        <h2 style="text-align:center; color:var(--accent)">Kayıt Ol</h2>
+        <input type="email" id="rEmail" placeholder="E-posta Seçin">
+        <input type="password" id="rPass" placeholder="Şifre Belirleyin">
+        <button class="btn btn-blue" onclick="doRegister()">Kayıt Ol ve Başlat</button>
+        <span class="link" onclick="toggleAuth('loginScreen')">Geri Dön</span>
     </div>
 
     <div id="dashboard">
+        <div class="header-main" style="border:none; margin:0; display:flex; justify-content: space-between; align-items: center;">
+            <span id="uMail" style="font-size: 0.7rem; color: var(--muted);">...</span>
+            <button onclick="doLogout()" style="background:none; border:none; color:red; cursor:pointer; font-size:0.7rem;">ÇIKIŞ</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="input-box"><label style="font-size:0.6rem">Yaş</label><input type="number" id="uAge" placeholder="Yaş"></div>
+            <div class="input-box"><label style="font-size:0.6rem">Kilo</label><input type="number" id="uWeight" placeholder="Kilo"></div>
+        </div>
+
         <div class="stats-row">
-            <div class="input-box"><label>Adım Sayısı</label><input type="number" id="steps" value="5000"></div>
-            <div class="input-box"><label>Modun</label><select id="mood"><option>Normal</option><option>Yorgun</option><option>Stresli</option></select></div>
+            <div class="input-box"><label style="font-size:0.6rem">Adım</label><input type="number" id="uSteps" value="6000"></div>
+            <div class="input-box"><label style="font-size:0.6rem">Ruh Hali</label>
+                <select id="uMood"><option>Normal</option><option>Yorgun</option><option>Stresli</option></select>
+            </div>
         </div>
 
         <div class="cam-view"><video id="video" autoplay playsinline></video></div>
         <canvas id="canvas" style="display:none;"></canvas>
 
-        <div id="loading">✨ AI ANALİZ YAPIYOR...</div>
         <div id="results"></div>
-
-        <div class="action-btns">
-            <button class="btn btn-green" id="b1" onclick="startAI('yemek')">📸 YEMEK</button>
-            <button class="btn btn-blue" id="b2" onclick="startAI('buzdolabi')">❄️ DOLAP</button>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+            <button class="btn btn-green" id="bY" onclick="runAI('yemek')">📸 YEMEK</button>
+            <button class="btn btn-blue" id="bD" onclick="runAI('buzdolabi')">❄️ DOLAP</button>
         </div>
-        <p style="text-align:center; font-size:0.6rem; color:var(--muted); margin-top:15px; cursor:pointer;" onclick="localStorage.clear(); location.reload();">Verileri Sıfırla</p>
     </div>
 </div>
 
 <script>
-    // Saat ve Tarih
-    function updateClock() {
+    // --- FIREBASE KURULUMU (DEĞİŞTİRİN) ---
+    const firebaseConfig = {
+        apiKey: "SENİN_API_KEY",
+        authDomain: "SENİN_PROJE.firebaseapp.com",
+        projectId: "SENİN_PROJE_ID",
+        storageBucket: "SENİN_PROJE.appspot.com",
+        messagingSenderId: "SENDER_ID",
+        appId: "APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Saat
+    setInterval(() => {
         const n = new Date();
         document.getElementById('clock').innerText = n.toLocaleTimeString('tr-TR');
         document.getElementById('date').innerText = n.toLocaleDateString('tr-TR', {weekday:'long', day:'numeric', month:'long'});
+    }, 1000);
+
+    // Auth Takibi
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            document.getElementById('uMail').innerText = user.email;
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('regScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'flex';
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
+        } else {
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+        }
+    });
+
+    // Fonksiyonlar
+    function toggleAuth(id) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('regScreen').style.display = 'none';
+        document.getElementById(id).style.display = 'flex';
     }
-    setInterval(updateClock, 1000); updateClock();
 
-    // Veri Yönetimi
-    let user = JSON.parse(localStorage.getItem('bio_v4'));
-    if(user) showDashboard(); else document.getElementById('setup').style.display = 'flex';
-
-    function save() {
-        user = { age: document.getElementById('age').value, weight: document.getElementById('weight').value, gender: document.getElementById('gender').value, goal: document.getElementById('goal').value };
-        if(!user.age || !user.weight) return alert("Eksik bilgi!");
-        localStorage.setItem('bio_v4', JSON.stringify(user));
-        showDashboard();
+    async function doLogin() {
+        try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); }
     }
-
-    function showDashboard() {
-        document.getElementById('setup').style.display = 'none';
-        document.getElementById('dashboard').style.display = 'flex';
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
+    async function doRegister() {
+        try { await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); } catch(e) { alert(e.message); }
     }
+    async function doReset() {
+        const email = document.getElementById('lEmail').value;
+        if(!email) return alert("Mail girin.");
+        try { await auth.sendPasswordResetEmail(email); alert("Link gönderildi."); } catch(e) { alert(e.message); }
+    }
+    function doLogout() { auth.signOut(); location.reload(); }
 
-    // AI Analiz Akışı
-    async function startAI(mode) {
-        const b1 = document.getElementById('b1'); const b2 = document.getElementById('b2');
-        const loader = document.getElementById('loading'); const resDiv = document.getElementById('results');
+    async function runAI(mode) {
+        const bY = document.getElementById('bY'); const bD = document.getElementById('bD');
+        const resDiv = document.getElementById('results');
+        const age = document.getElementById('uAge').value; const weight = document.getElementById('uWeight').value;
+        if(!age || !weight) return alert("Profil bilgilerini girin.");
         
-        b1.disabled = b2.disabled = true; loader.style.display = 'block'; resDiv.style.display = 'none';
-
+        bY.disabled = bD.disabled = true; bY.innerText = "Bekleyin...";
+        
         const vid = document.getElementById('video'); const canv = document.getElementById('canvas');
         canv.width = vid.videoWidth; canv.height = vid.videoHeight;
         canv.getContext('2d').drawImage(vid, 0, 0);
-        const img = canv.toDataURL('image/jpeg');
+        const img = canv.toDataURL('image/jpeg', 0.8);
 
-        const userStr = `${user.age} yaş, ${user.weight}kg, ${user.gender}, Hedef: ${user.goal}, Adım: ${document.getElementById('steps').value}, Saat: ${new Date().toLocaleTimeString()}, Mod: ${document.getElementById('mood').value}`;
+        const uStr = `${age}yaş, ${weight}kg, Adım:${document.getElementById('uSteps').value}, Saat:${new Date().toLocaleTimeString()}, Mod:${document.getElementById('uMood').value}`;
 
         try {
             const r = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mode, image: img, user_data: userStr })
+                body: JSON.stringify({ mode, image: img, user_data: uStr })
             });
             const d = await r.json();
-            
-            // Şablonu Oluştur ve Göster
             resDiv.innerHTML = ''; resDiv.style.display = 'flex';
             const blocks = d.analysis.split(/\d\./).filter(t => t.trim().length > 5);
-            const tags = ["ANALİZ", "SAĞLIK ETKİSİ", "HEDEF DURUMU", "TAVSİYE"];
-
+            const tags = ["ANALİZ", "SAĞLIK", "HEDEF/KİLO", "TAVSİYE"];
             blocks.forEach((txt, i) => {
                 const card = document.createElement('div'); card.className = 'analysis-card';
-                card.innerHTML = `<div class="card-tag">${tags[i] || 'BİLGİ'}</div><div class="card-txt">${txt.trim()}</div>`;
+                card.innerHTML = `<div class="card-tag">${tags[i] || 'NOT'}</div><div class="card-txt">${txt.trim()}</div>`;
                 resDiv.appendChild(card);
             });
-
-            // Sesli okuma
-            const s = new SpeechSynthesisUtterance(d.analysis); s.lang = 'tr-TR'; window.speechSynthesis.speak(s);
-
-        } catch (e) { alert("Hata: " + e.message); }
-        finally { b1.disabled = b2.disabled = false; loader.style.display = 'none'; }
+            window.speechSynthesis.speak(new SpeechSynthesisUtterance(d.analysis));
+        } catch (e) { alert("Hata oluştu."); }
+        finally { bY.disabled = bD.disabled = false; bY.innerText = "📸 YEMEK"; }
     }
 </script>
-
 </body>
 </html>
