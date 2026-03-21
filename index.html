@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Bio-Chef | Senin Genetiğin, Senin Mutfağın</title>
+    <title>AI Bio-Chef | Akıllı Sağlık Paneli</title>
     <style>
         :root {
             --bg: #0f172a;
             --card: #1e293b;
             --primary: #10b981;
             --accent: #38bdf8;
-            --atilla: #38bdf8; /* Açık Mavi */
-            --yeliz: #db2777; /* Pembe */
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
         }
@@ -36,514 +34,215 @@
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
             border: 1px solid rgba(255,255,255,0.05);
             position: relative;
-            overflow: hidden;
         }
 
-        /* --- GİRİŞ / ONBOARDING EKRANI --- */
-        #onboardingScreen {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            animation: fadeIn 0.5s ease-out;
+        /* --- SAAT VE TARİH PANELİ --- */
+        .live-clock-panel {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(56, 189, 248, 0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(56, 189, 248, 0.2);
         }
+        #liveTime { font-size: 2.2rem; font-weight: 800; color: var(--accent); letter-spacing: 2px; }
+        #liveDate { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; }
 
-        header { text-align: center; margin-bottom: 10px; }
-        header h1 { font-size: 2.3rem; font-weight: 900; background: linear-gradient(to right, #a78bfa, #34d399); -webkit-background-clip: text; color: transparent; text-transform: uppercase;}
-        header p { font-size: 0.9rem; color: var(--text-muted); }
-
-        .input-group { display: flex; flex-direction: column; gap: 8px; }
-        .input-group label { font-size: 0.85rem; color: var(--text-muted); }
-        
+        /* --- GİRİŞ EKRANI --- */
+        #onboardingScreen { display: flex; flex-direction: column; gap: 15px; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+        .input-group label { font-size: 0.8rem; color: var(--text-muted); padding-left: 5px; }
         input, select {
-            width: 100%; padding: 15px; border-radius: 12px;
+            width: 100%; padding: 14px; border-radius: 12px;
             background: #0f172a; border: 1px solid #334155;
-            color: white; font-size: 1rem; text-align: center;
-            outline: none; transition: border-color 0.3s;
-        }
-        input:focus, select:focus { border-color: var(--primary); }
-
-        .start-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 18px;
-            border-radius: 15px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: all 0.3s;
-        }
-        .start-btn:hover { background: #059669; transform: translateY(-2px); }
-
-        /* --- ANA ANALİZ EKRANI (PANEL) --- */
-        #dashboardScreen {
-            display: none;
-            flex-direction: column;
-            gap: 20px;
-            animation: fadeIn 0.5s ease-out;
+            color: white; font-size: 1rem; outline: none;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Kullanıcı Özet Kartı */
-        .user-summary {
+        /* --- ANA PANEL --- */
+        #dashboardScreen { display: none; flex-direction: column; gap: 15px; }
+        
+        .activity-card {
             background: rgba(16, 185, 129, 0.1);
             border: 1px solid rgba(16, 185, 129, 0.2);
-            border-radius: 15px;
+            border-radius: 20px;
             padding: 15px;
-            font-size: 0.85rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .user-summary-text { color: #cbd5e1; }
-        .edit-btn { background: none; border: none; color: var(--accent); text-decoration: underline; cursor: pointer; font-size: 0.8rem;}
 
-        /* Kamera ve Fotoğraf Alanı */
         .camera-box {
-            width: 100%;
-            aspect-ratio: 4/3;
-            background: #000;
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-            border: 2px solid #334155;
+            width: 100%; aspect-ratio: 4/3; background: #000;
+            border-radius: 20px; overflow: hidden; border: 2px solid #334155;
         }
         video { width: 100%; height: 100%; object-fit: cover; }
         canvas { display: none; }
 
-        /* Analiz Sonuç Kartları */
-        .result-panel {
-            display: none; /* Başlangıçta gizli */
-            flex-direction: column;
-            gap: 15px;
-            animation: slideUp 0.6s ease-out;
-        }
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .result-card {
-            background: #0f172a;
-            border-radius: 15px;
-            padding: 18px;
-            border: 1px solid #1f2937;
-        }
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #1f2937;
-            padding-bottom: 8px;
-        }
-        .card-icon { font-size: 1.2rem; }
-        .card-title { font-size: 0.9rem; color: #a78bfa; font-weight: bold; text-transform: uppercase;}
-        .card-content { font-size: 0.95rem; line-height: 1.5; color: #cbd5e1; white-space: pre-wrap; /* Satır başlarını koru */}
-
-        /* Aksiyon Butonları */
-        .btn-analyze {
-            background: var(--primary);
+        .btn {
+            width: 100%; padding: 18px; border-radius: 15px; border: none;
+            font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s;
             color: white;
-            border: none;
-            padding: 20px;
-            border-radius: 16px;
-            font-size: 1.15rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
         }
-        .btn-analyze:hover { background: #059669; }
-        .btn-analyze:disabled { background: #475569; cursor: not-allowed; }
+        .btn-primary { background: var(--primary); }
+        .btn-accent { background: var(--accent); }
+        .btn:disabled { opacity: 0.5; }
 
-        .loading-spinner {
-            display: none;
-            text-align: center;
-            color: var(--accent);
-            font-weight: bold;
-            font-style: italic;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        /* --- SONUÇ KARTLARI --- */
+        .result-panel { display: none; flex-direction: column; gap: 12px; margin-top: 10px; }
+        .result-card { background: #0f172a; padding: 15px; border-radius: 15px; border: 1px solid #1f2937; }
+        .card-title { color: var(--accent); font-size: 0.8rem; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+        .card-content { font-size: 0.95rem; line-height: 1.4; color: #cbd5e1; }
 
-        /* Sosyal Kanıt Alanı */
-        .social-proof {
-            background: #f1f5f9;
-            border: 2px solid #cbd5e1;
-            border-radius: 16px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        .social-title {
-            font-size: 14px;
-            color: #64748b;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-        .score-display {
-            font-size: 28px;
-            font-weight: 900;
-            margin: 5px 0;
-        }
-        .atilla-score { color: var(--atilla); }
-        .yeliz-score { color: var(--yeliz); }
-
+        .loading { display: none; text-align: center; color: var(--accent); font-weight: bold; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    
+    <div class="live-clock-panel">
+        <div id="liveTime">00:00:00</div>
+        <div id="liveDate">YÜKLENİYOR...</div>
+    </div>
+
     <div id="onboardingScreen">
-        <header>
-            <h1>⚔️ AI Chaos</h1>
-            <p>Senin Genetiğin, Senin Mutfağın</p>
-        </header>
-        
-        <p style="text-align:center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">
-            Sana özel bir analiz için temel verilerini gir. Kim kime borçlanacak?
-        </p>
-
-        <div style="display: flex; gap: 15px;">
-            <div class="input-group" style="flex:1;">
-                <label>Yaşınız:</label>
-                <input type="number" id="userAge" placeholder="25" min="10" max="100">
-            </div>
-            <div class="input-group" style="flex:1;">
-                <label>Kilonuz (kg):</label>
-                <input type="number" id="userWeight" placeholder="70" min="30" max="200">
-            </div>
+        <h2 style="text-align: center; margin-bottom: 10px;">Profilini Oluştur</h2>
+        <div style="display: flex; gap: 10px;">
+            <div class="input-group" style="flex:1;"><label>Yaş</label><input type="number" id="age" placeholder="25"></div>
+            <div class="input-group" style="flex:1;"><label>Kilo</label><input type="number" id="weight" placeholder="70"></div>
         </div>
-
-        <div class="input-group">
-            <label>Cinsiyetiniz:</label>
-            <select id="userGender">
-                <option value="Erkek">Erkek</option>
-                <option value="Kadın">Kadın</option>
-            </select>
+        <div class="input-group"><label>Cinsiyet</label>
+            <select id="gender"><option value="Erkek">Erkek</option><option value="Kadın">Kadın</option></select>
         </div>
-
-        <div class="input-group">
-            <label>Ana Hedefiniz:</label>
-            <select id="userGoal">
-                <option value="Kilo Vermek">Kilo Vermek (-)</option>
-                <option value="Kilo Korumak">Kilo Korumak (=)</option>
-                <option value="Kilo Almak">Kilo Almak (+)</option>
-            </select>
+        <div class="input-group"><label>Hedef</label>
+            <select id="goal"><option value="Kilo Vermek">Kilo Vermek</option><option value="Kas Yapmak">Kas Yapmak</option></select>
         </div>
-
-        <button class="start-btn" onclick="completeOnboarding()">Sistemi Başlat 🚀</button>
+        <button class="btn btn-primary" onclick="startApp()">SİSTEME GİRİŞ YAP</button>
     </div>
 
     <div id="dashboardScreen">
-        
-        <div class="social-proof">
-            <div class="social-title">Mevcut Durum</div>
-            <div id="scoreDisplay" class="score-display">Hesaplanıyor...</div>
-            <div style="font-size: 12px; color: #94a3b8; margin-top:5px;">(Bugün 3. yarım litreyi deviren puan kazanır)</div>
-        </div>
-
-        <div class="user-summary">
-            <div class="user-summary-text" id="summaryText"></div>
-            <button class="edit-btn" onclick="editProfile()">Düzenle</button>
-        </div>
-
-        <div class="input-group">
-            <label>Şu anki Ruh Halin:</label>
-            <select id="userMood">
-                <option value="Normal">Normal</option>
-                <option value="Stresli">Stresli</option>
-                <option value="Mutlu">Mutlu</option>
-                <option value="Yorgun">Yorgun</option>
-            </select>
+        <div class="activity-card">
+            <div class="input-group" style="margin:0; width: 60%;">
+                <label>Bugünkü Adım Sayın:</label>
+                <input type="number" id="steps" value="5000" style="padding: 8px;">
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.7rem; color: var(--text-muted);">MODUN:</div>
+                <select id="mood" style="padding: 5px; font-size: 0.8rem; width: auto; border:none; background:none; color:var(--primary); font-weight:bold;">
+                    <option value="Normal">Normal</option>
+                    <option value="Stresli">Stresli</option>
+                    <option value="Yorgun">Yorgun</option>
+                </select>
+            </div>
         </div>
 
         <div class="camera-box">
             <video id="video" autoplay playsinline></video>
-            <canvas id="photoCanvas"></canvas>
+            <canvas id="canvas"></canvas>
         </div>
 
-        <div id="loading" class="loading-spinner">🧠 AI Muhakeme Ediyor...</div>
+        <div id="loading" class="loading">🧠 AI VERİLERİ HARMANLIYOR...</div>
+        <div id="resultPanel" class="result-panel"></div>
 
-        <div id="resultPanel" class="result-panel">
-            </div>
-
-        <button class="btn-analyze" id="analyzeBtn" onclick="processMeal()">📸 YEMEĞİ ANALİZ ET</button>
-        <button class="btn-analyze" id="analyzeBuzdolabiBtn" style="background-color:var(--accent);" onclick="processBuzdolabi()">📸 BUZDOLABINI ANALİZ ET</button>
+        <button class="btn btn-primary" id="analyzeBtn" onclick="analyze('yemek')">📸 YEMEĞİ ANALİZ ET</button>
+        <button class="btn btn-accent" id="fridgeBtn" onclick="analyze('buzdolabi')" style="margin-top: 5px;">❄️ BUZDOLABINA BAK</button>
         
-        <button class="edit-btn" style="margin-top: 10px; color: var(--yeliz);" onclick="logout()">Çıkış Yap / Diğer Hesaba Geç</button>
+        <p style="text-align: center; font-size: 0.7rem; color: var(--text-muted); margin-top: 10px; cursor:pointer;" onclick="localStorage.clear(); location.reload();">Verileri Sıfırla</p>
     </div>
-
 </div>
 
 <script>
-    const onboardingScreen = document.getElementById('onboardingScreen');
-    const dashboardScreen = document.getElementById('dashboardScreen');
-    const summaryText = document.getElementById('summaryText');
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('photoCanvas');
-    const analyzeBtn = document.getElementById('analyzeBtn');
-    const analyzeBuzdolabiBtn = document.getElementById('analyzeBuzdolabiBtn');
-    const resultPanel = document.getElementById('resultPanel');
-    const loading = document.getElementById('loading');
-    const scoreDisplay = document.getElementById('scoreDisplay');
-    const userMoodSelect = document.getElementById('userMood');
+    // SAAT FONKSİYONU
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('liveTime').innerText = now.toLocaleTimeString('tr-TR');
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('liveDate').innerText = now.toLocaleDateString('tr-TR', options);
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 
-    // Veritabanı (Telefonda Kayıtlı Veri)
-    let userData = JSON.parse(localStorage.getItem('suDuelloData')) || null;
-    let currentUser = null; // 'atilla' veya 'yeliz'
+    let user = JSON.parse(localStorage.getItem('user_bio')) || null;
 
-    // Günü Kontrol Et (Yeni günse su görevlerini sıfırla, paraya dokunma)
-    const today = new Date().toLocaleDateString();
-    if (userData && userData.lastDate !== today) {
-        // YENİ GÜN! Dünkü borçları hesapla
-        // Atilla yapmış, Yeliz yapamamışsa:
-        if (userData.atilla.intake === 3 && userData.yeliz.intake < 3) {
-            userData.yelizOwesAtilla += 50;
+    function startApp() {
+        if(!user) {
+            user = {
+                age: document.getElementById('age').value,
+                weight: document.getElementById('weight').value,
+                gender: document.getElementById('gender').value,
+                goal: document.getElementById('goal').value
+            };
+            if(!user.age || !user.weight) return alert("Bilgileri doldur!");
+            localStorage.setItem('user_bio', JSON.stringify(user));
         }
-        // Yeliz yapmış, Atilla yapamamışsa:
-        else if (userData.yeliz.intake === 3 && userData.atilla.intake < 3) {
-            userData.atillaOwesYeliz += 50;
-        }
-        // (İkisi de yaptıysa veya ikisi de yapamadıysa ceza yok)
-
-        // Görevleri Sıfırla
-        userData.atilla.intake = 0;
-        userData.yeliz.intake = 0;
-        userData.atilla.lastDrinkTime = 0;
-        userData.yeliz.lastDrinkTime = 0;
-        userData.lastDate = today;
-        
-        saveData();
+        document.getElementById('onboardingScreen').style.display = 'none';
+        document.getElementById('dashboardScreen').style.display = 'flex';
+        initCamera();
     }
 
-    // Sayfa açıldığında daha önce giriş yapılmış mı kontrol et
-    if (userData && userData.atilla && userData.atilla.age) {
-        completeOnboarding(true); // Giriş yapılmışsa doğrudan panele geç
-    }
+    if(user) startApp();
 
-    function completeOnboarding(skipSave = false) {
-        if (!skipSave) {
-            const age = document.getElementById('userAge').value;
-            const weight = document.getElementById('userWeight').value;
-            const gender = document.getElementById('userGender').value;
-            const goal = document.getElementById('userGoal').value;
-
-            if (!age || !weight) { alert("Lütfen yaş ve kilo verilerinizi girin!"); return; }
-
-            if (!userData) {
-                userData = {
-                    lastDate: today,
-                    atillaOwesYeliz: 0,
-                    yelizOwesAtilla: 0,
-                    atilla: { intake: 0, lastDrinkTime: 0, age, weight, gender, goal },
-                    yeliz: { intake: 0, lastDrinkTime: 0, age, weight, gender, goal }
-                };
-            } else {
-                userData.atilla.age = age;
-                userData.atilla.weight = weight;
-                userData.atilla.gender = gender;
-                userData.atilla.goal = goal;
-                // Yeliz'in verilerini de aynı şekilde güncellemek isterseniz:
-                userData.yeliz.age = age;
-                userData.yeliz.weight = weight;
-                userData.yeliz.gender = gender;
-                userData.yeliz.goal = goal;
-            }
-            saveData();
-        }
-
-        // Özeti Güncelle
-        summaryText.innerText = `${userData.atilla.age} Yaş, ${userData.atilla.weight}kg ${userData.atilla.gender} | Hedef: ${userData.atilla.goal}`;
-
-        onboardingScreen.style.display = 'none';
-        dashboardScreen.style.display = 'flex';
-        startCamera();
-        updateScore();
-    }
-
-    function editProfile() {
-        dashboardScreen.style.display = 'none';
-        onboardingScreen.style.display = 'flex';
-        
-        // Mevcut verileri inputlara doldur
-        document.getElementById('userAge').value = userData.atilla.age;
-        document.getElementById('userWeight').value = userData.atilla.weight;
-        document.getElementById('userGender').value = userData.atilla.gender;
-        document.getElementById('userGoal').value = userData.atilla.goal;
-    }
-
-    function logout() {
-        currentUser = null;
-        onboardingScreen.style.display = 'flex';
-        dashboardScreen.style.display = 'none';
-    }
-
-    // Kamerayı Başlat
-    function startCamera() {
+    function initCamera() {
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-            .then(stream => { video.srcObject = stream; })
-            .catch(err => { console.error("Kamera açılmadı:", err); });
+            .then(s => document.getElementById('video').srcObject = s);
     }
 
-    function updateScore() {
-        // Borç Durumunu Göster
-        const netAtilla = userData.yelizOwesAtilla - userData.atillaOwesYeliz;
-
-        if (netAtilla > 0) {
-            scoreDisplay.innerHTML = `<span style="color: var(--atilla)">Yeliz, Atilla'ya ${netAtilla} TL borçlu!</span>`;
-        } else if (netAtilla < 0) {
-            scoreDisplay.innerHTML = `<span style="color: var(--yeliz)">Atilla, Yeliz'e ${Math.abs(netAtilla)} TL borçlu!</span>`;
-        } else {
-            scoreDisplay.innerHTML = `<span style="color: #64748b">Borçlar Eşit (0 TL)</span>`;
-        }
-    }
-
-    async function processMeal() {
-        analyzeBtn.disabled = true;
-        analyzeBuzdolabiBtn.disabled = true;
-        resultPanel.style.display = 'none';
-        loading.style.display = 'block';
-
-        // Fotoğrafı Yakala (Base64)
-        const ctx = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0);
-        const base64Image = canvas.toDataURL('image/jpeg');
-
-        // Biyometrik Veri (Canlı Simülasyon)
-        const currentBiometrics = "Demir: Düşük, Kan Şekeri: 115mg/dL (Sınırda).";
-        const mood = userMoodSelect.value;
-
-        try {
-            // VERCEL SERVERLESS FONKSİYONUNA GÖNDER
-            const response = await fetch('/api/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    mode: 'yemek',
-                    image: base64Image,
-                    user_data: `Kullanıcı: ${userData.atilla.age} yaş, ${userData.atilla.weight}kg ${userData.atilla.gender}. Hedef: ${userData.atilla.goal}. Anlık Biyometri: ${currentBiometrics}. Ruh Hali: ${mood}`
-                })
-            });
-
-            const data = await response.json();
-            
-            // Sonuçları İşle ve Göster
-            loading.style.display = 'none';
-            analyzeBtn.disabled = false;
-            analyzeBuzdolabiBtn.disabled = false;
-            
-            displayResults(data.analysis, 'yemek');
-
-        } catch (err) {
-            loading.style.display = 'none';
-            analyzeBtn.disabled = false;
-            analyzeBuzdolabiBtn.disabled = false;
-            resultPanel.innerHTML = `<div class="result-card" style="color:#ef4444;">HATA: ${err.message}</div>`;
-            resultPanel.style.display = 'flex';
-        }
-    }
-
-    async function processBuzdolabi() {
-        analyzeBtn.disabled = true;
-        analyzeBuzdolabiBtn.disabled = true;
-        resultPanel.style.display = 'none';
-        loading.style.display = 'block';
-
-        // Fotoğrafı Yakala (Base64)
-        const ctx = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0);
-        const base64Image = canvas.toDataURL('image/jpeg');
-
-        // Biyometrik Veri (Canlı Simülasyon)
-        const currentBiometrics = "Demir: Düşük, Kan Şekeri: 115mg/dL (Sınırda).";
-        const mood = userMoodSelect.value;
-
-        try {
-            // VERCEL SERVERLESS FONKSİYONUNA GÖNDER
-            const response = await fetch('/api/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    mode: 'buzdolabi',
-                    buzdolabiImage: base64Image,
-                    user_data: `Kullanıcı: ${userData.atilla.age} yaş, ${userData.atilla.weight}kg ${userData.atilla.gender}. Hedef: ${userData.atilla.goal}. Anlık Biyometri: ${currentBiometrics}. Ruh Hali: ${mood}`
-                })
-            });
-
-            const data = await response.json();
-            
-            // Sonuçları İşle ve Göster
-            loading.style.display = 'none';
-            analyzeBtn.disabled = false;
-            analyzeBuzdolabiBtn.disabled = false;
-            
-            displayResults(data.analysis, 'buzdolabi');
-
-        } catch (err) {
-            loading.style.display = 'none';
-            analyzeBtn.disabled = false;
-            analyzeBuzdolabiBtn.disabled = false;
-            resultPanel.innerHTML = `<div class="result-card" style="color:#ef4444;">HATA: ${err.message}</div>`;
-            resultPanel.style.display = 'flex';
-        }
-    }
-
-    function displayResults(analysisText, mode) {
-        resultPanel.innerHTML = ''; // Paneli temizle
-        resultPanel.style.display = 'flex';
-
-        // OpenAI'dan gelen metni başlıklara göre parçala
-        const lines = analysisText.split('\n');
+    async function analyze(mode) {
+        const btn = document.getElementById('analyzeBtn');
+        const fBtn = document.getElementById('fridgeBtn');
+        const loading = document.getElementById('loading');
+        const resultPanel = document.getElementById('resultPanel');
         
-        const icons = mode === 'yemek' ? ["📊", "🩸", "⚖️", "🔬", "🛡️"] : ["❄️", "🍽️", "📊"];
-        const titles = mode === 'yemek' ? ["Yemek Analizi ve Kalori", "Kişisel Sağlık Etkisi", "Kilo ve Hedef Durumu", "Anlık Taktiksel Tavsiye", "Sosyal Kanıt ve Ödül"] : ["Eldeki Malzemeler", "Akşam Yemeği Tarifi", "Yemek Analizi ve Kalori"];
+        btn.disabled = fBtn.disabled = true;
+        loading.style.display = 'block';
+        resultPanel.style.display = 'none';
 
-        let currentCardIndex = -1;
-        let cardContents = ["", "", "", "", ""];
+        // Fotoğraf çek
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        const imgBase64 = canvas.toDataURL('image/jpeg');
 
-        lines.forEach(line => {
-            if (line.match(/^\d\.\s/)) { // "1. ", "2. " gibi başlıyorsa
-                currentCardIndex++;
-            } else if (currentCardIndex >= 0) {
-                cardContents[currentCardIndex] += line + "\n";
+        const payload = {
+            mode: mode,
+            image: imgBase64,
+            user_data: `Kullanıcı: ${user.age} yaş, ${user.weight}kg, ${user.gender}. Hedef: ${user.goal}. Adım: ${document.getElementById('steps').value}. Saat: ${new Date().toLocaleTimeString()}. Mod: ${document.getElementById('mood').value}`
+        };
+
+        try {
+            const res = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            showResults(data.analysis);
+        } catch (e) {
+            alert("Hata: " + e.message);
+        } finally {
+            btn.disabled = fBtn.disabled = false;
+            loading.style.display = 'none';
+        }
+    }
+
+    function showResults(text) {
+        const panel = document.getElementById('resultPanel');
+        panel.innerHTML = '';
+        panel.style.display = 'flex';
+
+        const sections = text.split(/\d\./);
+        const titles = ["GİRİŞ", "ANALİZ", "SAĞLIK ETKİSİ", "HEDEF DURUMU", "TAVSİYE"];
+
+        sections.forEach((content, i) => {
+            if(content.trim().length > 5) {
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                card.innerHTML = `<div class="card-title">${titles[i] || 'DETAY'}</div><div class="card-content">${content.trim()}</div>`;
+                panel.appendChild(card);
             }
         });
-
-        // Kartları Oluştur
-        const cardCount = mode === 'yemek' ? 5 : 3;
-        for (let i = 0; i < cardCount; i++) {
-            if (cardContents[i].trim() !== "") {
-                const cardDiv = document.createElement('div');
-                cardDiv.className = 'result-card';
-                cardDiv.innerHTML = `
-                    <div class="card-header">
-                        <span class="card-icon">${icons[i]}</span>
-                        <span class="card-title">${titles[i]}</span>
-                    </div>
-                    <div class="card-content">${cardContents[i]}</div>
-                `;
-                resultPanel.appendChild(cardDiv);
-            }
-        }
-        
-        // Sonuç ekranına otomatik kaydır
-        resultPanel.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function saveData() {
-        localStorage.setItem('suDuelloData', JSON.stringify(userData));
+        panel.scrollIntoView({behavior: 'smooth'});
     }
 </script>
 
