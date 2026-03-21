@@ -3,246 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Bio-Chef | Akıllı Sağlık Paneli</title>
+    <title>AI Bio-Chef | Tam Donanımlı Sağlık Paneli</title>
     <style>
         :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --primary: #10b981;
-            --accent: #38bdf8;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --bg: #0f172a; --card: #1e293b; --primary: #10b981; 
+            --accent: #38bdf8; --text: #f8fafc; --muted: #94a3b8;
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 480px;
-            background: var(--card);
-            border-radius: 30px;
-            padding: 25px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.05);
-            position: relative;
-        }
-
-        /* --- SAAT VE TARİH PANELİ --- */
-        .live-clock-panel {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(56, 189, 248, 0.1);
-            border-radius: 20px;
-            border: 1px solid rgba(56, 189, 248, 0.2);
-        }
-        #liveTime { font-size: 2.2rem; font-weight: 800; color: var(--accent); letter-spacing: 2px; }
-        #liveDate { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; }
-
-        /* --- GİRİŞ EKRANI --- */
-        #onboardingScreen { display: flex; flex-direction: column; gap: 15px; }
-        .input-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
-        .input-group label { font-size: 0.8rem; color: var(--text-muted); padding-left: 5px; }
-        input, select {
-            width: 100%; padding: 14px; border-radius: 12px;
-            background: #0f172a; border: 1px solid #334155;
-            color: white; font-size: 1rem; outline: none;
-        }
-
-        /* --- ANA PANEL --- */
-        #dashboardScreen { display: none; flex-direction: column; gap: 15px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
         
-        .activity-card {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            border-radius: 20px;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        .app { width: 100%; max-width: 480px; background: var(--card); border-radius: 30px; padding: 25px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); }
 
-        .camera-box {
-            width: 100%; aspect-ratio: 4/3; background: #000;
-            border-radius: 20px; overflow: hidden; border: 2px solid #334155;
-        }
+        /* Üst Panel: Saat ve Profil */
+        .header-panel { text-align: center; margin-bottom: 20px; background: rgba(56, 189, 248, 0.05); padding: 15px; border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.1); }
+        #clock { font-size: 2.2rem; font-weight: 800; color: var(--accent); letter-spacing: 2px; }
+        #date { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; margin-bottom: 5px; }
+
+        /* Onboarding */
+        #setup { display: flex; flex-direction: column; gap: 15px; }
+        .input-row { display: flex; gap: 10px; }
+        .group { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 0.75rem; color: var(--muted); padding-left: 5px; }
+        input, select { width: 100%; padding: 14px; border-radius: 12px; background: #0f172a; border: 1px solid #334155; color: white; outline: none; }
+
+        /* Main Dashboard */
+        #main { display: none; flex-direction: column; gap: 15px; }
+        .stats-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.1); }
+
+        .cam-wrap { width: 100%; aspect-ratio: 4/3; background: #000; border-radius: 20px; overflow: hidden; border: 2px solid #334155; position: relative; }
         video { width: 100%; height: 100%; object-fit: cover; }
         canvas { display: none; }
 
-        .btn {
-            width: 100%; padding: 18px; border-radius: 15px; border: none;
-            font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s;
-            color: white;
-        }
-        .btn-primary { background: var(--primary); }
-        .btn-accent { background: var(--accent); }
-        .btn:disabled { opacity: 0.5; }
+        .btn { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; color: white; margin-top: 5px; }
+        .btn-main { background: var(--primary); }
+        .btn-sub { background: var(--accent); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* --- SONUÇ KARTLARI --- */
-        .result-panel { display: none; flex-direction: column; gap: 12px; margin-top: 10px; }
-        .result-card { background: #0f172a; padding: 15px; border-radius: 15px; border: 1px solid #1f2937; }
-        .card-title { color: var(--accent); font-size: 0.8rem; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
-        .card-content { font-size: 0.95rem; line-height: 1.4; color: #cbd5e1; }
+        /* Results */
+        #loading { display: none; text-align: center; color: var(--accent); font-weight: bold; font-style: italic; margin: 10px 0; }
+        #results { display: none; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .card { background: #0f172a; padding: 15px; border-radius: 15px; border: 1px solid #1f2937; animation: slideIn 0.4s ease-out; }
+        .card-h { color: var(--accent); font-size: 0.75rem; font-weight: 900; text-transform: uppercase; margin-bottom: 5px; border-bottom: 1px solid #1f2937; padding-bottom: 4px; }
+        .card-b { font-size: 0.95rem; line-height: 1.4; color: #cbd5e1; }
 
-        .loading { display: none; text-align: center; color: var(--accent); font-weight: bold; font-style: italic; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div class="live-clock-panel">
-        <div id="liveTime">00:00:00</div>
-        <div id="liveDate">YÜKLENİYOR...</div>
+<div class="app">
+    <div class="header-panel">
+        <div id="date">Yükleniyor...</div>
+        <div id="clock">00:00:00</div>
     </div>
 
-    <div id="onboardingScreen">
-        <h2 style="text-align: center; margin-bottom: 10px;">Profilini Oluştur</h2>
-        <div style="display: flex; gap: 10px;">
-            <div class="input-group" style="flex:1;"><label>Yaş</label><input type="number" id="age" placeholder="25"></div>
-            <div class="input-group" style="flex:1;"><label>Kilo</label><input type="number" id="weight" placeholder="70"></div>
+    <div id="setup">
+        <h2 style="text-align: center;">Profilini Oluştur</h2>
+        <div class="input-row">
+            <div class="group"><label>Yaş</label><input type="number" id="age" placeholder="25"></div>
+            <div class="group"><label>Kilo (kg)</label><input type="number" id="weight" placeholder="75"></div>
         </div>
-        <div class="input-group"><label>Cinsiyet</label>
-            <select id="gender"><option value="Erkek">Erkek</option><option value="Kadın">Kadın</option></select>
-        </div>
-        <div class="input-group"><label>Hedef</label>
-            <select id="goal"><option value="Kilo Vermek">Kilo Vermek</option><option value="Kas Yapmak">Kas Yapmak</option></select>
-        </div>
-        <button class="btn btn-primary" onclick="startApp()">SİSTEME GİRİŞ YAP</button>
+        <div class="group"><label>Cinsiyet</label><select id="gender"><option value="Erkek">Erkek</option><option value="Kadın">Kadın</option></select></div>
+        <div class="group"><label>Hedef</label><select id="goal"><option value="Kilo Vermek">Kilo Vermek (-)</option><option value="Kilo Almak">Kilo Almak (+)</option></select></div>
+        <button class="btn btn-main" onclick="saveAndStart()">SİSTEMİ BAŞLAT 🚀</button>
     </div>
 
-    <div id="dashboardScreen">
-        <div class="activity-card">
-            <div class="input-group" style="margin:0; width: 60%;">
-                <label>Bugünkü Adım Sayın:</label>
-                <input type="number" id="steps" value="5000" style="padding: 8px;">
-            </div>
+    <div id="main">
+        <div class="stats-bar">
+            <div class="group" style="margin:0; width:60%;"><label>Bugünkü Adım:</label><input type="number" id="steps" value="6000" style="padding:8px;"></div>
             <div style="text-align: right;">
-                <div style="font-size: 0.7rem; color: var(--text-muted);">MODUN:</div>
-                <select id="mood" style="padding: 5px; font-size: 0.8rem; width: auto; border:none; background:none; color:var(--primary); font-weight:bold;">
-                    <option value="Normal">Normal</option>
-                    <option value="Stresli">Stresli</option>
-                    <option value="Yorgun">Yorgun</option>
+                <label>Ruh Hali:</label>
+                <select id="mood" style="border:none; background:none; color:var(--primary); font-weight:bold; width:auto; padding:0;">
+                    <option value="Normal">Normal</option><option value="Stresli">Stresli</option><option value="Yorgun">Yorgun</option>
                 </select>
             </div>
         </div>
 
-        <div class="camera-box">
-            <video id="video" autoplay playsinline></video>
-            <canvas id="canvas"></canvas>
-        </div>
+        <div class="cam-wrap"><video id="video" autoplay playsinline></video></div>
+        <canvas id="canvas"></canvas>
 
-        <div id="loading" class="loading">🧠 AI VERİLERİ HARMANLIYOR...</div>
-        <div id="resultPanel" class="result-panel"></div>
+        <div id="loading">🧠 AI VERİLERİ HARMANLIYOR...</div>
+        <div id="results"></div>
 
-        <button class="btn btn-primary" id="analyzeBtn" onclick="analyze('yemek')">📸 YEMEĞİ ANALİZ ET</button>
-        <button class="btn btn-accent" id="fridgeBtn" onclick="analyze('buzdolabi')" style="margin-top: 5px;">❄️ BUZDOLABINA BAK</button>
-        
-        <p style="text-align: center; font-size: 0.7rem; color: var(--text-muted); margin-top: 10px; cursor:pointer;" onclick="localStorage.clear(); location.reload();">Verileri Sıfırla</p>
+        <button class="btn btn-main" id="btn1" onclick="runAI('yemek')">📸 YEMEĞİ ANALİZ ET</button>
+        <button class="btn btn-sub" id="btn2" onclick="runAI('buzdolabi')">❄️ BUZDOLABINA BAK</button>
+        <p style="text-align:center; font-size:0.7rem; color:var(--muted); margin-top:15px; cursor:pointer;" onclick="localStorage.clear(); location.reload();">Verileri Sıfırla</p>
     </div>
 </div>
 
 <script>
-    // SAAT FONKSİYONU
-    function updateClock() {
+    // Canlı Saat
+    function tick() {
         const now = new Date();
-        document.getElementById('liveTime').innerText = now.toLocaleTimeString('tr-TR');
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('liveDate').innerText = now.toLocaleDateString('tr-TR', options);
+        document.getElementById('clock').innerText = now.toLocaleTimeString('tr-TR');
+        document.getElementById('date').innerText = now.toLocaleDateString('tr-TR', {weekday:'long', day:'numeric', month:'long'});
     }
-    setInterval(updateClock, 1000);
-    updateClock();
+    setInterval(tick, 1000); tick();
 
-    let user = JSON.parse(localStorage.getItem('user_bio')) || null;
+    // Veri Yönetimi
+    let user = JSON.parse(localStorage.getItem('bio_v3')) || null;
+    if(user) loadMain();
 
-    function startApp() {
-        if(!user) {
-            user = {
-                age: document.getElementById('age').value,
-                weight: document.getElementById('weight').value,
-                gender: document.getElementById('gender').value,
-                goal: document.getElementById('goal').value
-            };
-            if(!user.age || !user.weight) return alert("Bilgileri doldur!");
-            localStorage.setItem('user_bio', JSON.stringify(user));
-        }
-        document.getElementById('onboardingScreen').style.display = 'none';
-        document.getElementById('dashboardScreen').style.display = 'flex';
-        initCamera();
+    function saveAndStart() {
+        user = {
+            age: document.getElementById('age').value,
+            weight: document.getElementById('weight').value,
+            gender: document.getElementById('gender').value,
+            goal: document.getElementById('goal').value
+        };
+        if(!user.age || !user.weight) return alert("Lütfen boş alan bırakma!");
+        localStorage.setItem('bio_v3', JSON.stringify(user));
+        loadMain();
     }
 
-    if(user) startApp();
-
-    function initCamera() {
+    function loadMain() {
+        document.getElementById('setup').style.display = 'none';
+        document.getElementById('main').style.display = 'flex';
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
             .then(s => document.getElementById('video').srcObject = s);
     }
 
-    async function analyze(mode) {
-        const btn = document.getElementById('analyzeBtn');
-        const fBtn = document.getElementById('fridgeBtn');
-        const loading = document.getElementById('loading');
-        const resultPanel = document.getElementById('resultPanel');
+    // AI Analiz
+    async function runAI(mode) {
+        const btn1 = document.getElementById('btn1'); const btn2 = document.getElementById('btn2');
+        const loader = document.getElementById('loading'); const resDiv = document.getElementById('results');
         
-        btn.disabled = fBtn.disabled = true;
-        loading.style.display = 'block';
-        resultPanel.style.display = 'none';
+        btn1.disabled = btn2.disabled = true; loader.style.display = 'block'; resDiv.style.display = 'none';
 
-        // Fotoğraf çek
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
-        const imgBase64 = canvas.toDataURL('image/jpeg');
+        const vid = document.getElementById('video'); const canv = document.getElementById('canvas');
+        canv.width = vid.videoWidth; canv.height = vid.videoHeight;
+        canv.getContext('2d').drawImage(vid, 0, 0);
+        const img = canv.toDataURL('image/jpeg');
 
-        const payload = {
-            mode: mode,
-            image: imgBase64,
-            user_data: `Kullanıcı: ${user.age} yaş, ${user.weight}kg, ${user.gender}. Hedef: ${user.goal}. Adım: ${document.getElementById('steps').value}. Saat: ${new Date().toLocaleTimeString()}. Mod: ${document.getElementById('mood').value}`
-        };
+        const userDataStr = `${user.age} yaş, ${user.weight}kg, ${user.gender}, Hedef: ${user.goal}, Adım: ${document.getElementById('steps').value}, Saat: ${new Date().toLocaleTimeString()}, Mod: ${document.getElementById('mood').value}`;
 
         try {
             const res = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ mode: mode, image: img, user_data: userDataStr })
             });
             const data = await res.json();
-            showResults(data.analysis);
+            
+            // Sonuçları göster
+            resDiv.innerHTML = ''; resDiv.style.display = 'flex';
+            const parts = data.analysis.split(/\d\./);
+            const headers = ["GİRİŞ", "ANALİZ", "SAĞLIK", "KİLO", "TAVSİYE", "SAAT/ADIM"];
+            
+            parts.forEach((p, i) => {
+                if(p.trim().length > 3) {
+                    const c = document.createElement('div'); c.className = 'card';
+                    c.innerHTML = `<div class="card-h">${headers[i] || 'DETAY'}</div><div class="card-b">${p.trim()}</div>`;
+                    resDiv.appendChild(c);
+                }
+            });
+
+            // Sesli oku
+            const speech = new SpeechSynthesisUtterance(data.analysis);
+            speech.lang = 'tr-TR'; window.speechSynthesis.speak(speech);
+
         } catch (e) {
-            alert("Hata: " + e.message);
+            alert("Sistem hatası: " + e.message);
         } finally {
-            btn.disabled = fBtn.disabled = false;
-            loading.style.display = 'none';
+            btn1.disabled = btn2.disabled = false; loader.style.display = 'none';
         }
-    }
-
-    function showResults(text) {
-        const panel = document.getElementById('resultPanel');
-        panel.innerHTML = '';
-        panel.style.display = 'flex';
-
-        const sections = text.split(/\d\./);
-        const titles = ["GİRİŞ", "ANALİZ", "SAĞLIK ETKİSİ", "HEDEF DURUMU", "TAVSİYE"];
-
-        sections.forEach((content, i) => {
-            if(content.trim().length > 5) {
-                const card = document.createElement('div');
-                card.className = 'result-card';
-                card.innerHTML = `<div class="card-title">${titles[i] || 'DETAY'}</div><div class="card-content">${content.trim()}</div>`;
-                panel.appendChild(card);
-            }
-        });
-        panel.scrollIntoView({behavior: 'smooth'});
     }
 </script>
 
