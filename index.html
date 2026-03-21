@@ -73,12 +73,12 @@
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
             <div class="input-box"><label style="font-size:0.6rem">YAŞ</label><input type="number" id="uAge" placeholder="Yaş"></div>
-            <div class="input-box"><label style="font-size:0.6rem">KİLO</label><input type="number" id="uWeight" placeholder="Kilo"></div>
+            <div class="input-box"><label style="font-size:0.6rem">KİLO (KG)</label><input type="number" id="uWeight" placeholder="Kilo"></div>
         </div>
 
         <div class="stats-row">
-            <div class="input-box"><label style="font-size:0.6rem">GÜNLÜK ADIM</label><input type="number" id="uSteps" value="6000"></div>
-            <div class="input-box"><label style="font-size:0.6rem">MODUNUZ</label>
+            <div class="input-box"><label style="font-size:0.6rem">BUGÜNKÜ ADIM</label><input type="number" id="uSteps" value="6000"></div>
+            <div class="input-box"><label style="font-size:0.6rem">RUH HALİ</label>
                 <select id="uMood"><option>Normal</option><option>Yorgun</option><option>Stresli</option><option>Mutlu</option></select>
             </div>
         </div>
@@ -95,28 +95,28 @@
 </div>
 
 <script>
-    // --- FIREBASE KURULUMU (SENİN VERDİĞİN BİLGİLER) ---
+    // --- YENİ FIREBASE CONFIG (716fa7) ---
     const firebaseConfig = {
-        apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
-        authDomain: "voice2post-9e8ca.firebaseapp.com",
-        projectId: "voice2post-9e8ca",
-        storageBucket: "voice2post-9e8ca.firebasestorage.app",
-        messagingSenderId: "511446656614",
-        appId: "1:511446656614:web:925aed5ec7d6f3fb716fa7",
-        measurementId: "G-RWZBXDR02Y"
+      apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
+      authDomain: "voice2post-9e8ca.firebaseapp.com",
+      projectId: "voice2post-9e8ca",
+      storageBucket: "voice2post-9e8ca.firebasestorage.app",
+      messagingSenderId: "511446656614",
+      appId: "1:511446656614:web:32101ee70299543c716fa7",
+      measurementId: "G-36ZHRLMK5T"
     };
     
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    // Saat ve Tarih Güncelleme
+    // Saat ve Tarih Fonksiyonu
     setInterval(() => {
         const n = new Date();
         document.getElementById('clock').innerText = n.toLocaleTimeString('tr-TR');
         document.getElementById('date').innerText = n.toLocaleDateString('tr-TR', {weekday:'long', day:'numeric', month:'long'});
     }, 1000);
 
-    // Oturum Takibi
+    // Auth Takibi
     auth.onAuthStateChanged(user => {
         if (user) {
             document.getElementById('uMail').innerText = user.email;
@@ -138,52 +138,53 @@
     }
 
     async function doLogin() {
-        try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } 
-        catch(e) { alert("Giriş Hatası: " + e.message); }
+        const e = document.getElementById('lEmail').value;
+        const p = document.getElementById('lPass').value;
+        try { await auth.signInWithEmailAndPassword(e, p); } catch(err) { alert("Hata: " + err.message); }
     }
     
     async function doRegister() {
-        try { await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); } 
-        catch(e) { alert("Kayıt Hatası: " + e.message); }
+        const e = document.getElementById('rEmail').value;
+        const p = document.getElementById('rPass').value;
+        try { await auth.createUserWithEmailAndPassword(e, p); } catch(err) { alert("Hata: " + err.message); }
     }
     
     async function doReset() {
         const email = document.getElementById('lEmail').value;
-        if(!email) return alert("Lütfen mail adresinizi yazın.");
-        try { await auth.sendPasswordResetEmail(email); alert("Şifre sıfırlama linki e-postanıza gönderildi."); } 
-        catch(e) { alert(e.message); }
+        if(!email) return alert("E-posta adresinizi girin.");
+        try { await auth.sendPasswordResetEmail(email); alert("Şifre sıfırlama linki gönderildi."); } catch(err) { alert(err.message); }
     }
     
     function doLogout() { auth.signOut(); location.reload(); }
 
-    // AI Analiz Fonksiyonu
+    // AI Analiz Motoru
     async function runAI(mode) {
         const bY = document.getElementById('bY'); const bD = document.getElementById('bD');
         const resDiv = document.getElementById('results');
         const age = document.getElementById('uAge').value; const weight = document.getElementById('uWeight').value;
         
-        if(!age || !weight) return alert("Lütfen Yaş ve Kilo bilgilerinizi girin.");
+        if(!age || !weight) return alert("Lütfen profil verilerini girin.");
         
-        bY.disabled = bD.disabled = true; bY.innerText = "İŞLENİYOR...";
+        bY.disabled = bD.disabled = true; bY.innerText = "İşleniyor...";
         
         const vid = document.getElementById('video'); const canv = document.getElementById('canvas');
         canv.width = vid.videoWidth; canv.height = vid.videoHeight;
         canv.getContext('2d').drawImage(vid, 0, 0);
         const img = canv.toDataURL('image/jpeg', 0.8);
 
-        const uStr = `${age}yaş, ${weight}kg, Adım:${document.getElementById('uSteps').value}, Saat:${new Date().toLocaleTimeString()}, Mod:${document.getElementById('uMood').value}`;
+        const userDataStr = `${age} yaş, ${weight}kg, Adım:${document.getElementById('uSteps').value}, Saat:${new Date().toLocaleTimeString()}, Mod:${document.getElementById('uMood').value}`;
 
         try {
             const r = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mode, image: img, user_data: uStr })
+                body: JSON.stringify({ mode, image: img, user_data: userDataStr })
             });
             const d = await r.json();
             
             resDiv.innerHTML = ''; resDiv.style.display = 'flex';
             const blocks = d.analysis.split(/\d\./).filter(t => t.trim().length > 5);
-            const tags = ["ANALİZ", "SAĞLIK", "HEDEF/KİLO", "TAVSİYE"];
+            const tags = ["ANALİZ", "SAĞLIK ETKİSİ", "HEDEF DURUMU", "TAVSİYE"];
             
             blocks.forEach((txt, i) => {
                 const card = document.createElement('div'); card.className = 'analysis-card';
@@ -192,7 +193,7 @@
             });
             
             window.speechSynthesis.speak(new SpeechSynthesisUtterance(d.analysis));
-        } catch (e) { alert("Analiz Hatası: Lütfen tekrar deneyin."); }
+        } catch (e) { alert("Analiz sırasında bir hata oluştu."); }
         finally { bY.disabled = bD.disabled = false; bY.innerText = mode === 'yemek' ? "📸 YEMEK ANALİZİ" : "❄️ DOLAP ANALİZİ"; }
     }
 </script>
