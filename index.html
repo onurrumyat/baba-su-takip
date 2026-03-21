@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bio-Chef Pro | Net Analiz</title>
+    <title>Bio-Chef Pro | VIP Analiz</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AdOeigm877SXMe7mMtuEMPUeGkY9WcgyIJPbzGJU2HP1CS_eaGcn4O0FnUEoB3JFmDXEHSnxx5Do-pIN&currency=USD"></script>
@@ -22,6 +22,7 @@
         .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 2px solid #1e293b; margin-bottom: 20px; }
         video { width: 100%; height: 100%; object-fit: cover; }
         .premium-box { background: rgba(245, 158, 11, 0.05); border: 1px dashed var(--premium); border-radius: 20px; padding: 15px; margin-top: 15px; text-align: center; }
+        #paypal-button-container { margin-top: 10px; }
         #results { display: none; flex-direction: column; gap: 12px; margin-top: 25px; }
         .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); }
         .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
@@ -71,7 +72,8 @@
         
         <div class="premium-box">
             <button class="btn btn-sub" style="margin-top:0;" onclick="handlePlanClick()">📅 HAFTALIK PLAN</button>
-            <div id="paypal-button-container" style="margin-top:10px;"></div>
+            <div id="paypal-button-container">
+                </div>
         </div>
 
         <div id="results"></div>
@@ -113,9 +115,11 @@
 
     function initPayPal() {
         paypal.Buttons({
-            createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: '0.99' } }] }),
+            style: { layout: 'horizontal', color: 'gold', shape: 'pill', label: 'pay' },
+            createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: '0.99', currency_code: 'USD' }, description: "PREMIUM ÜYE | 0.99 $" }] }),
             onApprove: (d, a) => a.order.capture().then(det => {
                 localStorage.setItem('vip_' + auth.currentUser.uid, 'true');
+                alert("Ödeme Başarılı! Premium üyeliğiniz aktif edildi.");
                 location.reload();
             })
         }).render('#paypal-button-container');
@@ -129,7 +133,7 @@
         try { await auth.sendPasswordResetEmail(email); alert("Link gönderildi."); } catch(e) { alert(e.message); }
     }
 
-    function handlePlanClick() { if(!isVip) return alert("Premium Üyelik Gereklidir."); runAI('plan'); }
+    function handlePlanClick() { if(!isVip) return alert("Haftalık plan için lütfen Premium üye olun."); runAI('plan'); }
 
     async function runAI(mode) {
         const resDiv = document.getElementById('results');
