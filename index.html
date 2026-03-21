@@ -3,51 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bio-Chef Pro | Akıllı Besin Tablosu</title>
+    <title>Bio-Chef Pro | Advanced Dashboard</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --primary: #10b981; --accent: #38bdf8; --text: #f8fafc; --muted: #64748b; }
+        :root { --bg: #0f172a; --card: #1e293b; --primary: #10b981; --accent: #38bdf8; --text: #f8fafc; --muted: #64748b; --danger: #ef4444; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 15px; }
-        .container { width: 100%; max-width: 440px; background: var(--card); border-radius: 28px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); }
-        .header-main { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
-        #clock { font-size: 1.8rem; font-weight: 800; color: var(--accent); }
-        input, select { width: 100%; padding: 12px; border-radius: 10px; background: #0f172a; border: 1px solid #334155; color: white; margin-bottom: 10px; text-align: center; }
-        .cam-view { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 20px; overflow: hidden; border: 2px solid var(--accent); position: relative; }
+        
+        .container { width: 100%; max-width: 440px; background: var(--card); border-radius: 32px; padding: 25px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); }
+        
+        /* Dashboard Header */
+        .header-main { text-align: center; margin-bottom: 20px; }
+        #clock { font-size: 2rem; font-weight: 900; color: var(--accent); letter-spacing: -1px; }
+        #date { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
+
+        input, select { width: 100%; padding: 14px; border-radius: 12px; background: #0f172a; border: 1px solid #334155; color: white; margin-bottom: 12px; outline: none; transition: 0.3s; text-align: center; }
+        input:focus { border-color: var(--accent); }
+
+        .cam-view { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 24px; overflow: hidden; border: 3px solid #334155; position: relative; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); }
         video { width: 100%; height: 100%; object-fit: cover; }
-        .btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; color: white; margin-top: 10px; }
-        .btn-green { background: var(--primary); }
-        .btn-blue { background: var(--accent); }
         
-        /* Tablo ve Kart Yapısı */
-        #results { display: none; flex-direction: column; gap: 10px; margin-top: 15px; }
-        .analysis-card { background: #0f172a; padding: 15px; border-radius: 12px; border-left: 4px solid var(--accent); animation: slideUp 0.4s ease; }
-        .card-tag { font-size: 0.7rem; font-weight: 900; color: var(--accent); margin-bottom: 5px; text-transform: uppercase; }
-        .card-txt { font-size: 0.9rem; line-height: 1.5; color: #cbd5e1; white-space: pre-line; }
+        .btn { width: 100%; padding: 18px; border-radius: 16px; border: none; font-weight: 800; cursor: pointer; transition: 0.3s; color: white; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 0.5px; }
+        .btn-green { background: linear-gradient(135deg, var(--primary), #059669); margin-top: 15px; }
+        .btn-blue { background: linear-gradient(135deg, var(--accent), #0284c7); margin-top: 10px; }
+        .btn:active { transform: scale(0.98); }
+
+        /* ANALİZ ŞABLONU TASARIMI */
+        #results { display: none; flex-direction: column; gap: 12px; margin-top: 20px; animation: fadeIn 0.5s ease; }
+        .result-card { background: rgba(15, 23, 42, 0.6); border-radius: 20px; padding: 18px; border: 1px solid rgba(56, 189, 248, 0.1); backdrop-filter: blur(10px); }
+        .result-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .result-header span { font-size: 0.7rem; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+        .result-body { font-size: 0.95rem; line-height: 1.6; color: #cbd5e1; }
         
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* Tablo Özel Tasarımı (AI Besin Değerleri İçin) */
+        .nutrition-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .nutri-item { background: #1e293b; padding: 10px; border-radius: 10px; border: 1px solid #334155; font-size: 0.8rem; text-align: center; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="loginScreen" class="header-main">
-        <h1>Bio-Chef</h1>
-        <input type="email" id="lEmail" placeholder="E-posta">
-        <input type="password" id="lPass" placeholder="Şifre">
+        <h1 style="color:var(--primary); font-weight:900; margin-bottom:15px;">BIO-CHEF</h1>
+        <input type="email" id="lEmail" placeholder="E-posta Adresiniz">
+        <input type="password" id="lPass" placeholder="Şifreniz">
         <button class="btn btn-green" onclick="doLogin()">Giriş Yap</button>
     </div>
 
     <div id="dashboard" style="display:none;">
         <div class="header-main">
+            <div id="date">...</div>
             <div id="clock">00:00:00</div>
-            <p id="uMail" style="font-size:0.7rem; color:var(--muted)"></p>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <input type="number" id="uAge" placeholder="Yaş">
-            <input type="number" id="uWeight" placeholder="Kilo">
+            <input type="number" id="uAge" placeholder="YAŞ">
+            <input type="number" id="uWeight" placeholder="KİLO">
         </div>
         <select id="uGoal">
             <option value="Kilo Vermek">Kilo Vermek (-)</option>
@@ -60,13 +74,15 @@
 
         <div id="results"></div>
 
-        <button class="btn btn-green" id="bY" onclick="runAI('yemek')">📸 FOTOĞRAF ÇEK VE ANALİZ ET</button>
-        <button class="btn btn-blue" onclick="runAI('buzdolabi')">❄️ BUZDOLABINA BAK</button>
-        <button onclick="auth.signOut(); location.reload();" style="background:none; border:none; color:red; margin-top:10px; width:100%; cursor:pointer;">ÇIKIŞ YAP</button>
+        <button class="btn btn-green" id="bY" onclick="runAI('yemek')">📸 ANALİZİ BAŞLAT</button>
+        <button class="btn btn-blue" onclick="runAI('buzdolabi')">❄️ BUZDOLABI TARİFİ</button>
+        
+        <p style="text-align:center; margin-top:20px; font-size:0.7rem; color:var(--muted); cursor:pointer;" onclick="auth.signOut(); location.reload();">Oturumu Kapat</p>
     </div>
 </div>
 
 <script>
+    // FIREBASE (AYNI BIRAKILDI)
     const firebaseConfig = {
       apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
       authDomain: "voice2post-9e8ca.firebaseapp.com",
@@ -78,13 +94,17 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+    // CANLI SAAT (AYNI)
+    setInterval(() => { 
+        const n = new Date();
+        document.getElementById('clock').innerText = n.toLocaleTimeString('tr-TR');
+        document.getElementById('date').innerText = n.toLocaleDateString('tr-TR', {weekday:'long', day:'numeric', month:'long'});
+    }, 1000);
 
     auth.onAuthStateChanged(user => {
         if (user) {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
-            document.getElementById('uMail').innerText = user.email;
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
         }
     });
@@ -99,48 +119,45 @@
         const resDiv = document.getElementById('results');
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
+        if(!age || !weight) return alert("Bilgileri girin!");
         
-        if(!age || !weight) return alert("Lütfen yaş ve kilonuzu girin!");
-        
-        btn.disabled = true; btn.innerText = "Gıda Analiz Ediliyor...";
+        btn.disabled = true; btn.innerText = "VERİLER İŞLENİYOR...";
         
         const vid = document.getElementById('video');
         const canv = document.getElementById('canvas');
-        // Algılama Sorununu Çözmek İçin Görsel Boyutu Küçültme (Optimization)
-        canv.width = 640; 
-        canv.height = 480;
+        canv.width = 640; canv.height = 480;
         canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
-        const img = canv.toDataURL('image/jpeg', 0.7); // Kaliteyi %70'e çekerek gönderimi hızlandırıyoruz
-
-        const uStr = `${age} yaş, ${weight} kg, Hedef: ${document.getElementById('uGoal').value}`;
+        const img = canv.toDataURL('image/jpeg', 0.7);
 
         try {
             const r = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mode, image: img, user_data: uStr })
+                body: JSON.stringify({ mode, image: img, user_data: `Yaş: ${age}, Kilo: ${weight}, Hedef: ${document.getElementById('uGoal').value}` })
             });
             const d = await r.json();
             
             resDiv.innerHTML = ''; resDiv.style.display = 'flex';
             
-            // AI yanıtını bölümlere ayırarak kartlara/tabloya dökme
+            // ŞABLON OLUŞTURMA MANTIĞI
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
-            const headers = ["ÖZET", "BESİN TABLOSU (100g/Porsiyon)", "HEDEF ANALİZİ", "UZMAN TAVSİYESİ"];
+            const headers = ["📊 GENEL ÖZET", "🧪 BESİN DEĞERLERİ", "🎯 HEDEF ANALİZİ", "💡 UZMAN TAVSİYESİ"];
 
             sections.forEach((text, i) => {
                 const card = document.createElement('div');
-                card.className = 'analysis-card';
-                card.innerHTML = `<div class="card-tag">${headers[i] || 'DETAY'}</div><div class="card-txt">${text.trim()}</div>`;
+                card.className = 'result-card';
+                card.innerHTML = `
+                    <div class="result-header"><span>${headers[i] || 'DETAY'}</span></div>
+                    <div class="result-body">${text.trim()}</div>
+                `;
                 resDiv.appendChild(card);
             });
 
             window.speechSynthesis.speak(new SpeechSynthesisUtterance(d.analysis));
-        } catch (e) { 
-            alert("Sistem şu an fotoğrafı işleyemedi. Lütfen daha yakından ve net çekin."); 
-        } finally { 
-            btn.disabled = false; btn.innerText = "📸 FOTOĞRAF ÇEK VE ANALİZ ET"; 
-        }
+            resDiv.scrollIntoView({ behavior: 'smooth' });
+
+        } catch (e) { alert("Hata oluştu."); }
+        finally { btn.disabled = false; btn.innerText = "📸 ANALİZİ BAŞLAT"; }
     }
 </script>
 </body>
