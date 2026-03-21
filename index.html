@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bio-Chef Pro | Teknik Analiz Sistemi</title>
+    <title>Bio-Chef Pro | Net Analiz</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AdOeigm877SXMe7mMtuEMPUeGkY9WcgyIJPbzGJU2HP1CS_eaGcn4O0FnUEoB3JFmDXEHSnxx5Do-pIN&currency=USD"></script>
@@ -67,10 +67,10 @@
         <div class="cam-box"><video id="video" autoplay playsinline></video></div>
         <canvas id="canvas" style="display:none;"></canvas>
 
-        <button class="btn btn-main" id="btnAnalyze" onclick="runAI('yemek')">📸 TEKNİK ANALİZ</button>
+        <button class="btn btn-main" id="btnAnalyze" onclick="runAI('yemek')">📸 ANALİZ ET</button>
         
         <div class="premium-box">
-            <button class="btn btn-sub" style="margin-top:0;" onclick="handlePlanClick()">📅 HAFTALIK PLANI GÖR</button>
+            <button class="btn btn-sub" style="margin-top:0;" onclick="handlePlanClick()">📅 HAFTALIK PLAN</button>
             <div id="paypal-button-container" style="margin-top:10px;"></div>
         </div>
 
@@ -136,8 +136,7 @@
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
         if(!age || !weight) return alert("Bilgileri girin.");
-        
-        resDiv.innerHTML = '<p style="text-align:center;">🔍 Rapor Hazırlanıyor...</p>';
+        resDiv.innerHTML = '<p style="text-align:center;">🔍 İnceleniyor...</p>';
         resDiv.style.display = 'flex';
 
         let img = "";
@@ -157,17 +156,14 @@
             });
             const d = await r.json();
             resDiv.innerHTML = '';
-
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
-            const headers = mode === 'plan' ? ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"] : ["ANALİZ ÖZETİ", "TEKNİK DEĞERLER", "STRATEJİK ANALİZ", "TAVSİYE"];
-
+            const headers = mode === 'plan' ? ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"] : ["ÜRÜN ÖZETİ", "BESİN DEĞERLERİ", "HEDEF ANALİZİ", "NET TAVSİYE"];
             sections.forEach((text, i) => {
                 const card = document.createElement('div');
                 card.className = 'report-card';
                 card.innerHTML = `<div class="report-tag">${headers[i] || 'DETAY'}</div><div class="report-txt">${text.trim()}</div>`;
                 resDiv.appendChild(card);
             });
-            // SESLİ OKUMA KALDIRILDI
         } catch (e) { alert("Hata!"); }
     }
 </script>
