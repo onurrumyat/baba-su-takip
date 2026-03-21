@@ -10,6 +10,8 @@
             --card: #1e293b;
             --primary: #10b981;
             --accent: #38bdf8;
+            --atilla: #38bdf8; /* Açık Mavi */
+            --yeliz: #db2777; /* Pembe */
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
         }
@@ -46,7 +48,7 @@
         }
 
         header { text-align: center; margin-bottom: 10px; }
-        header h1 { font-size: 2rem; background: linear-gradient(to right, #34d399, #38bdf8); -webkit-background-clip: text; color: transparent; text-transform: uppercase;}
+        header h1 { font-size: 2.3rem; font-weight: 900; background: linear-gradient(to right, #a78bfa, #34d399); -webkit-background-clip: text; color: transparent; text-transform: uppercase;}
         header p { font-size: 0.9rem; color: var(--text-muted); }
 
         .input-group { display: flex; flex-direction: column; gap: 8px; }
@@ -170,6 +172,29 @@
         }
         @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
+        /* Sosyal Kanıt Alanı */
+        .social-proof {
+            background: #f1f5f9;
+            border: 2px solid #cbd5e1;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .social-title {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .score-display {
+            font-size: 28px;
+            font-weight: 900;
+            margin: 5px 0;
+        }
+        .atilla-score { color: var(--atilla); }
+        .yeliz-score { color: var(--yeliz); }
+
     </style>
 </head>
 <body>
@@ -178,12 +203,12 @@
     
     <div id="onboardingScreen">
         <header>
-            <h1>🔬 AI BIO-CHEF</h1>
+            <h1>⚔️ AI Chaos</h1>
             <p>Senin Genetiğin, Senin Mutfağın</p>
         </header>
         
         <p style="text-align:center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">
-            Sana özel bir analiz için temel verilerini gir.
+            Sana özel bir analiz için temel verilerini gir. Kim kime borçlanacak?
         </p>
 
         <div style="display: flex; gap: 15px;">
@@ -219,9 +244,25 @@
 
     <div id="dashboardScreen">
         
+        <div class="social-proof">
+            <div class="social-title">Mevcut Durum</div>
+            <div id="scoreDisplay" class="score-display">Hesaplanıyor...</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top:5px;">(Bugün 3. yarım litreyi deviren puan kazanır)</div>
+        </div>
+
         <div class="user-summary">
             <div class="user-summary-text" id="summaryText"></div>
             <button class="edit-btn" onclick="editProfile()">Düzenle</button>
+        </div>
+
+        <div class="input-group">
+            <label>Şu anki Ruh Halin:</label>
+            <select id="userMood">
+                <option value="Normal">Normal</option>
+                <option value="Stresli">Stresli</option>
+                <option value="Mutlu">Mutlu</option>
+                <option value="Yorgun">Yorgun</option>
+            </select>
         </div>
 
         <div class="camera-box">
@@ -235,6 +276,9 @@
             </div>
 
         <button class="btn-analyze" id="analyzeBtn" onclick="processMeal()">📸 YEMEĞİ ANALİZ ET</button>
+        <button class="btn-analyze" id="analyzeBuzdolabiBtn" style="background-color:var(--accent);" onclick="processBuzdolabi()">📸 BUZDOLABINI ANALİZ ET</button>
+        
+        <button class="edit-btn" style="margin-top: 10px; color: var(--yeliz);" onclick="logout()">Çıkış Yap / Diğer Hesaba Geç</button>
     </div>
 
 </div>
@@ -246,14 +290,42 @@
     const video = document.getElementById('video');
     const canvas = document.getElementById('photoCanvas');
     const analyzeBtn = document.getElementById('analyzeBtn');
+    const analyzeBuzdolabiBtn = document.getElementById('analyzeBuzdolabiBtn');
     const resultPanel = document.getElementById('resultPanel');
     const loading = document.getElementById('loading');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const userMoodSelect = document.getElementById('userMood');
 
     // Veritabanı (Telefonda Kayıtlı Veri)
-    let userData = JSON.parse(localStorage.getItem('babaSuDataV2')) || null;
+    let userData = JSON.parse(localStorage.getItem('suDuelloData')) || null;
+    let currentUser = null; // 'atilla' veya 'yeliz'
+
+    // Günü Kontrol Et (Yeni günse su görevlerini sıfırla, paraya dokunma)
+    const today = new Date().toLocaleDateString();
+    if (userData && userData.lastDate !== today) {
+        // YENİ GÜN! Dünkü borçları hesapla
+        // Atilla yapmış, Yeliz yapamamışsa:
+        if (userData.atilla.intake === 3 && userData.yeliz.intake < 3) {
+            userData.yelizOwesAtilla += 50;
+        }
+        // Yeliz yapmış, Atilla yapamamışsa:
+        else if (userData.yeliz.intake === 3 && userData.atilla.intake < 3) {
+            userData.atillaOwesYeliz += 50;
+        }
+        // (İkisi de yaptıysa veya ikisi de yapamadıysa ceza yok)
+
+        // Görevleri Sıfırla
+        userData.atilla.intake = 0;
+        userData.yeliz.intake = 0;
+        userData.atilla.lastDrinkTime = 0;
+        userData.yeliz.lastDrinkTime = 0;
+        userData.lastDate = today;
+        
+        saveData();
+    }
 
     // Sayfa açıldığında daha önce giriş yapılmış mı kontrol et
-    if (userData) {
+    if (userData && userData.atilla && userData.atilla.age) {
         completeOnboarding(true); // Giriş yapılmışsa doğrudan panele geç
     }
 
@@ -266,16 +338,35 @@
 
             if (!age || !weight) { alert("Lütfen yaş ve kilo verilerinizi girin!"); return; }
 
-            userData = { age, weight, gender, goal };
-            localStorage.setItem('babaSuDataV2', JSON.stringify(userData));
+            if (!userData) {
+                userData = {
+                    lastDate: today,
+                    atillaOwesYeliz: 0,
+                    yelizOwesAtilla: 0,
+                    atilla: { intake: 0, lastDrinkTime: 0, age, weight, gender, goal },
+                    yeliz: { intake: 0, lastDrinkTime: 0, age, weight, gender, goal }
+                };
+            } else {
+                userData.atilla.age = age;
+                userData.atilla.weight = weight;
+                userData.atilla.gender = gender;
+                userData.atilla.goal = goal;
+                // Yeliz'in verilerini de aynı şekilde güncellemek isterseniz:
+                userData.yeliz.age = age;
+                userData.yeliz.weight = weight;
+                userData.yeliz.gender = gender;
+                userData.yeliz.goal = goal;
+            }
+            saveData();
         }
 
         // Özeti Güncelle
-        summaryText.innerText = `${userData.age} Yaş, ${userData.weight}kg ${userData.gender} | Hedef: ${userData.goal}`;
+        summaryText.innerText = `${userData.atilla.age} Yaş, ${userData.atilla.weight}kg ${userData.atilla.gender} | Hedef: ${userData.atilla.goal}`;
 
         onboardingScreen.style.display = 'none';
         dashboardScreen.style.display = 'flex';
         startCamera();
+        updateScore();
     }
 
     function editProfile() {
@@ -283,10 +374,16 @@
         onboardingScreen.style.display = 'flex';
         
         // Mevcut verileri inputlara doldur
-        document.getElementById('userAge').value = userData.age;
-        document.getElementById('userWeight').value = userData.weight;
-        document.getElementById('userGender').value = userData.gender;
-        document.getElementById('userGoal').value = userData.goal;
+        document.getElementById('userAge').value = userData.atilla.age;
+        document.getElementById('userWeight').value = userData.atilla.weight;
+        document.getElementById('userGender').value = userData.atilla.gender;
+        document.getElementById('userGoal').value = userData.atilla.goal;
+    }
+
+    function logout() {
+        currentUser = null;
+        onboardingScreen.style.display = 'flex';
+        dashboardScreen.style.display = 'none';
     }
 
     // Kamerayı Başlat
@@ -296,8 +393,22 @@
             .catch(err => { console.error("Kamera açılmadı:", err); });
     }
 
+    function updateScore() {
+        // Borç Durumunu Göster
+        const netAtilla = userData.yelizOwesAtilla - userData.atillaOwesYeliz;
+
+        if (netAtilla > 0) {
+            scoreDisplay.innerHTML = `<span style="color: var(--atilla)">Yeliz, Atilla'ya ${netAtilla} TL borçlu!</span>`;
+        } else if (netAtilla < 0) {
+            scoreDisplay.innerHTML = `<span style="color: var(--yeliz)">Atilla, Yeliz'e ${Math.abs(netAtilla)} TL borçlu!</span>`;
+        } else {
+            scoreDisplay.innerHTML = `<span style="color: #64748b">Borçlar Eşit (0 TL)</span>`;
+        }
+    }
+
     async function processMeal() {
         analyzeBtn.disabled = true;
+        analyzeBuzdolabiBtn.disabled = true;
         resultPanel.style.display = 'none';
         loading.style.display = 'block';
 
@@ -308,8 +419,9 @@
         ctx.drawImage(video, 0, 0);
         const base64Image = canvas.toDataURL('image/jpeg');
 
-        // Biyometrik Veri (Canlı Simülasyon - Burayı Firebase/Saat API'sine bağlayabiliriz)
+        // Biyometrik Veri (Canlı Simülasyon)
         const currentBiometrics = "Demir: Düşük, Kan Şekeri: 115mg/dL (Sınırda).";
+        const mood = userMoodSelect.value;
 
         try {
             // VERCEL SERVERLESS FONKSİYONUNA GÖNDER
@@ -317,8 +429,9 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    mode: 'yemek',
                     image: base64Image,
-                    user_data: `Kullanıcı: ${userData.age} yaş, ${userData.weight}kg ${userData.gender}. Hedef: ${userData.goal}. Anlık Biyometri: ${currentBiometrics}`
+                    user_data: `Kullanıcı: ${userData.atilla.age} yaş, ${userData.atilla.weight}kg ${userData.atilla.gender}. Hedef: ${userData.atilla.goal}. Anlık Biyometri: ${currentBiometrics}. Ruh Hali: ${mood}`
                 })
             });
 
@@ -327,30 +440,78 @@
             // Sonuçları İşle ve Göster
             loading.style.display = 'none';
             analyzeBtn.disabled = false;
-            analyzeBtn.innerText = "🔄 YENİ ANALİZ";
+            analyzeBuzdolabiBtn.disabled = false;
             
-            displayResults(data.analysis);
+            displayResults(data.analysis, 'yemek');
 
         } catch (err) {
             loading.style.display = 'none';
             analyzeBtn.disabled = false;
+            analyzeBuzdolabiBtn.disabled = false;
             resultPanel.innerHTML = `<div class="result-card" style="color:#ef4444;">HATA: ${err.message}</div>`;
             resultPanel.style.display = 'flex';
         }
     }
 
-    function displayResults(analysisText) {
+    async function processBuzdolabi() {
+        analyzeBtn.disabled = true;
+        analyzeBuzdolabiBtn.disabled = true;
+        resultPanel.style.display = 'none';
+        loading.style.display = 'block';
+
+        // Fotoğrafı Yakala (Base64)
+        const ctx = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
+        const base64Image = canvas.toDataURL('image/jpeg');
+
+        // Biyometrik Veri (Canlı Simülasyon)
+        const currentBiometrics = "Demir: Düşük, Kan Şekeri: 115mg/dL (Sınırda).";
+        const mood = userMoodSelect.value;
+
+        try {
+            // VERCEL SERVERLESS FONKSİYONUNA GÖNDER
+            const response = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    mode: 'buzdolabi',
+                    buzdolabiImage: base64Image,
+                    user_data: `Kullanıcı: ${userData.atilla.age} yaş, ${userData.atilla.weight}kg ${userData.atilla.gender}. Hedef: ${userData.atilla.goal}. Anlık Biyometri: ${currentBiometrics}. Ruh Hali: ${mood}`
+                })
+            });
+
+            const data = await response.json();
+            
+            // Sonuçları İşle ve Göster
+            loading.style.display = 'none';
+            analyzeBtn.disabled = false;
+            analyzeBuzdolabiBtn.disabled = false;
+            
+            displayResults(data.analysis, 'buzdolabi');
+
+        } catch (err) {
+            loading.style.display = 'none';
+            analyzeBtn.disabled = false;
+            analyzeBuzdolabiBtn.disabled = false;
+            resultPanel.innerHTML = `<div class="result-card" style="color:#ef4444;">HATA: ${err.message}</div>`;
+            resultPanel.style.display = 'flex';
+        }
+    }
+
+    function displayResults(analysisText, mode) {
         resultPanel.innerHTML = ''; // Paneli temizle
         resultPanel.style.display = 'flex';
 
-        // OpenAI'dan gelen metni başlıklara göre parçala (1., 2., 3. ... kullanıldıysa)
+        // OpenAI'dan gelen metni başlıklara göre parçala
         const lines = analysisText.split('\n');
         
-        const icons = ["📊", "🩸", "⚖️", "🔬"];
-        const titles = ["Yemek Analizi ve Kalori", "Kişisel Sağlık Etkisi", "Kilo ve Hedef Durumu", "Anlık Taktiksel Tavsiye"];
+        const icons = mode === 'yemek' ? ["📊", "🩸", "⚖️", "🔬", "🛡️"] : ["❄️", "🍽️", "📊"];
+        const titles = mode === 'yemek' ? ["Yemek Analizi ve Kalori", "Kişisel Sağlık Etkisi", "Kilo ve Hedef Durumu", "Anlık Taktiksel Tavsiye", "Sosyal Kanıt ve Ödül"] : ["Eldeki Malzemeler", "Akşam Yemeği Tarifi", "Yemek Analizi ve Kalori"];
 
         let currentCardIndex = -1;
-        let cardContents = ["", "", "", ""];
+        let cardContents = ["", "", "", "", ""];
 
         lines.forEach(line => {
             if (line.match(/^\d\.\s/)) { // "1. ", "2. " gibi başlıyorsa
@@ -361,7 +522,8 @@
         });
 
         // Kartları Oluştur
-        for (let i = 0; i < 4; i++) {
+        const cardCount = mode === 'yemek' ? 5 : 3;
+        for (let i = 0; i < cardCount; i++) {
             if (cardContents[i].trim() !== "") {
                 const cardDiv = document.createElement('div');
                 cardDiv.className = 'result-card';
@@ -378,6 +540,10 @@
         
         // Sonuç ekranına otomatik kaydır
         resultPanel.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function saveData() {
+        localStorage.setItem('suDuelloData', JSON.stringify(userData));
     }
 </script>
 
