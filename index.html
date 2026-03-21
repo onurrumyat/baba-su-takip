@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bio-Chef Pro | Full Stack AI</title>
+    <title>Bio-Chef Pro | Hedef Odaklı AI</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
@@ -78,8 +78,12 @@
 
         <div class="stats-row">
             <div class="input-box"><label style="font-size:0.6rem">BUGÜNKÜ ADIM</label><input type="number" id="uSteps" value="6000"></div>
-            <div class="input-box"><label style="font-size:0.6rem">RUH HALİ</label>
-                <select id="uMood"><option>Normal</option><option>Yorgun</option><option>Stresli</option><option>Mutlu</option></select>
+            <div class="input-box"><label style="font-size:0.6rem">HEDEFİNİZ</label>
+                <select id="uGoal">
+                    <option value="Kilo Vermek">Kilo Vermek</option>
+                    <option value="Kilo Almak">Kilo Almak</option>
+                    <option value="Kiloyu Korumak">Kiloyu Korumak</option>
+                </select>
             </div>
         </div>
 
@@ -95,7 +99,7 @@
 </div>
 
 <script>
-    // --- YENİ FIREBASE CONFIG (716fa7) ---
+    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
       apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
       authDomain: "voice2post-9e8ca.firebaseapp.com",
@@ -109,14 +113,14 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    // Saat ve Tarih Fonksiyonu
+    // Saat ve Tarih
     setInterval(() => {
         const n = new Date();
         document.getElementById('clock').innerText = n.toLocaleTimeString('tr-TR');
         document.getElementById('date').innerText = n.toLocaleDateString('tr-TR', {weekday:'long', day:'numeric', month:'long'});
     }, 1000);
 
-    // Auth Takibi
+    // Oturum Kontrolü
     auth.onAuthStateChanged(user => {
         if (user) {
             document.getElementById('uMail').innerText = user.email;
@@ -130,7 +134,6 @@
         }
     });
 
-    // Auth Fonksiyonları
     function toggleAuth(id) {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('regScreen').style.display = 'none';
@@ -138,53 +141,51 @@
     }
 
     async function doLogin() {
-        const e = document.getElementById('lEmail').value;
-        const p = document.getElementById('lPass').value;
-        try { await auth.signInWithEmailAndPassword(e, p); } catch(err) { alert("Hata: " + err.message); }
+        try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } 
+        catch(err) { alert("Giriş Hatası: " + err.message); }
     }
     
     async function doRegister() {
-        const e = document.getElementById('rEmail').value;
-        const p = document.getElementById('rPass').value;
-        try { await auth.createUserWithEmailAndPassword(e, p); } catch(err) { alert("Hata: " + err.message); }
+        try { await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); } 
+        catch(err) { alert("Kayıt Hatası: " + err.message); }
     }
     
     async function doReset() {
         const email = document.getElementById('lEmail').value;
-        if(!email) return alert("E-posta adresinizi girin.");
-        try { await auth.sendPasswordResetEmail(email); alert("Şifre sıfırlama linki gönderildi."); } catch(err) { alert(err.message); }
+        if(!email) return alert("E-posta girin.");
+        try { await auth.sendPasswordResetEmail(email); alert("Link gönderildi."); } catch(err) { alert(err.message); }
     }
     
     function doLogout() { auth.signOut(); location.reload(); }
 
-    // AI Analiz Motoru
+    // Analiz Motoru
     async function runAI(mode) {
         const bY = document.getElementById('bY'); const bD = document.getElementById('bD');
         const resDiv = document.getElementById('results');
         const age = document.getElementById('uAge').value; const weight = document.getElementById('uWeight').value;
         
-        if(!age || !weight) return alert("Lütfen profil verilerini girin.");
+        if(!age || !weight) return alert("Yaş ve Kilo girin.");
         
-        bY.disabled = bD.disabled = true; bY.innerText = "İşleniyor...";
+        bY.disabled = bD.disabled = true; bY.innerText = "...";
         
         const vid = document.getElementById('video'); const canv = document.getElementById('canvas');
         canv.width = vid.videoWidth; canv.height = vid.videoHeight;
         canv.getContext('2d').drawImage(vid, 0, 0);
         const img = canv.toDataURL('image/jpeg', 0.8);
 
-        const userDataStr = `${age} yaş, ${weight}kg, Adım:${document.getElementById('uSteps').value}, Saat:${new Date().toLocaleTimeString()}, Mod:${document.getElementById('uMood').value}`;
+        const uStr = `${age}yaş, ${weight}kg, Adım:${document.getElementById('uSteps').value}, Saat:${new Date().toLocaleTimeString()}, Hedef:${document.getElementById('uGoal').value}`;
 
         try {
             const r = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mode, image: img, user_data: userDataStr })
+                body: JSON.stringify({ mode, image: img, user_data: uStr })
             });
             const d = await r.json();
             
             resDiv.innerHTML = ''; resDiv.style.display = 'flex';
             const blocks = d.analysis.split(/\d\./).filter(t => t.trim().length > 5);
-            const tags = ["ANALİZ", "SAĞLIK ETKİSİ", "HEDEF DURUMU", "TAVSİYE"];
+            const tags = ["ANALİZ", "SAĞLIK", "HEDEF/KİLO", "TAVSİYE"];
             
             blocks.forEach((txt, i) => {
                 const card = document.createElement('div'); card.className = 'analysis-card';
@@ -193,7 +194,7 @@
             });
             
             window.speechSynthesis.speak(new SpeechSynthesisUtterance(d.analysis));
-        } catch (e) { alert("Analiz sırasında bir hata oluştu."); }
+        } catch (e) { alert("Hata oluştu."); }
         finally { bY.disabled = bD.disabled = false; bY.innerText = mode === 'yemek' ? "📸 YEMEK ANALİZİ" : "❄️ DOLAP ANALİZİ"; }
     }
 </script>
