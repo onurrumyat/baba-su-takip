@@ -3,13 +3,13 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
     const { image, user_data, mode } = req.body;
 
-    const systemPrompt = `Sen profesyonel bir Gıda Analiz Sistemisin. Kullanıcı Profili: ${user_data}.
+    const systemPrompt = `Sen profesyonel bir Gıda Analiz Sistemisin. Kullanıcı Profili ve Hedefi: ${user_data}.
     GÖREV: Fotoğraftaki nesneye odaklan. Kişi analizi uyarısı yapma, doğrudan tabağa/dolaba odaklan.
     FORMAT: Yanıtı sadece 4 madde (1., 2., 3., 4.) halinde, çok sade ve teknik ver.
     1. ANALİZ: Kalori ve içerik tahmini.
-    2. SAĞLIK: Profil verilerine göre tıbbi/beslenme etkisi.
-    3. HEDEF/KİLO: Adım ve saate göre kilo değişimi tahmini.
-    4. TAVSİYE: Kısa ve net aksiyon önerisi.`;
+    2. SAĞLIK: Profil verilerine ve hedefine göre tıbbi/beslenme etkisi.
+    3. HEDEF/KİLO: Kullanıcının seçtiği hedefe göre bu yemeğin kilo değişimine (+/- gr) tahmini etkisi.
+    4. TAVSİYE: Hedefe ulaşmak için kısa ve net aksiyon önerisi.`;
 
     try {
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
