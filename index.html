@@ -15,12 +15,11 @@
         
         .auth-container h1 { font-size: 2.5rem; text-align: center; margin-bottom: 20px; background: linear-gradient(45deg, var(--primary), var(--accent)); -webkit-background-clip: text; color: transparent; font-weight: 900; }
         input, select { width: 100%; padding: 15px; border-radius: 15px; background: #0b0f1a; border: 1px solid #2d3748; color: white; margin-bottom: 12px; outline: none; transition: 0.3s; text-align: center; font-size: 1rem; }
-        input:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(14, 165, 233, 0.2); }
         
         .btn { width: 100%; padding: 18px; border-radius: 18px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; color: white; font-size: 1rem; }
         .btn-main { background: var(--primary); margin-top: 10px; }
         .btn-sub { background: var(--accent); margin-top: 10px; }
-        .btn-outline { background: transparent; border: 1px solid #2d3748; color: #94a3b8; margin-top: 15px; font-size: 0.8rem; }
+        .btn-outline { background: transparent; border: 1px solid #2d3748; color: #94a3b8; margin-top: 10px; font-size: 0.8rem; }
         
         .header { text-align: center; margin-bottom: 20px; }
         #clock { font-size: 2.2rem; font-weight: 800; color: var(--accent); }
@@ -34,7 +33,7 @@
         #results { display: none; flex-direction: column; gap: 15px; margin-top: 25px; }
         .day-card { background: #1e293b; border-radius: 20px; padding: 18px; border-left: 5px solid var(--accent); animation: slideIn 0.5s ease forwards; }
         .day-title { font-size: 0.8rem; font-weight: 900; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
-        .day-content { font-size: 0.95rem; line-height: 1.6; color: #e2e8f0; }
+        .day-content { font-size: 0.95rem; line-height: 1.6; color: #e2e8f0; white-space: pre-line; }
 
         @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -47,6 +46,7 @@
         <input type="email" id="lEmail" placeholder="E-posta">
         <input type="password" id="lPass" placeholder="Şifre">
         <button class="btn btn-main" onclick="doLogin()">GİRİŞ YAP</button>
+        <button class="btn btn-outline" style="border:none; margin-top:5px;" onclick="doReset()">Şifremi Unuttum?</button>
         <button class="btn btn-outline" onclick="toggleView('regView')">Hesabın yok mu? Kayıt Ol</button>
     </div>
 
@@ -55,7 +55,7 @@
         <input type="email" id="rEmail" placeholder="E-posta Seç">
         <input type="password" id="rPass" placeholder="Şifre Belirle">
         <button class="btn btn-sub" onclick="doRegister()">HESABI OLUŞTUR</button>
-        <button class="btn btn-outline" onclick="toggleView('loginView')">Zaten üyeyim, Giriş yap</button>
+        <button class="btn btn-outline" onclick="toggleView('loginView')">Geri Dön</button>
     </div>
 
     <div id="mainView" style="display:none;">
@@ -81,7 +81,7 @@
         
         <div class="premium-box">
             <button class="btn btn-sub" style="margin-top:0;" onclick="handlePlanClick()">📅 HAFTALIK BESİN PLANI</button>
-            <div id="lockNotice" class="lock-notice">⚠️ BU ÖZELLİK PREMIUM ÜYELİK GEREKTİRİR!</div>
+            <div id="lockNotice" class="lock-notice">⚠️ PREMIUM ÜYELİK GEREKTİRİR!</div>
             <button id="btnBuy" class="btn btn-premium" style="margin-top:10px;" onclick="buyPremium()">PREMIUM ÜYE | 0.99 $</button>
         </div>
 
@@ -131,6 +131,13 @@
     async function doRegister() {
         try { await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); } catch(e) { alert(e.message); }
     }
+    
+    // ŞİFRE SIFIRLAMA FONKSİYONU
+    async function doReset() {
+        const email = document.getElementById('lEmail').value;
+        if(!email) return alert("Lütfen mail adresinizi yazın.");
+        try { await auth.sendPasswordResetEmail(email); alert("Şifre sıfırlama linki e-postanıza gönderildi."); } catch(e) { alert(e.message); }
+    }
 
     function buyPremium() {
         if(confirm("0.99$ ödeme onaylıyor musunuz?")) {
@@ -143,10 +150,7 @@
     }
 
     function handlePlanClick() {
-        if(!isVip) {
-            document.getElementById('lockNotice').style.display = 'block';
-            return;
-        }
+        if(!isVip) { document.getElementById('lockNotice').style.display = 'block'; return; }
         runAI('plan');
     }
 
@@ -154,7 +158,7 @@
         const resDiv = document.getElementById('results');
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
-        if(!age || !weight) return alert("Bilgileri girin!");
+        if(!age || !weight) return alert("Lütfen bilgileri girin!");
 
         resDiv.innerHTML = '<p style="text-align:center;">🧠 İşleniyor...</p>';
         resDiv.style.display = 'flex';
