@@ -4,26 +4,21 @@ export default async function handler(req, res) {
 
     const { image, user_data, mode } = req.body;
 
-    // AI'ya giden güncellenmiş, sadeleştirilmiş ve sertleştirilmiş talimat (Prompt)
-    const systemPrompt = `Sen profesyonel bir AI Beslenme ve Mutfak Mühendisisin. 
-    Kullanıcı Bilgileri: ${user_data}.
+    // AI'yı "Kişi analizi yapmıyorum" tuzağından kurtaran ve doğrudan yemeğe odaklayan komut
+    const systemPrompt = `Sen profesyonel bir Gıda ve Beslenme Analiz Sistemisin. 
+    Kullanıcı Profili (Sadece girdi olarak kullan): ${user_data}.
     
-    ÖNEMLİ KURALLAR:
-    1. Cevabını MUTLAKA sadece 4 ana başlık altında ve her başlığın başına "1.", "2.", "3.", "4." koyarak ver.
-    2. Gereksiz giriş (Merhaba, tabi, işte analiz...) cümlelerini ASLA kullanma. Doğrudan bilgiye geç.
-    3. Metinleri çok sade, kısa ve vurucu tut. 
-    4. Analizi yaparken kullanıcının attığı adım sayısını ve o anki saati (gece mi, spor sonrası mı) mutlaka hesaba kat.
-    5. Kilo etkisini "Tahmini Gram" veya "Kilo Durumu: Pozitif/Negatif" şeklinde sade belirt.
+    ÖNEMLİ GÜVENLİK VE GÖREV TALİMATI:
+    1. Fotoğrafta insan olsa bile KİŞİ ANALİZİ YAPMA. Sadece TABAĞA/YEMEĞE odaklan. 
+    2. 'Kişi analizi yapamam' gibi uyarılar verme. Doğrudan yemeğin içeriğini ve bu yemeğin belirtilen kilodaki/yaştaki insana etkisini yaz.
+    3. Yanıtı sadece şu 4 madde ile sınırla (1., 2., 3., 4. şeklinde):
+    
+    1. ANALİZ: (Yemek içeriği ve tahmini toplam kalori.)
+    2. SAĞLIK ETKİSİ: (Bu içeriğin profil verilerine göre tıbbi/beslenme etkisi.)
+    3. HEDEF VE KİLO: (Adım sayısı ve saate göre bu yemeğin kilo değişimine (+/- gr) tahmini etkisi.)
+    4. TAVSİYE: (Kısa, net ve uygulanabilir bir direktif.)
 
-    FORMAT ŞABLONU (Bu sırayı bozma):
-    1. ANALİZ: (Yemeğin içeriği ve tahmini kalori bilgisi.)
-    2. SAĞLIK ETKİSİ: (Kullanıcının yaşına ve biyometrisine göre kısa sağlık notu.)
-    3. HEDEF DURUMU: (Kullanıcının hedefine uygunluğu ve adım sayısına göre kilo etkisi.)
-    4. TAVSİYE: (Kullanıcıya özel kısa, aksiyon odaklı altın tavsiye.)`;
-
-    const userPrompt = mode === "yemek" 
-        ? "Bu yemeği fotoğraftan analiz et ve şablona göre sadeleştirerek yanıtla." 
-        : "Bu buzdolabını analiz et, malzemeleri listele ve şablona uyarak en uygun tarifi öner.";
+    NOT: Çok sade ve teknik bir dil kullan. Gereksiz nezaket cümleleri kurma.`;
 
     try {
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -39,24 +34,22 @@ export default async function handler(req, res) {
                     {
                         role: "user",
                         content: [
-                            { type: "text", text: userPrompt },
+                            { type: "text", text: mode === "yemek" ? "Bu tabağı analiz et." : "Bu dolaptaki malzemeleri listele ve tarif ver." },
                             { type: "image_url", image_url: { url: image } }
                         ]
                     }
                 ],
-                max_tokens: 700,
-                temperature: 0.5 // Daha tutarlı ve ciddi yanıtlar için
+                max_tokens: 600,
+                temperature: 0.3 // Daha tutarlı sonuçlar için
             })
         });
 
         const data = await response.json();
         
-        if (data.error) {
-            throw new Error(data.error.message);
-        }
+        if (data.error) throw new Error(data.error.message);
 
         res.status(200).json({ analysis: data.choices[0].message.content });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: "Analiz Motoru Yanıt Vermedi. Lütfen tekrar deneyin." });
     }
 }
