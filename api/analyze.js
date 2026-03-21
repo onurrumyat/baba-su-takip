@@ -1,19 +1,19 @@
 // api/analyze.js
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-
     const { image, user_data, mode } = req.body;
 
-    // AI'ya giden ana talimat (Prompt)
-    const prompt = mode === "yemek" 
-        ? `Sen 'AI Bio-Chef' platformunun öncü beslenme mühendisisin. 
-           Kullanıcı Bilgileri: ${user_data}.
-           Görevin: Fotoğraftaki yemeği analiz et. 
-           Cevabını 5 madde halinde (1. ANALİZ, 2. SAĞLIK ETKİSİ, 3. KİLO ETKİSİ, 4. TAVSİYE, 5. SAAT/ADIM YORUMU) ver.
-           Özellikle kullanıcının o anki SAATİNE ve ADIM SAYISINA göre bu yemeği yiyip yememesi gerektiğini açıkla.`
-        : `Sen 'AI Bio-Chef' envanter uzmanısın. 
-           Kullanıcı Bilgileri: ${user_data}.
-           Görevin: Fotoğraftaki BUZDOLABINI analiz et, malzemeleri listele ve bu malzemelerle kullanıcının hedefine uygun bir tarif öner.`;
+    const systemPrompt = `Sen profesyonel bir AI Beslenme Uzmanısın. 
+    Kullanıcı Verisi: ${user_data}.
+    
+    KURALLAR:
+    1. Analizi çok sade ve net yap. Uzun cümlelerden kaçın.
+    2. Cevabı mutlaka şu formatta ver:
+       1. ANALİZ: (Kalori ve içerik tahmini)
+       2. SAĞLIK: (Kullanıcının yaşına/şekerine/deminine göre etkisi)
+       3. HEDEF: (Kilosuna ve adım sayısına göre uygunluk)
+       4. TAVSİYE: (Kısa ve net aksiyon önerisi)
+    3. Eğer gece geç saatse veya adım azsa bunu mutlaka vurgula.`;
 
     try {
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -25,19 +25,15 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 model: "gpt-4o",
                 messages: [
-                    { role: "system", content: prompt },
-                    {
-                        role: "user",
-                        content: [
-                            { type: "text", text: `Bu benim ${mode === 'yemek' ? 'yemeğim' : 'buzdolabım'}. Lütfen analiz et.` },
-                            { type: "image_url", image_url: { url: image } }
-                        ]
-                    }
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: [
+                        { type: "text", text: `${mode === 'yemek' ? 'Bu yemeği' : 'Bu buzdolabını'} en sade şekilde analiz et.` },
+                        { type: "image_url", image_url: { url: image } }
+                    ]}
                 ],
-                max_tokens: 800
+                max_tokens: 600
             })
         });
-
         const data = await response.json();
         res.status(200).json({ analysis: data.choices[0].message.content });
     } catch (error) {
