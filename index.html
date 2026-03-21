@@ -3,169 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Bio-Chef | Tam Donanımlı Sağlık Paneli</title>
+    <title>Bio-Chef Pro | AI Sağlık Girişimi</title>
     <style>
-        :root {
-            --bg: #0f172a; --card: #1e293b; --primary: #10b981; 
-            --accent: #38bdf8; --text: #f8fafc; --muted: #94a3b8;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
+        :root { --bg: #0f172a; --card: #1e293b; --primary: #10b981; --accent: #38bdf8; --text: #f8fafc; --muted: #64748b; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 15px; }
         
-        .app { width: 100%; max-width: 480px; background: var(--card); border-radius: 30px; padding: 25px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); }
+        .container { width: 100%; max-width: 440px; background: var(--card); border-radius: 28px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); height: fit-content; }
+        
+        /* Saat ve Tarih */
+        .header { text-align: center; margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #334155; }
+        #clock { font-size: 1.8rem; font-weight: 800; color: var(--accent); }
+        #date { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
 
-        /* Üst Panel: Saat ve Profil */
-        .header-panel { text-align: center; margin-bottom: 20px; background: rgba(56, 189, 248, 0.05); padding: 15px; border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.1); }
-        #clock { font-size: 2.2rem; font-weight: 800; color: var(--accent); letter-spacing: 2px; }
-        #date { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; margin-bottom: 5px; }
+        /* Formlar */
+        #setup, #dashboard { display: none; flex-direction: column; gap: 15px; }
+        .input-box { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 0.7rem; font-weight: bold; color: var(--muted); text-transform: uppercase; margin-left: 5px; }
+        input, select { width: 100%; padding: 12px; border-radius: 10px; background: #0f172a; border: 1px solid #334155; color: white; outline: none; font-size: 0.9rem; text-align: center; }
 
-        /* Onboarding */
-        #setup { display: flex; flex-direction: column; gap: 15px; }
-        .input-row { display: flex; gap: 10px; }
-        .group { flex: 1; display: flex; flex-direction: column; gap: 5px; }
-        label { font-size: 0.75rem; color: var(--muted); padding-left: 5px; }
-        input, select { width: 100%; padding: 14px; border-radius: 12px; background: #0f172a; border: 1px solid #334155; color: white; outline: none; }
-
-        /* Main Dashboard */
-        #main { display: none; flex-direction: column; gap: 15px; }
-        .stats-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.1); }
-
-        .cam-wrap { width: 100%; aspect-ratio: 4/3; background: #000; border-radius: 20px; overflow: hidden; border: 2px solid #334155; position: relative; }
+        /* Dashboard */
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 15px; }
+        .cam-view { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 20px; overflow: hidden; border: 2px solid #334155; position: relative; margin-top: 5px; }
         video { width: 100%; height: 100%; object-fit: cover; }
-        canvas { display: none; }
+        
+        .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .btn { padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; color: white; font-size: 0.85rem; }
+        .btn-green { background: var(--primary); }
+        .btn-blue { background: var(--accent); }
+        .btn:disabled { opacity: 0.5; }
 
-        .btn { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; color: white; margin-top: 5px; }
-        .btn-main { background: var(--primary); }
-        .btn-sub { background: var(--accent); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        /* Sade Analiz Kartları */
+        #results { display: none; flex-direction: column; gap: 8px; margin-top: 15px; }
+        .analysis-card { background: #0f172a; padding: 12px; border-radius: 12px; border-left: 4px solid var(--accent); animation: fadeIn 0.5s ease; }
+        .card-tag { font-size: 0.65rem; font-weight: 900; color: var(--accent); margin-bottom: 3px; text-transform: uppercase; }
+        .card-txt { font-size: 0.85rem; line-height: 1.4; color: #cbd5e1; }
+        
+        #loading { display: none; text-align: center; font-size: 0.8rem; color: var(--accent); font-weight: bold; padding: 10px; animation: pulse 1.5s infinite; }
 
-        /* Results */
-        #loading { display: none; text-align: center; color: var(--accent); font-weight: bold; font-style: italic; margin: 10px 0; }
-        #results { display: none; flex-direction: column; gap: 10px; margin-top: 10px; }
-        .card { background: #0f172a; padding: 15px; border-radius: 15px; border: 1px solid #1f2937; animation: slideIn 0.4s ease-out; }
-        .card-h { color: var(--accent); font-size: 0.75rem; font-weight: 900; text-transform: uppercase; margin-bottom: 5px; border-bottom: 1px solid #1f2937; padding-bottom: 4px; }
-        .card-b { font-size: 0.95rem; line-height: 1.4; color: #cbd5e1; }
-
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
     </style>
 </head>
 <body>
 
-<div class="app">
-    <div class="header-panel">
+<div class="container">
+    <div class="header">
         <div id="date">Yükleniyor...</div>
         <div id="clock">00:00:00</div>
     </div>
 
     <div id="setup">
-        <h2 style="text-align: center;">Profilini Oluştur</h2>
-        <div class="input-row">
-            <div class="group"><label>Yaş</label><input type="number" id="age" placeholder="25"></div>
-            <div class="group"><label>Kilo (kg)</label><input type="number" id="weight" placeholder="75"></div>
+        <h3 style="text-align:center; margin-bottom:10px;">Profil Bilgileri</h3>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="input-box"><label>Yaşınız</label><input type="number" id="age" placeholder="25"></div>
+            <div class="input-box"><label>Kilonuz (kg)</label><input type="number" id="weight" placeholder="75"></div>
         </div>
-        <div class="group"><label>Cinsiyet</label><select id="gender"><option value="Erkek">Erkek</option><option value="Kadın">Kadın</option></select></div>
-        <div class="group"><label>Hedef</label><select id="goal"><option value="Kilo Vermek">Kilo Vermek (-)</option><option value="Kilo Almak">Kilo Almak (+)</option></select></div>
-        <button class="btn btn-main" onclick="saveAndStart()">SİSTEMİ BAŞLAT 🚀</button>
+        <div class="input-box">
+            <label>Cinsiyetiniz</label>
+            <select id="gender">
+                <option value="Erkek">Erkek</option>
+                <option value="Kadın">Kadın</option>
+            </select>
+        </div>
+        <div class="input-box">
+            <label>Ana Hedefiniz</label>
+            <select id="goal">
+                <option value="Kilo Vermek">Kilo Vermek (-)</option>
+                <option value="Kilo Korumak">Kilo Korumak (=)</option>
+                <option value="Kilo Almak">Kilo Almak (+)</option>
+            </select>
+        </div>
+        <button class="btn btn-green" onclick="save()" style="font-size: 1.1rem; padding: 18px;">SİSTEMİ AKTİF ET 🚀</button>
     </div>
 
-    <div id="main">
-        <div class="stats-bar">
-            <div class="group" style="margin:0; width:60%;"><label>Bugünkü Adım:</label><input type="number" id="steps" value="6000" style="padding:8px;"></div>
-            <div style="text-align: right;">
-                <label>Ruh Hali:</label>
-                <select id="mood" style="border:none; background:none; color:var(--primary); font-weight:bold; width:auto; padding:0;">
-                    <option value="Normal">Normal</option><option value="Stresli">Stresli</option><option value="Yorgun">Yorgun</option>
+    <div id="dashboard">
+        <div class="stats-row">
+            <div class="input-box"><label>Adım Sayısı</label><input type="number" id="steps" value="5000"></div>
+            <div class="input-box">
+                <label>Ruh Halin</label>
+                <select id="mood">
+                    <option value="Normal">Normal</option>
+                    <option value="Yorgun">Yorgun</option>
+                    <option value="Stresli">Stresli</option>
+                    <option value="Mutlu">Mutlu</option>
                 </select>
             </div>
         </div>
 
-        <div class="cam-wrap"><video id="video" autoplay playsinline></video></div>
-        <canvas id="canvas"></canvas>
+        <div class="cam-view"><video id="video" autoplay playsinline></video></div>
+        <canvas id="canvas" style="display:none;"></canvas>
 
-        <div id="loading">🧠 AI VERİLERİ HARMANLIYOR...</div>
+        <div id="loading">✨ AI ANALİZ YAPIYOR...</div>
         <div id="results"></div>
 
-        <button class="btn btn-main" id="btn1" onclick="runAI('yemek')">📸 YEMEĞİ ANALİZ ET</button>
-        <button class="btn btn-sub" id="btn2" onclick="runAI('buzdolabi')">❄️ BUZDOLABINA BAK</button>
-        <p style="text-align:center; font-size:0.7rem; color:var(--muted); margin-top:15px; cursor:pointer;" onclick="localStorage.clear(); location.reload();">Verileri Sıfırla</p>
+        <div class="action-btns">
+            <button class="btn btn-green" id="b1" onclick="startAI('yemek')">📸 YEMEK ANALİZİ</button>
+            <button class="btn btn-blue" id="b2" onclick="startAI('buzdolabi')">❄️ DOLAP ANALİZİ</button>
+        </div>
+        <p style="text-align:center; font-size:0.6rem; color:var(--muted); margin-top:15px; cursor:pointer;" onclick="localStorage.clear(); location.reload();">Verileri Sıfırla & Çıkış</p>
     </div>
 </div>
 
 <script>
-    // Canlı Saat
-    function tick() {
-        const now = new Date();
-        document.getElementById('clock').innerText = now.toLocaleTimeString('tr-TR');
-        document.getElementById('date').innerText = now.toLocaleDateString('tr-TR', {weekday:'long', day:'numeric', month:'long'});
+    // Saat ve Tarih Güncelleme
+    function updateClock() {
+        const n = new Date();
+        document.getElementById('clock').innerText = n.toLocaleTimeString('tr-TR');
+        document.getElementById('date').innerText = n.toLocaleDateString('tr-TR', {weekday:'long', day:'numeric', month:'long'});
     }
-    setInterval(tick, 1000); tick();
+    setInterval(updateClock, 1000); updateClock();
 
     // Veri Yönetimi
-    let user = JSON.parse(localStorage.getItem('bio_v3')) || null;
-    if(user) loadMain();
+    let user = JSON.parse(localStorage.getItem('bio_v4'));
+    if(user) showDashboard(); else document.getElementById('setup').style.display = 'flex';
 
-    function saveAndStart() {
-        user = {
-            age: document.getElementById('age').value,
-            weight: document.getElementById('weight').value,
-            gender: document.getElementById('gender').value,
-            goal: document.getElementById('goal').value
-        };
-        if(!user.age || !user.weight) return alert("Lütfen boş alan bırakma!");
-        localStorage.setItem('bio_v3', JSON.stringify(user));
-        loadMain();
+    function save() {
+        const age = document.getElementById('age').value;
+        const weight = document.getElementById('weight').value;
+        const gender = document.getElementById('gender').value;
+        const goal = document.getElementById('goal').value;
+
+        if(!age || !weight) return alert("Lütfen yaş ve kilo bilgilerini doldurun!");
+
+        user = { age, weight, gender, goal };
+        localStorage.setItem('bio_v4', JSON.stringify(user));
+        showDashboard();
     }
 
-    function loadMain() {
+    function showDashboard() {
         document.getElementById('setup').style.display = 'none';
-        document.getElementById('main').style.display = 'flex';
+        document.getElementById('dashboard').style.display = 'flex';
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-            .then(s => document.getElementById('video').srcObject = s);
+            .then(s => document.getElementById('video').srcObject = s)
+            .catch(err => alert("Kamera erişimi engellendi veya bulunamadı."));
     }
 
-    // AI Analiz
-    async function runAI(mode) {
-        const btn1 = document.getElementById('btn1'); const btn2 = document.getElementById('btn2');
+    // AI Analiz Akışı
+    async function startAI(mode) {
+        const b1 = document.getElementById('b1'); const b2 = document.getElementById('b2');
         const loader = document.getElementById('loading'); const resDiv = document.getElementById('results');
         
-        btn1.disabled = btn2.disabled = true; loader.style.display = 'block'; resDiv.style.display = 'none';
+        b1.disabled = b2.disabled = true; loader.style.display = 'block'; resDiv.style.display = 'none';
 
         const vid = document.getElementById('video'); const canv = document.getElementById('canvas');
         canv.width = vid.videoWidth; canv.height = vid.videoHeight;
         canv.getContext('2d').drawImage(vid, 0, 0);
         const img = canv.toDataURL('image/jpeg');
 
-        const userDataStr = `${user.age} yaş, ${user.weight}kg, ${user.gender}, Hedef: ${user.goal}, Adım: ${document.getElementById('steps').value}, Saat: ${new Date().toLocaleTimeString()}, Mod: ${document.getElementById('mood').value}`;
+        // AI'ya gidecek veri paketi
+        const userStr = `${user.age} yaş, ${user.weight}kg, ${user.gender}, Hedef: ${user.goal}, Adım: ${document.getElementById('steps').value}, Saat: ${new Date().toLocaleTimeString()}, Mod: ${document.getElementById('mood').value}`;
 
         try {
-            const res = await fetch('/api/analyze', {
+            const r = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mode: mode, image: img, user_data: userDataStr })
+                body: JSON.stringify({ mode, image: img, user_data: userStr })
             });
-            const data = await res.json();
+            const d = await r.json();
             
-            // Sonuçları göster
+            // Sonuç Şablonunu Oluştur
             resDiv.innerHTML = ''; resDiv.style.display = 'flex';
-            const parts = data.analysis.split(/\d\./);
-            const headers = ["GİRİŞ", "ANALİZ", "SAĞLIK", "KİLO", "TAVSİYE", "SAAT/ADIM"];
             
-            parts.forEach((p, i) => {
-                if(p.trim().length > 3) {
-                    const c = document.createElement('div'); c.className = 'card';
-                    c.innerHTML = `<div class="card-h">${headers[i] || 'DETAY'}</div><div class="card-b">${p.trim()}</div>`;
-                    resDiv.appendChild(c);
-                }
+            // OpenAI çıktısını madde numaralarına göre böl (1. 2. 3. 4.)
+            const blocks = d.analysis.split(/\d\./).filter(t => t.trim().length > 5);
+            const tags = ["ANALİZ", "SAĞLIK ETKİSİ", "HEDEF DURUMU", "TAVSİYE"];
+
+            blocks.forEach((txt, i) => {
+                const card = document.createElement('div'); card.className = 'analysis-card';
+                card.innerHTML = `<div class="card-tag">${tags[i] || 'BİLGİ'}</div><div class="card-txt">${txt.trim()}</div>`;
+                resDiv.appendChild(card);
             });
 
-            // Sesli oku
-            const speech = new SpeechSynthesisUtterance(data.analysis);
-            speech.lang = 'tr-TR'; window.speechSynthesis.speak(speech);
+            // Sesli okuma (Opsiyonel)
+            const s = new SpeechSynthesisUtterance(d.analysis); 
+            s.lang = 'tr-TR'; 
+            window.speechSynthesis.speak(s);
 
-        } catch (e) {
-            alert("Sistem hatası: " + e.message);
-        } finally {
-            btn1.disabled = btn2.disabled = false; loader.style.display = 'none';
+        } catch (e) { 
+            alert("Analiz sırasında bir hata oluştu: " + e.message); 
+        } finally { 
+            b1.disabled = b2.disabled = false; loader.style.display = 'none'; 
         }
     }
 </script>
