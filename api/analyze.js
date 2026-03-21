@@ -5,8 +5,8 @@ export default async function handler(req, res) {
 
     let systemPrompt = mode === 'plan' 
         ? `Sen profesyonel bir diyetisyensin. Kullanıcı: ${user_data}. 7 günlük planı GÜN GÜN, sadece öğün ve yemek adı olarak kısa ve net ver.`
-        : `Sen kıdemli bir gıda uzmanısın. Kullanıcı: ${user_data}. 
-           ÖNEMLİ: Görüntüdeki kişilere odaklanma, doğrudan gıdaya odaklan. "Tanımlayamam" deme. Gördüğün yemeği/atıştırmalığı mutlaka tanımla.
+        : `Sen kıdemli gıda uzmanısın. Kullanıcı: ${user_data}. 
+           ÖNEMLİ: Görüntüdeki kişilere odaklanma, doğrudan gıdaya odaklan. Gördüğün yemeği/atıştırmalığı mutlaka tanımla.
            FORMAT:
            1. ÜRÜN ÖZETİ: Gördüğün gıdanın tam adı ve porsiyonu.
            2. BESİN DEĞERLERİ: Kalori (kcal), Protein (g), Karbonhidrat (g), Yağ (g) net rakamlarla.
