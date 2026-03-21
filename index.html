@@ -20,7 +20,7 @@
         #setup, #dashboard { display: none; flex-direction: column; gap: 15px; }
         .input-box { display: flex; flex-direction: column; gap: 5px; }
         label { font-size: 0.7rem; font-weight: bold; color: var(--muted); text-transform: uppercase; margin-left: 5px; }
-        input, select { width: 100%; padding: 12px; border-radius: 10px; background: #0f172a; border: 1px solid #334155; color: white; outline: none; font-size: 0.9rem; text-align: center; }
+        input, select { width: 100%; padding: 12px; border-radius: 10px; background: #0f172a; border: 1px solid #334155; color: white; outline: none; font-size: 0.9rem; }
 
         /* Dashboard */
         .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 15px; }
@@ -35,14 +35,11 @@
 
         /* Sade Analiz Kartları */
         #results { display: none; flex-direction: column; gap: 8px; margin-top: 15px; }
-        .analysis-card { background: #0f172a; padding: 12px; border-radius: 12px; border-left: 4px solid var(--accent); animation: fadeIn 0.5s ease; }
-        .card-tag { font-size: 0.65rem; font-weight: 900; color: var(--accent); margin-bottom: 3px; text-transform: uppercase; }
+        .analysis-card { background: #0f172a; padding: 12px; border-radius: 12px; border-left: 4px solid var(--accent); }
+        .card-tag { font-size: 0.65rem; font-weight: 900; color: var(--accent); margin-bottom: 3px; }
         .card-txt { font-size: 0.85rem; line-height: 1.4; color: #cbd5e1; }
         
-        #loading { display: none; text-align: center; font-size: 0.8rem; color: var(--accent); font-weight: bold; padding: 10px; animation: pulse 1.5s infinite; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        #loading { display: none; text-align: center; font-size: 0.8rem; color: var(--accent); font-weight: bold; padding: 10px; }
     </style>
 </head>
 <body>
@@ -56,39 +53,18 @@
     <div id="setup">
         <h3 style="text-align:center; margin-bottom:10px;">Profil Bilgileri</h3>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div class="input-box"><label>Yaşınız</label><input type="number" id="age" placeholder="25"></div>
-            <div class="input-box"><label>Kilonuz (kg)</label><input type="number" id="weight" placeholder="75"></div>
+            <div class="input-box"><label>Yaş</label><input type="number" id="age" placeholder="25"></div>
+            <div class="input-box"><label>Kilo</label><input type="number" id="weight" placeholder="75"></div>
         </div>
-        <div class="input-box">
-            <label>Cinsiyetiniz</label>
-            <select id="gender">
-                <option value="Erkek">Erkek</option>
-                <option value="Kadın">Kadın</option>
-            </select>
-        </div>
-        <div class="input-box">
-            <label>Ana Hedefiniz</label>
-            <select id="goal">
-                <option value="Kilo Vermek">Kilo Vermek (-)</option>
-                <option value="Kilo Korumak">Kilo Korumak (=)</option>
-                <option value="Kilo Almak">Kilo Almak (+)</option>
-            </select>
-        </div>
-        <button class="btn btn-green" onclick="save()" style="font-size: 1.1rem; padding: 18px;">SİSTEMİ AKTİF ET 🚀</button>
+        <div class="input-box"><label>Cinsiyet</label><select id="gender"><option value="Erkek">Erkek</option><option value="Kadın">Kadın</option></select></div>
+        <div class="input-box"><label>Hedef</label><select id="goal"><option value="Kilo Vermek">Kilo Vermek (-)</option><option value="Kilo Almak">Kilo Almak (+)</option></select></div>
+        <button class="btn btn-green" onclick="save()">SİSTEMİ AKTİF ET</button>
     </div>
 
     <div id="dashboard">
         <div class="stats-row">
             <div class="input-box"><label>Adım Sayısı</label><input type="number" id="steps" value="5000"></div>
-            <div class="input-box">
-                <label>Ruh Halin</label>
-                <select id="mood">
-                    <option value="Normal">Normal</option>
-                    <option value="Yorgun">Yorgun</option>
-                    <option value="Stresli">Stresli</option>
-                    <option value="Mutlu">Mutlu</option>
-                </select>
-            </div>
+            <div class="input-box"><label>Modun</label><select id="mood"><option>Normal</option><option>Yorgun</option><option>Stresli</option></select></div>
         </div>
 
         <div class="cam-view"><video id="video" autoplay playsinline></video></div>
@@ -98,15 +74,15 @@
         <div id="results"></div>
 
         <div class="action-btns">
-            <button class="btn btn-green" id="b1" onclick="startAI('yemek')">📸 YEMEK ANALİZİ</button>
-            <button class="btn btn-blue" id="b2" onclick="startAI('buzdolabi')">❄️ DOLAP ANALİZİ</button>
+            <button class="btn btn-green" id="b1" onclick="startAI('yemek')">📸 YEMEK</button>
+            <button class="btn btn-blue" id="b2" onclick="startAI('buzdolabi')">❄️ DOLAP</button>
         </div>
-        <p style="text-align:center; font-size:0.6rem; color:var(--muted); margin-top:15px; cursor:pointer;" onclick="localStorage.clear(); location.reload();">Verileri Sıfırla & Çıkış</p>
+        <p style="text-align:center; font-size:0.6rem; color:var(--muted); margin-top:15px; cursor:pointer;" onclick="localStorage.clear(); location.reload();">Verileri Sıfırla</p>
     </div>
 </div>
 
 <script>
-    // Saat ve Tarih Güncelleme
+    // Saat ve Tarih
     function updateClock() {
         const n = new Date();
         document.getElementById('clock').innerText = n.toLocaleTimeString('tr-TR');
@@ -119,14 +95,8 @@
     if(user) showDashboard(); else document.getElementById('setup').style.display = 'flex';
 
     function save() {
-        const age = document.getElementById('age').value;
-        const weight = document.getElementById('weight').value;
-        const gender = document.getElementById('gender').value;
-        const goal = document.getElementById('goal').value;
-
-        if(!age || !weight) return alert("Lütfen yaş ve kilo bilgilerini doldurun!");
-
-        user = { age, weight, gender, goal };
+        user = { age: document.getElementById('age').value, weight: document.getElementById('weight').value, gender: document.getElementById('gender').value, goal: document.getElementById('goal').value };
+        if(!user.age || !user.weight) return alert("Eksik bilgi!");
         localStorage.setItem('bio_v4', JSON.stringify(user));
         showDashboard();
     }
@@ -134,9 +104,7 @@
     function showDashboard() {
         document.getElementById('setup').style.display = 'none';
         document.getElementById('dashboard').style.display = 'flex';
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-            .then(s => document.getElementById('video').srcObject = s)
-            .catch(err => alert("Kamera erişimi engellendi veya bulunamadı."));
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
     }
 
     // AI Analiz Akışı
@@ -151,7 +119,6 @@
         canv.getContext('2d').drawImage(vid, 0, 0);
         const img = canv.toDataURL('image/jpeg');
 
-        // AI'ya gidecek veri paketi
         const userStr = `${user.age} yaş, ${user.weight}kg, ${user.gender}, Hedef: ${user.goal}, Adım: ${document.getElementById('steps').value}, Saat: ${new Date().toLocaleTimeString()}, Mod: ${document.getElementById('mood').value}`;
 
         try {
@@ -162,10 +129,8 @@
             });
             const d = await r.json();
             
-            // Sonuç Şablonunu Oluştur
+            // Şablonu Oluştur ve Göster
             resDiv.innerHTML = ''; resDiv.style.display = 'flex';
-            
-            // OpenAI çıktısını madde numaralarına göre böl (1. 2. 3. 4.)
             const blocks = d.analysis.split(/\d\./).filter(t => t.trim().length > 5);
             const tags = ["ANALİZ", "SAĞLIK ETKİSİ", "HEDEF DURUMU", "TAVSİYE"];
 
@@ -175,16 +140,11 @@
                 resDiv.appendChild(card);
             });
 
-            // Sesli okuma (Opsiyonel)
-            const s = new SpeechSynthesisUtterance(d.analysis); 
-            s.lang = 'tr-TR'; 
-            window.speechSynthesis.speak(s);
+            // Sesli okuma
+            const s = new SpeechSynthesisUtterance(d.analysis); s.lang = 'tr-TR'; window.speechSynthesis.speak(s);
 
-        } catch (e) { 
-            alert("Analiz sırasında bir hata oluştu: " + e.message); 
-        } finally { 
-            b1.disabled = b2.disabled = false; loader.style.display = 'none'; 
-        }
+        } catch (e) { alert("Hata: " + e.message); }
+        finally { b1.disabled = b2.disabled = false; loader.style.display = 'none'; }
     }
 </script>
 
