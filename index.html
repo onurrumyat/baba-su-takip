@@ -6,7 +6,7 @@
     <title>Bio-Chef Pro | VIP Analiz</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.paypal.com/sdk/js?client-id=AdOeigm877SXMe7mMtuEMPUeGkY9WcgyIJPbzGJU2HP1CS_eaGcn4O0FnUEoB3JFmDXEHSnxx5Do-pIN&currency=USD"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=AdOeigm877SXMe7mMtuEMPUeGkY9WcgyIJPbzGJU2HP1CS_eaGcn4O0FnUEoB3JFmDXEHSnxx5Do-pIN&currency=USD&components=buttons"></script>
     
     <style>
         :root { --bg: #0b0f1a; --card: #161b2a; --primary: #10b981; --accent: #0ea5e9; --premium: #f59e0b; --text: #f1f5f9; }
@@ -21,8 +21,12 @@
         .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #2d3748; margin-top: 10px; font-size: 0.8rem; }
         .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 2px solid #1e293b; margin-bottom: 20px; }
         video { width: 100%; height: 100%; object-fit: cover; }
-        .premium-box { background: rgba(245, 158, 11, 0.05); border: 1px dashed var(--premium); border-radius: 20px; padding: 15px; margin-top: 15px; text-align: center; }
-        #paypal-button-container { margin-top: 10px; }
+        
+        /* PREMIUM ÖDEME ALANI */
+        .premium-area { background: rgba(245, 158, 11, 0.08); border: 2px solid var(--premium); border-radius: 25px; padding: 20px; margin-top: 20px; text-align: center; }
+        .premium-title { font-weight: 900; color: var(--premium); font-size: 1.1rem; margin-bottom: 15px; }
+        #paypal-button-container { margin-top: 10px; min-height: 150px; }
+
         #results { display: none; flex-direction: column; gap: 12px; margin-top: 25px; }
         .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); }
         .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
@@ -70,10 +74,12 @@
 
         <button class="btn btn-main" id="btnAnalyze" onclick="runAI('yemek')">📸 ANALİZ ET</button>
         
-        <div class="premium-box">
-            <button class="btn btn-sub" style="margin-top:0;" onclick="handlePlanClick()">📅 HAFTALIK PLAN</button>
-            <div id="paypal-button-container">
-                </div>
+        <div class="premium-area">
+            <button class="btn btn-sub" style="margin-top:0; background: var(--premium); color: black;" onclick="handlePlanClick()">📅 HAFTALIK PLANINIZI ÇIKARIN</button>
+            <div id="premiumLockInfo" style="margin-top: 15px;">
+                <div class="premium-title">PREMIUM ÜYE | 0.99 $</div>
+                <div id="paypal-button-container"></div>
+            </div>
         </div>
 
         <div id="results"></div>
@@ -108,18 +114,31 @@
             toggleView('mainView');
             document.getElementById('uMail').innerText = user.email;
             isVip = localStorage.getItem('vip_' + user.uid) === 'true';
-            if(!isVip) initPayPal();
+            
+            if(!isVip) {
+                document.getElementById('premiumLockInfo').style.display = 'block';
+                initPayPal();
+            } else {
+                document.getElementById('premiumLockInfo').style.display = 'none';
+            }
+            
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
         } else { toggleView('loginView'); }
     });
 
     function initPayPal() {
         paypal.Buttons({
-            style: { layout: 'horizontal', color: 'gold', shape: 'pill', label: 'pay' },
-            createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: '0.99', currency_code: 'USD' }, description: "PREMIUM ÜYE | 0.99 $" }] }),
+            // Vertical layout sayesinde Banka Kartı (Debit/Credit Card) seçeneği otomatik gelir
+            style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
+            createOrder: (d, a) => a.order.create({ 
+                purchase_units: [{ 
+                    amount: { value: '0.99', currency_code: 'USD' },
+                    description: "Bio-Chef Pro Haftalık Plan Erişimi" 
+                }] 
+            }),
             onApprove: (d, a) => a.order.capture().then(det => {
                 localStorage.setItem('vip_' + auth.currentUser.uid, 'true');
-                alert("Ödeme Başarılı! Premium üyeliğiniz aktif edildi.");
+                alert("Ödeme Başarılı! VIP özellikler aktif edildi.");
                 location.reload();
             })
         }).render('#paypal-button-container');
@@ -129,11 +148,14 @@
     async function doRegister() { try { await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); } catch(e) { alert(e.message); } }
     async function doReset() { 
         const email = document.getElementById('lEmail').value;
-        if(!email) return alert("E-posta yazın.");
+        if(!email) return alert("Mail yazın.");
         try { await auth.sendPasswordResetEmail(email); alert("Link gönderildi."); } catch(e) { alert(e.message); }
     }
 
-    function handlePlanClick() { if(!isVip) return alert("Haftalık plan için lütfen Premium üye olun."); runAI('plan'); }
+    function handlePlanClick() { 
+        if(!isVip) return alert("Haftalık plan için aşağıdan Premium üyeliğinizi başlatın."); 
+        runAI('plan'); 
+    }
 
     async function runAI(mode) {
         const resDiv = document.getElementById('results');
