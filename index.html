@@ -3,38 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bio-Chef Pro | VIP Beslenme</title>
+    <title>Bio-Chef Pro | PayPal VIP</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=AdOeigm877SXMe7mMtuEMPUeGkY9WcgyIJPbzGJU2HP1CS_eaGcn4O0FnUEoB3JFmDXEHSnxx5Do-pIN&currency=USD"></script>
+    
     <style>
         :root { --bg: #0b0f1a; --card: #161b2a; --primary: #10b981; --accent: #0ea5e9; --premium: #f59e0b; --text: #f1f5f9; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
         body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
-        
         .app-card { width: 100%; max-width: 420px; background: var(--card); border-radius: 35px; padding: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); height: fit-content; }
-        
         .auth-container h1 { font-size: 2.5rem; text-align: center; margin-bottom: 20px; background: linear-gradient(45deg, var(--primary), var(--accent)); -webkit-background-clip: text; color: transparent; font-weight: 900; }
-        input, select { width: 100%; padding: 15px; border-radius: 15px; background: #0b0f1a; border: 1px solid #2d3748; color: white; margin-bottom: 12px; outline: none; transition: 0.3s; text-align: center; font-size: 1rem; }
-        
+        input, select { width: 100%; padding: 15px; border-radius: 15px; background: #0b0f1a; border: 1px solid #2d3748; color: white; margin-bottom: 12px; outline: none; text-align: center; font-size: 1rem; }
         .btn { width: 100%; padding: 18px; border-radius: 18px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; color: white; font-size: 1rem; }
         .btn-main { background: var(--primary); margin-top: 10px; }
         .btn-sub { background: var(--accent); margin-top: 10px; }
         .btn-outline { background: transparent; border: 1px solid #2d3748; color: #94a3b8; margin-top: 10px; font-size: 0.8rem; }
-        
-        .header { text-align: center; margin-bottom: 20px; }
-        #clock { font-size: 2.2rem; font-weight: 800; color: var(--accent); }
         .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 3px solid #1e293b; margin-bottom: 20px; position: relative; }
         video { width: 100%; height: 100%; object-fit: cover; }
-        
         .premium-box { background: rgba(245, 158, 11, 0.1); border: 1px dashed var(--premium); border-radius: 20px; padding: 15px; margin-top: 15px; text-align: center; }
-        .btn-premium { background: var(--premium); color: #000; font-weight: 800; }
+        #paypal-button-container { margin-top: 15px; display: none; min-height: 150px; }
         .lock-notice { color: var(--premium); font-size: 0.8rem; margin-top: 10px; font-weight: bold; display: none; }
-
         #results { display: none; flex-direction: column; gap: 15px; margin-top: 25px; }
         .day-card { background: #1e293b; border-radius: 20px; padding: 18px; border-left: 5px solid var(--accent); animation: slideIn 0.5s ease forwards; }
-        .day-title { font-size: 0.8rem; font-weight: 900; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
+        .day-title { font-size: 0.8rem; font-weight: 900; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
         .day-content { font-size: 0.95rem; line-height: 1.6; color: #e2e8f0; white-space: pre-line; }
-
         @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -59,8 +52,8 @@
     </div>
 
     <div id="mainView" style="display:none;">
-        <div class="header">
-            <div id="clock">00:00:00</div>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div id="clock" style="font-size: 2.2rem; font-weight: 800; color: var(--accent);">00:00:00</div>
             <p id="uMail" style="font-size:0.7rem; color:#64748b;"></p>
         </div>
 
@@ -82,11 +75,10 @@
         <div class="premium-box">
             <button class="btn btn-sub" style="margin-top:0;" onclick="handlePlanClick()">📅 HAFTALIK BESİN PLANI</button>
             <div id="lockNotice" class="lock-notice">⚠️ PREMIUM ÜYELİK GEREKTİRİR!</div>
-            <button id="btnBuy" class="btn btn-premium" style="margin-top:10px;" onclick="buyPremium()">PREMIUM ÜYE | 0.99 $</button>
+            <div id="paypal-button-container"></div>
         </div>
 
         <div id="results"></div>
-
         <button class="btn btn-outline" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
     </div>
 </div>
@@ -118,35 +110,48 @@
             toggleView('mainView');
             document.getElementById('uMail').innerText = user.email;
             isVip = localStorage.getItem('vip_' + user.uid) === 'true';
-            document.getElementById('btnBuy').style.display = isVip ? 'none' : 'block';
+            
+            if(!isVip) {
+                document.getElementById('paypal-button-container').style.display = 'block';
+                initPayPal();
+            } else {
+                document.getElementById('paypal-button-container').style.display = 'none';
+            }
+            
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
         } else {
             toggleView('loginView');
         }
     });
 
-    async function doLogin() {
-        try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); }
-    }
-    async function doRegister() {
-        try { await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); } catch(e) { alert(e.message); }
-    }
-    
-    // ŞİFRE SIFIRLAMA FONKSİYONU
-    async function doReset() {
-        const email = document.getElementById('lEmail').value;
-        if(!email) return alert("Lütfen mail adresinizi yazın.");
-        try { await auth.sendPasswordResetEmail(email); alert("Şifre sıfırlama linki e-postanıza gönderildi."); } catch(e) { alert(e.message); }
+    function initPayPal() {
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        description: "Bio-Chef Premium Üyelik",
+                        amount: { value: '0.99' }
+                    }]
+                });
+            },
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    localStorage.setItem('vip_' + auth.currentUser.uid, 'true');
+                    isVip = true;
+                    document.getElementById('paypal-button-container').style.display = 'none';
+                    document.getElementById('lockNotice').style.display = 'none';
+                    alert('Ödeme Başarılı! Hoşgeldin ' + details.payer.name.given_name + ', artık Premium üyesisin.');
+                });
+            }
+        }).render('#paypal-button-container');
     }
 
-    function buyPremium() {
-        if(confirm("0.99$ ödeme onaylıyor musunuz?")) {
-            localStorage.setItem('vip_' + auth.currentUser.uid, 'true');
-            isVip = true;
-            document.getElementById('btnBuy').style.display = 'none';
-            document.getElementById('lockNotice').style.display = 'none';
-            alert("TEBRİKLER! ARTIK PREMIUM ÜYESİSİNİZ.");
-        }
+    async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); } }
+    async function doRegister() { try { await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); } catch(e) { alert(e.message); } }
+    async function doReset() { 
+        const email = document.getElementById('lEmail').value;
+        if(!email) return alert("E-posta yazın.");
+        try { await auth.sendPasswordResetEmail(email); alert("Sıfırlama linki gönderildi."); } catch(e) { alert(e.message); }
     }
 
     function handlePlanClick() {
@@ -158,8 +163,7 @@
         const resDiv = document.getElementById('results');
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
-        if(!age || !weight) return alert("Lütfen bilgileri girin!");
-
+        if(!age || !weight) return alert("Bilgileri girin!");
         resDiv.innerHTML = '<p style="text-align:center;">🧠 İşleniyor...</p>';
         resDiv.style.display = 'flex';
 
@@ -180,7 +184,6 @@
             });
             const d = await r.json();
             resDiv.innerHTML = '';
-
             const sections = d.analysis.split(/GÜN:|1\.|2\.|3\.|4\./).filter(s => s.trim().length > 5);
             const titles = mode === 'plan' ? ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"] : ["ÖZET", "BESİN TABLOSU", "HEDEF ANALİZİ", "TAVSİYE"];
 
