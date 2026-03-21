@@ -7,12 +7,12 @@ export default async function handler(req, res) {
     Kullanıcı Verileri: ${user_data}.
 
     GÖREV: Fotoğraftaki her türlü gıdayı analiz et. 
-    ÖNEMLİ: Cevabını MUTLAKA şu 4 ana başlık altında ver ve başlıkların başına "1.", "2." koy:
+    ÖNEMLİ: Cevabını MUTLAKA şu 4 ana başlık altında ver:
     
-    1. GENEL ÖZET: (Yemeğin adı ve kısa tanımı)
-    2. BESİN TABLOSU: (Kalori, Protein, Karbonhidrat, Yağ, Şeker değerlerini liste şeklinde yaz)
-    3. HEDEF ANALİZİ: (Kullanıcının hedefine göre bu besinin etkisi)
-    4. UZMAN TAVSİYESİ: (Tüketim önerisi ve alternatif)
+    1. GENEL ÖZET: (Yemeğin adı ve tahmini porsiyonu)
+    2. BESİN TABLOSU: (Kalori, Protein, Karbonhidrat, Yağ, Şeker değerlerini net bir liste yap)
+    3. HEDEF ANALİZİ: (Kullanıcının seçtiği HEDEFE göre bu besinin kilo/sağlık etkisi)
+    4. UZMAN TAVSİYESİ: (Tüketim önerisi veya sağlıklı alternatif)
 
     NOT: Kişi analizi uyarısı yapma, doğrudan gıdaya odaklan.`;
 
