@@ -3,87 +3,381 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Bio-Chef | GERÇEK ANALİZ</title>
+    <title>AI Bio-Chef | Senin Genetiğin, Senin Mutfağın</title>
     <style>
-        :root { --primary: #10b981; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
-        body { background: var(--bg); color: var(--text); font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
-        .app { width: 100%; max-width: 450px; background: var(--card); border-radius: 25px; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .camera-box { width: 100%; aspect-ratio: 4/3; background: #000; border-radius: 15px; overflow: hidden; position: relative; }
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --primary: #10b981;
+            --accent: #38bdf8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card);
+            border-radius: 30px;
+            padding: 25px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* --- GİRİŞ / ONBOARDING EKRANI --- */
+        #onboardingScreen {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        header { text-align: center; margin-bottom: 10px; }
+        header h1 { font-size: 2rem; background: linear-gradient(to right, #34d399, #38bdf8); -webkit-background-clip: text; color: transparent; text-transform: uppercase;}
+        header p { font-size: 0.9rem; color: var(--text-muted); }
+
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        .input-group label { font-size: 0.85rem; color: var(--text-muted); }
+        
+        input, select {
+            width: 100%; padding: 15px; border-radius: 12px;
+            background: #0f172a; border: 1px solid #334155;
+            color: white; font-size: 1rem; text-align: center;
+            outline: none; transition: border-color 0.3s;
+        }
+        input:focus, select:focus { border-color: var(--primary); }
+
+        .start-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        .start-btn:hover { background: #059669; transform: translateY(-2px); }
+
+        /* --- ANA ANALİZ EKRANI (PANEL) --- */
+        #dashboardScreen {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Kullanıcı Özet Kartı */
+        .user-summary {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .user-summary-text { color: #cbd5e1; }
+        .edit-btn { background: none; border: none; color: var(--accent); text-decoration: underline; cursor: pointer; font-size: 0.8rem;}
+
+        /* Kamera ve Fotoğraf Alanı */
+        .camera-box {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid #334155;
+        }
         video { width: 100%; height: 100%; object-fit: cover; }
-        button { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        #result { background: #0f172a; padding: 15px; border-radius: 12px; display: none; line-height: 1.5; font-size: 0.9rem; }
-        .loading { color: #38bdf8; text-align: center; display: none; font-weight: bold; }
+        canvas { display: none; }
+
+        /* Analiz Sonuç Kartları */
+        .result-panel {
+            display: none; /* Başlangıçta gizli */
+            flex-direction: column;
+            gap: 15px;
+            animation: slideUp 0.6s ease-out;
+        }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .result-card {
+            background: #0f172a;
+            border-radius: 15px;
+            padding: 18px;
+            border: 1px solid #1f2937;
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #1f2937;
+            padding-bottom: 8px;
+        }
+        .card-icon { font-size: 1.2rem; }
+        .card-title { font-size: 0.9rem; color: #a78bfa; font-weight: bold; text-transform: uppercase;}
+        .card-content { font-size: 0.95rem; line-height: 1.5; color: #cbd5e1; white-space: pre-wrap; /* Satır başlarını koru */}
+
+        /* Aksiyon Butonları */
+        .btn-analyze {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 16px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-analyze:hover { background: #059669; }
+        .btn-analyze:disabled { background: #475569; cursor: not-allowed; }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            color: var(--accent);
+            font-weight: bold;
+            font-style: italic;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
     </style>
 </head>
 <body>
 
-<div class="app">
-    <h2 style="text-align: center;">🔬 AI Bio-Chef (Live)</h2>
+<div class="app-container">
     
-    <div style="font-size: 0.8rem; background: rgba(16,185,129,0.1); padding: 10px; border-radius: 10px;">
-        <strong>Biyometri:</strong> Demir Düşük, Şeker 115 mg/dL.
+    <div id="onboardingScreen">
+        <header>
+            <h1>🔬 AI BIO-CHEF</h1>
+            <p>Senin Genetiğin, Senin Mutfağın</p>
+        </header>
+        
+        <p style="text-align:center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">
+            Sana özel bir analiz için temel verilerini gir.
+        </p>
+
+        <div style="display: flex; gap: 15px;">
+            <div class="input-group" style="flex:1;">
+                <label>Yaşınız:</label>
+                <input type="number" id="userAge" placeholder="25" min="10" max="100">
+            </div>
+            <div class="input-group" style="flex:1;">
+                <label>Kilonuz (kg):</label>
+                <input type="number" id="userWeight" placeholder="70" min="30" max="200">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Cinsiyetiniz:</label>
+            <select id="userGender">
+                <option value="Erkek">Erkek</option>
+                <option value="Kadın">Kadın</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Ana Hedefiniz:</label>
+            <select id="userGoal">
+                <option value="Kilo Vermek">Kilo Vermek (-)</option>
+                <option value="Kilo Korumak">Kilo Korumak (=)</option>
+                <option value="Kilo Almak">Kilo Almak (+)</option>
+            </select>
+        </div>
+
+        <button class="start-btn" onclick="completeOnboarding()">Sistemi Başlat 🚀</button>
     </div>
 
-    <div class="camera-box">
-        <video id="video" autoplay playsinline></video>
+    <div id="dashboardScreen">
+        
+        <div class="user-summary">
+            <div class="user-summary-text" id="summaryText"></div>
+            <button class="edit-btn" onclick="editProfile()">Düzenle</button>
+        </div>
+
+        <div class="camera-box">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="photoCanvas"></canvas>
+        </div>
+
+        <div id="loading" class="loading-spinner">🧠 AI Muhakeme Ediyor...</div>
+
+        <div id="resultPanel" class="result-panel">
+            </div>
+
+        <button class="btn-analyze" id="analyzeBtn" onclick="processMeal()">📸 YEMEĞİ ANALİZ ET</button>
     </div>
 
-    <div id="loading" class="loading">🧠 AI Analiz Ediyor...</div>
-    <div id="result"></div>
-
-    <button id="btn" onclick="captureAndAnalyze()">📸 YEMEĞİ ANALİZ ET</button>
-    <canvas id="canvas" style="display:none;"></canvas>
 </div>
 
 <script>
+    const onboardingScreen = document.getElementById('onboardingScreen');
+    const dashboardScreen = document.getElementById('dashboardScreen');
+    const summaryText = document.getElementById('summaryText');
     const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const btn = document.getElementById('btn');
-    const resultDiv = document.getElementById('result');
+    const canvas = document.getElementById('photoCanvas');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const resultPanel = document.getElementById('resultPanel');
     const loading = document.getElementById('loading');
 
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-        .then(stream => video.srcObject = stream);
+    // Veritabanı (Telefonda Kayıtlı Veri)
+    let userData = JSON.parse(localStorage.getItem('babaSuDataV2')) || null;
 
-    async function captureAndAnalyze() {
-        btn.disabled = true;
+    // Sayfa açıldığında daha önce giriş yapılmış mı kontrol et
+    if (userData) {
+        completeOnboarding(true); // Giriş yapılmışsa doğrudan panele geç
+    }
+
+    function completeOnboarding(skipSave = false) {
+        if (!skipSave) {
+            const age = document.getElementById('userAge').value;
+            const weight = document.getElementById('userWeight').value;
+            const gender = document.getElementById('userGender').value;
+            const goal = document.getElementById('userGoal').value;
+
+            if (!age || !weight) { alert("Lütfen yaş ve kilo verilerinizi girin!"); return; }
+
+            userData = { age, weight, gender, goal };
+            localStorage.setItem('babaSuDataV2', JSON.stringify(userData));
+        }
+
+        // Özeti Güncelle
+        summaryText.innerText = `${userData.age} Yaş, ${userData.weight}kg ${userData.gender} | Hedef: ${userData.goal}`;
+
+        onboardingScreen.style.display = 'none';
+        dashboardScreen.style.display = 'flex';
+        startCamera();
+    }
+
+    function editProfile() {
+        dashboardScreen.style.display = 'none';
+        onboardingScreen.style.display = 'flex';
+        
+        // Mevcut verileri inputlara doldur
+        document.getElementById('userAge').value = userData.age;
+        document.getElementById('userWeight').value = userData.weight;
+        document.getElementById('userGender').value = userData.gender;
+        document.getElementById('userGoal').value = userData.goal;
+    }
+
+    // Kamerayı Başlat
+    function startCamera() {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            .then(stream => { video.srcObject = stream; })
+            .catch(err => { console.error("Kamera açılmadı:", err); });
+    }
+
+    async function processMeal() {
+        analyzeBtn.disabled = true;
+        resultPanel.style.display = 'none';
         loading.style.display = 'block';
-        resultDiv.style.display = 'none';
 
-        // Fotoğraf çek
+        // Fotoğrafı Yakala (Base64)
         const ctx = canvas.getContext('2d');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         ctx.drawImage(video, 0, 0);
         const base64Image = canvas.toDataURL('image/jpeg');
 
+        // Biyometrik Veri (Canlı Simülasyon - Burayı Firebase/Saat API'sine bağlayabiliriz)
+        const currentBiometrics = "Demir: Düşük, Kan Şekeri: 115mg/dL (Sınırda).";
+
         try {
+            // VERCEL SERVERLESS FONKSİYONUNA GÖNDER
             const response = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     image: base64Image,
-                    biometrics: "Demir: Düşük, Şeker: 115mg/dL, Amaç: Enerji artışı"
+                    user_data: `Kullanıcı: ${userData.age} yaş, ${userData.weight}kg ${userData.gender}. Hedef: ${userData.goal}. Anlık Biyometri: ${currentBiometrics}`
                 })
             });
 
             const data = await response.json();
-            resultDiv.innerHTML = `<strong>AI Tavsiyesi:</strong><br>${data.analysis}`;
-            resultDiv.style.display = 'block';
             
-            // Sesli oku
-            const speech = new SpeechSynthesisUtterance(data.analysis);
-            speech.lang = 'tr-TR';
-            window.speechSynthesis.speak(speech);
+            // Sonuçları İşle ve Göster
+            loading.style.display = 'none';
+            analyzeBtn.disabled = false;
+            analyzeBtn.innerText = "🔄 YENİ ANALİZ";
+            
+            displayResults(data.analysis);
 
         } catch (err) {
-            resultDiv.innerText = "Hata: " + err.message;
-            resultDiv.style.display = 'block';
-        } finally {
-            btn.disabled = false;
             loading.style.display = 'none';
+            analyzeBtn.disabled = false;
+            resultPanel.innerHTML = `<div class="result-card" style="color:#ef4444;">HATA: ${err.message}</div>`;
+            resultPanel.style.display = 'flex';
         }
+    }
+
+    function displayResults(analysisText) {
+        resultPanel.innerHTML = ''; // Paneli temizle
+        resultPanel.style.display = 'flex';
+
+        // OpenAI'dan gelen metni başlıklara göre parçala (1., 2., 3. ... kullanıldıysa)
+        const lines = analysisText.split('\n');
+        
+        const icons = ["📊", "🩸", "⚖️", "🔬"];
+        const titles = ["Yemek Analizi ve Kalori", "Kişisel Sağlık Etkisi", "Kilo ve Hedef Durumu", "Anlık Taktiksel Tavsiye"];
+
+        let currentCardIndex = -1;
+        let cardContents = ["", "", "", ""];
+
+        lines.forEach(line => {
+            if (line.match(/^\d\.\s/)) { // "1. ", "2. " gibi başlıyorsa
+                currentCardIndex++;
+            } else if (currentCardIndex >= 0) {
+                cardContents[currentCardIndex] += line + "\n";
+            }
+        });
+
+        // Kartları Oluştur
+        for (let i = 0; i < 4; i++) {
+            if (cardContents[i].trim() !== "") {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'result-card';
+                cardDiv.innerHTML = `
+                    <div class="card-header">
+                        <span class="card-icon">${icons[i]}</span>
+                        <span class="card-title">${titles[i]}</span>
+                    </div>
+                    <div class="card-content">${cardContents[i]}</div>
+                `;
+                resultPanel.appendChild(cardDiv);
+            }
+        }
+        
+        // Sonuç ekranına otomatik kaydır
+        resultPanel.scrollIntoView({ behavior: 'smooth' });
     }
 </script>
 
