@@ -39,7 +39,6 @@
         .score-marker { position: absolute; top: -10px; width: 30px; height: 30px; background: #fff; border: 3px solid #1e293b; border-radius: 50%; transform: translateX(-50%); transition: left 1s ease-out; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 900; color: #000; z-index: 2; }
         .score-marker::after { content: '📍'; position: absolute; bottom: -20px; font-size: 1rem; }
 
-        /* --- EKLENEN: ALEVLİ SERİ ROZETİ CSS --- */
         .streak-badge { display:none; background:rgba(249, 115, 22, 0.15); color:#f97316; padding:8px 15px; border-radius:20px; font-weight:900; font-size:0.9rem; border:1px solid #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.3); animation: pulse 2s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
@@ -96,6 +95,8 @@
 
         <button class="btn btn-main" id="btnAnalyzeText" onclick="runAI('yemek')">📸 ANALİZ ET</button>
         
+        <button class="btn btn-sub" id="btnVsText" style="background: #ef4444; margin-top: 10px;" onclick="runAI('vs')">⚔️ SAVAŞTIR (VS MODU)</button>
+        
         <div class="premium-area">
             <button class="btn btn-sub" id="txtBtnPlan" style="margin-top:0; background: var(--premium); color: black;" onclick="handlePlanClick()">📅 HAFTALIK PLANINIZI ÇIKARIN</button>
             <div id="premiumLockInfo" style="margin-top: 15px;">
@@ -132,9 +133,10 @@
             loading: "🔍 İnceleniyor...", 
             headersYemek: ["HEDEF SKORU 🎯", "ÜRÜN ÖZETİ", "BESİN DEĞERLERİ", "HEDEF ANALİZİ", "NET TAVSİYE"],
             headersPlan: ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"],
+            headersVs: ["MAÇIN SONUCU 🏆", "1. KÖŞE 🔴", "2. KÖŞE 🔵"], // EKLENEN VS BAŞLIKLARI
             payDesc: "Bio-Chef Pro Haftalık Plan Erişimi", paySucc: "Ödeme Başarılı! VIP özellikler aktif edildi.",
             btnPdfTxt: "📄 PDF OLARAK KAYDET", btnHistTxt: "📚 GEÇMİŞ ANALİZLERİM", histTitle: "Son Taramalarınız", noHist: "Henüz geçmiş yok.",
-            markerInfo: "Sen", streakTxt: "Seri" // EKLENEN DİL DESTEĞİ
+            markerInfo: "Sen", streakTxt: "Seri", btnVsTxt: "⚔️ SAVAŞTIR (VS MODU)" // EKLENEN VS BUTONU ÇEVİRİSİ
         },
         en: {
             appTitle: "BIO-CHEF", emailHolder: "Email", passHolder: "Password", btnLogin: "LOGIN", btnReset: "Forgot Password?", btnReg: "Sign Up",
@@ -146,9 +148,10 @@
             loading: "🔍 Analyzing...", 
             headersYemek: ["GOAL SCORE 🎯", "PRODUCT SUMMARY", "NUTRITION FACTS", "GOAL ANALYSIS", "NET ADVICE"],
             headersPlan: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
+            headersVs: ["MATCH RESULT 🏆", "CORNER 1 🔴", "CORNER 2 🔵"], // EKLENEN VS BAŞLIKLARI
             payDesc: "Bio-Chef Pro Weekly Plan Access", paySucc: "Payment Successful! VIP features activated.",
             btnPdfTxt: "📄 DOWNLOAD AS PDF", btnHistTxt: "📚 MY HISTORY", histTitle: "Recent Scans", noHist: "No history yet.",
-            markerInfo: "You", streakTxt: "Streak" // EKLENEN DİL DESTEĞİ
+            markerInfo: "You", streakTxt: "Streak", btnVsTxt: "⚔️ FOOD BATTLE (VS)" // EKLENEN VS BUTONU ÇEVİRİSİ
         }
     };
 
@@ -171,13 +174,14 @@
         document.getElementById('opt2').innerText = langData[l].g2;
         document.getElementById('opt3').innerText = langData[l].g3;
         document.getElementById('btnAnalyzeText').innerText = langData[l].btnAna;
+        document.getElementById('btnVsText').innerText = langData[l].btnVsTxt; // EKLENEN
         document.getElementById('txtBtnPlan').innerText = langData[l].btnPlan;
         document.getElementById('txtPrem').innerText = langData[l].premTitle;
         document.getElementById('txtOut').innerText = langData[l].btnOut;
         document.getElementById('btnPdf').innerText = langData[l].btnPdfTxt;
         document.getElementById('btnHistToggle').innerText = langData[l].btnHistTxt;
         document.getElementById('txtHistTitle').innerText = langData[l].histTitle;
-        document.getElementById('txtStreak').innerText = langData[l].streakTxt; // Alev serisi çevirisi
+        document.getElementById('txtStreak').innerText = langData[l].streakTxt; 
     }
 
     const firebaseConfig = {
@@ -209,12 +213,11 @@
             if(!isVip) { document.getElementById('premiumLockInfo').style.display = 'block'; initPayPal(); } 
             else { document.getElementById('premiumLockInfo').style.display = 'none'; }
             
-            showStreak(); // Giriş yapıldığında alev serisini göster
+            showStreak(); 
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
         } else { toggleView('loginView'); }
     });
 
-    // --- EKLENEN: ALEVLİ SERİ GÜNCELLEME VE GÖSTERME MANTIĞI ---
     function showStreak() {
         if(!auth.currentUser) return;
         let streakData = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}');
@@ -246,13 +249,12 @@
                 streakData.lastDate = today;
             }
         } else {
-            streakData.count = 0; // Kötü beslendiğinde seri sıfırlanır
+            streakData.count = 0; 
             streakData.lastDate = today;
         }
         localStorage.setItem('streak_' + uid, JSON.stringify(streakData));
         showStreak();
     }
-    // -------------------------------------------------------------
 
     function initPayPal() {
         paypal.Buttons({
@@ -278,7 +280,8 @@
         resDiv.style.display = 'flex';
 
         let img = "";
-        if(mode === 'yemek') {
+        // EKLENEN: VS Modunda da kamerayı dondur
+        if(mode === 'yemek' || mode === 'vs') {
             const vid = document.getElementById('video');
             const canv = document.createElement('canvas');
             canv.width = 640; canv.height = 480;
@@ -297,9 +300,11 @@
             resDiv.innerHTML = '';
             
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
-            const headers = mode === 'plan' ? langData[currentLang].headersPlan : langData[currentLang].headersYemek;
             
-            let historySummary = "Analiz";
+            // EKLENEN: Başlık seçimi VS Modu eklendi
+            const headers = mode === 'plan' ? langData[currentLang].headersPlan : (mode === 'vs' ? langData[currentLang].headersVs : langData[currentLang].headersYemek);
+            
+            let historySummary = mode === 'vs' ? "⚔️ VS Maçı" : "Analiz";
 
             sections.forEach((text, i) => {
                 const card = document.createElement('div');
@@ -313,8 +318,6 @@
                         scoreVal = parseInt(scoreMatch[1]);
                         if(scoreVal > 10) scoreVal = 10;
                         cardContent = cardContent.replace(scoreMatch[0], '').trim();
-                        
-                        // EKLENEN: Skoru aldıktan sonra Alevli Seriyi güncelle
                         updateStreak(scoreVal);
                     }
                     let leftPos = (scoreVal / 10) * 100;
@@ -333,13 +336,15 @@
                     historySummary = `Skor: ${scoreVal}/10 - ` + cardContent.substring(0, 30) + "...";
                 } else {
                     card.innerHTML = `<div class="report-tag">${headers[i] || 'DETAY / DETAIL'}</div><div class="report-txt">${cardContent}</div>`;
+                    if(mode === 'vs' && i === 0) historySummary = "🥊 Savaş: " + cardContent.substring(0, 35) + "...";
                 }
                 resDiv.appendChild(card);
             });
             
             document.getElementById('btnPdf').style.display = 'block';
 
-            if (auth.currentUser && mode === 'yemek') {
+            // EKLENEN: Geçmişe VS kaydını da ekle
+            if (auth.currentUser && (mode === 'yemek' || mode === 'vs')) {
                 let histKey = 'history_' + auth.currentUser.uid;
                 let histArray = JSON.parse(localStorage.getItem(histKey) || '[]');
                 histArray.unshift({ summary: historySummary, date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString() });
