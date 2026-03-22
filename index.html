@@ -36,21 +36,27 @@
 <body>
 
 <div class="app-card">
+
+    <div style="text-align: center; margin-bottom: 15px;">
+        <span onclick="changeLang('tr')" style="font-size: 1.8rem; cursor: pointer; margin-right: 15px;" title="Türkçe">🇹🇷</span>
+        <span onclick="changeLang('en')" style="font-size: 1.8rem; cursor: pointer;" title="English">🇺🇸</span>
+    </div>
+
     <div id="loginView" class="auth-container">
-        <h1>BIO-CHEF</h1>
+        <h1 id="txtL1">BIO-CHEF</h1>
         <input type="email" id="lEmail" placeholder="E-posta">
         <input type="password" id="lPass" placeholder="Şifre">
-        <button class="btn btn-main" onclick="doLogin()">GİRİŞ YAP</button>
-        <button class="btn btn-outline" style="border:none;" onclick="doReset()">Şifremi Unuttum?</button>
-        <button class="btn btn-outline" onclick="toggleView('regView')">Kayıt Ol</button>
+        <button class="btn btn-main" id="txtL4" onclick="doLogin()">GİRİŞ YAP</button>
+        <button class="btn btn-outline" id="txtL5" style="border:none;" onclick="doReset()">Şifremi Unuttum?</button>
+        <button class="btn btn-outline" id="txtL6" onclick="toggleView('regView')">Kayıt Ol</button>
     </div>
 
     <div id="regView" class="auth-container" style="display:none;">
-        <h1>KAYIT OL</h1>
+        <h1 id="txtR7">KAYIT OL</h1>
         <input type="email" id="rEmail" placeholder="E-posta">
         <input type="password" id="rPass" placeholder="Şifre">
-        <button class="btn btn-sub" onclick="doRegister()">HESABI OLUŞTUR</button>
-        <button class="btn btn-outline" onclick="toggleView('loginView')">Geri Dön</button>
+        <button class="btn btn-sub" id="txtR8" onclick="doRegister()">HESABI OLUŞTUR</button>
+        <button class="btn btn-outline" id="txtR9" onclick="toggleView('loginView')">Geri Dön</button>
     </div>
 
     <div id="mainView" style="display:none;">
@@ -64,30 +70,85 @@
             <input type="number" id="uWeight" placeholder="KİLO">
         </div>
         <select id="uGoal">
-            <option value="Kilo Vermek">Kilo Vermek (-)</option>
-            <option value="Kilo Almak">Kilo Almak (+)</option>
-            <option value="Kiloyu Korumak">Kiloyu Korumak (=)</option>
+            <option id="opt1" value="Kilo Vermek">Kilo Vermek (-)</option>
+            <option id="opt2" value="Kilo Almak">Kilo Almak (+)</option>
+            <option id="opt3" value="Kiloyu Korumak">Kiloyu Korumak (=)</option>
         </select>
 
-        <div class="cam-box"><video id="video" autoplay playsinline></video></div>
+        <div class="cam-box"><video id="video" autoplay playsinline onclick="this.play()"></video></div>
         <canvas id="canvas" style="display:none;"></canvas>
 
-        <button class="btn btn-main" id="btnAnalyze" onclick="runAI('yemek')">📸 ANALİZ ET</button>
+        <button class="btn btn-main" id="btnAnalyzeText" onclick="runAI('yemek')">📸 ANALİZ ET</button>
         
         <div class="premium-area">
-            <button class="btn btn-sub" style="margin-top:0; background: var(--premium); color: black;" onclick="handlePlanClick()">📅 HAFTALIK PLANINIZI ÇIKARIN</button>
+            <button class="btn btn-sub" id="txtBtnPlan" style="margin-top:0; background: var(--premium); color: black;" onclick="handlePlanClick()">📅 HAFTALIK PLANINIZI ÇIKARIN</button>
             <div id="premiumLockInfo" style="margin-top: 15px;">
-                <div class="premium-title">PREMIUM ÜYE | 0.99 $</div>
+                <div class="premium-title" id="txtPrem">PREMIUM ÜYE | 0.99 $</div>
                 <div id="paypal-button-container"></div>
             </div>
         </div>
 
         <div id="results"></div>
-        <button class="btn btn-outline" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
+        <button class="btn btn-outline" id="txtOut" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
     </div>
 </div>
 
 <script>
+    // --- EKLENEN: DİL ALTYAPISI (ÇEVİRİ SÖZLÜĞÜ) ---
+    let currentLang = 'tr';
+    const langData = {
+        tr: {
+            appTitle: "BIO-CHEF", emailHolder: "E-posta", passHolder: "Şifre", btnLogin: "GİRİŞ YAP", btnReset: "Şifremi Unuttum?", btnReg: "Kayıt Ol",
+            regTitle: "KAYIT OL", btnCreate: "HESABI OLUŞTUR", btnBack: "Geri Dön",
+            ageHolder: "YAŞ", weightHolder: "KİLO",
+            g1: "Kilo Vermek (-)", g2: "Kilo Almak (+)", g3: "Kiloyu Korumak (=)",
+            btnAna: "📸 ANALİZ ET", btnPlan: "📅 HAFTALIK PLANINIZI ÇIKARIN", premTitle: "PREMIUM ÜYE | 0.99 $", btnOut: "GÜVENLİ ÇIKIŞ",
+            errMail: "Mail yazın.", errInfo: "Bilgileri girin.", errPlan: "Haftalık plan için aşağıdan Premium üyeliğinizi başlatın.", errMsg: "Hata!",
+            loading: "🔍 İnceleniyor...", headersYemek: ["ÜRÜN ÖZETİ", "BESİN DEĞERLERİ", "HEDEF ANALİZİ", "NET TAVSİYE"],
+            headersPlan: ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"],
+            payDesc: "Bio-Chef Pro Haftalık Plan Erişimi", paySucc: "Ödeme Başarılı! VIP özellikler aktif edildi."
+        },
+        en: {
+            appTitle: "BIO-CHEF", emailHolder: "Email", passHolder: "Password", btnLogin: "LOGIN", btnReset: "Forgot Password?", btnReg: "Sign Up",
+            regTitle: "SIGN UP", btnCreate: "CREATE ACCOUNT", btnBack: "Go Back",
+            ageHolder: "AGE", weightHolder: "WEIGHT",
+            g1: "Lose Weight (-)", g2: "Gain Weight (+)", g3: "Maintain Weight (=)",
+            btnAna: "📸 ANALYZE", btnPlan: "📅 GET WEEKLY PLAN", premTitle: "PREMIUM MEMBER | $0.99", btnOut: "SECURE LOGOUT",
+            errMail: "Enter email.", errInfo: "Enter info.", errPlan: "Start Premium below for weekly plan.", errMsg: "Error!",
+            loading: "🔍 Analyzing...", headersYemek: ["PRODUCT SUMMARY", "NUTRITION FACTS", "GOAL ANALYSIS", "NET ADVICE"],
+            headersPlan: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
+            payDesc: "Bio-Chef Pro Weekly Plan Access", paySucc: "Payment Successful! VIP features activated."
+        }
+    };
+
+    function changeLang(l) {
+        currentLang = l;
+        document.getElementById('txtL1').innerText = langData[l].appTitle;
+        document.getElementById('lEmail').placeholder = langData[l].emailHolder;
+        document.getElementById('lPass').placeholder = langData[l].passHolder;
+        document.getElementById('txtL4').innerText = langData[l].btnLogin;
+        document.getElementById('txtL5').innerText = langData[l].btnReset;
+        document.getElementById('txtL6').innerText = langData[l].btnReg;
+
+        document.getElementById('txtR7').innerText = langData[l].regTitle;
+        document.getElementById('rEmail').placeholder = langData[l].emailHolder;
+        document.getElementById('rPass').placeholder = langData[l].passHolder;
+        document.getElementById('txtR8').innerText = langData[l].btnCreate;
+        document.getElementById('txtR9').innerText = langData[l].btnBack;
+
+        document.getElementById('uAge').placeholder = langData[l].ageHolder;
+        document.getElementById('uWeight').placeholder = langData[l].weightHolder;
+        document.getElementById('opt1').innerText = langData[l].g1;
+        document.getElementById('opt2').innerText = langData[l].g2;
+        document.getElementById('opt3').innerText = langData[l].g3;
+
+        document.getElementById('btnAnalyzeText').innerText = langData[l].btnAna;
+        document.getElementById('txtBtnPlan').innerText = langData[l].btnPlan;
+        document.getElementById('txtPrem').innerText = langData[l].premTitle;
+        document.getElementById('txtOut').innerText = langData[l].btnOut;
+    }
+    // ---------------------------------------------
+
     const firebaseConfig = {
         apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
         authDomain: "voice2post-9e8ca.firebaseapp.com",
@@ -128,17 +189,16 @@
 
     function initPayPal() {
         paypal.Buttons({
-            // Vertical layout sayesinde Banka Kartı (Debit/Credit Card) seçeneği otomatik gelir
             style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
             createOrder: (d, a) => a.order.create({ 
                 purchase_units: [{ 
                     amount: { value: '0.99', currency_code: 'USD' },
-                    description: "Bio-Chef Pro Haftalık Plan Erişimi" 
+                    description: langData[currentLang].payDesc 
                 }] 
             }),
             onApprove: (d, a) => a.order.capture().then(det => {
                 localStorage.setItem('vip_' + auth.currentUser.uid, 'true');
-                alert("Ödeme Başarılı! VIP özellikler aktif edildi.");
+                alert(langData[currentLang].paySucc);
                 location.reload();
             })
         }).render('#paypal-button-container');
@@ -148,12 +208,12 @@
     async function doRegister() { try { await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); } catch(e) { alert(e.message); } }
     async function doReset() { 
         const email = document.getElementById('lEmail').value;
-        if(!email) return alert("Mail yazın.");
-        try { await auth.sendPasswordResetEmail(email); alert("Link gönderildi."); } catch(e) { alert(e.message); }
+        if(!email) return alert(langData[currentLang].errMail);
+        try { await auth.sendPasswordResetEmail(email); alert("Link gönderildi. / Link sent."); } catch(e) { alert(e.message); }
     }
 
     function handlePlanClick() { 
-        if(!isVip) return alert("Haftalık plan için aşağıdan Premium üyeliğinizi başlatın."); 
+        if(!isVip) return alert(langData[currentLang].errPlan); 
         runAI('plan'); 
     }
 
@@ -161,8 +221,8 @@
         const resDiv = document.getElementById('results');
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
-        if(!age || !weight) return alert("Bilgileri girin.");
-        resDiv.innerHTML = '<p style="text-align:center;">🔍 İnceleniyor...</p>';
+        if(!age || !weight) return alert(langData[currentLang].errInfo);
+        resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
         resDiv.style.display = 'flex';
 
         let img = "";
@@ -172,25 +232,39 @@
             canv.width = 640; canv.height = 480;
             canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
             img = canv.toDataURL('image/jpeg', 0.7);
+            
+            // EKLENEN: Analize basıldığında kamera donar ve fotoğraf çeker.
+            vid.pause(); 
         }
 
         try {
             const r = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mode, image: img, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}` })
+                body: JSON.stringify({ 
+                    mode, 
+                    image: img, 
+                    user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`,
+                    lang: currentLang // EKLENEN: Yapay zekaya dili gönderiyoruz
+                })
             });
             const d = await r.json();
             resDiv.innerHTML = '';
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
-            const headers = mode === 'plan' ? ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"] : ["ÜRÜN ÖZETİ", "BESİN DEĞERLERİ", "HEDEF ANALİZİ", "NET TAVSİYE"];
+            const headers = mode === 'plan' ? langData[currentLang].headersPlan : langData[currentLang].headersYemek;
             sections.forEach((text, i) => {
                 const card = document.createElement('div');
                 card.className = 'report-card';
-                card.innerHTML = `<div class="report-tag">${headers[i] || 'DETAY'}</div><div class="report-txt">${text.trim()}</div>`;
+                card.innerHTML = `<div class="report-tag">${headers[i] || 'DETAY / DETAIL'}</div><div class="report-txt">${text.trim()}</div>`;
                 resDiv.appendChild(card);
             });
-        } catch (e) { alert("Hata!"); }
+            
+            // EKLENEN: Sonuç gelince otomatik olarak aşağıya sonuçlara kaydırır.
+            setTimeout(() => {
+                resDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 200);
+
+        } catch (e) { alert(langData[currentLang].errMsg); }
     }
 </script>
 </body>
