@@ -8,11 +8,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AdOeigm877SXMe7mMtuEMPUeGkY9WcgyIJPbzGJU2HP1CS_eaGcn4O0FnUEoB3JFmDXEHSnxx5Do-pIN&currency=USD&components=buttons"></script>
     
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <style>
         :root { --bg: #0b0f1a; --card: #161b2a; --primary: #10b981; --accent: #0ea5e9; --premium: #f59e0b; --text: #f1f5f9; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
-        .app-card { width: 100%; max-width: 420px; background: var(--card); border-radius: 35px; padding: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); }
+        .app-card { width: 100%; max-width: 420px; background: var(--card); border-radius: 35px; padding: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); height: fit-content; }
         .auth-container h1 { font-size: 2.2rem; text-align: center; margin-bottom: 20px; color: var(--primary); font-weight: 900; }
         input, select { width: 100%; padding: 15px; border-radius: 15px; background: #0b0f1a; border: 1px solid #2d3748; color: white; margin-bottom: 12px; text-align: center; }
         .btn { width: 100%; padding: 18px; border-radius: 18px; border: none; font-weight: 700; cursor: pointer; color: white; transition: 0.3s; }
@@ -27,10 +30,13 @@
         .premium-title { font-weight: 900; color: var(--premium); font-size: 1.1rem; margin-bottom: 15px; }
         #paypal-button-container { margin-top: 10px; min-height: 150px; }
 
-        #results { display: none; flex-direction: column; gap: 12px; margin-top: 25px; }
+        #results { display: none; flex-direction: column; gap: 12px; margin-top: 25px; padding: 15px; background: var(--bg); border-radius: 20px; }
         .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); }
         .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
         .report-txt { font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
+
+        /* EKLENEN: GEÇMİŞ PANELI CSS */
+        .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); }
     </style>
 </head>
 <body>
@@ -89,12 +95,21 @@
         </div>
 
         <div id="results"></div>
+
+        <button class="btn btn-main" id="btnPdf" style="display:none; background: #ef4444; margin-top:15px;" onclick="downloadPDF()">📄 PDF OLARAK KAYDET</button>
+
+        <button class="btn btn-outline" id="btnHistToggle" onclick="toggleHistory()">📚 GEÇMİŞ ANALİZLERİM</button>
+        
+        <div id="historyPanel" style="display:none; margin-top:15px; padding:15px; border-radius:15px; border: 1px solid #2d3748;">
+            <h3 id="txtHistTitle" style="text-align:center; color:var(--primary); margin-bottom:10px;">Son Taramalarınız</h3>
+            <div id="historyList"></div>
+        </div>
+
         <button class="btn btn-outline" id="txtOut" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
     </div>
 </div>
 
 <script>
-    // --- EKLENEN: DİL ALTYAPISI (ÇEVİRİ SÖZLÜĞÜ) ---
     let currentLang = 'tr';
     const langData = {
         tr: {
@@ -104,9 +119,12 @@
             g1: "Kilo Vermek (-)", g2: "Kilo Almak (+)", g3: "Kiloyu Korumak (=)",
             btnAna: "📸 ANALİZ ET", btnPlan: "📅 HAFTALIK PLANINIZI ÇIKARIN", premTitle: "PREMIUM ÜYE | 0.99 $", btnOut: "GÜVENLİ ÇIKIŞ",
             errMail: "Mail yazın.", errInfo: "Bilgileri girin.", errPlan: "Haftalık plan için aşağıdan Premium üyeliğinizi başlatın.", errMsg: "Hata!",
-            loading: "🔍 İnceleniyor...", headersYemek: ["ÜRÜN ÖZETİ", "BESİN DEĞERLERİ", "HEDEF ANALİZİ", "NET TAVSİYE"],
+            loading: "🔍 İnceleniyor...", 
+            // EKLENEN: Başlığa HEDEF SKORU eklendi (5 Madde oldu)
+            headersYemek: ["HEDEF SKORU 🎯", "ÜRÜN ÖZETİ", "BESİN DEĞERLERİ", "HEDEF ANALİZİ", "NET TAVSİYE"],
             headersPlan: ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"],
-            payDesc: "Bio-Chef Pro Haftalık Plan Erişimi", paySucc: "Ödeme Başarılı! VIP özellikler aktif edildi."
+            payDesc: "Bio-Chef Pro Haftalık Plan Erişimi", paySucc: "Ödeme Başarılı! VIP özellikler aktif edildi.",
+            btnPdfTxt: "📄 PDF OLARAK KAYDET", btnHistTxt: "📚 GEÇMİŞ ANALİZLERİM", histTitle: "Son Taramalarınız", noHist: "Henüz geçmiş yok."
         },
         en: {
             appTitle: "BIO-CHEF", emailHolder: "Email", passHolder: "Password", btnLogin: "LOGIN", btnReset: "Forgot Password?", btnReg: "Sign Up",
@@ -115,9 +133,12 @@
             g1: "Lose Weight (-)", g2: "Gain Weight (+)", g3: "Maintain Weight (=)",
             btnAna: "📸 ANALYZE", btnPlan: "📅 GET WEEKLY PLAN", premTitle: "PREMIUM MEMBER | $0.99", btnOut: "SECURE LOGOUT",
             errMail: "Enter email.", errInfo: "Enter info.", errPlan: "Start Premium below for weekly plan.", errMsg: "Error!",
-            loading: "🔍 Analyzing...", headersYemek: ["PRODUCT SUMMARY", "NUTRITION FACTS", "GOAL ANALYSIS", "NET ADVICE"],
+            loading: "🔍 Analyzing...", 
+            // EKLENEN: Başlığa GOAL SCORE eklendi (5 Madde oldu)
+            headersYemek: ["GOAL SCORE 🎯", "PRODUCT SUMMARY", "NUTRITION FACTS", "GOAL ANALYSIS", "NET ADVICE"],
             headersPlan: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
-            payDesc: "Bio-Chef Pro Weekly Plan Access", paySucc: "Payment Successful! VIP features activated."
+            payDesc: "Bio-Chef Pro Weekly Plan Access", paySucc: "Payment Successful! VIP features activated.",
+            btnPdfTxt: "📄 DOWNLOAD AS PDF", btnHistTxt: "📚 MY HISTORY", histTitle: "Recent Scans", noHist: "No history yet."
         }
     };
 
@@ -129,25 +150,26 @@
         document.getElementById('txtL4').innerText = langData[l].btnLogin;
         document.getElementById('txtL5').innerText = langData[l].btnReset;
         document.getElementById('txtL6').innerText = langData[l].btnReg;
-
         document.getElementById('txtR7').innerText = langData[l].regTitle;
         document.getElementById('rEmail').placeholder = langData[l].emailHolder;
         document.getElementById('rPass').placeholder = langData[l].passHolder;
         document.getElementById('txtR8').innerText = langData[l].btnCreate;
         document.getElementById('txtR9').innerText = langData[l].btnBack;
-
         document.getElementById('uAge').placeholder = langData[l].ageHolder;
         document.getElementById('uWeight').placeholder = langData[l].weightHolder;
         document.getElementById('opt1').innerText = langData[l].g1;
         document.getElementById('opt2').innerText = langData[l].g2;
         document.getElementById('opt3').innerText = langData[l].g3;
-
         document.getElementById('btnAnalyzeText').innerText = langData[l].btnAna;
         document.getElementById('txtBtnPlan').innerText = langData[l].btnPlan;
         document.getElementById('txtPrem').innerText = langData[l].premTitle;
         document.getElementById('txtOut').innerText = langData[l].btnOut;
+        
+        // EKLENEN: Yeni buton çevirileri
+        document.getElementById('btnPdf').innerText = langData[l].btnPdfTxt;
+        document.getElementById('btnHistToggle').innerText = langData[l].btnHistTxt;
+        document.getElementById('txtHistTitle').innerText = langData[l].histTitle;
     }
-    // ---------------------------------------------
 
     const firebaseConfig = {
         apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
@@ -159,6 +181,8 @@
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+    const db = firebase.firestore(); // EKLENEN: Veritabanı başlatıldı
+
     let isVip = false;
 
     function toggleView(id) {
@@ -222,6 +246,8 @@
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
         if(!age || !weight) return alert(langData[currentLang].errInfo);
+        
+        document.getElementById('btnPdf').style.display = 'none'; // Yeni işlemde PDF butonunu gizle
         resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
         resDiv.style.display = 'flex';
 
@@ -232,8 +258,6 @@
             canv.width = 640; canv.height = 480;
             canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
             img = canv.toDataURL('image/jpeg', 0.7);
-            
-            // EKLENEN: Analize basıldığında kamera donar ve fotoğraf çeker.
             vid.pause(); 
         }
 
@@ -242,14 +266,15 @@
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ 
-                    mode, 
-                    image: img, 
+                    mode, image: img, 
                     user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`,
-                    lang: currentLang // EKLENEN: Yapay zekaya dili gönderiyoruz
+                    lang: currentLang 
                 })
             });
             const d = await r.json();
             resDiv.innerHTML = '';
+            
+            // AI Raporunu Ekrana Basma
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
             const headers = mode === 'plan' ? langData[currentLang].headersPlan : langData[currentLang].headersYemek;
             sections.forEach((text, i) => {
@@ -259,12 +284,53 @@
                 resDiv.appendChild(card);
             });
             
-            // EKLENEN: Sonuç gelince otomatik olarak aşağıya sonuçlara kaydırır.
-            setTimeout(() => {
-                resDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 200);
+            // EKLENEN: İşlem bitince PDF Butonunu Göster
+            document.getElementById('btnPdf').style.display = 'block';
+
+            // EKLENEN: Başarılı analizi Firestore'a Kaydet (Geçmiş için)
+            if (auth.currentUser && mode === 'yemek') {
+                db.collection("history").add({
+                    uid: auth.currentUser.uid,
+                    summary: sections[0] ? sections[0].substring(0, 50) + "..." : "Analiz",
+                    date: new Date().toLocaleString()
+                });
+            }
+
+            setTimeout(() => { resDiv.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
 
         } catch (e) { alert(langData[currentLang].errMsg); }
+    }
+
+    // EKLENEN: PDF İndirme Fonksiyonu
+    function downloadPDF() {
+        const element = document.getElementById('results');
+        const opt = { margin: 0.5, filename: 'BioChef_Rapor.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
+        html2pdf().set(opt).from(element).save();
+    }
+
+    // EKLENEN: Geçmiş Paneli Açma ve Veri Çekme Fonksiyonu
+    function toggleHistory() {
+        const panel = document.getElementById('historyPanel');
+        const listDiv = document.getElementById('historyList');
+        
+        if (panel.style.display === 'none') {
+            panel.style.display = 'block';
+            listDiv.innerHTML = '<p style="text-align:center;">Yükleniyor...</p>';
+            
+            // Firestore'dan veriyi çek (Sadece giriş yapan kullanıcının verileri)
+            db.collection("history").where("uid", "==", auth.currentUser.uid).orderBy("date", "desc").limit(10).get()
+            .then((querySnapshot) => {
+                listDiv.innerHTML = '';
+                if (querySnapshot.empty) { listDiv.innerHTML = `<p style="text-align:center; color:#94a3b8;">${langData[currentLang].noHist}</p>`; return; }
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    listDiv.innerHTML += `<div class="history-box"><b>🗓️ ${data.date}</b><br>${data.summary}</div>`;
+                });
+            }).catch((error) => { listDiv.innerHTML = '<p>Veritabanı erişim izni gerekiyor.</p>'; });
+        } else {
+            panel.style.display = 'none';
+        }
     }
 </script>
 </body>
