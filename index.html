@@ -8,7 +8,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AdOeigm877SXMe7mMtuEMPUeGkY9WcgyIJPbzGJU2HP1CS_eaGcn4O0FnUEoB3JFmDXEHSnxx5Do-pIN&currency=USD&components=buttons"></script>
     
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
@@ -25,7 +24,6 @@
         .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 2px solid #1e293b; margin-bottom: 20px; }
         video { width: 100%; height: 100%; object-fit: cover; }
         
-        /* PREMIUM ÖDEME ALANI */
         .premium-area { background: rgba(245, 158, 11, 0.08); border: 2px solid var(--premium); border-radius: 25px; padding: 20px; margin-top: 20px; text-align: center; }
         .premium-title { font-weight: 900; color: var(--premium); font-size: 1.1rem; margin-bottom: 15px; }
         #paypal-button-container { margin-top: 10px; min-height: 150px; }
@@ -35,8 +33,13 @@
         .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
         .report-txt { font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
 
-        /* EKLENEN: GEÇMİŞ PANELI CSS */
         .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); }
+
+        /* --- EKLENEN: 1-10 GÖRSEL SKOR BARI CSS --- */
+        .score-wrapper { margin-top: 20px; margin-bottom: 10px; width: 100%; position: relative; padding-bottom: 20px; }
+        .score-bar { height: 14px; width: 100%; border-radius: 7px; background: linear-gradient(to right, #ef4444 0%, #f97316 35%, #eab308 65%, #22c55e 100%); position: relative; }
+        .score-marker { position: absolute; top: -10px; width: 30px; height: 30px; background: #fff; border: 3px solid #1e293b; border-radius: 50%; transform: translateX(-50%); transition: left 1s ease-out; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 900; color: #000; z-index: 2; }
+        .score-marker::after { content: '📍'; position: absolute; bottom: -20px; font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -120,11 +123,11 @@
             btnAna: "📸 ANALİZ ET", btnPlan: "📅 HAFTALIK PLANINIZI ÇIKARIN", premTitle: "PREMIUM ÜYE | 0.99 $", btnOut: "GÜVENLİ ÇIKIŞ",
             errMail: "Mail yazın.", errInfo: "Bilgileri girin.", errPlan: "Haftalık plan için aşağıdan Premium üyeliğinizi başlatın.", errMsg: "Hata!",
             loading: "🔍 İnceleniyor...", 
-            // EKLENEN: Başlığa HEDEF SKORU eklendi (5 Madde oldu)
             headersYemek: ["HEDEF SKORU 🎯", "ÜRÜN ÖZETİ", "BESİN DEĞERLERİ", "HEDEF ANALİZİ", "NET TAVSİYE"],
             headersPlan: ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"],
             payDesc: "Bio-Chef Pro Haftalık Plan Erişimi", paySucc: "Ödeme Başarılı! VIP özellikler aktif edildi.",
-            btnPdfTxt: "📄 PDF OLARAK KAYDET", btnHistTxt: "📚 GEÇMİŞ ANALİZLERİM", histTitle: "Son Taramalarınız", noHist: "Henüz geçmiş yok."
+            btnPdfTxt: "📄 PDF OLARAK KAYDET", btnHistTxt: "📚 GEÇMİŞ ANALİZLERİM", histTitle: "Son Taramalarınız", noHist: "Henüz geçmiş yok.",
+            markerInfo: "Sen"
         },
         en: {
             appTitle: "BIO-CHEF", emailHolder: "Email", passHolder: "Password", btnLogin: "LOGIN", btnReset: "Forgot Password?", btnReg: "Sign Up",
@@ -134,11 +137,11 @@
             btnAna: "📸 ANALYZE", btnPlan: "📅 GET WEEKLY PLAN", premTitle: "PREMIUM MEMBER | $0.99", btnOut: "SECURE LOGOUT",
             errMail: "Enter email.", errInfo: "Enter info.", errPlan: "Start Premium below for weekly plan.", errMsg: "Error!",
             loading: "🔍 Analyzing...", 
-            // EKLENEN: Başlığa GOAL SCORE eklendi (5 Madde oldu)
             headersYemek: ["GOAL SCORE 🎯", "PRODUCT SUMMARY", "NUTRITION FACTS", "GOAL ANALYSIS", "NET ADVICE"],
             headersPlan: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
             payDesc: "Bio-Chef Pro Weekly Plan Access", paySucc: "Payment Successful! VIP features activated.",
-            btnPdfTxt: "📄 DOWNLOAD AS PDF", btnHistTxt: "📚 MY HISTORY", histTitle: "Recent Scans", noHist: "No history yet."
+            btnPdfTxt: "📄 DOWNLOAD AS PDF", btnHistTxt: "📚 MY HISTORY", histTitle: "Recent Scans", noHist: "No history yet.",
+            markerInfo: "You"
         }
     };
 
@@ -164,8 +167,6 @@
         document.getElementById('txtBtnPlan').innerText = langData[l].btnPlan;
         document.getElementById('txtPrem').innerText = langData[l].premTitle;
         document.getElementById('txtOut').innerText = langData[l].btnOut;
-        
-        // EKLENEN: Yeni buton çevirileri
         document.getElementById('btnPdf').innerText = langData[l].btnPdfTxt;
         document.getElementById('btnHistToggle').innerText = langData[l].btnHistTxt;
         document.getElementById('txtHistTitle').innerText = langData[l].histTitle;
@@ -181,8 +182,6 @@
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db = firebase.firestore(); // EKLENEN: Veritabanı başlatıldı
-
     let isVip = false;
 
     function toggleView(id) {
@@ -199,14 +198,8 @@
             toggleView('mainView');
             document.getElementById('uMail').innerText = user.email;
             isVip = localStorage.getItem('vip_' + user.uid) === 'true';
-            
-            if(!isVip) {
-                document.getElementById('premiumLockInfo').style.display = 'block';
-                initPayPal();
-            } else {
-                document.getElementById('premiumLockInfo').style.display = 'none';
-            }
-            
+            if(!isVip) { document.getElementById('premiumLockInfo').style.display = 'block'; initPayPal(); } 
+            else { document.getElementById('premiumLockInfo').style.display = 'none'; }
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
         } else { toggleView('loginView'); }
     });
@@ -214,32 +207,15 @@
     function initPayPal() {
         paypal.Buttons({
             style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
-            createOrder: (d, a) => a.order.create({ 
-                purchase_units: [{ 
-                    amount: { value: '0.99', currency_code: 'USD' },
-                    description: langData[currentLang].payDesc 
-                }] 
-            }),
-            onApprove: (d, a) => a.order.capture().then(det => {
-                localStorage.setItem('vip_' + auth.currentUser.uid, 'true');
-                alert(langData[currentLang].paySucc);
-                location.reload();
-            })
+            createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: '0.99', currency_code: 'USD' }, description: langData[currentLang].payDesc }] }),
+            onApprove: (d, a) => a.order.capture().then(det => { localStorage.setItem('vip_' + auth.currentUser.uid, 'true'); alert(langData[currentLang].paySucc); location.reload(); })
         }).render('#paypal-button-container');
     }
 
     async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); } }
     async function doRegister() { try { await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); } catch(e) { alert(e.message); } }
-    async function doReset() { 
-        const email = document.getElementById('lEmail').value;
-        if(!email) return alert(langData[currentLang].errMail);
-        try { await auth.sendPasswordResetEmail(email); alert("Link gönderildi. / Link sent."); } catch(e) { alert(e.message); }
-    }
-
-    function handlePlanClick() { 
-        if(!isVip) return alert(langData[currentLang].errPlan); 
-        runAI('plan'); 
-    }
+    async function doReset() { const email = document.getElementById('lEmail').value; if(!email) return alert(langData[currentLang].errMail); try { await auth.sendPasswordResetEmail(email); alert("Link gönderildi. / Link sent."); } catch(e) { alert(e.message); } }
+    function handlePlanClick() { if(!isVip) return alert(langData[currentLang].errPlan); runAI('plan'); }
 
     async function runAI(mode) {
         const resDiv = document.getElementById('results');
@@ -247,7 +223,7 @@
         const weight = document.getElementById('uWeight').value;
         if(!age || !weight) return alert(langData[currentLang].errInfo);
         
-        document.getElementById('btnPdf').style.display = 'none'; // Yeni işlemde PDF butonunu gizle
+        document.getElementById('btnPdf').style.display = 'none'; 
         resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
         resDiv.style.display = 'flex';
 
@@ -265,35 +241,59 @@
             const r = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ 
-                    mode, image: img, 
-                    user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`,
-                    lang: currentLang 
-                })
+                body: JSON.stringify({ mode, image: img, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`, lang: currentLang })
             });
             const d = await r.json();
             resDiv.innerHTML = '';
             
-            // AI Raporunu Ekrana Basma
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
             const headers = mode === 'plan' ? langData[currentLang].headersPlan : langData[currentLang].headersYemek;
+            
+            let historySummary = "Analiz";
+
             sections.forEach((text, i) => {
                 const card = document.createElement('div');
                 card.className = 'report-card';
-                card.innerHTML = `<div class="report-tag">${headers[i] || 'DETAY / DETAIL'}</div><div class="report-txt">${text.trim()}</div>`;
+                let cardContent = text.trim();
+
+                // EKLENEN: 1-10 Skor Barını Algılama ve Çizme
+                if (mode === 'yemek' && i === 0) {
+                    const scoreMatch = cardContent.match(/\[SKOR:\s*(\d+)\]/i);
+                    let scoreVal = 5; 
+                    if (scoreMatch) {
+                        scoreVal = parseInt(scoreMatch[1]);
+                        if(scoreVal > 10) scoreVal = 10;
+                        cardContent = cardContent.replace(scoreMatch[0], '').trim();
+                    }
+                    let leftPos = (scoreVal / 10) * 100;
+                    
+                    let scoreBarHtml = `
+                    <div class="score-wrapper">
+                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#94a3b8; margin-bottom:5px;">
+                            <span>Kötü (0)</span><span>Orta</span><span>Mükemmel (10)</span>
+                        </div>
+                        <div class="score-bar">
+                            <div class="score-marker" style="left: ${leftPos}%;">${scoreVal}</div>
+                        </div>
+                    </div>`;
+                    
+                    card.innerHTML = `<div class="report-tag">${headers[i]}</div><div class="report-txt">${cardContent}</div>${scoreBarHtml}`;
+                    historySummary = `Skor: ${scoreVal}/10 - ` + cardContent.substring(0, 30) + "...";
+                } else {
+                    card.innerHTML = `<div class="report-tag">${headers[i] || 'DETAY / DETAIL'}</div><div class="report-txt">${cardContent}</div>`;
+                }
                 resDiv.appendChild(card);
             });
             
-            // EKLENEN: İşlem bitince PDF Butonunu Göster
             document.getElementById('btnPdf').style.display = 'block';
 
-            // EKLENEN: Başarılı analizi Firestore'a Kaydet (Geçmiş için)
+            // DÜZELTİLEN: Geçmiş Kayıtları veritabanı iznine takılmasın diye LocalStorage'a çevrildi.
             if (auth.currentUser && mode === 'yemek') {
-                db.collection("history").add({
-                    uid: auth.currentUser.uid,
-                    summary: sections[0] ? sections[0].substring(0, 50) + "..." : "Analiz",
-                    date: new Date().toLocaleString()
-                });
+                let histKey = 'history_' + auth.currentUser.uid;
+                let histArray = JSON.parse(localStorage.getItem(histKey) || '[]');
+                histArray.unshift({ summary: historySummary, date: new Date().toLocaleString() });
+                if(histArray.length > 10) histArray.pop(); // Sadece son 10 kaydı tut
+                localStorage.setItem(histKey, JSON.stringify(histArray));
             }
 
             setTimeout(() => { resDiv.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
@@ -301,33 +301,32 @@
         } catch (e) { alert(langData[currentLang].errMsg); }
     }
 
-    // EKLENEN: PDF İndirme Fonksiyonu
     function downloadPDF() {
         const element = document.getElementById('results');
         const opt = { margin: 0.5, filename: 'BioChef_Rapor.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
         html2pdf().set(opt).from(element).save();
     }
 
-    // EKLENEN: Geçmiş Paneli Açma ve Veri Çekme Fonksiyonu
+    // DÜZELTİLEN: Geçmişi Firebase hatası olmadan direkt cihazdan çekip gösterme
     function toggleHistory() {
         const panel = document.getElementById('historyPanel');
         const listDiv = document.getElementById('historyList');
         
         if (panel.style.display === 'none') {
             panel.style.display = 'block';
-            listDiv.innerHTML = '<p style="text-align:center;">Yükleniyor...</p>';
+            if(!auth.currentUser) return;
             
-            // Firestore'dan veriyi çek (Sadece giriş yapan kullanıcının verileri)
-            db.collection("history").where("uid", "==", auth.currentUser.uid).orderBy("date", "desc").limit(10).get()
-            .then((querySnapshot) => {
-                listDiv.innerHTML = '';
-                if (querySnapshot.empty) { listDiv.innerHTML = `<p style="text-align:center; color:#94a3b8;">${langData[currentLang].noHist}</p>`; return; }
-                
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
+            let histKey = 'history_' + auth.currentUser.uid;
+            let histArray = JSON.parse(localStorage.getItem(histKey) || '[]');
+            
+            listDiv.innerHTML = '';
+            if (histArray.length === 0) { 
+                listDiv.innerHTML = `<p style="text-align:center; color:#94a3b8;">${langData[currentLang].noHist}</p>`; 
+            } else {
+                histArray.forEach((data) => {
                     listDiv.innerHTML += `<div class="history-box"><b>🗓️ ${data.date}</b><br>${data.summary}</div>`;
                 });
-            }).catch((error) => { listDiv.innerHTML = '<p>Veritabanı erişim izni gerekiyor.</p>'; });
+            }
         } else {
             panel.style.display = 'none';
         }
