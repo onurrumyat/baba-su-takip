@@ -8,9 +8,9 @@ export default async function handler(req, res) {
     let systemPrompt = mode === 'plan' 
         ? `Sen profesyonel bir diyetisyensin. Kullanıcı: ${user_data}. 7 günlük planı GÜN GÜN, sadece öğün ve yemek adı olarak kısa ve net ver. ${languageInstruction}`
         : `Sen kıdemli gıda uzmanısın. Kullanıcı: ${user_data}. 
-           ÖNEMLİ: Görüntüdeki kişilere odaklanma, doğrudan gıdaya odaklan. Gördüğün yemeği/atıştırmalığı mutlaka tanımla.
+           ÖNEMLİ: Görüntüdeki kişilere odaklanma, doğrudan gıdaya odaklan. 
            FORMAT:
-           1. HEDEF UYUM SKORU: Kullanıcının hedefine uygunluk skoru (Örn: 92/100) ve tek cümlelik etki açıklaması.
+           1. HEDEF UYUM SKORU: Kullanıcının hedefine uygunluk skoru 1 ile 10 arasında olmalı. YAZIYA KESİNLİKLE ŞU FORMATTA BAŞLA: "[SKOR: X]". Sonrasında tek cümle açıklama yap.
            2. ÜRÜN ÖZETİ: Gördüğün gıdanın tam adı ve porsiyonu.
            3. BESİN DEĞERLERİ: Kalori (kcal), Protein (g), Karbonhidrat (g), Yağ (g) net rakamlarla.
            4. HEDEF ANALİZİ: Kullanıcının hedefine uygunluk durumu.
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 model: "gpt-4o",
                 messages: [{ role: "system", content: systemPrompt }, 
-                           { role: "user", content: mode === 'plan' ? "Net beslenme planı çıkar." : [{ type: "text", text: "Gıdayı tanımla ve analiz et." }, { type: "image_url", image_url: { url: image } }] }],
+                           { role: "user", content: mode === 'plan' ? "Net beslenme planı çıkar." : [{ type: "text", text: "Gıdayı analiz et ve 1-10 arası skor ver." }, { type: "image_url", image_url: { url: image } }] }],
                 max_tokens: 800, temperature: 0.1
             })
         });
