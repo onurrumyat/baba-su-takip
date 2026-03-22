@@ -7,14 +7,13 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AdOeigm877SXMe7mMtuEMPUeGkY9WcgyIJPbzGJU2HP1CS_eaGcn4O0FnUEoB3JFmDXEHSnxx5Do-pIN&currency=USD&components=buttons"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
         :root { --bg: #0b0f1a; --card: #161b2a; --primary: #10b981; --accent: #0ea5e9; --premium: #f59e0b; --text: #f1f5f9; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
-        .app-card { width: 100%; max-width: 420px; background: var(--card); border-radius: 35px; padding: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); height: fit-content; }
+        .app-card { width: 100%; max-width: 420px; background: var(--card); border-radius: 35px; padding: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); height: fit-content; position: relative; }
         .auth-container h1 { font-size: 2.2rem; text-align: center; margin-bottom: 20px; color: var(--primary); font-weight: 900; }
         input, select { width: 100%; padding: 15px; border-radius: 15px; background: #0b0f1a; border: 1px solid #2d3748; color: white; margin-bottom: 12px; text-align: center; }
         .btn { width: 100%; padding: 18px; border-radius: 18px; border: none; font-weight: 700; cursor: pointer; color: white; transition: 0.3s; }
@@ -35,20 +34,28 @@
 
         .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); }
 
-        /* --- EKLENEN: 1-10 GÖRSEL SKOR BARI CSS --- */
         .score-wrapper { margin-top: 20px; margin-bottom: 10px; width: 100%; position: relative; padding-bottom: 20px; }
         .score-bar { height: 14px; width: 100%; border-radius: 7px; background: linear-gradient(to right, #ef4444 0%, #f97316 35%, #eab308 65%, #22c55e 100%); position: relative; }
         .score-marker { position: absolute; top: -10px; width: 30px; height: 30px; background: #fff; border: 3px solid #1e293b; border-radius: 50%; transform: translateX(-50%); transition: left 1s ease-out; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 900; color: #000; z-index: 2; }
         .score-marker::after { content: '📍'; position: absolute; bottom: -20px; font-size: 1rem; }
+
+        /* --- EKLENEN: ALEVLİ SERİ ROZETİ CSS --- */
+        .streak-badge { display:none; background:rgba(249, 115, 22, 0.15); color:#f97316; padding:8px 15px; border-radius:20px; font-weight:900; font-size:0.9rem; border:1px solid #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.3); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
 <div class="app-card">
 
-    <div style="text-align: center; margin-bottom: 15px;">
-        <span onclick="changeLang('tr')" style="font-size: 1.8rem; cursor: pointer; margin-right: 15px;" title="Türkçe">🇹🇷</span>
-        <span onclick="changeLang('en')" style="font-size: 1.8rem; cursor: pointer;" title="English">🇺🇸</span>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+        <div>
+            <span onclick="changeLang('tr')" style="font-size: 1.8rem; cursor: pointer; margin-right: 15px;" title="Türkçe">🇹🇷</span>
+            <span onclick="changeLang('en')" style="font-size: 1.8rem; cursor: pointer;" title="English">🇺🇸</span>
+        </div>
+        <div id="streakBadge" class="streak-badge">
+            🔥 <span id="streakCount">0</span> <span id="txtStreak">Seri</span>
+        </div>
     </div>
 
     <div id="loginView" class="auth-container">
@@ -127,7 +134,7 @@
             headersPlan: ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"],
             payDesc: "Bio-Chef Pro Haftalık Plan Erişimi", paySucc: "Ödeme Başarılı! VIP özellikler aktif edildi.",
             btnPdfTxt: "📄 PDF OLARAK KAYDET", btnHistTxt: "📚 GEÇMİŞ ANALİZLERİM", histTitle: "Son Taramalarınız", noHist: "Henüz geçmiş yok.",
-            markerInfo: "Sen"
+            markerInfo: "Sen", streakTxt: "Seri" // EKLENEN DİL DESTEĞİ
         },
         en: {
             appTitle: "BIO-CHEF", emailHolder: "Email", passHolder: "Password", btnLogin: "LOGIN", btnReset: "Forgot Password?", btnReg: "Sign Up",
@@ -141,7 +148,7 @@
             headersPlan: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
             payDesc: "Bio-Chef Pro Weekly Plan Access", paySucc: "Payment Successful! VIP features activated.",
             btnPdfTxt: "📄 DOWNLOAD AS PDF", btnHistTxt: "📚 MY HISTORY", histTitle: "Recent Scans", noHist: "No history yet.",
-            markerInfo: "You"
+            markerInfo: "You", streakTxt: "Streak" // EKLENEN DİL DESTEĞİ
         }
     };
 
@@ -170,6 +177,7 @@
         document.getElementById('btnPdf').innerText = langData[l].btnPdfTxt;
         document.getElementById('btnHistToggle').innerText = langData[l].btnHistTxt;
         document.getElementById('txtHistTitle').innerText = langData[l].histTitle;
+        document.getElementById('txtStreak').innerText = langData[l].streakTxt; // Alev serisi çevirisi
     }
 
     const firebaseConfig = {
@@ -200,9 +208,51 @@
             isVip = localStorage.getItem('vip_' + user.uid) === 'true';
             if(!isVip) { document.getElementById('premiumLockInfo').style.display = 'block'; initPayPal(); } 
             else { document.getElementById('premiumLockInfo').style.display = 'none'; }
+            
+            showStreak(); // Giriş yapıldığında alev serisini göster
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
         } else { toggleView('loginView'); }
     });
+
+    // --- EKLENEN: ALEVLİ SERİ GÜNCELLEME VE GÖSTERME MANTIĞI ---
+    function showStreak() {
+        if(!auth.currentUser) return;
+        let streakData = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}');
+        let badge = document.getElementById('streakBadge');
+        if(streakData.count > 0) {
+            badge.style.display = 'block';
+            document.getElementById('streakCount').innerText = streakData.count;
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    function updateStreak(score) {
+        if(!auth.currentUser) return;
+        let uid = auth.currentUser.uid;
+        let streakData = JSON.parse(localStorage.getItem('streak_' + uid) || '{"count":0, "lastDate":""}');
+        let today = new Date().toLocaleDateString();
+        
+        let yesterdayObj = new Date();
+        yesterdayObj.setDate(yesterdayObj.getDate() - 1);
+        let yesterday = yesterdayObj.toLocaleDateString();
+
+        if(score >= 7) {
+            if(streakData.lastDate === yesterday) {
+                streakData.count++;
+                streakData.lastDate = today;
+            } else if(streakData.lastDate !== today) {
+                streakData.count = 1;
+                streakData.lastDate = today;
+            }
+        } else {
+            streakData.count = 0; // Kötü beslendiğinde seri sıfırlanır
+            streakData.lastDate = today;
+        }
+        localStorage.setItem('streak_' + uid, JSON.stringify(streakData));
+        showStreak();
+    }
+    // -------------------------------------------------------------
 
     function initPayPal() {
         paypal.Buttons({
@@ -256,7 +306,6 @@
                 card.className = 'report-card';
                 let cardContent = text.trim();
 
-                // EKLENEN: 1-10 Skor Barını Algılama ve Çizme
                 if (mode === 'yemek' && i === 0) {
                     const scoreMatch = cardContent.match(/\[SKOR:\s*(\d+)\]/i);
                     let scoreVal = 5; 
@@ -264,6 +313,9 @@
                         scoreVal = parseInt(scoreMatch[1]);
                         if(scoreVal > 10) scoreVal = 10;
                         cardContent = cardContent.replace(scoreMatch[0], '').trim();
+                        
+                        // EKLENEN: Skoru aldıktan sonra Alevli Seriyi güncelle
+                        updateStreak(scoreVal);
                     }
                     let leftPos = (scoreVal / 10) * 100;
                     
@@ -287,12 +339,11 @@
             
             document.getElementById('btnPdf').style.display = 'block';
 
-            // DÜZELTİLEN: Geçmiş Kayıtları veritabanı iznine takılmasın diye LocalStorage'a çevrildi.
             if (auth.currentUser && mode === 'yemek') {
                 let histKey = 'history_' + auth.currentUser.uid;
                 let histArray = JSON.parse(localStorage.getItem(histKey) || '[]');
-                histArray.unshift({ summary: historySummary, date: new Date().toLocaleString() });
-                if(histArray.length > 10) histArray.pop(); // Sadece son 10 kaydı tut
+                histArray.unshift({ summary: historySummary, date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString() });
+                if(histArray.length > 10) histArray.pop(); 
                 localStorage.setItem(histKey, JSON.stringify(histArray));
             }
 
@@ -307,7 +358,6 @@
         html2pdf().set(opt).from(element).save();
     }
 
-    // DÜZELTİLEN: Geçmişi Firebase hatası olmadan direkt cihazdan çekip gösterme
     function toggleHistory() {
         const panel = document.getElementById('historyPanel');
         const listDiv = document.getElementById('historyList');
