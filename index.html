@@ -21,8 +21,9 @@
         .btn-main { background: var(--primary); }
         .btn-sub { background: var(--accent); margin-top: 10px; }
         .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #2d3748; margin-top: 10px; font-size: 0.8rem; }
-        .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 2px solid #1e293b; margin-bottom: 20px; }
-        video { width: 100%; height: 100%; object-fit: cover; }
+        .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 2px solid #1e293b; margin-bottom: 20px; position: relative; }
+        video, canvas#snapshotCanvas { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+        #snapshotCanvas { display: none; z-index: 5; }
         .premium-area { background: rgba(245, 158, 11, 0.08); border: 2px solid var(--premium); border-radius: 25px; padding: 20px; margin-top: 20px; text-align: center; }
         .premium-title { font-weight: 900; color: var(--premium); font-size: 1.1rem; margin-bottom: 15px; }
         #paypal-button-container { margin-top: 10px; min-height: 150px; }
@@ -50,12 +51,10 @@
         .friends-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 250px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 10px; z-index: 101; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         .friend-link { display: block; padding: 10px; background: #0b0f1a; border-radius: 10px; margin-bottom: 5px; color: var(--primary); font-weight: bold; cursor: pointer; text-decoration: none; font-size: 0.9rem; text-align: center; }
         
-        /* Modal Style */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: var(--card); padding: 25px; border-radius: 25px; width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto; position: relative; border: 1px solid var(--primary); }
         .close-modal { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; cursor: pointer; color: var(--danger); }
         
-        /* Role Selection */
         .role-box { display: flex; gap: 10px; margin-bottom: 20px; }
         .role-btn { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #2d3748; background: #0b0f1a; color: #94a3b8; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
         .role-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(16, 185, 129, 0.1); }
@@ -132,7 +131,10 @@
             <option id="opt2" value="Kilo Almak">Kilo Almak (+)</option>
             <option id="opt3" value="Kiloyu Korumak">Kiloyu Korumak (=)</option>
         </select>
-        <div class="cam-box"><video id="video" autoplay playsinline onclick="this.play()"></video></div>
+        <div class="cam-box">
+            <video id="video" autoplay playsinline onclick="this.play()"></video>
+            <canvas id="snapshotCanvas"></canvas>
+        </div>
         <canvas id="canvas" style="display:none;"></canvas>
         <button class="btn btn-main" id="btnAnalyzeText" onclick="runAI('yemek')">📸 ANALİZ ET</button>
         <div id="results"></div>
@@ -277,10 +279,7 @@
             else { document.getElementById('premiumLockInfo').style.display = 'none'; }
             document.getElementById('bellIcon').style.display = 'flex'; 
             document.getElementById('friendListBtn').style.display = 'flex'; 
-            
-            // Kalıcı Veri Yükleme
             loadSavedProfile();
-
             listenNotifications(); listenFriends(); showStreak();
             let me = user.displayName ? user.displayName.toLowerCase() : user.email.split('@')[0].toLowerCase();
             db.collection('partner_data').doc(me).set({ username: me }, { merge: true });
@@ -293,7 +292,6 @@
         const localWeight = localStorage.getItem('bio_weight');
         if(localAge) document.getElementById('uAge').value = localAge;
         if(localWeight) document.getElementById('uWeight').value = localWeight;
-
         const doc = await db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).get();
         if(doc.exists) {
             if(!localAge && doc.data().age) document.getElementById('uAge').value = doc.data().age;
@@ -354,7 +352,7 @@
     function checkSpecific(u) {
         document.getElementById('partnerUser').value = u;
         document.getElementById('partnerPanel').style.display = 'block';
-        document.getElementById('partnerPanel').scrollIntoView(); // Akıllı Kaydırma
+        document.getElementById('partnerPanel').scrollIntoView(); 
         checkPartner(); toggleFriends();
     }
 
@@ -395,17 +393,25 @@
         const resDiv = document.getElementById('results');
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
+        const btn = document.getElementById('btnAnalyzeText');
+        
         if(!age || !weight) return alert(langData[currentLang].errInfo);
+        
+        // Görsel Fotoğraf Çekme (Dondurma)
+        const vid = document.getElementById('video');
+        const snap = document.getElementById('snapshotCanvas');
+        const ctx = snap.getContext('2d');
+        snap.width = vid.videoWidth;
+        snap.height = vid.videoHeight;
+        ctx.drawImage(vid, 0, 0, snap.width, snap.height);
+        snap.style.display = 'block'; // Videonun üstüne dondurulmuş görüntüyü koy
+
+        btn.disabled = true; // Butonu devre dışı bırak
         resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
         resDiv.style.display = 'flex';
         
-        let img = "";
-        if(mode === 'yemek') {
-            const vid = document.getElementById('video');
-            const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
-            canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
-            img = canv.toDataURL('image/jpeg', 0.7);
-        }
+        let img = snap.toDataURL('image/jpeg', 0.7);
+
         try {
             const r = await fetch('/api/analyze', {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -420,7 +426,6 @@
                 const card = document.createElement('div'); card.className = 'report-card';
                 let content = txt.trim();
                 
-                // Koşullu Skor: Sadece yemek modu
                 if(mode === 'yemek' && i === 0) {
                     const match = content.match(/\[SKOR:\s*(\d+)\]/i);
                     if(match) { score = parseInt(match[1]); content = content.replace(match[0], '').trim(); updateStreak(score); }
@@ -432,29 +437,39 @@
             });
             
             document.getElementById('btnPdf').style.display = 'block';
-            resDiv.scrollIntoView(); // Akıllı Kaydırma
+            resDiv.scrollIntoView(); 
             
             if(mode === 'yemek') saveHistory(score, d.analysis);
-        } catch(e) { alert(langData[currentLang].errMsg); }
+            
+            // Analiz bittikten sonra kamerayı serbest bırak ve butonu aç
+            snap.style.display = 'none';
+            btn.disabled = false;
+
+        } catch(e) { 
+            alert(langData[currentLang].errMsg); 
+            snap.style.display = 'none';
+            btn.disabled = false;
+        }
     }
 
     function saveHistory(score, raw) {
         let me = auth.currentUser.displayName.toLowerCase();
-        let date = new Date().toLocaleString();
+        let now = new Date();
+        let date = now.toLocaleDateString();
+        let time = now.toLocaleTimeString();
         let fullDetail = raw;
+        let mealSummary = raw.split("\n")[2] || "Bilinmeyen Yemek"; 
         
-        // Veritabanına Kayıt
         db.collection('partner_data').doc(me).set({ 
             score: score, 
-            lastMeal: raw.substring(0, 50), 
-            time: new Date().toLocaleTimeString(),
-            history: firebase.firestore.FieldValue.arrayUnion({ summary: `Skor: ${score}/10`, date: date, full: fullDetail })
+            lastMeal: mealSummary, 
+            time: time,
+            history: firebase.firestore.FieldValue.arrayUnion({ summary: mealSummary, score: score, date: date, time: time, full: fullDetail })
         }, { merge: true });
 
-        // LocalStorage Kayıt
         let key = 'history_' + auth.currentUser.uid;
         let arr = JSON.parse(localStorage.getItem(key) || '[]');
-        arr.unshift({ summary: `Skor: ${score}/10`, date: date, full: fullDetail });
+        arr.unshift({ summary: mealSummary, score: score, date: date + " " + time, full: fullDetail });
         localStorage.setItem(key, JSON.stringify(arr.slice(0, 10)));
     }
 
@@ -464,10 +479,9 @@
         if(p.style.display === 'block') {
             const list = document.getElementById('historyList');
             let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-            // Gelişmiş Geçmiş: Tıklanınca Modal Açılır
             list.innerHTML = arr.length ? arr.map((h, i) => `
                 <div class="history-box" onclick="showHistoryDetail(${i})">
-                    <b>${h.date}</b><br>${h.summary}
+                    <b>${h.date}</b><br>Skor: ${h.score}/10 - ${h.summary}
                 </div>`).join('') : "Henüz yok.";
         }
     }
@@ -498,15 +512,17 @@
                     let s = data.score;
                     res.innerText = (s < 7 ? langData[currentLang].partCatch : langData[currentLang].partGood) + s + "/10";
                 }
-                // Partner Takibi: Şık Liste
+                // Partner Geçmişi: Tarih, Saat, Skor, Ne Yedi (Büyütme yok)
                 if(data.history) {
-                    hList.innerHTML = `<p style="font-size:0.8rem; color:var(--accent); margin:10px 0;">Partner Geçmişi:</p>` + 
-                        data.history.slice(-5).reverse().map(h => `
-                        <div class="history-box" style="font-size:0.75rem;">
-                            <b>${h.date}</b> - ${h.summary}
+                    hList.innerHTML = `<p style="font-size:0.8rem; color:var(--accent); margin:10px 0; text-align:center; font-weight:bold;">Partner Analiz Geçmişi</p>` + 
+                        data.history.slice(-10).reverse().map(h => `
+                        <div class="history-box" style="font-size:0.75rem; cursor:default; border-left-color: var(--danger);">
+                            <div style="color:var(--premium); font-weight:bold;">${h.date} - ${h.time}</div>
+                            <div style="color:white; margin:2px 0;">Skor: <span style="color:var(--primary)">${h.score}/10</span></div>
+                            <div style="color:#94a3b8; font-style:italic;">"${h.summary}"</div>
                         </div>`).join('');
-                }
-            } else { res.innerText = "Veri yok."; hList.innerHTML = ""; }
+                } else { hList.innerHTML = "<p style='font-size:0.7rem; text-align:center;'>Geçmiş veri yok.</p>"; }
+            } else { res.innerText = "Kullanıcı bulunamadı."; hList.innerHTML = ""; }
         });
     }
 
