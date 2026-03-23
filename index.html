@@ -15,83 +15,99 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
         body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
         .app-card { width: 100%; max-width: 420px; background: var(--card); border-radius: 35px; padding: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); height: fit-content; position: relative; }
-        
-        /* Görüntü Bozulmasını Önleyen Kritik CSS */
-        .cam-box { 
-            width: 100%; 
-            aspect-ratio: 1/1; 
-            background: #000; 
-            border-radius: 25px; 
-            overflow: hidden; 
-            border: 2px solid #1e293b; 
-            margin-bottom: 20px; 
-            position: relative; 
-        }
-        video, #capturedImage { 
-            width: 100% !important; 
-            height: 100% !important; 
-            object-fit: cover !important; 
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-        #capturedImage { display: none; z-index: 5; }
-
+        .auth-container h1 { font-size: 2.2rem; text-align: center; margin-bottom: 20px; color: var(--primary); font-weight: 900; }
         input, select { width: 100%; padding: 15px; border-radius: 15px; background: #0b0f1a; border: 1px solid #2d3748; color: white; margin-bottom: 12px; text-align: center; }
         .btn { width: 100%; padding: 18px; border-radius: 18px; border: none; font-weight: 700; cursor: pointer; color: white; transition: 0.3s; }
         .btn-main { background: var(--primary); }
         .btn-sub { background: var(--accent); margin-top: 10px; }
         .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #2d3748; margin-top: 10px; font-size: 0.8rem; }
         
+        /* Fotoğraf Genişleme Hatası Çözümü */
+        .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 2px solid #1e293b; margin-bottom: 20px; position: relative; display: flex; align-items: center; justify-content: center; }
+        video, #capturedImage { width: 100%; height: 100%; object-fit: cover; display: block; }
+        #capturedImage { display: none; position: absolute; top: 0; left: 0; z-index: 5; }
+
+        .premium-area { background: rgba(245, 158, 11, 0.08); border: 2px solid var(--premium); border-radius: 25px; padding: 20px; margin-top: 20px; text-align: center; }
+        .premium-title { font-weight: 900; color: var(--premium); font-size: 1.1rem; margin-bottom: 15px; }
+        #paypal-button-container { margin-top: 10px; min-height: 150px; }
+        #results { display: none; flex-direction: column; gap: 12px; margin-top: 25px; padding: 15px; background: var(--bg); border-radius: 20px; }
+        .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); }
+        .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
+        .report-txt { font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
+        .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); cursor: pointer; }
+        .score-wrapper { margin-top: 20px; margin-bottom: 10px; width: 100%; position: relative; padding-bottom: 20px; }
+        .score-bar { height: 14px; width: 100%; border-radius: 7px; background: linear-gradient(to right, #ef4444 0%, #f97316 35%, #eab308 65%, #22c55e 100%); position: relative; }
+        .score-marker { position: absolute; top: -10px; width: 30px; height: 30px; background: #fff; border: 3px solid #1e293b; border-radius: 50%; transform: translateX(-50%); transition: left 1s ease-out; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 900; color: #000; z-index: 2; }
+        .score-marker::after { content: '📍'; position: absolute; bottom: -20px; font-size: 1rem; }
+        .streak-badge { display:none; background:rgba(249, 115, 22, 0.15); color:#f97316; padding:8px 15px; border-radius:20px; font-weight:900; font-size:0.9rem; border:1px solid #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.3); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        .partner-box { background: rgba(239, 68, 68, 0.05); border: 1px dashed var(--danger); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
+        .role-selector { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }
+        .role-btn { flex: 1; padding: 10px; border-radius: 10px; background: #0b0f1a; border: 1px solid #2d3748; color: #94a3b8; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+        .role-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(16, 185, 129, 0.1); }
+        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; padding: 20px; align-items: center; justify-content: center; }
-        .modal-content { background: var(--card); border-radius: 30px; padding: 25px; width: 100%; max-width: 380px; border: 2px solid var(--primary); }
-        .modal-body { color: #cbd5e1; font-size: 0.95rem; white-space: pre-wrap; max-height: 60vh; overflow-y: auto; }
+        .modal-content { background: var(--card); border-radius: 30px; padding: 25px; width: 100%; max-width: 380px; border: 2px solid var(--primary); box-shadow: 0 0 30px rgba(16, 185, 129, 0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #2d3748; padding-bottom: 10px; }
+        .modal-title { color: var(--primary); font-weight: 900; font-size: 1.2rem; }
+        .modal-body { color: #cbd5e1; font-size: 0.95rem; line-height: 1.7; white-space: pre-wrap; max-height: 60vh; overflow-y: auto; padding-right: 5px; }
 
         .bell-container { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; }
-        .notif-badge { position: absolute; top: 0; right: 0; background: var(--danger); color: white; font-size: 0.6rem; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .notif-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 280px; background: #1e293b; border-radius: 15px; padding: 10px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        
-        .role-selector { display: flex; gap: 10px; margin-bottom: 15px; }
-        .role-btn { flex: 1; padding: 10px; border-radius: 10px; background: #0b0f1a; border: 1px solid #2d3748; color: #94a3b8; cursor: pointer; font-size: 0.8rem; text-align: center; }
-        .role-btn.active { border-color: var(--primary); color: var(--primary); }
-
-        .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; cursor: pointer; border-left: 3px solid var(--primary); }
-        .partner-item { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; margin-bottom: 8px; border-left: 4px solid var(--danger); }
-        .streak-badge { display:none; background:rgba(249, 115, 22, 0.15); color:#f97316; padding:8px 15px; border-radius:20px; font-weight:900; }
+        .bell-icon { font-size: 1.5rem; }
+        .notif-badge { position: absolute; top: 0; right: 0; background: var(--danger); color: white; font-size: 0.6rem; font-weight: 900; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .notif-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 280px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 10px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.8); max-height: 300px; overflow-y: auto; }
+        .notif-item { background: #0b0f1a; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 0.8rem; color: #cbd5e1; border-left: 3px solid var(--accent); }
+        .notif-btn { background: var(--primary); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; margin-top: 5px; font-weight:bold; }
+        .user-tag { font-size: 1.1rem; font-weight: 900; color: var(--primary); margin-top: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .friends-btn { font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; margin-left: 10px; position: relative; }
+        .friends-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 250px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 10px; z-index: 101; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        .friend-link { display: block; padding: 10px; background: #0b0f1a; border-radius: 10px; margin-bottom: 5px; color: var(--primary); font-weight: bold; cursor: pointer; text-decoration: none; font-size: 0.9rem; text-align: center; }
+        .partner-item { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; margin-bottom: 8px; border-left: 4px solid var(--danger); text-align: left; }
     </style>
 </head>
 <body>
 
 <div id="detailModal" class="modal">
     <div class="modal-content">
-        <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-            <b style="color:var(--primary)" id="modalTitle">DETAY</b>
-            <span style="cursor:pointer" onclick="document.getElementById('detailModal').style.display='none'">✕</span>
+        <div class="modal-header">
+            <span class="modal-title">ANALİZ DETAYI</span>
+            <span style="cursor:pointer; font-size: 1.5rem;" onclick="document.getElementById('detailModal').style.display='none'">✕</span>
         </div>
         <div class="modal-body" id="modalBody"></div>
+        <button class="btn btn-main" style="margin-top:20px;" onclick="document.getElementById('detailModal').style.display='none'">ANLAŞILDI</button>
     </div>
 </div>
 
 <div class="app-card">
+
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-        <div>
-            <span onclick="changeLang('tr')" style="font-size: 1.8rem; cursor: pointer; margin-right: 10px;">🇹🇷</span>
-            <span onclick="changeLang('en')" style="font-size: 1.8rem; cursor: pointer;">🇺🇸</span>
+        <div style="display: flex; align-items: center;">
+            <span onclick="changeLang('tr')" style="font-size: 1.8rem; cursor: pointer; margin-right: 15px;" title="Türkçe">🇹🇷</span>
+            <span onclick="changeLang('en')" style="font-size: 1.8rem; cursor: pointer;" title="English">🇺🇸</span>
         </div>
-        <div id="streakBadge" class="streak-badge">🔥 <span id="streakCount">0</span> <span id="txtStreak">Seri</span></div>
-        <div style="display: flex; gap: 10px;">
+        <div id="streakBadge" class="streak-badge" style="margin-left:10px;">
+            🔥 <span id="streakCount">0</span> <span id="txtStreak">Seri</span>
+        </div>
+        <div style="display: flex;">
             <div class="bell-container" onclick="toggleNotifications()" id="bellIcon" style="display:none;">
-                <span>🔔</span><span class="notif-badge" id="notifBadge" style="display:none;">0</span>
-                <div class="notif-dropdown" id="notifDropdown"><div id="notifList"></div></div>
+                <span class="bell-icon">🔔</span>
+                <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                <div class="notif-dropdown" id="notifDropdown">
+                    <h4 style="color:white; margin-bottom:10px; text-align:center;">Bildirimler</h4>
+                    <div id="notifList"><p style="text-align:center; font-size:0.8rem;">Bildirim yok.</p></div>
+                </div>
             </div>
-            <div class="bell-container" onclick="toggleFriends()" id="friendListBtn" style="display:none;">
-                <span>👤</span>
-                <div class="notif-dropdown" id="friendsDropdown" style="width:200px;"><div id="friendsListContainer"></div></div>
+            <div class="friends-btn" id="friendListBtn" onclick="toggleFriends()" style="display:none;">
+                👤
+                <div class="friends-dropdown" id="friendsDropdown">
+                    <h4 style="color:white; margin-bottom:10px; text-align:center;">Takip Ettiklerin</h4>
+                    <div id="friendsListContainer"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="loginView">
+    <div id="loginView" class="auth-container">
         <h1 id="txtL1">BIO-CHEF</h1>
         <div class="role-selector">
             <div class="role-btn active" onclick="setRole('danisan', this)">DANIŞAN</div>
@@ -100,22 +116,27 @@
         <input type="email" id="lEmail" placeholder="E-posta">
         <input type="password" id="lPass" placeholder="Şifre">
         <button class="btn btn-main" id="txtL4" onclick="doLogin()">GİRİŞ YAP</button>
+        <button class="btn btn-outline" id="txtL5" style="border:none;" onclick="doReset()">Şifremi Unuttum?</button>
         <button class="btn btn-outline" id="txtL6" onclick="toggleView('regView')">Kayıt Ol</button>
     </div>
 
-    <div id="regView" style="display:none;">
+    <div id="regView" class="auth-container" style="display:none;">
         <h1 id="txtR7">KAYIT OL</h1>
+        <div class="role-selector">
+            <div class="role-btn active" onclick="setRole('danisan', this)">DANIŞAN</div>
+            <div class="role-btn" onclick="setRole('diyetisyen', this)">DİYETİSYEN</div>
+        </div>
         <input type="email" id="rEmail" placeholder="E-posta">
-        <input type="text" id="rUser" placeholder="Kullanıcı Adı">
+        <input type="text" id="rUser" placeholder="Kullanıcı Adı (Örn: fit_chef)">
         <input type="password" id="rPass" placeholder="Şifre">
         <button class="btn btn-sub" id="txtR8" onclick="doRegister()">HESABI OLUŞTUR</button>
-        <button class="btn btn-outline" onclick="toggleView('loginView')">Geri Dön</button>
+        <button class="btn btn-outline" id="txtR9" onclick="toggleView('loginView')">Geri Dön</button>
     </div>
 
     <div id="mainView" style="display:none;">
-        <div style="text-align: center; margin-bottom: 15px;">
-            <div id="clock" style="font-size: 2rem; font-weight: 800; color: var(--accent);">00:00:00</div>
-            <div id="uMail" style="color:var(--primary); font-weight:900;"></div> 
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div id="clock" style="font-size: 2.2rem; font-weight: 800; color: var(--accent);">00:00:00</div>
+            <div id="uMail" class="user-tag"></div> 
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
             <input type="number" id="uAge" placeholder="YAŞ" onchange="saveUserData()">
@@ -129,7 +150,7 @@
         
         <div class="cam-box">
             <video id="video" autoplay playsinline></video>
-            <img id="capturedImage">
+            <img id="capturedImage" alt="Captured">
         </div>
         
         <canvas id="canvas" style="display:none;"></canvas>
@@ -137,22 +158,35 @@
         <button class="btn btn-sub" id="btnRetake" style="display:none; background: #64748b;" onclick="resetCamera()">🔄 YENİDEN ÇEK</button>
         
         <div id="results"></div>
-        <button class="btn btn-outline" id="btnHistToggle" onclick="toggleHistory()" style="margin-top:20px;">📚 SON 24 SAAT</button>
-        <div id="historyPanel" style="display:none;"><div id="historyList"></div></div>
+        <button class="btn btn-main" id="btnPdf" style="display:none; background: #ef4444; margin-top:15px;" onclick="downloadPDF()">📄 PDF OLARAK KAYDET</button>
 
-        <button class="btn btn-outline" id="btnPartnerToggle" style="color:var(--danger)" onclick="togglePartner()">👫 KANKA ARENASI</button>
+        <button class="btn btn-outline" id="btnHistToggle" onclick="toggleHistory()" style="margin-top:25px;">📚 SON 24 SAAT ANALİZLERİM</button>
+        <div id="historyPanel" style="display:none; margin-top:15px; padding:15px; border-radius:15px; border: 1px solid #2d3748;">
+            <h3 id="txtHistTitle" style="text-align:center; color:var(--primary); margin-bottom:10px;">Son Taramalarınız</h3>
+            <div id="historyList"></div>
+        </div>
+
+        <button class="btn btn-outline" id="btnPartnerToggle" style="border-color: var(--danger); color: var(--danger);" onclick="togglePartner()">👫 KANKA / ÇİFT ARENASI</button>
         <div id="partnerPanel" class="partner-box" style="display:none;">
-            <input type="text" id="partnerUser" placeholder="Kullanıcı Adı">
-            <button class="btn btn-sub" onclick="checkPartner()">🔍 SORGULA</button>
-            <div id="partnerResult" style="margin-top:10px;"></div>
-            <div id="partnerHistoryList"></div>
+            <h3 id="txtPartTitle" style="color:var(--danger); margin-bottom:10px;">Partnerini Denetle! 🚨</h3>
+            <input type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin" style="background: rgba(0,0,0,0.5);">
+            <div style="display:flex; gap:5px;">
+                <button class="btn btn-sub" id="btnAddFriend" style="background: var(--accent); font-size: 0.7rem; flex:1;" onclick="sendFriendRequest()">➕ TAKİP ET</button>
+                <button class="btn btn-sub" id="btnCheckPart" style="background: var(--danger); font-size: 0.7rem; flex:1;" onclick="checkPartner()">🔍 SORGULA</button>
+            </div>
+            <div id="partnerResult" style="margin-top:15px; font-weight:bold;"></div>
+            <div id="partnerHistoryList" style="margin-top:10px;"></div>
         </div>
 
-        <div class="premium-area" id="premiumArea">
-            <button class="btn btn-sub" id="txtBtnPlan" style="background: var(--premium); color: black;" onclick="handlePlanClick()">📅 HAFTALIK PLAN</button>
-            <div id="premiumLockInfo"><div id="paypal-button-container"></div></div>
+        <div class="premium-area">
+            <button class="btn btn-sub" id="txtBtnPlan" style="margin-top:0; background: var(--premium); color: black;" onclick="handlePlanClick()">📅 HAFTALIK PLANINIZI ÇIKARIN</button>
+            <div id="premiumLockInfo" style="margin-top: 15px;">
+                <div class="premium-title" id="txtPrem">PREMIUM ÜYE | 0.99 $</div>
+                <div id="paypal-button-container"></div>
+            </div>
         </div>
-        <button class="btn btn-outline" onclick="auth.signOut(); location.reload();">ÇIKIŞ</button>
+
+        <button class="btn btn-outline" id="txtOut" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
     </div>
 </div>
 
@@ -161,12 +195,19 @@
     let userRole = 'danisan';
     const langData = {
         tr: {
-            appTitle: "BIO-CHEF", btnLogin: "GİRİŞ YAP", ageHolder: "YAŞ", weightHolder: "KİLO",
-            btnAna: "📸 ANALİZ ET", btnHist: "📚 SON 24 SAAT", streakTxt: "Seri", loading: "🔍 İnceleniyor..."
+            appTitle: "BIO-CHEF", emailHolder: "E-posta", passHolder: "Şifre", btnLogin: "GİRİŞ YAP", btnReset: "Şifremi Unuttum?", btnReg: "Kayıt Ol",
+            regTitle: "KAYIT OL", btnCreate: "HESABI OLUŞTUR", btnBack: "Geri Dön", ageHolder: "YAŞ", weightHolder: "KİLO",
+            g1: "Kilo Vermek (-)", g2: "Kilo Almak (+)", g3: "Kiloyu Korumak (=)", btnAna: "📸 ANALİZ ET", btnPlan: "📅 HAFTALIK PLANINIZI ÇIKARIN",
+            premTitle: "PREMIUM ÜYE | 0.99 $", btnOut: "GÜVENLİ ÇIKIŞ", errMail: "Mail veya Kullanıcı Adı eksik.", errInfo: "Bilgileri girin.",
+            errPlan: "Haftalık plan için aşağıdan Premium üyeliğinizi başlatın.", errMsg: "Hata!", errUserTaken: "Bu kullanıcı adı zaten alınmış!",
+            loading: "🔍 İnceleniyor...", headersYemek: ["HEDEF SKORU 🎯", "AÇLIK KRONOMETRESİ ⏳", "ÜRÜN ÖZETİ", "BESİN DEĞERLERİ", "HEDEF ANALİZİ", "NET TAVSİYE"],
+            headersPlan: ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"]
         },
         en: {
-            appTitle: "BIO-CHEF", btnLogin: "LOGIN", ageHolder: "AGE", weightHolder: "WEIGHT",
-            btnAna: "📸 ANALYZE", btnHist: "📚 LAST 24H", streakTxt: "Streak", loading: "🔍 Analyzing..."
+            appTitle: "BIO-CHEF", emailHolder: "Email", passHolder: "Password", btnLogin: "LOGIN", btnReset: "Forgot?", btnReg: "Sign Up",
+            regTitle: "SIGN UP", btnCreate: "CREATE ACCOUNT", btnBack: "Back", ageHolder: "AGE", weightHolder: "WEIGHT",
+            g1: "Lose Weight", g2: "Gain Weight", g3: "Maintain", btnAna: "📸 ANALYZE", btnPlan: "📅 GET WEEKLY PLAN",
+            premTitle: "PREMIUM | $0.99", btnOut: "LOGOUT", loading: "🔍 Analyzing..."
         }
     };
 
@@ -180,31 +221,39 @@
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db = firebase.firestore();
+    const db = firebase.firestore(); 
     let isVip = false;
 
-    function changeLang(l) {
-        currentLang = l;
-        document.getElementById('txtL1').innerText = langData[l].appTitle;
-        document.getElementById('txtL4').innerText = langData[l].btnLogin;
-        document.getElementById('uAge').placeholder = langData[l].ageHolder;
-        document.getElementById('uWeight').placeholder = langData[l].weightHolder;
-        document.getElementById('btnAnalyzeText').innerText = langData[l].btnAna;
-        document.getElementById('btnHistToggle').innerText = langData[l].btnHist;
-        document.getElementById('txtStreak').innerText = langData[l].streakTxt;
-        // Girdi verilerini koru, sadece arayüzü güncelle
+    function setRole(role, el) {
+        userRole = role;
+        const btns = el.parentElement.querySelectorAll('.role-btn');
+        btns.forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
     }
+
+    function toggleView(id) {
+        document.getElementById('loginView').style.display = 'none';
+        document.getElementById('regView').style.display = 'none';
+        document.getElementById('mainView').style.display = 'none';
+        document.getElementById(id).style.display = 'block';
+    }
+
+    setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 
     auth.onAuthStateChanged(user => {
         if (user) {
             toggleView('mainView');
             loadUserData();
-            document.getElementById('uMail').innerText = "@" + (user.displayName || user.email.split('@')[0]);
+            let display = user.displayName ? "@" + user.displayName : "@" + user.email.split('@')[0];
+            document.getElementById('uMail').innerText = display;
             isVip = localStorage.getItem('vip_' + user.uid) === 'true';
-            document.getElementById('premiumLockInfo').style.display = isVip ? 'none' : 'block';
-            if(!isVip) initPayPal();
-            document.getElementById('bellIcon').style.display = 'flex';
-            document.getElementById('friendListBtn').style.display = 'flex';
+            if(!isVip) { document.getElementById('premiumLockInfo').style.display = 'block'; initPayPal(); } 
+            else { document.getElementById('premiumLockInfo').style.display = 'none'; }
+            document.getElementById('bellIcon').style.display = 'flex'; 
+            document.getElementById('friendListBtn').style.display = 'flex'; 
+            listenNotifications(); listenFriends(); showStreak();
+            let me = user.displayName ? user.displayName.toLowerCase() : user.email.split('@')[0].toLowerCase();
+            db.collection('partner_data').doc(me).set({ username: me, role: userRole }, { merge: true });
             startCamera();
         } else { toggleView('loginView'); }
     });
@@ -217,84 +266,21 @@
         });
     }
 
-    async function runAI(mode) {
-        const age = document.getElementById('uAge').value;
-        const weight = document.getElementById('uWeight').value;
-        if(!age || !weight) return alert("Bilgileri girin.");
-        
-        const vid = document.getElementById('video');
-        const canv = document.getElementById('canvas');
-        canv.width = vid.videoWidth; 
-        canv.height = vid.videoHeight;
-        canv.getContext('2d').drawImage(vid, 0, 0);
-        const img = canv.toDataURL('image/jpeg', 0.8);
-        
-        document.getElementById('capturedImage').src = img;
-        document.getElementById('capturedImage').style.display = 'block';
-        document.getElementById('video').style.display = 'none';
-        document.getElementById('btnAnalyzeText').style.display = 'none';
-        document.getElementById('btnRetake').style.display = 'block';
-
-        const resDiv = document.getElementById('results');
-        resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
-        resDiv.style.display = 'flex';
-
-        try {
-            const r = await fetch('/api/analyze', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mode, image: img, user_data: `Yaş:${age}, Kilo:${weight}`, lang: currentLang })
-            });
-            const d = await r.json();
-            resDiv.innerHTML = `<div class="report-card"><div class="report-txt">${d.analysis}</div></div>`;
-            if(mode === 'yemek') saveHistory(d.analysis);
-        } catch(e) { alert("Hata oluştu."); }
-    }
-
-    function saveHistory(raw) {
-        const historyItem = { 
-            full: raw, 
-            timestamp: Date.now(), 
-            date: new Date().toLocaleString() 
-        };
-        db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).update({ 
-            history: firebase.firestore.FieldValue.arrayUnion(historyItem)
-        });
-        let key = 'history_' + auth.currentUser.uid;
-        let arr = JSON.parse(localStorage.getItem(key) || '[]');
-        arr.unshift(historyItem);
-        localStorage.setItem(key, JSON.stringify(arr));
-    }
-
-    function toggleHistory() {
-        const p = document.getElementById('historyPanel');
-        p.style.display = p.style.display === 'none' ? 'block' : 'none';
-        if(p.style.display === 'block') {
-            const list = document.getElementById('historyList');
-            let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-            const son24 = arr.filter(h => h.timestamp > Date.now() - 86400000);
-            list.innerHTML = son24.length ? son24.map(h => `
-                <div class="history-box" onclick="showDetails('${encodeURIComponent(JSON.stringify(h))}')">
-                    <b>${h.date}</b><br><small>${h.full.substring(0, 50)}...</small>
-                </div>`).join('') : "Son 24 saatte veri yok.";
-        }
-    }
-
     function resetCamera() {
         document.getElementById('btnRetake').style.display = 'none';
         document.getElementById('btnAnalyzeText').style.display = 'block';
-        document.getElementById('capturedImage').style.display = 'none';
-        document.getElementById('video').style.display = 'block';
-    }
-
-    function showDetails(dataStr) {
-        const data = JSON.parse(decodeURIComponent(dataStr));
-        document.getElementById('modalBody').innerText = data.full;
-        document.getElementById('detailModal').style.display = 'flex';
+        startCamera();
     }
 
     function saveUserData() {
-        const data = { age: document.getElementById('uAge').value, weight: document.getElementById('uWeight').value, goal: document.getElementById('uGoal').value };
+        if(!auth.currentUser) return;
+        const data = {
+            age: document.getElementById('uAge').value,
+            weight: document.getElementById('uWeight').value,
+            goal: document.getElementById('uGoal').value
+        };
         localStorage.setItem('userData_' + auth.currentUser.uid, JSON.stringify(data));
+        db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).set(data, {merge: true});
     }
 
     function loadUserData() {
@@ -307,22 +293,244 @@
         }
     }
 
-    function toggleView(id) { 
-        ['loginView','regView','mainView'].forEach(v => document.getElementById(v).style.display='none');
-        document.getElementById(id).style.display='block'; 
-    }
-    function setRole(r, e) { userRole = r; document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('active')); e.classList.add('active'); }
-    setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
-    function initPayPal() { paypal.Buttons({ createOrder: (d,a) => a.order.create({purchase_units:[{amount:{value:'0.99'}}]}), onApprove: (d,a) => a.order.capture().then(()=>{localStorage.setItem('vip_'+auth.currentUser.uid,'true');location.reload();}) }).render('#paypal-button-container'); }
-    function toggleNotifications() { const d = document.getElementById('notifDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
-    function togglePartner() { const p = document.getElementById('partnerPanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
     async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); } }
     async function doRegister() { 
-        const u = document.getElementById('rUser').value;
-        const cred = await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value);
-        await cred.user.updateProfile({ displayName: u });
-        location.reload();
+        const u = document.getElementById('rUser').value.trim();
+        const e = document.getElementById('rEmail').value;
+        const p = document.getElementById('rPass').value;
+        if(!u || !e || !p) return alert("Eksik.");
+        try { 
+            const check = await db.collection('partner_data').doc(u.toLowerCase()).get();
+            if(check.exists) return alert(langData[currentLang].errUserTaken);
+            const cred = await auth.createUserWithEmailAndPassword(e, p);
+            await cred.user.updateProfile({ displayName: u });
+            await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase(), role: userRole }, { merge: true });
+            location.reload(); 
+        } catch(err) { alert(err.message); } 
     }
+
+    async function runAI(mode) {
+        const resDiv = document.getElementById('results');
+        const age = document.getElementById('uAge').value;
+        const weight = document.getElementById('uWeight').value;
+        if(!age || !weight) return alert(langData[currentLang].errInfo);
+        
+        let img = "";
+        if(mode === 'yemek') {
+            const vid = document.getElementById('video');
+            const canv = document.getElementById('canvas'); 
+            canv.width = 640; canv.height = 480;
+            canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
+            img = canv.toDataURL('image/jpeg', 0.8);
+            
+            document.getElementById('capturedImage').src = img;
+            document.getElementById('capturedImage').style.display = 'block';
+            document.getElementById('video').style.display = 'none';
+            document.getElementById('btnAnalyzeText').style.display = 'none';
+            document.getElementById('btnRetake').style.display = 'block';
+        }
+
+        resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
+        resDiv.style.display = 'flex';
+        resDiv.scrollIntoView();
+
+        try {
+            const r = await fetch('/api/analyze', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ mode, image: img, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`, lang: currentLang })
+            });
+            const d = await r.json(); resDiv.innerHTML = '';
+            const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
+            const heads = mode === 'plan' ? langData[currentLang].headersPlan : langData[currentLang].headersYemek;
+            let score = 5;
+            
+            sections.forEach((txt, i) => {
+                const card = document.createElement('div'); card.className = 'report-card';
+                let content = txt.trim();
+                if(mode === 'yemek' && i === 0) {
+                    const match = content.match(/\[SKOR:\s*(\d+)\]/i);
+                    if(match) { score = parseInt(match[1]); content = content.replace(match[0], '').trim(); updateStreak(score); }
+                    let left = (score/10)*100;
+                    card.innerHTML = `<div class="report-tag">${heads[i]}</div><div class="report-txt">${content}</div>
+                    <div class="score-wrapper"><div class="score-bar"><div class="score-marker" style="left:${left}%">${score}</div></div></div>`;
+                } else { card.innerHTML = `<div class="report-tag">${heads[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`; }
+                resDiv.appendChild(card);
+            });
+            document.getElementById('btnPdf').style.display = 'block';
+            if(mode === 'yemek') saveHistory(score, d.analysis);
+        } catch(e) { alert(langData[currentLang].errMsg); }
+    }
+
+    function saveHistory(score, raw) {
+        let me = auth.currentUser.displayName.toLowerCase();
+        let shortText = raw.split("\n").find(l => l.includes("ÜRÜN ÖZETİ")) || "Bilinmeyen Ürün";
+        shortText = shortText.replace("ÜRÜN ÖZETİ:", "").trim().substring(0, 30);
+
+        const historyItem = { 
+            score, 
+            full: raw, 
+            what: shortText,
+            timestamp: Date.now(), // 24 saat kontrolü için milisaniye
+            date: new Date().toLocaleString() 
+        };
+        
+        db.collection('partner_data').doc(me).update({ 
+            score: score, 
+            history: firebase.firestore.FieldValue.arrayUnion(historyItem)
+        });
+
+        let key = 'history_' + auth.currentUser.uid;
+        let arr = JSON.parse(localStorage.getItem(key) || '[]');
+        arr.unshift(historyItem);
+        localStorage.setItem(key, JSON.stringify(arr));
+    }
+
+    function toggleHistory() {
+        const p = document.getElementById('historyPanel');
+        p.style.display = p.style.display === 'none' ? 'block' : 'none';
+        if(p.style.display === 'block') {
+            const list = document.getElementById('historyList');
+            let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
+            
+            // Son 24 Saat Filtresi (24 * 60 * 60 * 1000 ms)
+            const birGunOnce = Date.now() - 86400000;
+            const son24Saat = arr.filter(h => h.timestamp > birGunOnce);
+
+            list.innerHTML = son24Saat.length ? son24Saat.map(h => `
+                <div class="history-box" onclick="showDetails('${encodeURIComponent(JSON.stringify(h))}')">
+                    <b>${h.date}</b> | <span style="color:var(--primary)">${h.score}/10</span><br>
+                    <small>🍽️ ${h.what}...</small>
+                </div>`).join('') : "Son 24 saatte analiz bulunamadı.";
+        }
+    }
+
+    function showDetails(dataStr) {
+        const data = JSON.parse(decodeURIComponent(dataStr));
+        const modal = document.getElementById('detailModal');
+        const body = document.getElementById('modalBody');
+        body.innerHTML = `📅 <b>Tarih:</b> ${data.date}\n⭐ <b>Skor:</b> ${data.score}/10\n\n${data.full}`;
+        modal.style.display = 'flex';
+    }
+
+    function checkPartner() {
+        const u = document.getElementById('partnerUser').value.trim().toLowerCase();
+        const res = document.getElementById('partnerResult');
+        const histList = document.getElementById('partnerHistoryList');
+        
+        db.collection('partner_data').doc(u).get().then(doc => {
+            if(doc.exists) {
+                let d = doc.data();
+                let s = d.score || 0;
+                res.innerHTML = `<span style="color:${s < 7 ? 'var(--danger)' : 'var(--primary)'}">${s < 7 ? '🚨 YAKALANDI!' : '✅ SADIK!'} Mevcut Puan: ${s}/10</span>`;
+                
+                if(d.history) {
+                    histList.innerHTML = `<h4 style="margin:15px 0 10px 0; color:var(--accent); font-size:0.9rem;">Partnerin Son Hareketleri:</h4>` + 
+                    d.history.slice(-5).reverse().map(h => `
+                        <div class="partner-item">
+                            <div style="font-size:0.75rem; color:#94a3b8;">📅 ${h.date}</div>
+                            <div style="font-size:0.85rem; font-weight:bold; margin:4px 0;">🍽️ ${h.what}</div>
+                            <div style="font-size:0.8rem; color:var(--premium)">⭐ Puan: ${h.score}/10</div>
+                        </div>
+                    `).join('');
+                }
+            } else { res.innerText = "Kullanıcı bulunamadı."; histList.innerHTML = ""; }
+        });
+    }
+
+    function toggleNotifications() {
+        const d = document.getElementById('notifDropdown');
+        document.getElementById('friendsDropdown').style.display = 'none';
+        d.style.display = d.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleFriends() {
+        const d = document.getElementById('friendsDropdown');
+        document.getElementById('notifDropdown').style.display = 'none';
+        d.style.display = d.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function listenFriends() {
+        let me = auth.currentUser.displayName ? auth.currentUser.displayName.toLowerCase() : auth.currentUser.email.split('@')[0].toLowerCase();
+        db.collection('partner_data').doc(me).onSnapshot(doc => {
+            const container = document.getElementById('friendsListContainer');
+            container.innerHTML = '';
+            if(doc.exists && doc.data().friends) {
+                doc.data().friends.forEach(f => {
+                    container.innerHTML += `<div class="friend-link" onclick="checkSpecific('${f}')">@${f}</div>`;
+                });
+            } else { container.innerHTML = '<p style="text-align:center;font-size:0.7rem;">Takip yok.</p>'; }
+        });
+    }
+
+    function checkSpecific(u) {
+        document.getElementById('partnerUser').value = u;
+        document.getElementById('partnerPanel').style.display = 'block';
+        document.getElementById('partnerPanel').scrollIntoView();
+        checkPartner(); toggleFriends();
+    }
+
+    function listenNotifications() {
+        let me = auth.currentUser.displayName ? auth.currentUser.displayName.toLowerCase() : auth.currentUser.email.split('@')[0].toLowerCase();
+        db.collection('notifications').where('toUser', '==', me).onSnapshot(snap => {
+            const list = document.getElementById('notifList');
+            const badge = document.getElementById('notifBadge');
+            list.innerHTML = ''; let c = 0;
+            snap.forEach(doc => {
+                c++; let d = doc.data();
+                let html = `<div class="notif-item">`;
+                if(d.type === 'friend_request') {
+                    html += `🤝 @${d.fromUser} takip etmek istiyor.<br><button class="notif-btn" onclick="acceptFriend('${d.fromUser}','${doc.id}')">Kabul Et</button>`;
+                } else { html += `${d.message}<br><button class="notif-btn" onclick="deleteNotif('${doc.id}')">Sil</button>`; }
+                html += `</div>`; list.innerHTML += html;
+            });
+            badge.style.display = c > 0 ? 'flex' : 'none'; badge.innerText = c;
+        });
+    }
+
+    function acceptFriend(u, id) {
+        let me = auth.currentUser.displayName.toLowerCase();
+        db.collection('partner_data').doc(me).update({ friends: firebase.firestore.FieldValue.arrayUnion(u) });
+        db.collection('partner_data').doc(u).update({ friends: firebase.firestore.FieldValue.arrayUnion(me) });
+        db.collection('notifications').doc(id).delete();
+    }
+
+    function sendFriendRequest() {
+        const u = document.getElementById('partnerUser').value.trim().toLowerCase();
+        let me = auth.currentUser.displayName.toLowerCase();
+        if(!u || u === me) return alert("Hatalı işlem.");
+        db.collection('notifications').add({ toUser: u, fromUser: me, type: 'friend_request', timestamp: Date.now() });
+        alert("Gönderildi.");
+    }
+
+    function togglePartner() {
+        const p = document.getElementById('partnerPanel');
+        p.style.display = p.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function showStreak() {
+        let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}');
+        if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; }
+    }
+
+    function updateStreak(s) {
+        let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0, "last":""}');
+        let t = new Date().toLocaleDateString();
+        if(s >= 7) { if(d.last !== t) d.count++; d.last = t; } else { d.count = 0; }
+        localStorage.setItem('streak_' + auth.currentUser.uid, JSON.stringify(d)); showStreak();
+    }
+
+    function initPayPal() {
+        paypal.Buttons({
+            createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: '0.99' } }] }),
+            onApprove: (d, a) => a.order.capture().then(() => { localStorage.setItem('vip_' + auth.currentUser.uid, 'true'); location.reload(); })
+        }).render('#paypal-button-container');
+    }
+
+    function handlePlanClick() { if(!isVip) return alert("Premium gerekli."); runAI('plan'); }
+    function downloadPDF() { html2pdf().from(document.getElementById('results')).save(); }
+    function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
+    function doReset() { auth.sendPasswordResetEmail(document.getElementById('lEmail').value).then(() => alert("Gönderildi.")); }
+    function changeLang(l) { currentLang = l; location.reload(); }
 </script>
 </body>
 </html>
