@@ -61,6 +61,7 @@
         .chat-box { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 15px; }
         .msg-lara { align-self: flex-start; background: var(--accent); color: white; padding: 10px; border-radius: 15px 15px 15px 0; font-size: 0.8rem; max-width: 85%; }
         .msg-user { align-self: flex-end; background: var(--primary); color: white; padding: 10px; border-radius: 15px 15px 0 15px; font-size: 0.8rem; max-width: 85%; }
+        .sport-day-card { background: #1a202c; border-radius: 12px; padding: 12px; margin-bottom: 8px; border-left: 4px solid var(--premium); }
     </style>
 </head>
 <body>
@@ -231,10 +232,6 @@
             <p id="dietStatus" style="font-size:0.7rem; margin-top:5px; color:#94a3b8;"></p>
         </div>
 
-        <div class="premium-area">
-            <button class="btn btn-sub" id="txtBtnPlan" style="background: var(--premium); color: black;" onclick="runAI('plan')">📅 HAFTALIK PLANINIZI ÇIKARIN</button>
-        </div>
-
         <button class="btn btn-outline" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
     </div>
 </div>
@@ -284,7 +281,6 @@
             document.getElementById('txtPartTitle').innerText = d.partTitle;
             document.getElementById('btnAddFriend').innerText = d.partAdd;
             document.getElementById('btnCheckPart').innerText = d.partCheck;
-            document.getElementById('txtBtnPlan').innerText = d.plan;
         }
     }
 
@@ -428,6 +424,7 @@
         });
     }
 
+    // --- LARA & SPOR YENİ FONKSİYONLAR ---
     async function askLara() {
         const inp = document.getElementById('laraInput');
         const display = document.getElementById('laraChatDisplay');
@@ -478,8 +475,8 @@
             });
             const d = await r.json();
             if(!r.ok) throw new Error("Hata");
-            if(mode === 'spor' || mode === 'plan') {
-                document.getElementById('modalTitle').innerText = mode === 'spor' ? "Haftalık Spor Programın" : "Haftalık Beslenme Planın";
+            if(mode === 'spor') {
+                document.getElementById('modalTitle').innerText = "Haftalık Spor Programın";
                 document.getElementById('modalBody').innerHTML = `<div style="white-space:pre-line;">${d.analysis}</div>`;
                 document.getElementById('detailModal').style.display = 'block';
                 return;
