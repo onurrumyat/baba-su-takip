@@ -30,12 +30,16 @@
         .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); }
         .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
         .report-txt { font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
-        .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); }
+        
+        /* Gelişmiş Geçmiş Stili */
+        .history-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; margin-bottom: 10px; cursor: pointer; border-left: 4px solid var(--primary); transition: 0.3s; }
+        .history-header { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: bold; }
+        .history-detail { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #2d3748; font-size: 0.85rem; color: #cbd5e1; white-space: pre-line; }
+
         .score-wrapper { margin-top: 20px; margin-bottom: 10px; width: 100%; position: relative; padding-bottom: 20px; }
         .score-bar { height: 14px; width: 100%; border-radius: 7px; background: linear-gradient(to right, #ef4444 0%, #f97316 35%, #eab308 65%, #22c55e 100%); position: relative; }
         .score-marker { position: absolute; top: -10px; width: 30px; height: 30px; background: #fff; border: 3px solid #1e293b; border-radius: 50%; transform: translateX(-50%); transition: left 1s ease-out; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 900; color: #000; z-index: 2; }
-        .score-marker::after { content: '📍'; position: absolute; bottom: -20px; font-size: 1rem; }
-        .streak-badge { display:none; background:rgba(249, 115, 22, 0.15); color:#f97316; padding:8px 15px; border-radius:20px; font-weight:900; font-size:0.9rem; border:1px solid #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.3); animation: pulse 2s infinite; }
+        .streak-badge { display:none; background:rgba(249, 115, 22, 0.15); color:#f97316; padding:8px 15px; border-radius:20px; font-weight:900; font-size:0.9rem; border:1px solid #f97316; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         .partner-box { background: rgba(239, 68, 68, 0.05); border: 1px dashed var(--danger); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
         .bell-container { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; }
@@ -53,22 +57,19 @@
 <body>
 
 <div class="app-card">
-
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
         <div style="display: flex; align-items: center;">
-            <span onclick="changeLang('tr')" style="font-size: 1.8rem; cursor: pointer; margin-right: 15px;" title="Türkçe">🇹🇷</span>
-            <span onclick="changeLang('en')" style="font-size: 1.8rem; cursor: pointer;" title="English">🇺🇸</span>
+            <span onclick="changeLang('tr')" style="font-size: 1.8rem; cursor: pointer; margin-right: 15px;">🇹🇷</span>
+            <span onclick="changeLang('en')" style="font-size: 1.8rem; cursor: pointer;">🇺🇸</span>
         </div>
-        <div id="streakBadge" class="streak-badge" style="margin-left:10px;">
-            🔥 <span id="streakCount">0</span> <span id="txtStreak">Seri</span>
-        </div>
+        <div id="streakBadge" class="streak-badge">🔥 <span id="streakCount">0</span> <span id="txtStreak">Seri</span></div>
         <div style="display: flex;">
             <div class="bell-container" onclick="toggleNotifications()" id="bellIcon" style="display:none;">
                 <span class="bell-icon">🔔</span>
                 <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
                 <div class="notif-dropdown" id="notifDropdown">
                     <h4 style="color:white; margin-bottom:10px; text-align:center;">Bildirimler</h4>
-                    <div id="notifList"><p style="text-align:center; font-size:0.8rem;">Bildirim yok.</p></div>
+                    <div id="notifList"></div>
                 </div>
             </div>
             <div class="friends-btn" id="friendListBtn" onclick="toggleFriends()" style="display:none;">
@@ -85,18 +86,18 @@
         <h1 id="txtL1">BIO-CHEF</h1>
         <input type="email" id="lEmail" placeholder="E-posta">
         <input type="password" id="lPass" placeholder="Şifre">
-        <button class="btn btn-main" id="txtL4" onclick="doLogin()">GİRİŞ YAP</button>
-        <button class="btn btn-outline" id="txtL5" style="border:none;" onclick="doReset()">Şifremi Unuttum?</button>
-        <button class="btn btn-outline" id="txtL6" onclick="toggleView('regView')">Kayıt Ol</button>
+        <button class="btn btn-main" onclick="doLogin()">GİRİŞ YAP</button>
+        <button class="btn btn-outline" style="border:none;" onclick="doReset()">Şifremi Unuttum?</button>
+        <button class="btn btn-outline" onclick="toggleView('regView')">Kayıt Ol</button>
     </div>
 
     <div id="regView" class="auth-container" style="display:none;">
         <h1 id="txtR7">KAYIT OL</h1>
         <input type="email" id="rEmail" placeholder="E-posta">
-        <input type="text" id="rUser" placeholder="Kullanıcı Adı (Örn: fit_chef)">
+        <input type="text" id="rUser" placeholder="Kullanıcı Adı">
         <input type="password" id="rPass" placeholder="Şifre">
-        <button class="btn btn-sub" id="txtR8" onclick="doRegister()">HESABI OLUŞTUR</button>
-        <button class="btn btn-outline" id="txtR9" onclick="toggleView('loginView')">Geri Dön</button>
+        <button class="btn btn-sub" onclick="doRegister()">HESABI OLUŞTUR</button>
+        <button class="btn btn-outline" onclick="toggleView('loginView')">Geri Dön</button>
     </div>
 
     <div id="mainView" style="display:none;">
@@ -119,195 +120,105 @@
         <div id="results"></div>
         <button class="btn btn-main" id="btnPdf" style="display:none; background: #ef4444; margin-top:15px;" onclick="downloadPDF()">📄 PDF OLARAK KAYDET</button>
 
-        <button class="btn btn-outline" id="btnHistToggle" onclick="toggleHistory()" style="margin-top:25px;">📚 GEÇMİŞ ANALİZLERİM</button>
+        <button class="btn btn-outline" onclick="toggleHistory()" style="margin-top:25px;">📚 GEÇMİŞ ANALİZLERİM</button>
         <div id="historyPanel" style="display:none; margin-top:15px; padding:15px; border-radius:15px; border: 1px solid #2d3748;">
-            <h3 id="txtHistTitle" style="text-align:center; color:var(--primary); margin-bottom:10px;">Son Taramalarınız</h3>
+            <h3 style="text-align:center; color:var(--primary); margin-bottom:10px;">Son Taramalarınız</h3>
             <div id="historyList"></div>
         </div>
 
         <button class="btn btn-outline" id="btnPartnerToggle" style="border-color: var(--danger); color: var(--danger);" onclick="togglePartner()">👫 KANKA / ÇİFT ARENASI</button>
         <div id="partnerPanel" class="partner-box" style="display:none;">
-            <h3 id="txtPartTitle" style="color:var(--danger); margin-bottom:10px;">Partnerini Denetle! 🚨</h3>
+            <h3 style="color:var(--danger); margin-bottom:10px;">Partnerini Denetle! 🚨</h3>
             <input type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin" style="background: rgba(0,0,0,0.5);">
-            <button class="btn btn-sub" id="btnAddFriend" style="background: var(--accent); margin-bottom:5px;" onclick="sendFriendRequest()">➕ ARKADAŞ EKLE İSTEĞİ AT</button>
-            <button class="btn btn-sub" id="btnCheckPart" style="background: var(--danger);" onclick="checkPartner()">🔍 DURUMUNU SORGULA</button>
+            <button class="btn btn-sub" style="background: var(--accent); margin-bottom:5px;" onclick="sendFriendRequest()">➕ ARKADAŞ EKLE İSTEĞİ AT</button>
+            <button class="btn btn-sub" style="background: var(--danger);" onclick="checkPartner()">🔍 DURUMUNU SORGULA</button>
             <div id="partnerResult" style="margin-top:15px; font-weight:bold; white-space:pre-line;"></div>
         </div>
 
         <div class="premium-area">
-            <button class="btn btn-sub" id="txtBtnPlan" style="margin-top:0; background: var(--premium); color: black;" onclick="handlePlanClick()">📅 HAFTALIK PLANINIZI ÇIKARIN</button>
-            <div id="premiumLockInfo" style="margin-top: 15px;">
-                <div class="premium-title" id="txtPrem">PREMIUM ÜYE | 0.99 $</div>
+            <button class="btn btn-sub" style="margin-top:0; background: var(--premium); color: black;" onclick="handlePlanClick()">📅 HAFTALIK PLANINIZI ÇIKARIN</button>
+            <div id="premiumLockInfo">
+                <div class="premium-title">PREMIUM ÜYE | 0.99 $</div>
                 <div id="paypal-button-container"></div>
             </div>
         </div>
 
-        <button class="btn btn-outline" id="txtOut" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
+        <button class="btn btn-outline" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
     </div>
 </div>
 
 <script>
     let currentLang = 'tr';
     const langData = {
-        tr: {
-            appTitle: "BIO-CHEF", emailHolder: "E-posta", passHolder: "Şifre", btnLogin: "GİRİŞ YAP", btnReset: "Şifremi Unuttum?", btnReg: "Kayıt Ol",
-            regTitle: "KAYIT OL", btnCreate: "HESABI OLUŞTUR", btnBack: "Geri Dön", ageHolder: "YAŞ", weightHolder: "KİLO",
-            g1: "Kilo Vermek (-)", g2: "Kilo Almak (+)", g3: "Kiloyu Korumak (=)", btnAna: "📸 ANALİZ ET", btnPlan: "📅 HAFTALIK PLANINIZI ÇIKARIN",
-            premTitle: "PREMIUM ÜYE | 0.99 $", btnOut: "GÜVENLİ ÇIKIŞ", errMail: "Mail veya Kullanıcı Adı eksik.", errInfo: "Bilgileri girin.",
-            errPlan: "Haftalık plan için aşağıdan Premium üyeliğinizi başlatın.", errMsg: "Hata!", errUserTaken: "Bu kullanıcı adı zaten alınmış!",
-            loading: "🔍 İnceleniyor...", headersYemek: ["HEDEF SKORU 🎯", "AÇLIK KRONOMETRESİ ⏳", "ÜRÜN ÖZETİ", "BESİN DEĞERLERİ", "HEDEF ANALİZİ", "NET TAVSİYE"],
-            headersPlan: ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"], payDesc: "Bio-Chef Pro Haftalık Plan Erişimi",
-            paySucc: "Ödeme Başarılı!", btnPdfTxt: "📄 PDF OLARAK KAYDET", btnHistTxt: "📚 GEÇMİŞ ANALİZLERİM", histTitle: "Son Taramalarınız",
-            noHist: "Henüz geçmiş yok.", streakTxt: "Seri", btnPartToggle: "👫 KANKA / ÇİFT ARENASI", partTitle: "Partnerini Denetle! 🚨",
-            partInput: "Kullanıcı Adı Girin", btnPartCheck: "🔍 DURUMUNU SORGULA", partErr: "Lütfen partner kullanıcı adı girin.",
-            partNoData: "Önce ona arkadaşlık isteği atmalısın!", partCatch: "🚨 YAKALANDI! Skor: ", partGood: "✅ Sadık! Skor: "
-        },
-        en: {
-            appTitle: "BIO-CHEF", emailHolder: "Email", passHolder: "Password", btnLogin: "LOGIN", btnReset: "Forgot?", btnReg: "Sign Up",
-            regTitle: "SIGN UP", btnCreate: "CREATE ACCOUNT", btnBack: "Back", ageHolder: "AGE", weightHolder: "WEIGHT",
-            g1: "Lose Weight", g2: "Gain Weight", g3: "Maintain", btnAna: "📸 ANALYZE", btnPlan: "📅 GET WEEKLY PLAN",
-            premTitle: "PREMIUM | $0.99", btnOut: "LOGOUT", errMail: "Missing info.", errInfo: "Enter info.",
-            errPlan: "Start Premium for plan.", errMsg: "Error!", errUserTaken: "Username taken!",
-            loading: "🔍 Analyzing...", headersYemek: ["GOAL SCORE 🎯", "HUNGER ⏳", "SUMMARY", "NUTRITION", "GOAL ANALYSIS", "ADVICE"],
-            headersPlan: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"], payDesc: "Bio-Chef Pro Access",
-            paySucc: "Success!", btnPdfTxt: "📄 SAVE AS PDF", btnHistTxt: "📚 MY HISTORY", histTitle: "Recent Scans",
-            noHist: "No history.", streakTxt: "Streak", btnPartToggle: "👫 BUDDY ARENA", partTitle: "Inspect Partner!",
-            partInput: "Enter Username", btnPartCheck: "🔍 CHECK", partErr: "Enter username.",
-            partNoData: "Send request first!", partCatch: "🚨 CAUGHT! Score: ", partGood: "✅ Loyal! Score: "
-        }
+        tr: { streakTxt: "Seri", errPlan: "Premium gereklidir.", loading: "🔍 İnceleniyor...", partErr: "Kullanıcı adı girin.", partNoData: "İstek atmalısın!", partCatch: "🚨 KÖTÜ SKOR! ", partGood: "✅ SADIK! " },
+        en: { streakTxt: "Streak", errPlan: "Premium required.", loading: "🔍 Analyzing...", partErr: "Enter username.", partNoData: "Send request!", partCatch: "🚨 BAD SCORE! ", partGood: "✅ LOYAL! " }
     };
 
-    function changeLang(l) {
-        currentLang = l;
-        document.getElementById('txtL1').innerText = langData[l].appTitle;
-        document.getElementById('lEmail').placeholder = langData[l].emailHolder;
-        document.getElementById('lPass').placeholder = langData[l].passHolder;
-        document.getElementById('txtL4').innerText = langData[l].btnLogin;
-        document.getElementById('txtL5').innerText = langData[l].btnReset;
-        document.getElementById('txtL6').innerText = langData[l].btnReg;
-        document.getElementById('txtR7').innerText = langData[l].regTitle;
-        document.getElementById('rEmail').placeholder = langData[l].emailHolder;
-        document.getElementById('rPass').placeholder = langData[l].passHolder;
-        document.getElementById('txtR8').innerText = langData[l].btnCreate;
-        document.getElementById('txtR9').innerText = langData[l].btnBack;
-        document.getElementById('uAge').placeholder = langData[l].ageHolder;
-        document.getElementById('uWeight').placeholder = langData[l].weightHolder;
-        document.getElementById('opt1').innerText = langData[l].g1;
-        document.getElementById('opt2').innerText = langData[l].g2;
-        document.getElementById('opt3').innerText = langData[l].g3;
-        document.getElementById('btnAnalyzeText').innerText = langData[l].btnAna;
-        document.getElementById('txtBtnPlan').innerText = langData[l].btnPlan;
-        document.getElementById('txtPrem').innerText = langData[l].premTitle;
-        document.getElementById('txtOut').innerText = langData[l].btnOut;
-        document.getElementById('btnPdf').innerText = langData[l].btnPdfTxt;
-        document.getElementById('btnHistToggle').innerText = langData[l].btnHistTxt;
-        document.getElementById('txtHistTitle').innerText = langData[l].histTitle;
-        document.getElementById('txtStreak').innerText = langData[l].streakTxt; 
-        document.getElementById('btnPartnerToggle').innerText = langData[l].btnPartToggle;
-        document.getElementById('txtPartTitle').innerText = langData[l].partTitle;
-        document.getElementById('partnerUser').placeholder = langData[l].partInput; 
-        document.getElementById('btnCheckPart').innerText = langData[l].btnPartCheck;
-    }
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
-        authDomain: "voice2post-9e8ca.firebaseapp.com",
-        projectId: "voice2post-9e8ca",
-        storageBucket: "voice2post-9e8ca.firebasestorage.app",
-        messagingSenderId: "511446656614",
-        appId: "1:511446656614:web:32101ee70299543c716fa7"
-    };
+    const firebaseConfig = { apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA", authDomain: "voice2post-9e8ca.firebaseapp.com", projectId: "voice2post-9e8ca", storageBucket: "voice2post-9e8ca.firebasestorage.app", messagingSenderId: "511446656614", appId: "1:511446656614:web:32101ee70299543c716fa7" };
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore(); 
-    let isVip = false;
+    const auth = firebase.auth(); const db = firebase.firestore(); let isVip = false;
 
-    function toggleView(id) {
-        document.getElementById('loginView').style.display = 'none';
-        document.getElementById('regView').style.display = 'none';
-        document.getElementById('mainView').style.display = 'none';
-        document.getElementById(id).style.display = 'block';
-    }
-
+    function toggleView(id) { document.getElementById('loginView').style.display='none'; document.getElementById('regView').style.display='none'; document.getElementById('mainView').style.display='none'; document.getElementById(id).style.display='block'; }
     setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 
     auth.onAuthStateChanged(user => {
         if (user) {
             toggleView('mainView');
-            let display = user.displayName ? "@" + user.displayName : "@" + user.email.split('@')[0];
-            document.getElementById('uMail').innerText = display;
-            isVip = localStorage.getItem('vip_' + user.uid) === 'true';
-            if(!isVip) { document.getElementById('premiumLockInfo').style.display = 'block'; initPayPal(); } 
-            else { document.getElementById('premiumLockInfo').style.display = 'none'; }
-            document.getElementById('bellIcon').style.display = 'flex'; 
-            document.getElementById('friendListBtn').style.display = 'flex'; 
+            document.getElementById('uMail').innerText = user.displayName ? "@"+user.displayName : "@"+user.email.split('@')[0];
+            isVip = localStorage.getItem('vip_'+user.uid) === 'true';
+            document.getElementById('premiumLockInfo').style.display = isVip ? 'none' : 'block';
+            if(!isVip) initPayPal();
+            document.getElementById('bellIcon').style.display='flex'; document.getElementById('friendListBtn').style.display='flex';
             listenNotifications(); listenFriends(); showStreak();
-            let me = user.displayName ? user.displayName.toLowerCase() : user.email.split('@')[0].toLowerCase();
-            db.collection('partner_data').doc(me).set({ username: me }, { merge: true });
+            db.collection('partner_data').doc(user.displayName.toLowerCase()).set({ username: user.displayName.toLowerCase() }, { merge: true });
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
         } else { toggleView('loginView'); }
     });
 
     async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); } }
-    async function doRegister() { 
-        const u = document.getElementById('rUser').value.trim();
-        const e = document.getElementById('rEmail').value;
-        const p = document.getElementById('rPass').value;
-        if(!u || !e || !p) return alert("Eksik.");
+    async function doRegister() {
+        const u = document.getElementById('rUser').value.trim(); const e = document.getElementById('rEmail').value; const p = document.getElementById('rPass').value;
         try { 
             const check = await db.collection('partner_data').doc(u.toLowerCase()).get();
-            if(check.exists) return alert(langData[currentLang].errUserTaken);
+            if(check.exists) return alert("Alınmış!");
             const cred = await auth.createUserWithEmailAndPassword(e, p);
             await cred.user.updateProfile({ displayName: u });
-            await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase() }, { merge: true });
-            location.reload(); 
-        } catch(err) { alert(err.message); } 
+            await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase() });
+            location.reload();
+        } catch(err) { alert(err.message); }
     }
 
-    function toggleNotifications() {
-        const d = document.getElementById('notifDropdown');
-        document.getElementById('friendsDropdown').style.display = 'none';
-        d.style.display = d.style.display === 'none' ? 'block' : 'none';
-    }
-
-    function toggleFriends() {
-        const d = document.getElementById('friendsDropdown');
-        document.getElementById('notifDropdown').style.display = 'none';
-        d.style.display = d.style.display === 'none' ? 'block' : 'none';
-    }
+    function toggleNotifications() { const d = document.getElementById('notifDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
+    function toggleFriends() { const d = document.getElementById('friendsDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
 
     function listenFriends() {
-        let me = auth.currentUser.displayName ? auth.currentUser.displayName.toLowerCase() : auth.currentUser.email.split('@')[0].toLowerCase();
+        let me = auth.currentUser.displayName.toLowerCase();
         db.collection('partner_data').doc(me).onSnapshot(doc => {
             const container = document.getElementById('friendsListContainer');
             container.innerHTML = '';
             if(doc.exists && doc.data().friends) {
                 doc.data().friends.forEach(f => {
-                    container.innerHTML += `<div class="friend-link" onclick="checkSpecific('${f}')">@${f}</div>`;
+                    container.innerHTML += `<div class="friend-link" onclick="scrollToPartner('${f}')">@${f}</div>`;
                 });
-            } else { container.innerHTML = '<p style="text-align:center;font-size:0.7rem;">Takip yok.</p>'; }
+            }
         });
     }
 
-    function checkSpecific(u) {
+    function scrollToPartner(u) {
         document.getElementById('partnerUser').value = u;
         document.getElementById('partnerPanel').style.display = 'block';
-        checkPartner(); toggleFriends();
+        document.getElementById('partnerPanel').scrollIntoView({ behavior: 'smooth' });
+        toggleFriends();
     }
 
     function listenNotifications() {
-        let me = auth.currentUser.displayName ? auth.currentUser.displayName.toLowerCase() : auth.currentUser.email.split('@')[0].toLowerCase();
+        let me = auth.currentUser.displayName.toLowerCase();
         db.collection('notifications').where('toUser', '==', me).onSnapshot(snap => {
-            const list = document.getElementById('notifList');
-            const badge = document.getElementById('notifBadge');
+            const list = document.getElementById('notifList'); const badge = document.getElementById('notifBadge');
             list.innerHTML = ''; let c = 0;
             snap.forEach(doc => {
                 c++; let d = doc.data();
-                let html = `<div class="notif-item">`;
-                if(d.type === 'friend_request') {
-                    html += `🤝 @${d.fromUser} takip etmek istiyor.<br><button class="notif-btn" onclick="acceptFriend('${d.fromUser}','${doc.id}')">Kabul Et</button>`;
-                } else { html += `${d.message}<br><button class="notif-btn" onclick="deleteNotif('${doc.id}')">Sil</button>`; }
-                html += `</div>`; list.innerHTML += html;
+                list.innerHTML += `<div class="notif-item">🤝 @${d.fromUser} istek attı.<br><button class="notif-btn" onclick="acceptFriend('${d.fromUser}','${doc.id}')">Kabul Et</button></div>`;
             });
             badge.style.display = c > 0 ? 'flex' : 'none'; badge.innerText = c;
         });
@@ -322,110 +233,112 @@
 
     function sendFriendRequest() {
         const u = document.getElementById('partnerUser').value.trim().toLowerCase();
-        let me = auth.currentUser.displayName.toLowerCase();
-        if(!u || u === me) return alert(langData[currentLang].partErr);
-        db.collection('notifications').add({ toUser: u, fromUser: me, type: 'friend_request', timestamp: Date.now() });
+        db.collection('notifications').add({ toUser: u, fromUser: auth.currentUser.displayName.toLowerCase(), type: 'friend_request' });
         alert("Gönderildi.");
     }
 
     async function runAI(mode) {
         const resDiv = document.getElementById('results');
-        const age = document.getElementById('uAge').value;
-        const weight = document.getElementById('uWeight').value;
-        if(!age || !weight) return alert(langData[currentLang].errInfo);
-        resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
-        resDiv.style.display = 'flex';
+        const age = document.getElementById('uAge').value; const weight = document.getElementById('uWeight').value;
+        if(!age || !weight) return alert("Bilgi girin.");
+        resDiv.innerHTML = `<p>${langData[currentLang].loading}</p>`; resDiv.style.display = 'flex';
         let img = "";
         if(mode === 'yemek') {
-            const vid = document.getElementById('video');
-            const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
-            canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
+            const vid = document.getElementById('video'); const canv = document.createElement('canvas');
+            canv.width = 640; canv.height = 480; canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
             img = canv.toDataURL('image/jpeg', 0.7);
         }
         try {
-            const r = await fetch('/api/analyze', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
+            const r = await fetch('/api/analyze', { method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ mode, image: img, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`, lang: currentLang })
             });
             const d = await r.json(); resDiv.innerHTML = '';
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
-            const heads = mode === 'plan' ? langData[currentLang].headersPlan : langData[currentLang].headersYemek;
-            let score = 5;
+            let score = 5; let foodName = "Bilinmiyor";
             sections.forEach((txt, i) => {
                 const card = document.createElement('div'); card.className = 'report-card';
                 let content = txt.trim();
-                if(mode === 'yemek' && i === 0) {
-                    const match = content.match(/\[SKOR:\s*(\d+)\]/i);
-                    if(match) { score = parseInt(match[1]); content = content.replace(match[0], '').trim(); updateStreak(score); }
-                    let left = (score/10)*100;
-                    card.innerHTML = `<div class="report-tag">${heads[i]}</div><div class="report-txt">${content}</div>
-                    <div class="score-wrapper"><div class="score-bar"><div class="score-marker" style="left:${left}%">${score}</div></div></div>`;
-                } else { card.innerHTML = `<div class="report-tag">${heads[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`; }
+                if(i === 0 && mode === 'yemek') {
+                    const m = content.match(/\[SKOR:\s*(\d+)\]/i);
+                    if(m) { score = parseInt(m[1]); content = content.replace(m[0], '').trim(); updateStreak(score); }
+                    card.innerHTML = `<div class="report-tag">SKOR</div><div class="report-txt">${content}</div><div class="score-wrapper"><div class="score-bar"><div class="score-marker" style="left:${(score/10)*100}%">${score}</div></div></div>`;
+                } else {
+                    if(i === 2) foodName = content.split('\n')[0]; // Ürün özeti
+                    card.innerHTML = `<div class="report-tag">DETAY</div><div class="report-txt">${content}</div>`;
+                }
                 resDiv.appendChild(card);
             });
-            document.getElementById('btnPdf').style.display = 'block';
-            if(mode === 'yemek') saveHistory(score, d.analysis);
-        } catch(e) { alert(langData[currentLang].errMsg); }
+            document.getElementById('btnPdf').style.display='block';
+            if(mode === 'yemek') saveHistory(score, foodName, d.analysis);
+        } catch(e) { alert("Hata!"); }
     }
 
-    function saveHistory(score, raw) {
+    function saveHistory(score, food, fullText) {
         let me = auth.currentUser.displayName.toLowerCase();
-        db.collection('partner_data').doc(me).set({ score: score, lastMeal: raw.substring(0, 50), time: new Date().toLocaleTimeString() }, { merge: true });
-        let key = 'history_' + auth.currentUser.uid;
+        db.collection('partner_data').doc(me).set({ score: score, lastMeal: food, time: new Date().toLocaleTimeString() }, { merge: true });
+        let key = 'history_'+auth.currentUser.uid;
         let arr = JSON.parse(localStorage.getItem(key) || '[]');
-        arr.unshift({ summary: `Skor: ${score}/10`, date: new Date().toLocaleString() });
-        localStorage.setItem(key, JSON.stringify(arr.slice(0, 10)));
+        arr.unshift({ score: score, food: food, full: fullText, date: new Date().toLocaleString() });
+        localStorage.setItem(key, JSON.stringify(arr.slice(0, 15)));
     }
 
     function toggleHistory() {
-        const p = document.getElementById('historyPanel');
-        p.style.display = p.style.display === 'none' ? 'block' : 'none';
-        if(p.style.display === 'block') {
+        const p = document.getElementById('historyPanel'); p.style.display = p.style.display==='none'?'block':'none';
+        if(p.style.display==='block') {
             const list = document.getElementById('historyList');
-            let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-            list.innerHTML = arr.length ? arr.map(h => `<div class="history-box"><b>${h.date}</b><br>${h.summary}</div>`).join('') : "Henüz yok.";
+            let arr = JSON.parse(localStorage.getItem('history_'+auth.currentUser.uid) || '[]');
+            list.innerHTML = arr.map((h, i) => `
+                <div class="history-item" onclick="toggleHistoryDetail(${i})">
+                    <div class="history-header"><span>🗓️ ${h.date}</span><span>⭐ ${h.score}/10</span></div>
+                    <div style="font-size:0.8rem; margin-top:5px;">🍴 ${h.food}</div>
+                    <div class="history-detail" id="histDet-${i}">${h.full}</div>
+                </div>`).join('');
         }
     }
 
-    function togglePartner() {
-        const p = document.getElementById('partnerPanel');
-        p.style.display = p.style.display === 'none' ? 'block' : 'none';
+    function toggleHistoryDetail(i) {
+        const d = document.getElementById(`histDet-${i}`);
+        d.style.display = d.style.display === 'block' ? 'none' : 'block';
     }
+
+    function togglePartner() { const p = document.getElementById('partnerPanel'); p.style.display = p.style.display==='none'?'block':'none'; }
 
     function checkPartner() {
         const u = document.getElementById('partnerUser').value.trim().toLowerCase();
         const res = document.getElementById('partnerResult');
         db.collection('partner_data').doc(u).get().then(doc => {
             if(doc.exists && doc.data().score !== undefined) {
-                let s = doc.data().score;
-                res.innerText = (s < 7 ? langData[currentLang].partCatch : langData[currentLang].partGood) + s + "/10";
+                const d = doc.data();
+                let status = d.score >= 7 ? langData[currentLang].partGood : (d.score <= 3 ? langData[currentLang].partCatch : "Orta Şekerli: ");
+                res.innerText = `${status} ${d.score}/10\nNe Yedi: ${d.lastMeal}\nSaat: ${d.time}`;
+                res.style.color = d.score >= 7 ? 'var(--primary)' : (d.score <= 3 ? 'var(--danger)' : 'var(--premium)');
             } else { res.innerText = "Veri yok."; }
         });
     }
 
     function showStreak() {
-        let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}');
-        if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; }
+        let d = JSON.parse(localStorage.getItem('streak_'+auth.currentUser.uid) || '{"count":0}');
+        if(d.count > 0) { document.getElementById('streakBadge').style.display='block'; document.getElementById('streakCount').innerText=d.count; }
     }
 
     function updateStreak(s) {
-        let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0, "last":""}');
+        let d = JSON.parse(localStorage.getItem('streak_'+auth.currentUser.uid) || '{"count":0,"last":""}');
         let t = new Date().toLocaleDateString();
         if(s >= 7) { if(d.last !== t) d.count++; d.last = t; } else { d.count = 0; }
-        localStorage.setItem('streak_' + auth.currentUser.uid, JSON.stringify(d)); showStreak();
+        localStorage.setItem('streak_'+auth.currentUser.uid, JSON.stringify(d)); showStreak();
     }
 
     function initPayPal() {
         paypal.Buttons({
             createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: '0.99' } }] }),
-            onApprove: (d, a) => a.order.capture().then(() => { localStorage.setItem('vip_' + auth.currentUser.uid, 'true'); location.reload(); })
+            onApprove: (d, a) => a.order.capture().then(() => { localStorage.setItem('vip_'+auth.currentUser.uid, 'true'); location.reload(); })
         }).render('#paypal-button-container');
     }
 
     function handlePlanClick() { if(!isVip) return alert(langData[currentLang].errPlan); runAI('plan'); }
     function downloadPDF() { html2pdf().from(document.getElementById('results')).save(); }
-    function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
-    function doReset() { auth.sendPasswordResetEmail(document.getElementById('lEmail').value).then(() => alert("Gönderildi.")); }
+    function changeLang(l) { currentLang = l; alert("Dil değiştirildi: " + l); }
+    function doReset() { auth.sendPasswordResetEmail(document.getElementById('lEmail').value).then(() => alert("Link gönderildi.")); }
 </script>
 </body>
 </html>
