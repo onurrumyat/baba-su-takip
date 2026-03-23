@@ -54,7 +54,6 @@
         
         .user-tag { font-size: 0.9rem; font-weight: 900; color: var(--primary); margin-top: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         
-        /* EKLENEN: Dashboard (Kontrol Paneli) Stilleri */
         .dashboard-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 20px; border: 1px solid #1e293b; margin-bottom: 20px; }
         .dash-side { text-align: center; width: 30%; display: flex; flex-direction: column; justify-content: center; }
         .dash-center { text-align: center; width: 40%; }
@@ -189,7 +188,6 @@
             btnPartToggle: "👫 KANKA / ÇİFT ARENASI", partTitle: "Partnerini Denetle! 🚨", partInput: "Kullanıcı Adı Girin", btnPartCheck: "🔍 DURUMUNU SORGULA",
             partErr: "Lütfen partner kullanıcı adı girin.", partNoData: "Önce ona arkadaşlık isteği atmalı ve onun kabul etmesini beklemelisin!",
             partCatch: "🚨 YAKALANDI! Partnerin gizlice kötü besleniyor!\nSkoru: ", partGood: "✅ Partnerin diyete sadık!\nSkoru: ",
-            // EKLENEN ÇEVİRİLER
             dailyAvgTxt: "GÜNLÜK ORT.", avatarTxt: "AVATARIN"
         },
         en: {
@@ -209,7 +207,6 @@
             btnPartToggle: "👫 BUDDY / COUPLE ARENA", partTitle: "Inspect Your Partner! 🚨", partInput: "Enter Username", btnPartCheck: "🔍 CHECK STATUS",
             partErr: "Please enter partner username.", partNoData: "You must send a friend request first and wait for approval!",
             partCatch: "🚨 CAUGHT! Your partner is eating bad secretly!\nScore: ", partGood: "✅ Your partner is staying fit!\nScore: ",
-            // EKLENEN ÇEVİRİLER
             dailyAvgTxt: "DAILY AVG.", avatarTxt: "AVATAR"
         }
     };
@@ -246,7 +243,6 @@
         document.getElementById('partnerUser').placeholder = langData[l].partInput; 
         document.getElementById('btnCheckPart').innerText = langData[l].btnPartCheck;
 
-        // EKLENEN ÇEVİRİLERİN ATANMASI
         document.getElementById('txtDailyAvg').innerText = langData[l].dailyAvgTxt;
         document.getElementById('txtAvatar').innerText = langData[l].avatarTxt;
     }
@@ -290,7 +286,6 @@
             let activeUser = user.displayName ? user.displayName.toLowerCase() : user.email.split('@')[0].toLowerCase();
             db.collection('partner_data').doc(activeUser).set({ username: activeUser }, { merge: true });
             
-            // EKLENEN: ARAYÜZ YÜKLENDİĞİNDE GÜNLÜK AVATARI VE ORTALAMAYI GÜNCELLE
             renderDailyStats();
 
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
@@ -301,7 +296,7 @@
     });
 
     // ==========================================
-    // EKLENEN: GÜNLÜK ORTALAMA VE AVATAR FONKSİYONLARI
+    // DÜZELTİLEN: GERÇEK MATEMATİKSEL ORTALAMA (FLOAT)
     // ==========================================
     function updateDailyStats(newScore) {
         if(!auth.currentUser) return;
@@ -309,15 +304,17 @@
         let today = new Date().toLocaleDateString();
         let dailyData = JSON.parse(localStorage.getItem('daily_' + uid) || '{"date":"","total":0,"count":0}');
         
-        // Eğer gün değiştiyse veriyi sıfırla, değişmediyse üzerine ekle
+        let score = parseFloat(newScore); // Sayıya çevir
+        
         if(dailyData.date !== today) {
-            dailyData = { date: today, total: newScore, count: 1 };
+            dailyData = { date: today, total: score, count: 1 };
         } else {
-            dailyData.total += newScore;
-            dailyData.count += 1;
+            // Matematiksel Toplama (Örn: 8 + 4 + 3 = 15)
+            dailyData.total = parseFloat(dailyData.total) + score;
+            dailyData.count = parseInt(dailyData.count) + 1;
         }
         localStorage.setItem('daily_' + uid, JSON.stringify(dailyData));
-        renderDailyStats(); // Arayüzü güncelle
+        renderDailyStats(); 
     }
 
     function renderDailyStats() {
@@ -329,28 +326,28 @@
         const avgValEl = document.getElementById('dailyAvgVal');
         const avatarEl = document.getElementById('avatarVal');
 
-        // Sadece bugünün verisi varsa hesapla
         if(dailyData.date === today && dailyData.count > 0) {
-            let avg = (dailyData.total / dailyData.count).toFixed(1);
+            // Matematiksel Bölme (Örn: 15 / 3 = 5.0)
+            let avg = parseFloat((parseFloat(dailyData.total) / parseInt(dailyData.count)).toFixed(1));
             avgValEl.innerText = avg;
 
             if(avg >= 7) {
-                avgValEl.style.color = "var(--primary)"; // Yeşil
-                avatarEl.innerText = "🦸‍♂️💪"; // SÜPER FİT AVATAR
+                avgValEl.style.color = "var(--primary)"; 
+                avatarEl.innerText = "🦸‍♂️💪"; 
                 avatarEl.style.transform = "scale(1.1)";
             } else if(avg >= 4) {
-                avgValEl.style.color = "var(--premium)"; // Turuncu
-                avatarEl.innerText = "🧍‍♂️"; // NORMAL AVATAR
+                avgValEl.style.color = "var(--premium)"; 
+                avatarEl.innerText = "🧍‍♂️"; 
                 avatarEl.style.transform = "scale(1)";
             } else {
-                avgValEl.style.color = "var(--danger)"; // Kırmızı
-                avatarEl.innerText = "🍔🥱"; // KÖTÜ BESLENMİŞ AVATAR
+                avgValEl.style.color = "var(--danger)"; 
+                avatarEl.innerText = "🍔🥱"; 
                 avatarEl.style.transform = "scale(0.9)";
             }
         } else {
             avgValEl.innerText = "-";
             avgValEl.style.color = "#64748b";
-            avatarEl.innerText = "👤"; // Veri Yok
+            avatarEl.innerText = "👤"; 
             avatarEl.style.transform = "scale(1)";
         }
     }
@@ -362,7 +359,9 @@
     }
 
     function listenNotifications() {
-        let activeUser = auth.currentUser.displayName ? auth.currentUser.displayName.toLowerCase() : auth.currentUser.email.split('@')[0].toLowerCase();
+        if(!auth.currentUser || !auth.currentUser.displayName) return;
+        let activeUser = auth.currentUser.displayName.toLowerCase();
+        
         db.collection('notifications').where('toUser', '==', activeUser)
           .onSnapshot(snap => {
               const listDiv = document.getElementById('notifList');
@@ -389,23 +388,35 @@
 
     function sendFriendRequest() {
         const pUser = document.getElementById('partnerUser').value.trim().toLowerCase();
-        let myUser = auth.currentUser.displayName ? auth.currentUser.displayName.toLowerCase() : auth.currentUser.email.split('@')[0].toLowerCase();
+        if(!auth.currentUser || !auth.currentUser.displayName) return alert("Hata: Kullanıcı adı bulunamadı.");
+        
+        let myUser = auth.currentUser.displayName.toLowerCase();
         
         if(!pUser || pUser === myUser) return alert(langData[currentLang].partErr);
         
         db.collection('notifications').add({
             toUser: pUser, fromUser: myUser, type: 'friend_request', timestamp: new Date().getTime()
-        }).then(() => alert("Arkadaşlık isteği gönderildi! O kabul edince skorunu görebileceksin."))
-          .catch(() => alert("İstek gönderilemedi."));
+        }).then(() => {
+            alert("Arkadaşlık isteği başarıyla gönderildi! O kabul edince skorunu görebileceksin.");
+            document.getElementById('partnerUser').value = ""; // Kutuyu temizle
+        }).catch((e) => alert("İstek gönderilemedi. Lütfen internet bağlantınızı kontrol edin."));
     }
 
+    // ==========================================
+    // DÜZELTİLEN: ARKADAŞ EKLEMEDE { MERGE: TRUE } MANTIĞI
+    // ==========================================
     function acceptFriend(friendUser, notifId) {
-        let myUser = auth.currentUser.displayName ? auth.currentUser.displayName.toLowerCase() : auth.currentUser.email.split('@')[0].toLowerCase();
-        db.collection('partner_data').doc(myUser).update({ friends: firebase.firestore.FieldValue.arrayUnion(friendUser) });
-        db.collection('partner_data').doc(friendUser).update({ friends: firebase.firestore.FieldValue.arrayUnion(myUser) });
+        if(!auth.currentUser || !auth.currentUser.displayName) return;
+        let myUser = auth.currentUser.displayName.toLowerCase();
+        
+        // set({ merge: true }) kullanıldı. Dosya yoksa bile zorla oluşturup içine yazar. Asla hata vermez.
+        db.collection('partner_data').doc(myUser).set({ friends: firebase.firestore.FieldValue.arrayUnion(friendUser) }, { merge: true });
+        db.collection('partner_data').doc(friendUser).set({ friends: firebase.firestore.FieldValue.arrayUnion(myUser) }, { merge: true });
+        
         deleteNotif(notifId);
         alert("Arkadaş eklendi! Artık birbirinizi sorgulayabilirsiniz.");
     }
+    // ==========================================
 
     function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
 
@@ -517,7 +528,7 @@
                         cardContent = cardContent.replace(scoreMatch[0], '').trim();
                         
                         updateStreak(currentScore);
-                        updateDailyStats(currentScore); // EKLENEN: Her yeni yemek okutulduğunda günlük ortalamayı ve avatarı günceller
+                        updateDailyStats(currentScore); 
                     }
                     let leftPos = (currentScore / 10) * 100;
                     
