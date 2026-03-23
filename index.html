@@ -43,8 +43,15 @@
         .streak-badge { display:none; background:rgba(249, 115, 22, 0.15); color:#f97316; padding:8px 15px; border-radius:20px; font-weight:900; font-size:0.9rem; border:1px solid #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.3); animation: pulse 2s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* --- EKLENEN: PARTNER ARENASI CSS --- */
         .partner-box { background: rgba(239, 68, 68, 0.05); border: 1px dashed var(--danger); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
+
+        /* --- EKLENEN: BİLDİRİM ZİLİ CSS --- */
+        .bell-container { position: relative; cursor: pointer; margin-left: auto; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; }
+        .bell-icon { font-size: 1.5rem; }
+        .notif-badge { position: absolute; top: 0; right: 0; background: var(--danger); color: white; font-size: 0.6rem; font-weight: 900; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .notif-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 280px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 10px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.8); max-height: 300px; overflow-y: auto; }
+        .notif-item { background: #0b0f1a; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 0.8rem; color: #cbd5e1; border-left: 3px solid var(--accent); }
+        .notif-btn { background: var(--primary); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; margin-top: 5px; font-weight:bold; }
     </style>
 </head>
 <body>
@@ -56,8 +63,17 @@
             <span onclick="changeLang('tr')" style="font-size: 1.8rem; cursor: pointer; margin-right: 15px;" title="Türkçe">🇹🇷</span>
             <span onclick="changeLang('en')" style="font-size: 1.8rem; cursor: pointer;" title="English">🇺🇸</span>
         </div>
-        <div id="streakBadge" class="streak-badge">
+        <div id="streakBadge" class="streak-badge" style="margin-left:10px;">
             🔥 <span id="streakCount">0</span> <span id="txtStreak">Seri</span>
+        </div>
+        
+        <div class="bell-container" onclick="toggleNotifications()" id="bellIcon" style="display:none;">
+            <span class="bell-icon">🔔</span>
+            <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+            <div class="notif-dropdown" id="notifDropdown">
+                <h4 style="color:white; margin-bottom:10px; text-align:center;">Bildirimler</h4>
+                <div id="notifList"><p style="text-align:center; font-size:0.8rem;">Bildirim yok.</p></div>
+            </div>
         </div>
     </div>
 
@@ -121,6 +137,7 @@
         <div id="partnerPanel" class="partner-box" style="display:none;">
             <h3 id="txtPartTitle" style="color:var(--danger); margin-bottom:10px;">Partnerini Denetle! 🚨</h3>
             <input type="email" id="partnerEmail" placeholder="Partnerinin E-postası" style="background: rgba(0,0,0,0.5);">
+            <button class="btn btn-sub" id="btnAddFriend" style="background: var(--accent); margin-bottom:5px;" onclick="sendFriendRequest()">➕ ARKADAŞ EKLE İSTEĞİ AT</button>
             <button class="btn btn-sub" id="btnCheckPart" style="background: var(--danger);" onclick="checkPartner()">🔍 DURUMUNU SORGULA</button>
             <div id="partnerResult" style="margin-top:15px; font-weight:bold; white-space:pre-line;"></div>
         </div>
@@ -140,15 +157,13 @@
             btnAna: "📸 ANALİZ ET", btnPlan: "📅 HAFTALIK PLANINIZI ÇIKARIN", premTitle: "PREMIUM ÜYE | 0.99 $", btnOut: "GÜVENLİ ÇIKIŞ",
             errMail: "Mail yazın.", errInfo: "Bilgileri girin.", errPlan: "Haftalık plan için aşağıdan Premium üyeliğinizi başlatın.", errMsg: "Hata!",
             loading: "🔍 İnceleniyor...", 
-            // DÜZELTİLEN: AÇLIK KRONOMETRESİ BAŞLIĞI EKLENDİ (6 Madde oldu)
             headersYemek: ["HEDEF SKORU 🎯", "AÇLIK KRONOMETRESİ ⏳", "ÜRÜN ÖZETİ", "BESİN DEĞERLERİ", "HEDEF ANALİZİ", "NET TAVSİYE"],
             headersPlan: ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"],
             payDesc: "Bio-Chef Pro Haftalık Plan Erişimi", paySucc: "Ödeme Başarılı! VIP özellikler aktif edildi.",
             btnPdfTxt: "📄 PDF OLARAK KAYDET", btnHistTxt: "📚 GEÇMİŞ ANALİZLERİM", histTitle: "Son Taramalarınız", noHist: "Henüz geçmiş yok.",
             markerInfo: "Sen", streakTxt: "Seri",
-            // EKLENEN: PARTNER ARENASI ÇEVİRİLERİ
             btnPartToggle: "👫 KANKA / ÇİFT ARENASI", partTitle: "Partnerini Denetle! 🚨", partInput: "Partnerinin E-postası", btnPartCheck: "🔍 DURUMUNU SORGULA",
-            partErr: "Lütfen partner e-postası girin.", partNoData: "Bu kullanıcıya ait henüz bir kayıt yok.",
+            partErr: "Lütfen partner e-postası girin.", partNoData: "Önce ona arkadaşlık isteği atmalı ve onun kabul etmesini beklemelisin!",
             partCatch: "🚨 YAKALANDI! Partnerin gizlice kötü besleniyor!\nSkoru: ", partGood: "✅ Partnerin diyete sadık!\nSkoru: "
         },
         en: {
@@ -165,7 +180,7 @@
             btnPdfTxt: "📄 DOWNLOAD AS PDF", btnHistTxt: "📚 MY HISTORY", histTitle: "Recent Scans", noHist: "No history yet.",
             markerInfo: "You", streakTxt: "Streak",
             btnPartToggle: "👫 BUDDY / COUPLE ARENA", partTitle: "Inspect Your Partner! 🚨", partInput: "Partner's Email", btnPartCheck: "🔍 CHECK STATUS",
-            partErr: "Please enter partner email.", partNoData: "No records found for this user.",
+            partErr: "Please enter partner email.", partNoData: "You must send a friend request first and wait for approval!",
             partCatch: "🚨 CAUGHT! Your partner is eating bad secretly!\nScore: ", partGood: "✅ Your partner is staying fit!\nScore: "
         }
     };
@@ -213,7 +228,7 @@
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db = firebase.firestore(); // Firestore Başlatıldı (Kanka Arenası için)
+    const db = firebase.firestore(); 
     let isVip = false;
 
     function toggleView(id) {
@@ -234,20 +249,83 @@
             else { document.getElementById('premiumLockInfo').style.display = 'none'; }
             
             showStreak(); 
+            document.getElementById('bellIcon').style.display = 'flex'; // Zili göster
+            listenNotifications(); // Bildirimleri dinlemeye başla
+            
+            // Kendini veritabanına kaydet
+            db.collection('partner_data').doc(user.email.toLowerCase()).set({ email: user.email.toLowerCase() }, { merge: true });
+            
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
-        } else { toggleView('loginView'); }
+        } else { 
+            toggleView('loginView'); 
+            document.getElementById('bellIcon').style.display = 'none';
+        }
     });
+
+    // --- EKLENEN: BİLDİRİM VE ARKADAŞLIK SİSTEMİ MANTIĞI ---
+    function toggleNotifications() {
+        const drop = document.getElementById('notifDropdown');
+        drop.style.display = drop.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function listenNotifications() {
+        if(!auth.currentUser) return;
+        db.collection('notifications').where('toEmail', '==', auth.currentUser.email.toLowerCase())
+          .onSnapshot(snap => {
+              const listDiv = document.getElementById('notifList');
+              const badge = document.getElementById('notifBadge');
+              listDiv.innerHTML = '';
+              let count = 0;
+              snap.forEach(doc => {
+                  count++;
+                  let data = doc.data();
+                  let itemHtml = `<div class="notif-item">`;
+                  if(data.type === 'friend_request') {
+                      itemHtml += `🤝 <b>${data.fromEmail}</b> seni takip etmek istiyor.<br>
+                      <button class="notif-btn" onclick="acceptFriend('${data.fromEmail}', '${doc.id}')">Kabul Et</button>`;
+                  } else {
+                      itemHtml += `${data.message} <br><button class="notif-btn" style="background:#ef4444;" onclick="deleteNotif('${doc.id}')">Sil</button>`;
+                  }
+                  itemHtml += `</div>`;
+                  listDiv.innerHTML += itemHtml;
+              });
+              if(count > 0) { badge.style.display = 'flex'; badge.innerText = count; } 
+              else { badge.style.display = 'none'; listDiv.innerHTML = '<p style="text-align:center; font-size:0.8rem;">Bildirim yok.</p>'; }
+          });
+    }
+
+    function sendFriendRequest() {
+        const pEmail = document.getElementById('partnerEmail').value.trim().toLowerCase();
+        if(!pEmail || pEmail === auth.currentUser.email.toLowerCase()) return alert(langData[currentLang].partErr);
+        db.collection('notifications').add({
+            toEmail: pEmail, fromEmail: auth.currentUser.email.toLowerCase(), type: 'friend_request', timestamp: new Date().getTime()
+        }).then(() => alert("Arkadaşlık isteği gönderildi! O kabul edince skorunu görebileceksin."))
+          .catch(() => alert("Firebase Konsol'dan Rules kısmını 'allow read, write: if true;' yapmanız gerekiyor."));
+    }
+
+    function acceptFriend(friendEmail, notifId) {
+        let myEmail = auth.currentUser.email.toLowerCase();
+        // Kendine arkadaşı ekle
+        db.collection('partner_data').doc(myEmail).update({
+            friends: firebase.firestore.FieldValue.arrayUnion(friendEmail)
+        });
+        // Arkadaşına kendini ekle
+        db.collection('partner_data').doc(friendEmail).update({
+            friends: firebase.firestore.FieldValue.arrayUnion(myEmail)
+        });
+        deleteNotif(notifId);
+        alert("Arkadaş eklendi! Artık birbirinizi sorgulayabilirsiniz.");
+    }
+
+    function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
+    // -------------------------------------------------------------
 
     function showStreak() {
         if(!auth.currentUser) return;
         let streakData = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}');
         let badge = document.getElementById('streakBadge');
-        if(streakData.count > 0) {
-            badge.style.display = 'block';
-            document.getElementById('streakCount').innerText = streakData.count;
-        } else {
-            badge.style.display = 'none';
-        }
+        if(streakData.count > 0) { badge.style.display = 'block'; document.getElementById('streakCount').innerText = streakData.count; } 
+        else { badge.style.display = 'none'; }
     }
 
     function updateStreak(score) {
@@ -261,9 +339,7 @@
         if(score >= 7) {
             if(streakData.lastDate === yesterday) { streakData.count++; streakData.lastDate = today; } 
             else if(streakData.lastDate !== today) { streakData.count = 1; streakData.lastDate = today; }
-        } else {
-            streakData.count = 0; streakData.lastDate = today;
-        }
+        } else { streakData.count = 0; streakData.lastDate = today; }
         localStorage.setItem('streak_' + uid, JSON.stringify(streakData));
         showStreak();
     }
@@ -352,19 +428,27 @@
             document.getElementById('btnPdf').style.display = 'block';
 
             if (auth.currentUser && mode === 'yemek') {
-                // Yerel Geçmiş (Kendi Cihazı İçin)
                 let histKey = 'history_' + auth.currentUser.uid;
                 let histArray = JSON.parse(localStorage.getItem(histKey) || '[]');
                 histArray.unshift({ summary: historySummary, date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString() });
                 if(histArray.length > 10) histArray.pop(); 
                 localStorage.setItem(histKey, JSON.stringify(histArray));
 
-                // EKLENEN: Partner Arenası için Firestore'a Küresel Kayıt Atma
                 db.collection('partner_data').doc(auth.currentUser.email.toLowerCase()).set({
-                    lastMeal: historySummary,
-                    score: currentScore,
-                    time: new Date().toLocaleTimeString()
-                });
+                    lastMeal: historySummary, score: currentScore, time: new Date().toLocaleTimeString()
+                }, { merge: true });
+
+                // EKLENEN: Otomatik Bildirim Sistemi (Kötü veya İyi beslenince arkadaşlara gider)
+                if (currentScore < 3 || currentScore >= 7) {
+                    db.collection('partner_data').doc(auth.currentUser.email.toLowerCase()).get().then(doc => {
+                        if(doc.exists && doc.data().friends) {
+                            let msg = currentScore < 3 ? `🚨 Partnerin ${auth.currentUser.email} kötü beslendi (Skor: ${currentScore})! Çabuk müdahale et!` : `✅ Partnerin ${auth.currentUser.email} harika beslendi (Skor: ${currentScore})! Onu tebrik et!`;
+                            doc.data().friends.forEach(friendEmail => {
+                                db.collection('notifications').add({ toEmail: friendEmail, fromEmail: 'Sistem', type: 'alert', message: msg, timestamp: new Date().getTime() });
+                            });
+                        }
+                    });
+                }
             }
 
             setTimeout(() => { resDiv.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
@@ -392,7 +476,6 @@
         } else { panel.style.display = 'none'; }
     }
 
-    // --- EKLENEN: PARTNER ARENASI FONKSİYONLARI ---
     function togglePartner() {
         const panel = document.getElementById('partnerPanel');
         panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
@@ -405,23 +488,29 @@
 
         resDiv.innerHTML = "Sorgulanıyor...";
 
-        db.collection('partner_data').doc(pEmail).get().then((doc) => {
-            if (doc.exists) {
-                const data = doc.data();
-                if(data.score < 7) {
-                    resDiv.style.color = "var(--danger)";
-                    resDiv.innerText = langData[currentLang].partCatch + data.score + "/10!\nSon Yemek: " + data.lastMeal + "\nSaat: " + data.time;
-                } else {
-                    resDiv.style.color = "var(--primary)";
-                    resDiv.innerText = langData[currentLang].partGood + data.score + "/10!\nSon Yemek: " + data.lastMeal + "\nSaat: " + data.time;
-                }
+        // EKLENEN: Arkadaşlık kontrolü
+        db.collection('partner_data').doc(auth.currentUser.email.toLowerCase()).get().then((myDoc) => {
+            if(myDoc.exists && myDoc.data().friends && myDoc.data().friends.includes(pEmail)) {
+                // Arkadaşlarsa skoru çek
+                db.collection('partner_data').doc(pEmail).get().then((doc) => {
+                    if (doc.exists && doc.data().lastMeal) {
+                        const data = doc.data();
+                        if(data.score < 7) {
+                            resDiv.style.color = "var(--danger)";
+                            resDiv.innerText = langData[currentLang].partCatch + data.score + "/10!\nSon Yemek: " + data.lastMeal + "\nSaat: " + data.time;
+                        } else {
+                            resDiv.style.color = "var(--primary)";
+                            resDiv.innerText = langData[currentLang].partGood + data.score + "/10!\nSon Yemek: " + data.lastMeal + "\nSaat: " + data.time;
+                        }
+                    } else {
+                        resDiv.style.color = "#94a3b8"; resDiv.innerText = "Bu kullanıcı henüz analiz yapmamış.";
+                    }
+                });
             } else {
                 resDiv.style.color = "#94a3b8";
-                resDiv.innerText = langData[currentLang].partNoData;
+                resDiv.innerText = langData[currentLang].partNoData; // Önce arkadaş eklemelisin uyarısı
             }
-        }).catch((error) => {
-            resDiv.innerText = "Veritabanı bağlantı hatası veya izin yok.";
-        });
+        }).catch(() => { resDiv.innerText = "Veritabanı kurallarınızı (Rules) 'allow read, write: if true;' yapmayı unutmayın."; });
     }
 </script>
 </body>
