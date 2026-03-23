@@ -55,8 +55,6 @@
         .friend-pill:hover { transform: translateY(-2px); border-color: var(--primary); background: #162031; }
         .friend-report-pill { background: #0b0f1a; border: 1px solid var(--danger); border-radius: 15px; padding: 10px; margin-top: 8px; font-size: 0.75rem; text-align: left; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
-        
-        /* Diyetisyen Özel Stilleri */
         .dietician-portal { background: #111827; border: 2px solid var(--primary); border-radius: 25px; padding: 20px; margin-top: 20px; }
         .diet-code-box { font-size: 1.5rem; font-weight: 900; letter-spacing: 5px; color: var(--primary); background: #000; padding: 10px; border-radius: 10px; margin: 10px 0; border: 1px dashed var(--primary); }
     </style>
@@ -130,8 +128,10 @@
             <h2 style="color:var(--primary);">Diyetisyen Portalı</h2>
             <div id="dMail" class="user-tag"></div>
             <div style="margin-top:15px;">
-                <p style="font-size:0.8rem; color:#94a3b8;">Danışanlarınız için Kodunuz:</p>
-                <div id="myDietCode" class="diet-code-box">********</div>
+                <p style="font-size:0.8rem; color:#94a3b8;">Kodunuzu Belirleyin (8 Hane):</p>
+                <input type="text" id="myDietCodeInput" maxlength="8" placeholder="Örn: DIET2026" style="margin-top:10px;">
+                <button class="btn btn-main" onclick="saveDieticianCode()" style="padding:10px;">KODU KAYDET</button>
+                <div id="currentCodeDisplay" style="margin-top:10px; font-weight:bold; color:var(--premium);"></div>
             </div>
         </div>
         <h3 style="margin-bottom:10px; border-bottom:1px solid #2d3748; padding-bottom:5px;">Hastalarım</h3>
@@ -196,7 +196,7 @@
             </div>
         </div>
 
-        <button class="btn btn-outline" id="txtOut" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
+        <button class="btn btn-outline" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
     </div>
 </div>
 
@@ -232,7 +232,7 @@
         document.getElementById('txtR7').innerText = d.reg.toUpperCase();
         document.getElementById('txtR8').innerText = d.create;
         document.getElementById('txtR9').innerText = d.back;
-        if(document.getElementById('uAge')) {
+        if(document.getElementById('uAge')){
             document.getElementById('uAge').placeholder = d.age;
             document.getElementById('uWeight').placeholder = d.weight;
             document.getElementById('opt1').innerText = d.g1;
@@ -248,7 +248,6 @@
             document.getElementById('btnCheckPart').innerText = d.partCheck;
             document.getElementById('txtBtnPlan').innerText = d.plan;
             document.getElementById('txtPrem').innerText = d.prem;
-            document.getElementById('txtOut').innerText = d.out;
         }
         document.getElementById('btnRoleUser').innerText = d.roleU;
         document.getElementById('btnRegRoleUser').innerText = d.roleU;
@@ -273,7 +272,7 @@
         if(!vid) return;
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
             .then(s => { vid.srcObject = s; vid.play(); })
-            .catch(e => { console.log("Kamera pasif."); });
+            .catch(e => { console.log("Kamera hatası."); });
     }
 
     function resetCamera() {
@@ -317,34 +316,38 @@
         listenNotifications(); listenFriends(); showStreak(); checkDieticianLink();
     }
 
-    // DİYETİSYEN MANTIĞI
     async function handleDieticianPortal(username) {
-        const docRef = db.collection('dieticians').doc(username);
-        const doc = await docRef.get();
-        let code;
-        if(!doc.exists) {
-            code = Math.random().toString(36).substring(2, 10).toUpperCase();
-            await docRef.set({ code: code, patients: [] });
-        } else {
-            code = doc.data().code;
+        const doc = await db.collection('dieticians').doc(username).get();
+        if(doc.exists && doc.data().code) {
+            document.getElementById('currentCodeDisplay').innerText = "Mevcut Kod: " + doc.data().code;
+            document.getElementById('myDietCodeInput').value = doc.data().code;
         }
-        document.getElementById('myDietCode').innerText = code;
         listenPatients(username);
+    }
+
+    async function saveDieticianCode() {
+        const username = auth.currentUser.displayName.toLowerCase();
+        const code = document.getElementById('myDietCodeInput').value.trim().toUpperCase();
+        if(code.length !== 8) return alert("Kod tam olarak 8 haneli olmalıdır.");
+        
+        await db.collection('dieticians').doc(username).set({ code: code }, { merge: true });
+        document.getElementById('currentCodeDisplay').innerText = "Mevcut Kod: " + code;
+        alert("Kod başarıyla güncellendi. Artık bu kodla danışan kabul edebilirsiniz.");
     }
 
     function listenPatients(dietUsername) {
         db.collection('dieticians').doc(dietUsername).onSnapshot(doc => {
             const list = document.getElementById('patientList');
             list.innerHTML = '';
-            const patients = doc.data().patients || [];
-            if(patients.length === 0) list.innerHTML = '<p style="font-size:0.8rem; color:#94a3b8;">Henüz bağlı danışan yok.</p>';
-            patients.forEach(p => {
-                const pBox = document.createElement('div');
-                pBox.className = 'friend-pill';
-                pBox.innerText = `@${p}`;
-                pBox.onclick = () => showPatientHistory(p);
-                list.appendChild(pBox);
-            });
+            if(doc.exists && doc.data().patients) {
+                doc.data().patients.forEach(p => {
+                    const pBox = document.createElement('div');
+                    pBox.className = 'friend-pill';
+                    pBox.innerText = `@${p}`;
+                    pBox.onclick = () => showPatientHistory(p);
+                    list.appendChild(pBox);
+                });
+            } else { list.innerHTML = '<p style="font-size:0.8rem; color:#94a3b8;">Henüz bağlı danışan yok.</p>'; }
         });
     }
 
@@ -371,10 +374,8 @@
         const code = document.getElementById('dietCodeInput').value.trim().toUpperCase();
         if(code.length !== 8) return alert("8 haneli kodu girin.");
         const me = auth.currentUser.displayName.toLowerCase();
-        
         const q = await db.collection('dieticians').where('code', '==', code).get();
-        if(q.empty) return alert("Geçersiz kod.");
-        
+        if(q.empty) return alert("Geçersiz veya hatalı kod.");
         const dietDoc = q.docs[0];
         await db.collection('dieticians').doc(dietDoc.id).update({
             patients: firebase.firestore.FieldValue.arrayUnion(me)
@@ -387,14 +388,13 @@
     function checkDieticianLink() {
         const me = auth.currentUser.displayName.toLowerCase();
         db.collection('partner_data').doc(me).get().then(doc => {
-            if(doc.data() && doc.data().linkedDietician) {
+            if(doc.exists && doc.data().linkedDietician) {
                 document.getElementById('dietStatus').innerText = "Bağlı: @" + doc.data().linkedDietician;
                 document.getElementById('dietCodeInput').style.display = 'none';
             }
         });
     }
 
-    // ESKİ FONKSİYONLARIN TAMAMI (DOKUNULMADI)
     async function runAI(mode) {
         const resDiv = document.getElementById('results');
         const vid = document.getElementById('video');
