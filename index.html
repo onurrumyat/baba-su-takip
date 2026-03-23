@@ -84,6 +84,18 @@
     </div>
 </div>
 
+<div id="sportQuestionsModal" class="modal">
+    <div class="modal-content">
+        <h3 style="color:var(--premium); text-align:center; margin-bottom:15px;">🏋️ Program Hazırlanıyor</h3>
+        <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:10px;">En iyi sonuç için lütfen yanıtla:</p>
+        <input type="number" id="sqDays" placeholder="Haftada kaç gün spor yapabilirsin?">
+        <input type="text" id="sqEquipment" placeholder="Ev mi Salon mu? Ekipman var mı?">
+        <input type="text" id="sqInjury" placeholder="Sakatlık veya engel var mı?">
+        <button class="btn btn-main" style="background:var(--premium); color:black;" onclick="generateSportProgram()">PROGRAMI OLUŞTUR</button>
+        <button class="btn btn-outline" onclick="document.getElementById('sportQuestionsModal').style.display='none'">İptal</button>
+    </div>
+</div>
+
 <div id="detailModal" class="modal">
     <div class="modal-content">
         <h3 id="modalTitle" style="color:var(--primary); margin-bottom:15px; text-align:center;">Analiz Detayı</h3>
@@ -199,18 +211,18 @@
             <div id="historyList"></div>
         </div>
 
-        <button class="btn btn-outline" id="btnPartnerToggle" style="border-color: var(--neutral); color: var(--text); background: var(--neutral);" onclick="togglePartner()">👫 DİYET DOSTU</button>
+        <button class="btn btn-outline" style="border-color: var(--neutral); color: var(--text); background: var(--neutral);" onclick="togglePartner()">👫 DİYET DOSTU</button>
+        
+        <div class="split-btns">
+            <button class="btn btn-neutral" onclick="document.getElementById('sportQuestionsModal').style.display='block'">🏃‍♂️ SPOR</button>
+            <button class="btn btn-neutral" onclick="document.getElementById('laraModal').style.display='block'">🤖 YZ DİYETİSYEN</button>
+        </div>
+
         <div id="partnerPanel" class="partner-box" style="display:none;">
             <h3 id="txtPartTitle" style="color:var(--primary); margin-bottom:10px;">Diyet Arkadaşım 👫</h3>
             <input type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin" style="background: rgba(0,0,0,0.5);">
             <button class="btn btn-sub" id="btnAddFriend" style="background: var(--accent); margin-bottom:5px;" onclick="sendFriendRequest()">➕ TAKİP İSTEĞİ AT</button>
             <button class="btn btn-sub" id="btnCheckPart" style="background: var(--primary);" onclick="checkPartner()">🔍 DURUMUNU SORGULA</button>
-            
-            <div class="split-btns">
-                <button class="btn btn-neutral" onclick="runAI('spor')">🏃‍♂️ SPOR</button>
-                <button class="btn btn-neutral" onclick="document.getElementById('laraModal').style.display='block'">🤖 YZ DİYETİSYEN</button>
-            </div>
-
             <div id="partnerResult" style="margin-top:15px; font-weight:bold; white-space:pre-line;"></div>
             <div id="partnerHistoryList" style="margin-top:10px; text-align:left;"></div>
         </div>
@@ -266,6 +278,23 @@
         document.getElementById('txtR7').innerText = d.reg.toUpperCase();
         document.getElementById('txtR8').innerText = d.create;
         document.getElementById('txtR9').innerText = d.back;
+        if(document.getElementById('uAge')){
+            document.getElementById('uAge').placeholder = d.age;
+            document.getElementById('uWeight').placeholder = d.weight;
+            document.getElementById('opt1').innerText = d.g1;
+            document.getElementById('opt2').innerText = d.g2;
+            document.getElementById('opt3').innerText = d.g3;
+            document.getElementById('btnAnalyzeText').innerText = d.btnAna;
+            document.getElementById('txtStreak').innerText = d.streak;
+            document.getElementById('freezeLayer').innerText = d.loading;
+            document.getElementById('btnRetry').innerText = d.retry;
+            document.getElementById('txtHistTitle').innerText = d.histTitle;
+            document.getElementById('txtPartTitle').innerText = d.partTitle;
+            document.getElementById('btnAddFriend').innerText = d.partAdd;
+            document.getElementById('btnCheckPart').innerText = d.partCheck;
+            document.getElementById('txtBtnPlan').innerText = d.plan;
+            document.getElementById('txtPrem').innerText = d.prem;
+        }
     }
 
     const firebaseConfig = {
@@ -308,7 +337,7 @@
                     handleDieticianPortal(user.displayName.toLowerCase());
                 } else {
                     toggleView('mainView');
-                    document.getElementById('uMail').innerText = "@" + (user.displayName || user.email.split('@')[0]);
+                    document.getElementById('uMail').innerText = "@" + user.displayName;
                     setupUserPanel(user);
                     startCamera();
                 }
@@ -383,7 +412,13 @@
                     const card = document.createElement('div');
                     card.className = 'patient-card';
                     card.onclick = () => showPatientHistory(p);
-                    card.innerHTML = `<div class="patient-info"><span class="patient-name">@${p}</span><span class="patient-last">Verileri Gör 📊</span></div><span class="patient-arrow">➔</span>`;
+                    card.innerHTML = `
+                        <div class="patient-info">
+                            <span class="patient-name">@${p}</span>
+                            <span class="patient-last">Verileri Gör 📊</span>
+                        </div>
+                        <span class="patient-arrow">➔</span>
+                    `;
                     list.appendChild(card);
                 });
             } else { list.innerHTML = '<p style="font-size:0.8rem; color:#94a3b8;">Bağlı hasta bulunmuyor.</p>'; }
@@ -395,15 +430,26 @@
         const oneDay = 24 * 60 * 60 * 1000;
         db.collection('partner_data').doc(pUsername).collection('history')
           .where('unix', '>', nowUnix - oneDay).orderBy('unix', 'desc').get().then(snap => {
-            let html = `<div style="text-align:center; border-bottom:1px solid var(--primary); padding-bottom:10px; margin-bottom:15px;"><h2 style="color:var(--primary);">@${pUsername}</h2></div>`;
-            if(snap.empty) { html += "<p>Bugün veri yok.</p>"; } else {
+            let html = `<div style="text-align:center; border-bottom:1px solid var(--primary); padding-bottom:10px; margin-bottom:15px;">
+                            <h2 style="color:var(--primary);">@${pUsername}</h2>
+                            <p style="font-size:0.7rem; color:#94a3b8;">Son 24 Saatin Detaylı Raporu</p>
+                        </div>`;
+            if(snap.empty) {
+                html += "<p style='text-align:center;'>Bu kullanıcı bugün henüz öğün taraması yapmamış.</p>";
+            } else {
                 snap.forEach(doc => {
                     const d = doc.data();
-                    html += `<div style="background: rgba(255,255,255,0.05); border-left: 4px solid var(--accent); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
-                                <div style="font-size:0.7rem; color:var(--accent); font-weight:bold;">🕒 ${d.date}</div>
-                                <div style="font-size:1rem; font-weight:900; color:#fff;">🍽️ ${d.mealName}</div>
-                                <div style="font-size:0.85rem; color:#cbd5e1; white-space:pre-line; margin-top:10px;">${d.fullText}</div>
-                            </div>`;
+                    html += `
+                        <div style="background: rgba(255,255,255,0.05); border-left: 4px solid var(--accent); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+                            <div style="font-size:0.7rem; color:var(--accent); font-weight:bold; margin-bottom:5px;">🕒 ${d.date}</div>
+                            <div style="font-size:1rem; font-weight:900; color:#fff; margin-bottom:10px;">🍽️ ${d.mealName}</div>
+                            <div style="font-size:0.85rem; color:#cbd5e1; line-height:1.5; white-space:pre-line; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+                                ${d.fullText}
+                            </div>
+                            <div style="margin-top:10px; display:inline-block; background:var(--primary); color:white; padding:4px 10px; border-radius:10px; font-size:0.7rem; font-weight:bold;">
+                                SKOR: ${d.score}/10
+                            </div>
+                        </div>`;
                 });
             }
             document.getElementById('modalBody').innerHTML = html;
@@ -411,17 +457,15 @@
         });
     }
 
+    // --- LARA & SPOR YENİ FONKSİYONLAR ---
     async function askLara() {
         const inp = document.getElementById('laraInput');
         const display = document.getElementById('laraChatDisplay');
         const q = inp.value.trim();
         if(!q) return;
-
-        // Kullanıcı mesajını ekle
         display.innerHTML += `<div class="msg-user">${q}</div>`;
         inp.value = '';
         display.scrollTop = display.scrollHeight;
-
         try {
             const r = await fetch('/api/analyze', {
                 method: 'POST',
@@ -431,43 +475,43 @@
             const d = await r.json();
             display.innerHTML += `<div class="msg-lara">${d.analysis}</div>`;
             display.scrollTop = display.scrollHeight;
-        } catch(e) {
-            display.innerHTML += `<div class="msg-lara">Üzgünüm, şu an yanıt veremiyorum.</div>`;
-        }
+        } catch(e) { display.innerHTML += `<div class="msg-lara">Üzgünüm, şu an Lara çevrimdışı.</div>`; }
     }
 
-    async function runAI(mode) {
+    async function generateSportProgram() {
+        const days = document.getElementById('sqDays').value;
+        const equip = document.getElementById('sqEquipment').value;
+        const injury = document.getElementById('sqInjury').value;
+        if(!days) return alert("Kaç gün spor yapacağınızı yazın.");
+        document.getElementById('sportQuestionsModal').style.display = 'none';
+        runAI('spor', `Haftalık ${days} gün, Ekipman: ${equip}, Engel: ${injury}`);
+    }
+
+    async function runAI(mode, extra = "") {
         const resDiv = document.getElementById('results');
         const vid = document.getElementById('video');
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
         const goal = document.getElementById('uGoal').value;
         if(!age || !weight) return alert("Bilgileri girin.");
-
-        if(mode === 'yemek') {
-            vid.pause(); document.getElementById('freezeLayer').style.display = 'flex';
-            document.getElementById('btnAnalyzeText').style.display = 'none';
-        }
-
+        if(mode === 'yemek') { vid.pause(); document.getElementById('freezeLayer').style.display = 'flex'; document.getElementById('btnAnalyzeText').style.display = 'none'; }
         const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
         if(mode === 'yemek') canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
         let imgBase64 = mode === 'yemek' ? canv.toDataURL('image/jpeg', 0.7) : null;
-
         try {
             const r = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mode, image: imgBase64, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${goal}`, lang: currentLang })
+                body: JSON.stringify({ mode, image: imgBase64, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${goal}. ${extra}`, lang: currentLang })
             });
             const d = await r.json();
             if(!r.ok) throw new Error("Hata");
-
             if(mode === 'spor') {
+                document.getElementById('modalTitle').innerText = "Haftalık Spor Programın";
                 document.getElementById('modalBody').innerHTML = `<div style="white-space:pre-line;">${d.analysis}</div>`;
                 document.getElementById('detailModal').style.display = 'block';
                 return;
             }
-
             resDiv.innerHTML = ''; resDiv.style.display = 'flex';
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
             const headers = langData[currentLang].headers;
@@ -478,22 +522,17 @@
                 if(i === 2) mealName = content.split('\n')[0].substring(0, 30);
                 if(content.includes('[SKOR:')) {
                     const match = content.match(/\[SKOR:\s*(\d+)\]/i);
-                    if(match) { 
-                        score = parseInt(match[1]); content = content.replace(match[0], '').trim();
-                        updateStreak(score); let left = (score/10)*100;
+                    if(match) { score = parseInt(match[1]); content = content.replace(match[0], '').trim(); updateStreak(score); let left = (score/10)*100;
                         card.innerHTML = `<div class="report-tag">${headers[i]}</div><div class="report-txt">${content}</div><div class="score-wrapper"><div class="score-bar"><div class="score-marker" style="left:${left}%">${score}</div></div></div>`;
                     }
                 } else { card.innerHTML = `<div class="report-tag">${headers[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`; }
                 resDiv.appendChild(card);
             });
-            document.getElementById('btnPdf').style.display = 'block';
-            document.getElementById('btnRetry').style.display = 'block';
-            document.getElementById('freezeLayer').style.display = 'none';
-            saveHistory(score, d.analysis, mealName);
+            document.getElementById('btnPdf').style.display = 'block'; document.getElementById('btnRetry').style.display = 'block'; document.getElementById('freezeLayer').style.display = 'none';
+            if(mode === 'yemek') saveHistory(score, d.analysis, mealName);
             resDiv.scrollIntoView();
         } catch(e) { 
-            document.getElementById('freezeLayer').style.display = 'none';
-            document.getElementById('btnAnalyzeText').style.display = 'block';
+            document.getElementById('freezeLayer').style.display = 'none'; document.getElementById('btnAnalyzeText').style.display = 'block';
             if(vid) vid.play(); alert("Hata oluştu.");
         }
     }
@@ -503,11 +542,12 @@
         if(!code) return alert("Lütfen kod girin.");
         const me = auth.currentUser.displayName.toLowerCase();
         const q = await db.collection('dieticians').where('code', '==', code).get();
-        if(q.empty) return alert("Kod bulunamadı.");
+        if(q.empty) return alert("HATA: Kod bulunamadı.");
         const dietDoc = q.docs[0];
-        await db.collection('dieticians').doc(dietDoc.id).update({ patients: firebase.firestore.FieldValue.arrayUnion(me) });
-        await db.collection('partner_data').doc(me).update({ linkedDietician: dietDoc.id });
-        alert("Bağlantı başarılı!");
+        const dieticianID = dietDoc.id;
+        await db.collection('dieticians').doc(dieticianID).update({ patients: firebase.firestore.FieldValue.arrayUnion(me) });
+        await db.collection('partner_data').doc(me).update({ linkedDietician: dieticianID });
+        alert("BAŞARILI! @" + dieticianID + " diyetisyenine bağlandınız.");
         checkDieticianLink();
     }
 
@@ -515,7 +555,7 @@
         const me = auth.currentUser.displayName.toLowerCase();
         db.collection('partner_data').doc(me).get().then(doc => {
             if(doc.exists && doc.data().linkedDietician) {
-                document.getElementById('dietStatus').innerText = "Bağlı: @" + doc.data().linkedDietician;
+                document.getElementById('dietStatus').innerText = "DURUM: @" + doc.data().linkedDietician + " bağlısınız.";
                 document.getElementById('dietCodeInput').style.display = 'none';
             }
         });
@@ -564,7 +604,7 @@
         let me = auth.currentUser.displayName.toLowerCase();
         if(!u || u === me) return alert("Geçersiz kullanıcı.");
         db.collection('notifications').add({ toUser: u, fromUser: me, type: 'friend_request', timestamp: Date.now() });
-        alert("İstek gönderildi.");
+        alert("Takip isteği gönderildi.");
     }
 
     function saveHistory(score, raw, meal) {
@@ -601,7 +641,16 @@
                 db.collection('partner_data').doc(u).collection('history').orderBy('unix', 'desc').limit(1).get().then(snap => {
                     if(snap.empty) { res.innerHTML = "Veri yok."; return; }
                     const d = snap.docs[0].data();
-                    res.innerHTML = `<div class="friend-report-pill">📅 ${d.date}<br>🍽️ ${d.mealName}<br>⭐ Skor: ${d.score}/10<br><br>${d.fullText}</div>`;
+                    const dateParts = d.date.split(' ');
+                    res.innerHTML = `
+                        <div class="friend-report-pill" style="border: 2px solid var(--primary); background: rgba(16, 185, 129, 0.1);">
+                            <div style="font-size:0.75rem; color:#94a3b8;">📅 Tarih: ${dateParts[0]} | 🕒 Saat: ${dateParts[1]}</div>
+                            <div style="font-size:1rem; font-weight:900; color:#fff;">🍽️ Yemek: ${d.mealName}</div>
+                            <div style="font-size:1.1rem; font-weight:900; color:var(--primary);">⭐ Puan: ${d.score}/10</div>
+                            <div style="font-size:0.8rem; color:#cbd5e1; background:rgba(0,0,0,0.3); padding:10px; border-radius:10px; margin-top:5px;">
+                                ${d.fullText}
+                            </div>
+                        </div>`;
                 });
             } else { res.innerText = "Kullanıcı bulunamadı."; }
         });
@@ -631,7 +680,6 @@
     function toggleFriends() { const d = document.getElementById('friendsDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
     function togglePartner() { const p = document.getElementById('partnerPanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
     function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
-    function doReset() { auth.sendPasswordResetEmail(document.getElementById('lEmail').value).then(() => alert("E-posta gönderildi.")); }
     setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 </script>
 </body>
