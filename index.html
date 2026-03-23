@@ -11,12 +11,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
-        :root { --bg: #0b0f1a; --card: #161b2a; --primary: #10b981; --accent: #0ea5e9; --premium: #f59e0b; --text: #f1f5f9; --danger: #ef4444; }
+        :root { --bg: #0b0f1a; --card: #161b2a; --primary: #10b981; --accent: #0ea5e9; --premium: #f59e0b; --text: #f1f5f9; --danger: #ef4444; --neutral: #334155; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
         body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
         .app-card { width: 100%; max-width: 420px; background: var(--card); border-radius: 35px; padding: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); height: fit-content; position: relative; }
         .auth-container h1 { font-size: 2.2rem; text-align: center; margin-bottom: 20px; color: var(--primary); font-weight: 900; }
-        input, select { width: 100%; padding: 15px; border-radius: 15px; background: #0b0f1a; border: 1px solid #2d3748; color: white; margin-bottom: 12px; text-align: center; }
+        input, select, textarea { width: 100%; padding: 15px; border-radius: 15px; background: #0b0f1a; border: 1px solid #2d3748; color: white; margin-bottom: 12px; text-align: center; }
         .btn { width: 100%; padding: 18px; border-radius: 18px; border: none; font-weight: 700; cursor: pointer; color: white; transition: 0.3s; }
         .btn-main { background: var(--primary); }
         .btn-sub { background: var(--accent); margin-top: 10px; }
@@ -50,7 +50,7 @@
         .role-btn.active { background: var(--primary); color: white; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); padding: 20px; overflow-y: auto; }
         .modal-content { background: var(--card); margin: auto; padding: 20px; border-radius: 25px; max-width: 400px; border: 1px solid var(--primary); }
-        .partner-box { background: rgba(239, 68, 68, 0.05); border: 1px dashed var(--danger); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
+        .partner-box { background: rgba(255,255,255,0.05); border: 1px dashed var(--neutral); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
         .patient-card { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--primary); padding: 20px; border-radius: 20px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); }
         .patient-card:hover { transform: translateY(-3px); background: #1c2536; box-shadow: 0 0 15px var(--primary); }
         .patient-info { display: flex; flex-direction: column; gap: 4px; }
@@ -58,9 +58,31 @@
         .patient-last { font-size: 0.7rem; color: var(--primary); font-weight: bold; }
         .patient-arrow { font-size: 1.2rem; color: var(--primary); }
         .broadcast-box { background: rgba(14, 165, 233, 0.1); border: 1px solid var(--accent); padding: 15px; border-radius: 20px; margin-bottom: 20px; }
+        
+        /* Yeni Özellikler Stili */
+        .split-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .btn-neutral { background: var(--neutral); color: white; font-size: 0.75rem; padding: 12px; }
+        .chat-box { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 15px; }
+        .msg-lara { align-self: flex-start; background: var(--accent); color: white; padding: 10px; border-radius: 15px 15px 15px 0; font-size: 0.8rem; max-width: 85%; }
+        .msg-user { align-self: flex-end; background: var(--primary); color: white; padding: 10px; border-radius: 15px 15px 0 15px; font-size: 0.8rem; max-width: 85%; }
+        .sport-day-card { background: #1a202c; border-radius: 12px; padding: 12px; margin-bottom: 8px; border-left: 4px solid var(--premium); }
     </style>
 </head>
 <body>
+
+<div id="laraModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+        <h3 style="color:var(--accent); text-align:center; margin-bottom:15px;">🤖 YZ Diyetisyen: LARA</h3>
+        <div id="laraChatDisplay" class="chat-box">
+            <div class="msg-lara">Merhaba! Ben Lara. Size sadece diyet, yemek ve spor konularında yardımcı olabilirim. Ne sormak istersiniz?</div>
+        </div>
+        <div style="display:flex; gap:5px;">
+            <input type="text" id="laraInput" placeholder="Sorunuzu yazın..." style="margin-bottom:0;">
+            <button class="btn btn-main" onclick="askLara()" style="width:60px; padding:0;">🚀</button>
+        </div>
+        <button class="btn btn-outline" onclick="document.getElementById('laraModal').style.display='none'">Kapat</button>
+    </div>
+</div>
 
 <div id="detailModal" class="modal">
     <div class="modal-content">
@@ -177,12 +199,18 @@
             <div id="historyList"></div>
         </div>
 
-        <button class="btn btn-outline" id="btnPartnerToggle" style="border-color: var(--danger); color: var(--danger);" onclick="togglePartner()">👫 KANKA / ÇİFT ARENASI</button>
+        <button class="btn btn-outline" id="btnPartnerToggle" style="border-color: var(--neutral); color: var(--text); background: var(--neutral);" onclick="togglePartner()">👫 DİYET DOSTU</button>
         <div id="partnerPanel" class="partner-box" style="display:none;">
-            <h3 id="txtPartTitle" style="color:var(--danger); margin-bottom:10px;">Partnerini Denetle! 🚨</h3>
+            <h3 id="txtPartTitle" style="color:var(--primary); margin-bottom:10px;">Diyet Arkadaşım 👫</h3>
             <input type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin" style="background: rgba(0,0,0,0.5);">
             <button class="btn btn-sub" id="btnAddFriend" style="background: var(--accent); margin-bottom:5px;" onclick="sendFriendRequest()">➕ TAKİP İSTEĞİ AT</button>
-            <button class="btn btn-sub" id="btnCheckPart" style="background: var(--danger);" onclick="checkPartner()">🔍 DURUMUNU SORGULA</button>
+            <button class="btn btn-sub" id="btnCheckPart" style="background: var(--primary);" onclick="checkPartner()">🔍 DURUMUNU SORGULA</button>
+            
+            <div class="split-btns">
+                <button class="btn btn-neutral" onclick="runAI('spor')">🏃‍♂️ SPOR</button>
+                <button class="btn btn-neutral" onclick="document.getElementById('laraModal').style.display='block'">🤖 YZ DİYETİSYEN</button>
+            </div>
+
             <div id="partnerResult" style="margin-top:15px; font-weight:bold; white-space:pre-line;"></div>
             <div id="partnerHistoryList" style="margin-top:10px; text-align:left;"></div>
         </div>
@@ -215,14 +243,14 @@
         tr: {
             appTitle: "BIO-CHEF", login: "GİRİŞ YAP", forgot: "Şifremi Unuttum?", reg: "Kayıt Ol", create: "HESABI OLUŞTUR", back: "Geri Dön",
             age: "YAŞ", weight: "KİLO", g1: "Kilo Vermek (-)", g2: "Kilo Almak (+)", g3: "Kiloyu Korumak (=)", btnAna: "📸 ANALİZ ET", 
-            streak: "Seri", loading: "🔍 İNCELENİYOR...", retry: "🔄 YENİDEN ANALİZ ET", histTitle: "Son 24 Saat", partTitle: "Partnerini Denetle! 🚨",
+            streak: "Seri", loading: "🔍 İNCELENİYOR...", retry: "🔄 YENİDEN ANALİZ ET", histTitle: "Son 24 Saat", partTitle: "Diyet Arkadaşım 👫",
             partAdd: "➕ TAKİP İSTEĞİ AT", partCheck: "🔍 DURUMUNU SORGULA", plan: "📅 HAFTALIK PLANINIZI ÇIKARIN", prem: "PREMIUM ÜYE | 0.99 $", 
             out: "GÜVENLİ ÇIKIŞ", headers: ["SKOR 🎯","AÇLIK ⏳","ÖZET","BESİN","ANALİZ","TAVSİYE"], roleU: "DANIŞAN", roleD: "DİYETİSYEN"
         },
         en: {
             appTitle: "BIO-CHEF", login: "LOGIN", forgot: "Forgot Password?", reg: "Sign Up", create: "CREATE ACCOUNT", back: "Back",
             age: "AGE", weight: "WEIGHT", g1: "Lose Weight (-)", g2: "Gain Weight (+)", g3: "Maintain Weight (=)", btnAna: "📸 ANALYZE", 
-            streak: "Streak", loading: "🔍 ANALYZING...", retry: "🔄 RE-ANALYZE", histTitle: "Last 24 Hours", partTitle: "Inspect Partner! 🚨",
+            streak: "Streak", loading: "🔍 ANALYZING...", retry: "🔄 RE-ANALYZE", histTitle: "Last 24 Hours", partTitle: "Diet Partner 👫",
             partAdd: "➕ SEND FOLLOW REQUEST", partCheck: "🔍 CHECK STATUS", plan: "📅 GET WEEKLY PLAN", prem: "PREMIUM | 0.99 $", 
             out: "SECURE LOGOUT", headers: ["SCORE 🎯","HUNGER ⏳","SUMMARY","NUTRITION","GOAL ANALYSIS","ADVICE"], roleU: "USER", roleD: "DIETICIAN"
         }
@@ -238,23 +266,6 @@
         document.getElementById('txtR7').innerText = d.reg.toUpperCase();
         document.getElementById('txtR8').innerText = d.create;
         document.getElementById('txtR9').innerText = d.back;
-        if(document.getElementById('uAge')){
-            document.getElementById('uAge').placeholder = d.age;
-            document.getElementById('uWeight').placeholder = d.weight;
-            document.getElementById('opt1').innerText = d.g1;
-            document.getElementById('opt2').innerText = d.g2;
-            document.getElementById('opt3').innerText = d.g3;
-            document.getElementById('btnAnalyzeText').innerText = d.btnAna;
-            document.getElementById('txtStreak').innerText = d.streak;
-            document.getElementById('freezeLayer').innerText = d.loading;
-            document.getElementById('btnRetry').innerText = d.retry;
-            document.getElementById('txtHistTitle').innerText = d.histTitle;
-            document.getElementById('txtPartTitle').innerText = d.partTitle;
-            document.getElementById('btnAddFriend').innerText = d.partAdd;
-            document.getElementById('btnCheckPart').innerText = d.partCheck;
-            document.getElementById('txtBtnPlan').innerText = d.plan;
-            document.getElementById('txtPrem').innerText = d.prem;
-        }
     }
 
     const firebaseConfig = {
@@ -360,7 +371,7 @@
         });
         await batch.commit();
         document.getElementById('broadcastMsg').value = '';
-        alert("Toplu mesaj " + patients.length + " danışana başarıyla gönderildi!");
+        alert("Toplu mesaj başarıyla gönderildi!");
     }
 
     function listenPatients(dietUsername) {
@@ -372,13 +383,7 @@
                     const card = document.createElement('div');
                     card.className = 'patient-card';
                     card.onclick = () => showPatientHistory(p);
-                    card.innerHTML = `
-                        <div class="patient-info">
-                            <span class="patient-name">@${p}</span>
-                            <span class="patient-last">Verileri Gör 📊</span>
-                        </div>
-                        <span class="patient-arrow">➔</span>
-                    `;
+                    card.innerHTML = `<div class="patient-info"><span class="patient-name">@${p}</span><span class="patient-last">Verileri Gör 📊</span></div><span class="patient-arrow">➔</span>`;
                     list.appendChild(card);
                 });
             } else { list.innerHTML = '<p style="font-size:0.8rem; color:#94a3b8;">Bağlı hasta bulunmuyor.</p>'; }
@@ -390,26 +395,15 @@
         const oneDay = 24 * 60 * 60 * 1000;
         db.collection('partner_data').doc(pUsername).collection('history')
           .where('unix', '>', nowUnix - oneDay).orderBy('unix', 'desc').get().then(snap => {
-            let html = `<div style="text-align:center; border-bottom:1px solid var(--primary); padding-bottom:10px; margin-bottom:15px;">
-                            <h2 style="color:var(--primary);">@${pUsername}</h2>
-                            <p style="font-size:0.7rem; color:#94a3b8;">Son 24 Saatin Detaylı Raporu</p>
-                        </div>`;
-            if(snap.empty) {
-                html += "<p style='text-align:center;'>Bu kullanıcı bugün henüz öğün taraması yapmamış.</p>";
-            } else {
+            let html = `<div style="text-align:center; border-bottom:1px solid var(--primary); padding-bottom:10px; margin-bottom:15px;"><h2 style="color:var(--primary);">@${pUsername}</h2></div>`;
+            if(snap.empty) { html += "<p>Bugün veri yok.</p>"; } else {
                 snap.forEach(doc => {
                     const d = doc.data();
-                    html += `
-                        <div style="background: rgba(255,255,255,0.05); border-left: 4px solid var(--accent); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
-                            <div style="font-size:0.7rem; color:var(--accent); font-weight:bold; margin-bottom:5px;">🕒 ${d.date}</div>
-                            <div style="font-size:1rem; font-weight:900; color:#fff; margin-bottom:10px;">🍽️ ${d.mealName}</div>
-                            <div style="font-size:0.85rem; color:#cbd5e1; line-height:1.5; white-space:pre-line; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
-                                ${d.fullText}
-                            </div>
-                            <div style="margin-top:10px; display:inline-block; background:var(--primary); color:white; padding:4px 10px; border-radius:10px; font-size:0.7rem; font-weight:bold;">
-                                SKOR: ${d.score}/10
-                            </div>
-                        </div>`;
+                    html += `<div style="background: rgba(255,255,255,0.05); border-left: 4px solid var(--accent); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+                                <div style="font-size:0.7rem; color:var(--accent); font-weight:bold;">🕒 ${d.date}</div>
+                                <div style="font-size:1rem; font-weight:900; color:#fff;">🍽️ ${d.mealName}</div>
+                                <div style="font-size:0.85rem; color:#cbd5e1; white-space:pre-line; margin-top:10px;">${d.fullText}</div>
+                            </div>`;
                 });
             }
             document.getElementById('modalBody').innerHTML = html;
@@ -417,28 +411,29 @@
         });
     }
 
-    async function connectToDietician() {
-        const code = document.getElementById('dietCodeInput').value.trim().toUpperCase();
-        if(!code) return alert("Lütfen kod girin.");
-        const me = auth.currentUser.displayName.toLowerCase();
-        const q = await db.collection('dieticians').where('code', '==', code).get();
-        if(q.empty) return alert("HATA: Kod bulunamadı.");
-        const dietDoc = q.docs[0];
-        const dieticianID = dietDoc.id;
-        await db.collection('dieticians').doc(dieticianID).update({ patients: firebase.firestore.FieldValue.arrayUnion(me) });
-        await db.collection('partner_data').doc(me).update({ linkedDietician: dieticianID });
-        alert("BAŞARILI! @" + dieticianID + " diyetisyenine bağlandınız.");
-        checkDieticianLink();
-    }
+    async function askLara() {
+        const inp = document.getElementById('laraInput');
+        const display = document.getElementById('laraChatDisplay');
+        const q = inp.value.trim();
+        if(!q) return;
 
-    function checkDieticianLink() {
-        const me = auth.currentUser.displayName.toLowerCase();
-        db.collection('partner_data').doc(me).get().then(doc => {
-            if(doc.exists && doc.data().linkedDietician) {
-                document.getElementById('dietStatus').innerText = "DURUM: @" + doc.data().linkedDietician + " bağlısınız.";
-                document.getElementById('dietCodeInput').style.display = 'none';
-            }
-        });
+        // Kullanıcı mesajını ekle
+        display.innerHTML += `<div class="msg-user">${q}</div>`;
+        inp.value = '';
+        display.scrollTop = display.scrollHeight;
+
+        try {
+            const r = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ mode: 'lara', user_data: q, lang: currentLang })
+            });
+            const d = await r.json();
+            display.innerHTML += `<div class="msg-lara">${d.analysis}</div>`;
+            display.scrollTop = display.scrollHeight;
+        } catch(e) {
+            display.innerHTML += `<div class="msg-lara">Üzgünüm, şu an yanıt veremiyorum.</div>`;
+        }
     }
 
     async function runAI(mode) {
@@ -446,21 +441,33 @@
         const vid = document.getElementById('video');
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
+        const goal = document.getElementById('uGoal').value;
         if(!age || !weight) return alert("Bilgileri girin.");
-        vid.pause(); 
-        document.getElementById('freezeLayer').style.display = 'flex';
-        document.getElementById('btnAnalyzeText').style.display = 'none';
+
+        if(mode === 'yemek') {
+            vid.pause(); document.getElementById('freezeLayer').style.display = 'flex';
+            document.getElementById('btnAnalyzeText').style.display = 'none';
+        }
+
         const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
-        canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
-        let imgBase64 = canv.toDataURL('image/jpeg', 0.7);
+        if(mode === 'yemek') canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
+        let imgBase64 = mode === 'yemek' ? canv.toDataURL('image/jpeg', 0.7) : null;
+
         try {
             const r = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mode, image: imgBase64, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`, lang: currentLang })
+                body: JSON.stringify({ mode, image: imgBase64, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${goal}`, lang: currentLang })
             });
             const d = await r.json();
             if(!r.ok) throw new Error("Hata");
+
+            if(mode === 'spor') {
+                document.getElementById('modalBody').innerHTML = `<div style="white-space:pre-line;">${d.analysis}</div>`;
+                document.getElementById('detailModal').style.display = 'block';
+                return;
+            }
+
             resDiv.innerHTML = ''; resDiv.style.display = 'flex';
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
             const headers = langData[currentLang].headers;
@@ -474,8 +481,7 @@
                     if(match) { 
                         score = parseInt(match[1]); content = content.replace(match[0], '').trim();
                         updateStreak(score); let left = (score/10)*100;
-                        card.innerHTML = `<div class="report-tag">${headers[i] || 'DETAY'}</div><div class="report-txt">${content}</div>
-                        <div class="score-wrapper"><div class="score-bar"><div class="score-marker" style="left:${left}%">${score}</div></div></div>`;
+                        card.innerHTML = `<div class="report-tag">${headers[i]}</div><div class="report-txt">${content}</div><div class="score-wrapper"><div class="score-bar"><div class="score-marker" style="left:${left}%">${score}</div></div></div>`;
                     }
                 } else { card.innerHTML = `<div class="report-tag">${headers[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`; }
                 resDiv.appendChild(card);
@@ -483,13 +489,36 @@
             document.getElementById('btnPdf').style.display = 'block';
             document.getElementById('btnRetry').style.display = 'block';
             document.getElementById('freezeLayer').style.display = 'none';
-            if(mode === 'yemek') saveHistory(score, d.analysis, mealName);
+            saveHistory(score, d.analysis, mealName);
             resDiv.scrollIntoView();
         } catch(e) { 
             document.getElementById('freezeLayer').style.display = 'none';
             document.getElementById('btnAnalyzeText').style.display = 'block';
-            vid.play(); alert("Analiz başarısız.");
+            if(vid) vid.play(); alert("Hata oluştu.");
         }
+    }
+
+    async function connectToDietician() {
+        const code = document.getElementById('dietCodeInput').value.trim().toUpperCase();
+        if(!code) return alert("Lütfen kod girin.");
+        const me = auth.currentUser.displayName.toLowerCase();
+        const q = await db.collection('dieticians').where('code', '==', code).get();
+        if(q.empty) return alert("Kod bulunamadı.");
+        const dietDoc = q.docs[0];
+        await db.collection('dieticians').doc(dietDoc.id).update({ patients: firebase.firestore.FieldValue.arrayUnion(me) });
+        await db.collection('partner_data').doc(me).update({ linkedDietician: dietDoc.id });
+        alert("Bağlantı başarılı!");
+        checkDieticianLink();
+    }
+
+    function checkDieticianLink() {
+        const me = auth.currentUser.displayName.toLowerCase();
+        db.collection('partner_data').doc(me).get().then(doc => {
+            if(doc.exists && doc.data().linkedDietician) {
+                document.getElementById('dietStatus').innerText = "Bağlı: @" + doc.data().linkedDietician;
+                document.getElementById('dietCodeInput').style.display = 'none';
+            }
+        });
     }
 
     function listenNotifications() {
@@ -519,7 +548,7 @@
                 doc.data().friends.forEach(f => {
                     container.innerHTML += `<div class="friend-pill" onclick="checkSpecific('${f}')">@${f}</div>`;
                 });
-            } else { container.innerHTML = '<p style="text-align:center;font-size:0.7rem;">Takip yok.</p>'; }
+            }
         });
     }
 
@@ -533,9 +562,9 @@
     function sendFriendRequest() {
         const u = document.getElementById('partnerUser').value.trim().toLowerCase();
         let me = auth.currentUser.displayName.toLowerCase();
-        if(!u || u === me) return alert("Kullanıcı bulunamadı.");
+        if(!u || u === me) return alert("Geçersiz kullanıcı.");
         db.collection('notifications').add({ toUser: u, fromUser: me, type: 'friend_request', timestamp: Date.now() });
-        alert("Takip isteği başarıyla gönderildi.");
+        alert("İstek gönderildi.");
     }
 
     function saveHistory(score, raw, meal) {
@@ -557,55 +586,28 @@
         if(p.style.display === 'block') {
             const list = document.getElementById('historyList');
             let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-            const nowUnix = new Date().getTime();
-            const oneDayUnix = 24 * 60 * 60 * 1000;
-            const last24h = arr.filter(item => (nowUnix - item.unix) < oneDayUnix);
-            if(last24h.length === 0) { list.innerHTML = "<p style='text-align:center; padding:10px;'>Son 24 saat içinde tarama bulunamadı.</p>"; return; }
-            list.innerHTML = last24h.map(h => {
-                const dateParts = h.date.split(' ');
-                return `<div class="history-box" onclick="openDetail(\`${h.detail.replace(/`/g, "'")}\`)">
-                    <div class="history-meta">📅 ${dateParts[0]} | 🕒 ${dateParts[1]} | ⭐ ${h.summary}</div>
-                    <div class="history-meal">🍽️ ${h.meal || 'Analiz Edilen Gıda'}</div>
-                    <div style="font-size:0.65rem; color:var(--accent); text-align:right;">Detay Gör 🔍</div>
-                </div>`;
-            }).join('');
+            const nowUnix = Date.now();
+            const last24h = arr.filter(item => (nowUnix - item.unix) < 86400000);
+            if(last24h.length === 0) { list.innerHTML = "<p>Son 24 saatte veri yok.</p>"; return; }
+            list.innerHTML = last24h.map(h => `<div class="history-box" onclick="openDetail(\`${h.detail.replace(/`/g, "'")}\`)"><div class="history-meta">🕒 ${h.date} | ⭐ ${h.summary}</div><div class="history-meal">🍽️ ${h.meal}</div></div>`).join('');
         }
     }
 
     function checkPartner() {
         const u = document.getElementById('partnerUser').value.trim().toLowerCase();
         const res = document.getElementById('partnerResult');
-        const histRes = document.getElementById('partnerHistoryList');
         db.collection('partner_data').doc(u).get().then(doc => {
             if(doc.exists) {
-                const data = doc.data();
-                // Partner şablonunu istediğin formatta güncelle: Tarih, Saat, Yemek, Puan, İçerik Raporu
                 db.collection('partner_data').doc(u).collection('history').orderBy('unix', 'desc').limit(1).get().then(snap => {
-                    if(snap.empty) {
-                        res.innerHTML = `<div class="friend-report-pill" style="text-align:center;">Henüz bir veri girişi yok.</div>`;
-                        histRes.innerHTML = "";
-                        return;
-                    }
-                    const lastMeal = snap.docs[0].data();
-                    const dateParts = lastMeal.date.split(' ');
-                    res.innerHTML = `
-                        <div class="friend-report-pill" style="border: 2px solid var(--primary); background: rgba(16, 185, 129, 0.1);">
-                            <div style="font-size:0.75rem; color:#94a3b8; border-bottom:1px solid #334155; padding-bottom:5px; margin-bottom:10px;">
-                                📅 <b>Tarih:</b> ${dateParts[0]} | 🕒 <b>Saat:</b> ${dateParts[1]}
-                            </div>
-                            <div style="font-size:1rem; font-weight:900; color:#fff; margin-bottom:5px;">🍽️ <b>Yemek:</b> ${lastMeal.mealName}</div>
-                            <div style="font-size:1.1rem; font-weight:900; color:var(--primary); margin-bottom:10px;">⭐ <b>Puan:</b> ${lastMeal.score}/10</div>
-                            <div style="font-size:0.8rem; color:#cbd5e1; line-height:1.4; background:rgba(0,0,0,0.3); padding:10px; border-radius:10px; border-left:3px solid var(--primary);">
-                                🔍 <b>İçerik Raporu:</b><br>${lastMeal.fullText}
-                            </div>
-                        </div>`;
-                    histRes.innerHTML = ""; // Ana şablonda tüm bilgi olduğu için ek geçmiş listesini temiz tutuyoruz
+                    if(snap.empty) { res.innerHTML = "Veri yok."; return; }
+                    const d = snap.docs[0].data();
+                    res.innerHTML = `<div class="friend-report-pill">📅 ${d.date}<br>🍽️ ${d.mealName}<br>⭐ Skor: ${d.score}/10<br><br>${d.fullText}</div>`;
                 });
             } else { res.innerText = "Kullanıcı bulunamadı."; }
         });
     }
 
-    function checkSpecific(u) { document.getElementById('partnerUser').value = u; document.getElementById('partnerPanel').style.display = 'block'; checkPartner(); toggleFriends(); document.getElementById('partnerPanel').scrollIntoView(); }
+    function checkSpecific(u) { document.getElementById('partnerUser').value = u; document.getElementById('partnerPanel').style.display = 'block'; checkPartner(); }
     function showStreak() { let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}'); if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; } }
     function updateStreak(s) { let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0, "last":""}'); let t = new Date().toLocaleDateString(); if(s >= 7) { if(d.last !== t) d.count++; d.last = t; } else { d.count = 0; } localStorage.setItem('streak_' + auth.currentUser.uid, JSON.stringify(d)); showStreak(); }
     function initPayPal() { paypal.Buttons({ createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: '0.99' } }] }), onApprove: (d, a) => a.order.capture().then(() => { localStorage.setItem('vip_' + auth.currentUser.uid, 'true'); location.reload(); }) }).render('#paypal-button-container'); }
