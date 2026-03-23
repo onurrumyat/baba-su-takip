@@ -57,8 +57,6 @@
         .patient-name { font-size: 1.1rem; font-weight: 900; color: #fff; }
         .patient-last { font-size: 0.7rem; color: var(--primary); font-weight: bold; }
         .patient-arrow { font-size: 1.2rem; color: var(--primary); }
-
-        /* Toplu Mesaj Alanı Stili */
         .broadcast-box { background: rgba(14, 165, 233, 0.1); border: 1px solid var(--accent); padding: 15px; border-radius: 20px; margin-bottom: 20px; }
     </style>
 </head>
@@ -137,13 +135,11 @@
                 <div id="currentCodeDisplay" style="margin-top:10px; font-weight:bold; color:var(--premium); font-size: 1.1rem;"></div>
             </div>
         </div>
-
         <div class="broadcast-box">
             <h4 style="color:var(--accent); margin-bottom:10px; font-size:0.9rem;">📢 Toplu Duyuru / Günlük Ödev</h4>
             <textarea id="broadcastMsg" placeholder="Tüm danışanlarınıza mesaj veya ödev gönderin..." style="width:100%; padding:10px; border-radius:10px; background:#0b0f1a; color:white; border:1px solid var(--accent); font-size:0.8rem; resize:none; height:60px;"></textarea>
             <button class="btn btn-sub" onclick="sendBroadcast()" style="padding:10px; font-size:0.7rem; background:var(--accent);">HERKESE GÖNDER</button>
         </div>
-
         <h3 style="margin-bottom:15px; border-bottom:1px solid #2d3748; padding-bottom:5px;">Bağlı Hastalarım</h3>
         <div id="patientList"></div>
         <button class="btn btn-outline" onclick="auth.signOut(); location.reload();" style="margin-top:20px;">GÜVENLİ ÇIKIŞ</button>
@@ -342,20 +338,16 @@
         } catch(e) { alert("Hata: " + e.message); }
     }
 
-    // TOPLU MESAJ GÖNDERME FONKSİYONU
     async function sendBroadcast() {
         const dieticianName = auth.currentUser.displayName.toLowerCase();
         const msg = document.getElementById('broadcastMsg').value.trim();
         if(!msg) return alert("Lütfen bir mesaj yazın.");
-
         const doc = await db.collection('dieticians').doc(dieticianName).get();
         if(!doc.exists || !doc.data().patients || doc.data().patients.length === 0) {
             return alert("Mesaj gönderilecek bağlı danışan bulunamadı.");
         }
-
         const patients = doc.data().patients;
         const batch = db.batch();
-
         patients.forEach(patientName => {
             const notifRef = db.collection('notifications').doc();
             batch.set(notifRef, {
@@ -366,7 +358,6 @@
                 timestamp: Date.now()
             });
         });
-
         await batch.commit();
         document.getElementById('broadcastMsg').value = '';
         alert("Toplu mesaj " + patients.length + " danışana başarıyla gönderildi!");
@@ -587,22 +578,30 @@
         const histRes = document.getElementById('partnerHistoryList');
         db.collection('partner_data').doc(u).get().then(doc => {
             if(doc.exists) {
-                const data = doc.data(); let s = data.score || 0;
-                let statusIcon = s < 7 ? "🚨 YAKALANDI!" : "✅ Sadık!";
-                res.innerHTML = `<div class="friend-report-pill">
-                    <div style="font-size:1rem; margin-bottom:5px;">${statusIcon} <b>Skor: ${s}/10</b></div>
-                    <div style="color:var(--primary)"><b>Son Yemek:</b> ${data.lastMealName || 'Bilinmiyor'}...</div>
-                    <div style="font-size:0.7rem; color:#94a3b8; margin-top:5px;">🕒 ${data.time || '-'}</div>
-                </div>`;
-                db.collection('partner_data').doc(u).collection('history').orderBy('unix', 'desc').limit(3).get().then(snap => {
-                    let html = '<p style="color:var(--primary); margin-top:10px; font-size:0.8rem;">Son Öğün Geçmişi:</p>';
-                    snap.forEach(h => {
-                        const hData = h.data();
-                        html += `<div class="history-box" style="font-size:0.7rem; border-color:var(--danger);"><div class="history-meta">📅 ${hData.date}</div><div class="history-meal">🍴 ${hData.mealName || 'Öğün'} (Skor: ${hData.score})</div></div>`;
-                    });
-                    histRes.innerHTML = html;
+                const data = doc.data();
+                // Partner şablonunu istediğin formatta güncelle: Tarih, Saat, Yemek, Puan, İçerik Raporu
+                db.collection('partner_data').doc(u).collection('history').orderBy('unix', 'desc').limit(1).get().then(snap => {
+                    if(snap.empty) {
+                        res.innerHTML = `<div class="friend-report-pill" style="text-align:center;">Henüz bir veri girişi yok.</div>`;
+                        histRes.innerHTML = "";
+                        return;
+                    }
+                    const lastMeal = snap.docs[0].data();
+                    const dateParts = lastMeal.date.split(' ');
+                    res.innerHTML = `
+                        <div class="friend-report-pill" style="border: 2px solid var(--primary); background: rgba(16, 185, 129, 0.1);">
+                            <div style="font-size:0.75rem; color:#94a3b8; border-bottom:1px solid #334155; padding-bottom:5px; margin-bottom:10px;">
+                                📅 <b>Tarih:</b> ${dateParts[0]} | 🕒 <b>Saat:</b> ${dateParts[1]}
+                            </div>
+                            <div style="font-size:1rem; font-weight:900; color:#fff; margin-bottom:5px;">🍽️ <b>Yemek:</b> ${lastMeal.mealName}</div>
+                            <div style="font-size:1.1rem; font-weight:900; color:var(--primary); margin-bottom:10px;">⭐ <b>Puan:</b> ${lastMeal.score}/10</div>
+                            <div style="font-size:0.8rem; color:#cbd5e1; line-height:1.4; background:rgba(0,0,0,0.3); padding:10px; border-radius:10px; border-left:3px solid var(--primary);">
+                                🔍 <b>İçerik Raporu:</b><br>${lastMeal.fullText}
+                            </div>
+                        </div>`;
+                    histRes.innerHTML = ""; // Ana şablonda tüm bilgi olduğu için ek geçmiş listesini temiz tutuyoruz
                 });
-            } else { res.innerText = "Veri yok."; }
+            } else { res.innerText = "Kullanıcı bulunamadı."; }
         });
     }
 
