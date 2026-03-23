@@ -39,6 +39,9 @@
         .notif-badge { position: absolute; top: 0; right: 0; background: var(--danger); color: white; font-size: 0.6rem; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .notif-dropdown, .friends-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 260px; background: #1e293b; border-radius: 15px; padding: 15px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         .friend-link { display: block; padding: 10px; background: #0b0f1a; border-radius: 10px; margin-bottom: 5px; color: var(--primary); font-weight: bold; cursor: pointer; text-align: center; }
+        
+        /* Premium Rozet Stili */
+        .premium-badge { display: none; background: var(--primary); color: white; font-size: 0.65rem; font-weight: 900; padding: 4px 10px; border-radius: 50px; margin-left: 8px; vertical-align: middle; border: 1px solid rgba(255,255,255,0.2); }
         .ref-container { display: none; background: #1a202c; border: 1px solid var(--premium); border-radius: 20px; padding: 15px; margin-top: 10px; }
         .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .ref-box { background: #0b0f1a; padding: 10px; border-radius: 12px; text-align: center; border: 1px solid #2d3748; }
@@ -92,7 +95,10 @@
     <div id="mainView" style="display:none;">
         <div style="text-align: center; margin-bottom: 20px;">
             <div id="clock" style="font-size: 2.2rem; font-weight: 800; color: var(--accent);">00:00:00</div>
-            <div id="uMail" style="font-size: 1.1rem; font-weight: 900; color: var(--primary);"></div> 
+            <div style="display: flex; align-items: center; justify-content: center; margin-top: 5px;">
+                <span id="uMail" style="font-size: 1.1rem; font-weight: 900; color: var(--primary);"></span>
+                <span id="vipBadge" class="premium-badge">PREMIUM</span>
+            </div>
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
@@ -107,43 +113,44 @@
 
         <div class="cam-box"><video id="video" autoplay playsinline></video></div>
         <button class="btn btn-main" id="btnAnalyze" onclick="runAI('yemek')">📸 ANALİZ ET</button>
+        
         <div id="results"></div>
         <button class="btn btn-main" id="btnPdf" style="display:none; background: #ef4444; margin-top:15px;" onclick="downloadPDF()">📄 PDF OLARAK KAYDET</button>
 
-        <button class="btn btn-outline" id="btnHistory" onclick="toggleHistory()">📚 GEÇMİŞ ANALİZLERİM</button>
+        <button class="btn btn-outline" id="btnHistory" onclick="toggleHistory()" style="margin-top:25px;">📚 GEÇMİŞ ANALİZLERİM</button>
         <div id="historyPanel" style="display:none; margin-top:15px; padding:15px; border-radius:15px; border: 1px solid #2d3748;">
-            <h3 id="txtHistPanelTitle" style="text-align:center;">Son Taramalarınız</h3>
+            <h3 id="txtHistPanelTitle" style="text-align:center; color:var(--primary); margin-bottom:10px;">Son Taramalarınız</h3>
             <div id="historyList"></div>
         </div>
 
         <button class="btn btn-outline" id="btnPartner" style="border-color: var(--danger); color: var(--danger);" onclick="togglePartner()">👫 KANKA / ÇİFT ARENASI</button>
         <div id="partnerPanel" class="partner-box" style="display:none;">
-            <h3 id="txtPartTitle">Partnerini Denetle! 🚨</h3>
+            <h3 id="txtPartTitle" style="color:var(--danger); margin-bottom:10px;">Partnerini Denetle! 🚨</h3>
             <input type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin">
-            <button class="btn btn-sub" id="btnFriendReq" onclick="sendFriendRequest()">➕ ARKADAŞ EKLE</button>
-            <button class="btn btn-sub" id="btnCheckPart" style="background: var(--danger);" onclick="checkPartner()">🔍 SORGULA</button>
-            <div id="partnerResult" style="margin-top:15px; font-weight:bold;"></div>
+            <button class="btn btn-sub" id="btnFriendReq" style="background: var(--accent); margin-bottom:5px;" onclick="sendFriendRequest()">➕ ARKADAŞ EKLE İSTEĞİ AT</button>
+            <button class="btn btn-sub" id="btnCheckPart" style="background: var(--danger);" onclick="checkPartner()">🔍 DURUMUNU SORGULA</button>
+            <div id="partnerResult" style="margin-top:15px; font-weight:bold; white-space:pre-line;"></div>
         </div>
 
         <div class="premium-area">
-            <button class="btn btn-sub" id="btnGetPlan" style="background: var(--premium); color: black;" onclick="handlePlanClick()">📅 HAFTALIK PLANINIZI ÇIKARIN</button>
+            <button class="btn btn-sub" id="btnGetPlan" style="margin-top:0; background: var(--premium); color: black;" onclick="handlePlanClick()">📅 HAFTALIK PLANINIZI ÇIKARIN</button>
             <div id="premiumLockInfo">
                 <div class="premium-title" id="txtPremTitle">PREMIUM ÜYE | 0.99 $</div>
                 <div id="paypal-button-container"></div>
             </div>
         </div>
 
-        <button class="btn btn-outline" id="btnInvite" style="border-color: var(--premium); color: var(--premium);" onclick="toggleRefPanel()">🎁 ARKADAŞINI GETİR (1 AY VIP)</button>
+        <button class="btn btn-outline" id="btnInvite" style="border-color: var(--premium); color: var(--premium); margin-top:20px;" onclick="toggleRefPanel()">🎁 ARKADAŞINI GETİR (1 AY VIP)</button>
         <div id="refPanel" class="ref-container">
             <div class="ref-grid">
                 <div class="ref-box">
-                    <div id="txtRefMy" style="font-size:0.6rem; color:#94a3b8;">Referans Kodum</div>
-                    <div id="myRefCode" style="font-family:monospace; color:var(--premium); font-weight:bold;">-----</div>
+                    <div id="txtRefMy" style="font-size:0.65rem; color:#94a3b8; margin-bottom:5px;">Referans Kodum</div>
+                    <div id="myRefCode" style="font-family:monospace; font-size:1.1rem; color:var(--premium); font-weight:bold;">-----</div>
                     <button class="btn" style="background:var(--accent); font-size:0.6rem; padding:5px; margin-top:5px;" onclick="copyMyCode()">KOPYALA</button>
                 </div>
                 <div class="ref-box">
-                    <div id="txtRefInp" style="font-size:0.6rem; color:#94a3b8;">Kod Gir (Hediye Et)</div>
-                    <input type="text" id="inputRefCode" placeholder="Kod..." style="padding:5px; font-size:0.8rem; margin-bottom:5px;">
+                    <div id="txtRefInp" style="font-size:0.65rem; color:#94a3b8; margin-bottom:5px;">Kod Gir (Hediye Et)</div>
+                    <input type="text" id="inputRefCode" placeholder="Kod..." style="padding:5px; font-size:0.8rem; border-radius:8px; margin-bottom:5px;">
                     <button class="btn" style="background:var(--primary); font-size:0.6rem; padding:5px;" onclick="submitFriendCode()">GÖNDER</button>
                 </div>
             </div>
@@ -163,21 +170,21 @@
             g1: "Kilo Vermek (-)", g2: "Kilo Almak (+)", g3: "Kiloyu Korumak (=)", btnAnalyze: "📸 ANALİZ ET", btnPlan: "📅 HAFTALIK PLANINIZI ÇIKARIN",
             premTitle: "PREMIUM ÜYE | 0.99 $", btnLogout: "GÜVENLİ ÇIKIŞ", btnInvite: "🎁 ARKADAŞINI GETİR (1 AY VIP)", streak: "Seri",
             notif: "Bildirimler", follow: "Takip Ettiklerin", hist: "Son Taramalarınız", partTitle: "Partnerini Denetle! 🚨",
-            partInput: "Kullanıcı Adı Girin", btnFriendReq: "➕ ARKADAŞ EKLE", btnCheck: "🔍 SORGULA",
+            partInput: "Kullanıcı Adı Girin", btnFriendReq: "➕ ARKADAŞ EKLE İSTEĞİ AT", btnCheck: "🔍 DURUMUNU SORGULA",
             errInfo: "Bilgi eksik.", errPrem: "Premium gereklidir.", loading: "🔍 İnceleniyor...",
             partCatch: "🚨 KÖTÜ SKOR!", partGood: "✅ SADIK DİYET!", noHist: "Henüz geçmiş yok.",
-            refMy: "Referans Kodum", refInp: "Kod Gir (Hediye Et)"
+            refMy: "Referans Kodum", refInp: "Kod Gir (Hediye Et)", refSucc: "Tebrikler! Arkadaşınız 1 aylık VIP üyelik kazandı!"
         },
         en: {
-            appTitle: "BIO-CHEF", emailPlaceholder: "Email", passPlaceholder: "Password", btnLogin: "LOGIN", btnForgot: "Forgot?", btnReg: "Sign Up",
+            appTitle: "BIO-CHEF", emailPlaceholder: "Email", passPlaceholder: "Password", btnLogin: "LOGIN", btnForgot: "Forgot Password?", btnReg: "Sign Up",
             regTitle: "SIGN UP", btnDoReg: "CREATE ACCOUNT", btnBack: "Go Back", agePlaceholder: "AGE", weightPlaceholder: "WEIGHT",
             g1: "Lose Weight", g2: "Gain Weight", g3: "Maintain", btnAnalyze: "📸 ANALYZE", btnPlan: "📅 GET WEEKLY PLAN",
-            premTitle: "PREMIUM | $0.99", btnLogout: "LOGOUT", btnInvite: "🎁 INVITE FRIEND (1 MO VIP)", streak: "Streak",
+            premTitle: "PREMIUM MEMBER | $0.99", btnLogout: "SECURE LOGOUT", btnInvite: "🎁 INVITE FRIEND (1 MO VIP)", streak: "Streak",
             notif: "Notifications", follow: "Following", hist: "Recent Scans", partTitle: "Inspect Partner! 🚨",
-            partInput: "Enter Username", btnFriendReq: "➕ ADD FRIEND", btnCheck: "🔍 CHECK",
+            partInput: "Enter Username", btnFriendReq: "➕ ADD FRIEND REQUEST", btnCheck: "🔍 CHECK STATUS",
             errInfo: "Missing info.", errPrem: "Premium required.", loading: "🔍 Analyzing...",
-            partCatch: "🚨 BAD DIET!", partGood: "✅ LOYAL!", noHist: "No history yet.",
-            refMy: "My Ref Code", refInp: "Enter Code"
+            partCatch: "🚨 BAD DIET!", partGood: "✅ LOYAL DIET!", noHist: "No history yet.",
+            refMy: "My Ref Code", refInp: "Enter Code", refSucc: "Congrats! Your friend won 1 month VIP!"
         }
     };
 
@@ -221,13 +228,14 @@
     auth.onAuthStateChanged(user => {
         if (user) {
             toggleView('mainView');
-            document.getElementById('uMail').innerText = "@" + (user.displayName || user.email.split('@')[0]);
-            loadUserInfo();
-            generateMyRefCode(user.displayName || user.email.split('@')[0]);
+            let me = user.displayName || user.email.split('@')[0];
+            document.getElementById('uMail').innerText = "@" + me;
+            loadUserInfo(); generateMyRefCode(me);
             
             db.collection('vip_users').doc(user.uid).onSnapshot(doc => {
                 isVipGlobal = (doc.exists && doc.data().expiry > Date.now()) || localStorage.getItem('vip_'+user.uid) === 'true';
                 document.getElementById('premiumLockInfo').style.display = isVipGlobal ? 'none' : 'block';
+                document.getElementById('vipBadge').style.display = isVipGlobal ? 'inline-block' : 'none';
                 if(!isVipGlobal) initPayPal();
             });
 
@@ -253,17 +261,14 @@
                 if(ownerId === auth.currentUser.uid) return alert("Kendi kodunu giremezsin!");
                 const thirtyDays = Date.now() + (30 * 24 * 60 * 60 * 1000);
                 db.collection('vip_users').doc(ownerId).set({ expiry: thirtyDays }, { merge: true });
-                alert("Arkadaşına 1 ay VIP hediye edildi!");
+                alert(langData[currentLang].refSucc);
                 document.getElementById('inputRefCode').value = "";
+                toggleRefPanel();
             } else { alert("Geçersiz kod!"); }
         });
     }
 
-    async function doLogin() { 
-        const e = document.getElementById('lEmail').value; const p = document.getElementById('lPass').value;
-        try { await auth.signInWithEmailAndPassword(e, p); } catch(err) { alert(err.message); } 
-    }
-
+    async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); } }
     async function doRegister() {
         const u = document.getElementById('rUser').value.trim(); const e = document.getElementById('rEmail').value; const p = document.getElementById('rPass').value;
         try { 
@@ -338,18 +343,6 @@
         localStorage.setItem(key, JSON.stringify(arr.slice(0, 15)));
     }
 
-    function checkPartner() {
-        const u = document.getElementById('partnerUser').value.trim().toLowerCase();
-        const res = document.getElementById('partnerResult');
-        db.collection('partner_data').doc(u).get().then(doc => {
-            if(doc.exists && doc.data().score !== undefined) {
-                const d = doc.data();
-                let status = d.score >= 7 ? langData[currentLang].partGood : (d.score <= 3 ? langData[currentLang].partCatch : "Orta:");
-                res.innerHTML = `<div style="background:rgba(0,0,0,0.3);padding:15px;border-radius:15px;border:1px solid var(--accent);margin-top:10px;">🗓️ ${d.date} | ⏰ ${d.time}<br>⭐ Skor: ${d.score}/10<br>🍴 ${d.lastMeal}<br><small>${status}</small></div>`;
-            } else { res.innerText = "Veri yok."; }
-        });
-    }
-
     function toggleView(id) { document.getElementById('loginView').style.display='none'; document.getElementById('regView').style.display='none'; document.getElementById('mainView').style.display='none'; document.getElementById(id).style.display='block'; }
     function toggleNotifications() { const d = document.getElementById('notifDropdown'); d.style.display = d.style.display==='none'?'block':'none'; }
     function toggleFriends() { const d = document.getElementById('friendsDropdown'); d.style.display = d.style.display==='none'?'block':'none'; }
@@ -360,7 +353,7 @@
     function copyMyCode() { const c = document.getElementById('myRefCode').innerText; navigator.clipboard.writeText(c).then(() => alert("Kopyalandı: " + c)); }
     function listenFriends() { let me = auth.currentUser.displayName.toLowerCase(); db.collection('partner_data').doc(me).onSnapshot(doc => { const container = document.getElementById('friendsListContainer'); container.innerHTML = ''; if(doc.exists && doc.data().friends) { doc.data().friends.forEach(f => { container.innerHTML += `<div class="friend-link" onclick="scrollToPartner('${f}')">@${f}</div>`; }); } }); }
     function scrollToPartner(u) { document.getElementById('partnerUser').value = u; document.getElementById('partnerPanel').style.display = 'block'; document.getElementById('partnerPanel').scrollIntoView({ behavior: 'smooth' }); toggleFriends(); }
-    function listenNotifications() { let me = auth.currentUser.displayName.toLowerCase(); db.collection('notifications').where('toUser', '==', me).onSnapshot(snap => { const list = document.getElementById('notifList'); const badge = document.getElementById('notifBadge'); list.innerHTML = ''; let c = 0; snap.forEach(doc => { c++; let d = doc.data(); list.innerHTML += `<div class="notif-item">${d.type === 'friend_request' ? '🤝 @'+d.fromUser+' istek attı. <button onclick="acceptFriend(\''+d.fromUser+'\',\''+doc.id+'\')">Kabul Et</button>' : d.message}</div>`; }); badge.style.display = c > 0 ? 'flex' : 'none'; badge.innerText = c; }); }
+    function listenNotifications() { let me = auth.currentUser.displayName.toLowerCase(); db.collection('notifications').where('toUser', '==', me).onSnapshot(snap => { const list = document.getElementById('notifList'); const badge = document.getElementById('notifBadge'); list.innerHTML = ''; let c = 0; snap.forEach(doc => { c++; let d = doc.data(); list.innerHTML += `<div class="notif-item">🤝 @${d.fromUser} istek attı. <button onclick="acceptFriend(\''+d.fromUser+'\',\''+doc.id+'\')">Kabul Et</button></div>`; }); badge.style.display = c > 0 ? 'flex' : 'none'; badge.innerText = c; }); }
     function acceptFriend(u, id) { let me = auth.currentUser.displayName.toLowerCase(); db.collection('partner_data').doc(me).update({ friends: firebase.firestore.FieldValue.arrayUnion(u) }); db.collection('partner_data').doc(u).update({ friends: firebase.firestore.FieldValue.arrayUnion(me) }); db.collection('notifications').doc(id).delete(); }
     function sendFriendRequest() { const u = document.getElementById('partnerUser').value.trim().toLowerCase(); db.collection('notifications').add({ toUser: u, fromUser: auth.currentUser.displayName.toLowerCase(), type: 'friend_request' }); alert("Gönderildi."); }
     function showStreak() { let d = JSON.parse(localStorage.getItem('streak_'+auth.currentUser.uid) || '{"count":0}'); if(d.count > 0) { document.getElementById('streakBadge').style.display='block'; document.getElementById('streakCount').innerText=d.count; } }
@@ -370,7 +363,6 @@
     function downloadPDF() { html2pdf().from(document.getElementById('results')).save(); }
     function doReset() { auth.sendPasswordResetEmail(document.getElementById('lEmail').value).then(() => alert("Gönderildi.")); }
     setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
-    function copyInviteLink() { const me = auth.currentUser.displayName || auth.currentUser.uid; const link = window.location.origin + "?ref=" + me; navigator.clipboard.writeText(link).then(() => alert("Kopyalandı: " + link)); }
 </script>
 </body>
 </html>
