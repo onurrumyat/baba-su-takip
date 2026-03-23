@@ -51,14 +51,15 @@
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); padding: 20px; overflow-y: auto; }
         .modal-content { background: var(--card); margin: auto; padding: 20px; border-radius: 25px; max-width: 400px; border: 1px solid var(--primary); }
         .partner-box { background: rgba(239, 68, 68, 0.05); border: 1px dashed var(--danger); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
-        
-        /* Diyetisyen Hasta Kartı Stilleri */
         .patient-card { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--primary); padding: 20px; border-radius: 20px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); }
         .patient-card:hover { transform: translateY(-3px); background: #1c2536; box-shadow: 0 0 15px var(--primary); }
         .patient-info { display: flex; flex-direction: column; gap: 4px; }
         .patient-name { font-size: 1.1rem; font-weight: 900; color: #fff; }
         .patient-last { font-size: 0.7rem; color: var(--primary); font-weight: bold; }
         .patient-arrow { font-size: 1.2rem; color: var(--primary); }
+
+        /* Toplu Mesaj Alanı Stili */
+        .broadcast-box { background: rgba(14, 165, 233, 0.1); border: 1px solid var(--accent); padding: 15px; border-radius: 20px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -136,6 +137,13 @@
                 <div id="currentCodeDisplay" style="margin-top:10px; font-weight:bold; color:var(--premium); font-size: 1.1rem;"></div>
             </div>
         </div>
+
+        <div class="broadcast-box">
+            <h4 style="color:var(--accent); margin-bottom:10px; font-size:0.9rem;">📢 Toplu Duyuru / Günlük Ödev</h4>
+            <textarea id="broadcastMsg" placeholder="Tüm danışanlarınıza mesaj veya ödev gönderin..." style="width:100%; padding:10px; border-radius:10px; background:#0b0f1a; color:white; border:1px solid var(--accent); font-size:0.8rem; resize:none; height:60px;"></textarea>
+            <button class="btn btn-sub" onclick="sendBroadcast()" style="padding:10px; font-size:0.7rem; background:var(--accent);">HERKESE GÖNDER</button>
+        </div>
+
         <h3 style="margin-bottom:15px; border-bottom:1px solid #2d3748; padding-bottom:5px;">Bağlı Hastalarım</h3>
         <div id="patientList"></div>
         <button class="btn btn-outline" onclick="auth.signOut(); location.reload();" style="margin-top:20px;">GÜVENLİ ÇIKIŞ</button>
@@ -334,6 +342,36 @@
         } catch(e) { alert("Hata: " + e.message); }
     }
 
+    // TOPLU MESAJ GÖNDERME FONKSİYONU
+    async function sendBroadcast() {
+        const dieticianName = auth.currentUser.displayName.toLowerCase();
+        const msg = document.getElementById('broadcastMsg').value.trim();
+        if(!msg) return alert("Lütfen bir mesaj yazın.");
+
+        const doc = await db.collection('dieticians').doc(dieticianName).get();
+        if(!doc.exists || !doc.data().patients || doc.data().patients.length === 0) {
+            return alert("Mesaj gönderilecek bağlı danışan bulunamadı.");
+        }
+
+        const patients = doc.data().patients;
+        const batch = db.batch();
+
+        patients.forEach(patientName => {
+            const notifRef = db.collection('notifications').doc();
+            batch.set(notifRef, {
+                toUser: patientName,
+                fromUser: dieticianName,
+                type: 'dietician_message',
+                message: "👨‍⚕️ Diyetisyeninizden Mesaj: " + msg,
+                timestamp: Date.now()
+            });
+        });
+
+        await batch.commit();
+        document.getElementById('broadcastMsg').value = '';
+        alert("Toplu mesaj " + patients.length + " danışana başarıyla gönderildi!");
+    }
+
     function listenPatients(dietUsername) {
         db.collection('dieticians').doc(dietUsername).onSnapshot(doc => {
             const list = document.getElementById('patientList');
@@ -343,8 +381,6 @@
                     const card = document.createElement('div');
                     card.className = 'patient-card';
                     card.onclick = () => showPatientHistory(p);
-                    
-                    // Hasta ismi ve son durum bilgisi
                     card.innerHTML = `
                         <div class="patient-info">
                             <span class="patient-name">@${p}</span>
