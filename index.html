@@ -52,7 +52,6 @@
         .notif-item { background: #0b0f1a; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 0.8rem; color: #cbd5e1; border-left: 3px solid var(--accent); }
         .notif-btn { background: var(--primary); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; margin-top: 5px; font-weight:bold; }
         
-        /* EKLENEN: Saatin altındaki Kullanıcı Adı Stili */
         .user-tag { font-size: 1.1rem; font-weight: 900; color: var(--primary); margin-top: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
     </style>
 </head>
@@ -159,6 +158,8 @@
             g1: "Kilo Vermek (-)", g2: "Kilo Almak (+)", g3: "Kiloyu Korumak (=)",
             btnAna: "📸 ANALİZ ET", btnPlan: "📅 HAFTALIK PLANINIZI ÇIKARIN", premTitle: "PREMIUM ÜYE | 0.99 $", btnOut: "GÜVENLİ ÇIKIŞ",
             errMail: "Mail veya Kullanıcı Adı eksik.", errInfo: "Bilgileri girin.", errPlan: "Haftalık plan için aşağıdan Premium üyeliğinizi başlatın.", errMsg: "Hata!",
+            // EKLENEN: Kullanıcı adı alınmış uyarısı çevirisi
+            errUserTaken: "Bu kullanıcı adı zaten alınmış! Lütfen başka bir ad seçin.", 
             loading: "🔍 İnceleniyor...", 
             headersYemek: ["HEDEF SKORU 🎯", "AÇLIK KRONOMETRESİ ⏳", "ÜRÜN ÖZETİ", "BESİN DEĞERLERİ", "HEDEF ANALİZİ", "NET TAVSİYE"],
             headersPlan: ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"],
@@ -176,6 +177,8 @@
             g1: "Lose Weight (-)", g2: "Gain Weight (+)", g3: "Maintain Weight (=)",
             btnAna: "📸 ANALYZE", btnPlan: "📅 GET WEEKLY PLAN", premTitle: "PREMIUM MEMBER | $0.99", btnOut: "SECURE LOGOUT",
             errMail: "Missing email or username.", errInfo: "Enter info.", errPlan: "Start Premium below for weekly plan.", errMsg: "Error!",
+            // EKLENEN: Kullanıcı adı alınmış uyarısı çevirisi
+            errUserTaken: "This username is already taken! Please choose another one.",
             loading: "🔍 Analyzing...", 
             headersYemek: ["GOAL SCORE 🎯", "HUNGER STOPWATCH ⏳", "PRODUCT SUMMARY", "NUTRITION FACTS", "GOAL ANALYSIS", "NET ADVICE"],
             headersPlan: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
@@ -246,7 +249,6 @@
     auth.onAuthStateChanged(user => {
         if (user) {
             toggleView('mainView');
-            // DÜZELTİLEN: Ekranda saatin altında Kullanıcı Adı yazacak (@kullanici_adi formatında)
             let displayString = user.displayName ? "@" + user.displayName : "@" + user.email.split('@')[0];
             document.getElementById('uMail').innerText = displayString;
             
@@ -258,7 +260,6 @@
             document.getElementById('bellIcon').style.display = 'flex'; 
             listenNotifications(); 
             
-            // Eğer varsa Firestore'daki kullanıcı verisini displayName olarak kaydet
             let activeUser = user.displayName ? user.displayName.toLowerCase() : user.email.split('@')[0].toLowerCase();
             db.collection('partner_data').doc(activeUser).set({ username: activeUser }, { merge: true });
             
@@ -356,26 +357,37 @@
 
     async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); } }
     
-    // EKLENEN: Kayıt olurken Kullanıcı Adını Firebase'e isler
+    // ==========================================
+    // EKLENEN: KULLANICI ADI BENZERSİZLİK KONTROLÜ
+    // ==========================================
     async function doRegister() { 
         const uName = document.getElementById('rUser').value.trim();
         const email = document.getElementById('rEmail').value;
         const pass = document.getElementById('rPass').value;
         
-        if(!uName || !email || !pass) return alert("Lütfen tüm alanları (Kullanıcı Adı dahil) doldurun.");
+        if(!uName || !email || !pass) return alert("Lütfen tüm alanları doldurun.");
         
+        const uNameLower = uName.toLowerCase();
+
         try { 
+            // 1. ADIM: Bu isim başkası tarafından alınmış mı diye Firestore'a soruyoruz
+            const userCheck = await db.collection('partner_data').doc(uNameLower).get();
+            if (userCheck.exists) {
+                // Eğer veritabanında bu isim varsa, kayıt işlemini iptal et ve uyarı ver
+                return alert(langData[currentLang].errUserTaken);
+            }
+
+            // 2. ADIM: Eğer isim boşta ise, normal kayıt işlemini tamamla
             const cred = await auth.createUserWithEmailAndPassword(email, pass);
-            // Firebase Auth Profile'ını Kullanıcı Adıyla Günceller
             await cred.user.updateProfile({ displayName: uName });
             
-            // Kullanıcı veritabanına adıyla kaydedilir
-            await db.collection('partner_data').doc(uName.toLowerCase()).set({ username: uName.toLowerCase() }, { merge: true });
+            await db.collection('partner_data').doc(uNameLower).set({ username: uNameLower }, { merge: true });
             
             alert("Hesap başarıyla oluşturuldu!");
-            location.reload(); // Değişikliklerin ekrana yansıması için sayfayı yeniler
+            location.reload(); 
         } catch(e) { alert(e.message); } 
     }
+    // ==========================================
 
     async function doReset() { const email = document.getElementById('lEmail').value; if(!email) return alert("E-posta girin."); try { await auth.sendPasswordResetEmail(email); alert("Link gönderildi."); } catch(e) { alert(e.message); } }
     function handlePlanClick() { if(!isVip) return alert(langData[currentLang].errPlan); runAI('plan'); }
