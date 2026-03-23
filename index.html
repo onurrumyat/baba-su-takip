@@ -43,9 +43,12 @@
         .role-btn { flex: 1; padding: 10px; border-radius: 10px; background: #0b0f1a; border: 1px solid #2d3748; color: #94a3b8; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
         .role-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(16, 185, 129, 0.1); }
         
-        /* Modal Style */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; padding: 20px; overflow-y: auto; }
-        .modal-content { background: var(--card); border-radius: 25px; padding: 25px; max-width: 400px; margin: auto; border: 1px solid var(--accent); }
+        /* Gelişmiş Detay Modalı */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; padding: 20px; overflow-y: auto; align-items: center; justify-content: center; }
+        .modal-content { background: var(--card); border-radius: 30px; padding: 25px; width: 100%; max-width: 380px; border: 2px solid var(--primary); box-shadow: 0 0 30px rgba(16, 185, 129, 0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #2d3748; padding-bottom: 10px; }
+        .modal-title { color: var(--primary); font-weight: 900; font-size: 1.2rem; }
+        .modal-body { color: #cbd5e1; font-size: 0.95rem; line-height: 1.7; white-space: pre-wrap; max-height: 60vh; overflow-y: auto; padding-right: 5px; }
 
         .bell-container { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; }
         .bell-icon { font-size: 1.5rem; }
@@ -57,13 +60,20 @@
         .friends-btn { font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; margin-left: 10px; position: relative; }
         .friends-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 250px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 10px; z-index: 101; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         .friend-link { display: block; padding: 10px; background: #0b0f1a; border-radius: 10px; margin-bottom: 5px; color: var(--primary); font-weight: bold; cursor: pointer; text-decoration: none; font-size: 0.9rem; text-align: center; }
+        .partner-item { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; margin-bottom: 8px; border-left: 4px solid var(--danger); text-align: left; }
     </style>
 </head>
 <body>
 
 <div id="detailModal" class="modal">
-    <div class="modal-content" id="modalBody"></div>
-    <button class="btn btn-sub" onclick="document.getElementById('detailModal').style.display='none'">KAPAT</button>
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="modal-title">ANALİZ DETAYI</span>
+            <span style="cursor:pointer; font-size: 1.5rem;" onclick="document.getElementById('detailModal').style.display='none'">✕</span>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <button class="btn btn-main" style="margin-top:20px;" onclick="document.getElementById('detailModal').style.display='none'">ANLAŞILDI</button>
+    </div>
 </div>
 
 <div class="app-card">
@@ -162,8 +172,8 @@
                 <button class="btn btn-sub" id="btnAddFriend" style="background: var(--accent); font-size: 0.7rem; flex:1;" onclick="sendFriendRequest()">➕ TAKİP ET</button>
                 <button class="btn btn-sub" id="btnCheckPart" style="background: var(--danger); font-size: 0.7rem; flex:1;" onclick="checkPartner()">🔍 SORGULA</button>
             </div>
-            <div id="partnerResult" style="margin-top:15px; font-weight:bold; white-space:pre-line;"></div>
-            <div id="partnerHistoryList" style="margin-top:10px; text-align:left;"></div>
+            <div id="partnerResult" style="margin-top:15px; font-weight:bold;"></div>
+            <div id="partnerHistoryList" style="margin-top:10px;"></div>
         </div>
 
         <div class="premium-area">
@@ -419,7 +429,6 @@
             canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
             img = canv.toDataURL('image/jpeg', 0.7);
             
-            // Fotoğrafı dondur
             document.getElementById('capturedImage').src = img;
             document.getElementById('capturedImage').style.display = 'block';
             document.getElementById('video').style.display = 'none';
@@ -454,13 +463,21 @@
                 resDiv.appendChild(card);
             });
             document.getElementById('btnPdf').style.display = 'block';
-            if(mode === 'yemek') saveHistory(score, d.analysis, img);
+            if(mode === 'yemek') saveHistory(score, d.analysis);
         } catch(e) { alert(langData[currentLang].errMsg); }
     }
 
-    function saveHistory(score, raw, img) {
+    function saveHistory(score, raw) {
         let me = auth.currentUser.displayName.toLowerCase();
-        const historyItem = { score, full: raw, thumb: raw.substring(0, 40) + "...", date: new Date().toLocaleString() };
+        let shortText = raw.split("\n").find(l => l.includes("ÜRÜN ÖZETİ")) || "Bilinmeyen Ürün";
+        shortText = shortText.replace("ÜRÜN ÖZETİ:", "").trim().substring(0, 30);
+
+        const historyItem = { 
+            score, 
+            full: raw, 
+            what: shortText,
+            date: new Date().toLocaleString() 
+        };
         
         db.collection('partner_data').doc(me).update({ 
             score: score, 
@@ -477,9 +494,7 @@
         const data = JSON.parse(decodeURIComponent(dataStr));
         const modal = document.getElementById('detailModal');
         const body = document.getElementById('modalBody');
-        body.innerHTML = `<h2 style="color:var(--primary)">Analiz Detayı</h2><hr style="margin:10px 0;opacity:0.2;">
-                          <p style="font-size:0.8rem; color:var(--accent)">${data.date}</p>
-                          <div class="report-txt" style="margin-top:15px; background:rgba(255,255,255,0.05); padding:15px; border-radius:10px;">${data.full}</div>`;
+        body.innerHTML = `📅 <b>Tarih:</b> ${data.date}\n⭐ <b>Skor:</b> ${data.score}/10\n\n${data.full}`;
         modal.style.display = 'flex';
     }
 
@@ -491,8 +506,8 @@
             let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
             list.innerHTML = arr.length ? arr.map(h => `
                 <div class="history-box" onclick="showDetails('${encodeURIComponent(JSON.stringify(h))}')">
-                    <b>${h.date}</b> | <span style="color:var(--premium)">Skor: ${h.score}/10</span><br>
-                    <small>${h.thumb}</small>
+                    <b>${h.date}</b> | <span style="color:var(--primary)">${h.score}/10</span><br>
+                    <small>🍽️ ${h.what}...</small>
                 </div>`).join('') : "Henüz yok.";
         }
     }
@@ -511,17 +526,19 @@
             if(doc.exists) {
                 let d = doc.data();
                 let s = d.score || 0;
-                res.innerText = (s < 7 ? langData[currentLang].partCatch : langData[currentLang].partGood) + s + "/10";
+                res.innerHTML = `<span style="color:${s < 7 ? 'var(--danger)' : 'var(--primary)'}">${s < 7 ? '🚨 YAKALANDI!' : '✅ SADIK!'} Mevcut Puan: ${s}/10</span>`;
                 
                 if(d.history) {
-                    histList.innerHTML = `<h4 style="margin:10px 0; color:var(--accent);">Partner Geçmişi:</h4>` + 
+                    histList.innerHTML = `<h4 style="margin:15px 0 10px 0; color:var(--accent); font-size:0.9rem;">Partnerin Son Hareketleri:</h4>` + 
                     d.history.slice(-5).reverse().map(h => `
-                        <div class="history-box" style="font-size:0.7rem;" onclick="showDetails('${encodeURIComponent(JSON.stringify(h))}')">
-                            <b>${h.date}</b> - Skor: ${h.score}
+                        <div class="partner-item">
+                            <div style="font-size:0.75rem; color:#94a3b8;">📅 ${h.date}</div>
+                            <div style="font-size:0.85rem; font-weight:bold; margin:4px 0;">🍽️ ${h.what}</div>
+                            <div style="font-size:0.8rem; color:var(--premium)">⭐ Puan: ${h.score}/10</div>
                         </div>
                     `).join('');
-                }
-            } else { res.innerText = "Veri yok."; histList.innerHTML = ""; }
+                } else { histList.innerHTML = "<p style='font-size:0.8rem; color:#94a3b8;'>Analiz geçmişi bulunamadı.</p>"; }
+            } else { res.innerText = "Kullanıcı bulunamadı."; histList.innerHTML = ""; }
         });
     }
 
