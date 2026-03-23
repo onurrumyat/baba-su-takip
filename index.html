@@ -1,431 +1,1064 @@
 <!DOCTYPE html>
+
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bio-Chef Pro | VIP Analiz</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.paypal.com/sdk/js?client-id=AdOeigm877SXMe7mMtuEMPUeGkY9WcgyIJPbzGJU2HP1CS_eaGcn4O0FnUEoB3JFmDXEHSnxx5Do-pIN&currency=USD&components=buttons"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <style>
-        :root { --bg: #0b0f1a; --card: #161b2a; --primary: #10b981; --accent: #0ea5e9; --premium: #f59e0b; --text: #f1f5f9; --danger: #ef4444; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
-        .app-card { width: 100%; max-width: 420px; background: var(--card); border-radius: 35px; padding: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); height: fit-content; position: relative; }
-        .auth-container h1 { font-size: 2.2rem; text-align: center; margin-bottom: 20px; color: var(--primary); font-weight: 900; }
-        input, select { width: 100%; padding: 15px; border-radius: 15px; background: #0b0f1a; border: 1px solid #2d3748; color: white; margin-bottom: 12px; text-align: center; }
-        .btn { width: 100%; padding: 18px; border-radius: 18px; border: none; font-weight: 700; cursor: pointer; color: white; transition: 0.3s; }
-        .btn-main { background: var(--primary); }
-        .btn-sub { background: var(--accent); margin-top: 10px; }
-        .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #2d3748; margin-top: 10px; font-size: 0.8rem; }
-        .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 2px solid #1e293b; margin-bottom: 20px; }
-        video { width: 100%; height: 100%; object-fit: cover; }
-        .premium-area { background: rgba(245, 158, 11, 0.08); border: 2px solid var(--premium); border-radius: 25px; padding: 20px; margin-top: 20px; text-align: center; }
-        .premium-title { font-weight: 900; color: var(--premium); font-size: 1.1rem; margin-bottom: 15px; }
-        #paypal-button-container { margin-top: 10px; min-height: 150px; }
-        #results { display: none; flex-direction: column; gap: 12px; margin-top: 25px; padding: 15px; background: var(--bg); border-radius: 20px; }
-        .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); }
-        .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
-        .report-txt { font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
-        .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); }
-        .score-wrapper { margin-top: 20px; margin-bottom: 10px; width: 100%; position: relative; padding-bottom: 20px; }
-        .score-bar { height: 14px; width: 100%; border-radius: 7px; background: linear-gradient(to right, #ef4444 0%, #f97316 35%, #eab308 65%, #22c55e 100%); position: relative; }
-        .score-marker { position: absolute; top: -10px; width: 30px; height: 30px; background: #fff; border: 3px solid #1e293b; border-radius: 50%; transform: translateX(-50%); transition: left 1s ease-out; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 900; color: #000; z-index: 2; }
-        .score-marker::after { content: '📍'; position: absolute; bottom: -20px; font-size: 1rem; }
-        .streak-badge { display:none; background:rgba(249, 115, 22, 0.15); color:#f97316; padding:8px 15px; border-radius:20px; font-weight:900; font-size:0.9rem; border:1px solid #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.3); animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        .partner-box { background: rgba(239, 68, 68, 0.05); border: 1px dashed var(--danger); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
-        .bell-container { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; }
-        .bell-icon { font-size: 1.5rem; }
-        .notif-badge { position: absolute; top: 0; right: 0; background: var(--danger); color: white; font-size: 0.6rem; font-weight: 900; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .notif-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 280px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 10px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.8); max-height: 300px; overflow-y: auto; }
-        .notif-item { background: #0b0f1a; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 0.8rem; color: #cbd5e1; border-left: 3px solid var(--accent); }
-        .notif-btn { background: var(--primary); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; margin-top: 5px; font-weight:bold; }
-        .user-tag { font-size: 1.1rem; font-weight: 900; color: var(--primary); margin-top: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        .friends-btn { font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; margin-left: 10px; position: relative; }
-        .friends-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 250px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 10px; z-index: 101; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        .friend-link { display: block; padding: 10px; background: #0b0f1a; border-radius: 10px; margin-bottom: 5px; color: var(--primary); font-weight: bold; cursor: pointer; text-decoration: none; font-size: 0.9rem; text-align: center; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Bio-Chef Pro | VIP Analiz</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<script src="https://www.paypal.com/sdk/js?client-id=AdOeigm877SXMe7mMtuEMPUeGkY9WcgyIJPbzGJU2HP1CS_eaGcn4O0FnUEoB3JFmDXEHSnxx5Do-pIN&currency=USD&components=buttons"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+/* ─── TOKENS ───────────────────────────────────────────────── */
+:root {
+  --bg:       #080b12;
+  --surface:  #0e1320;
+  --elevated: #141a2b;
+  --border:   rgba(255,255,255,0.07);
+  --green:    #00e887;
+  --blue:     #38b2f8;
+  --amber:    #f5a623;
+  --red:      #ff4757;
+  --text:     #eef2ff;
+  --muted:    #64748b;
+  --radius:   20px;
+  --radius-sm:12px;
+  --glow-g:   0 0 30px rgba(0,232,135,0.18);
+  --glow-b:   0 0 30px rgba(56,178,248,0.18);
+}
+
+/* ─── RESET & BASE ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px 16px 80px;
+  background-image:
+    radial-gradient(ellipse 60% 50% at 80% -10%, rgba(0,232,135,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at -10% 80%, rgba(56,178,248,0.06) 0%, transparent 60%);
+}
+
+/* ─── SHELL ────────────────────────────────────────────────── */
+.shell {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface);
+  border-radius: 32px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03);
+  position: relative;
+}
+
+.shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,232,135,0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── TOPBAR ───────────────────────────────────────────────── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 1;
+}
+
+.lang-switcher { display: flex; gap: 6px; }
+.lang-btn {
+  font-size: 1.25rem;
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.lang-btn:hover { border-color: var(--green); transform: translateY(-1px); }
+
+.topbar-right { display: flex; gap: 8px; align-items: center; }
+
+/* ─── STREAK ───────────────────────────────────────────────── */
+.streak {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--amber);
+  background: rgba(245,166,35,0.1);
+  border: 1px solid rgba(245,166,35,0.25);
+  padding: 6px 12px;
+  border-radius: 50px;
+  animation: breathe 3s ease-in-out infinite;
+}
+@keyframes breathe { 0%,100% { opacity:1; } 50% { opacity:.75; } }
+
+/* ─── ICON BUTTON ──────────────────────────────────────────── */
+.icon-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px; height: 38px;
+  border-radius: 12px;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  font-size: 1.1rem;
+  cursor: pointer;
+  position: relative;
+  transition: all .2s;
+}
+.icon-btn:hover { border-color: rgba(255,255,255,0.15); }
+.icon-btn.visible { display: flex; }
+
+.badge {
+  position: absolute;
+  top: -4px; right: -4px;
+  background: var(--red);
+  color: #fff;
+  font-size: 0.55rem;
+  font-weight: 700;
+  width: 15px; height: 15px;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--surface);
+}
+.badge.show { display: flex; }
+
+/* ─── DROPDOWN ─────────────────────────────────────────────── */
+.dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 270px;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  z-index: 200;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+  max-height: 280px;
+  overflow-y: auto;
+}
+.dropdown.open { display: block; }
+.dropdown h4 {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+  text-align: center;
+}
+.notif-item {
+  background: var(--bg);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  border-left: 2px solid var(--blue);
+  line-height: 1.5;
+}
+.notif-accept {
+  display: inline-block;
+  margin-top: 6px;
+  background: var(--green);
+  color: #000;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.friend-link {
+  display: block;
+  padding: 9px 12px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  color: var(--green);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: center;
+  border: 1px solid transparent;
+  transition: .2s;
+}
+.friend-link:hover { border-color: var(--green); }
+
+/* ─── CONTENT AREA ─────────────────────────────────────────── */
+.content { padding: 28px 24px; position: relative; z-index: 1; }
+
+/* ─── LOGO / WORDMARK ──────────────────────────────────────── */
+.wordmark {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 2.6rem;
+  text-align: center;
+  letter-spacing: -0.03em;
+  margin-bottom: 28px;
+  background: linear-gradient(135deg, var(--green) 0%, var(--blue) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── FORM FIELDS ──────────────────────────────────────────── */
+.field {
+  width: 100%;
+  padding: 15px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  transition: border-color .2s, box-shadow .2s;
+  outline: none;
+  text-align: center;
+  appearance: none;
+}
+.field:focus { border-color: var(--green); box-shadow: var(--glow-g); }
+.field::placeholder { color: var(--muted); }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ─── BUTTONS ──────────────────────────────────────────────── */
+.btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: .03em;
+  cursor: pointer;
+  transition: all .25s;
+  outline: none;
+  margin-top: 8px;
+}
+.btn:active { transform: scale(0.98); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--green) 0%, #00c472 100%);
+  color: #000;
+  box-shadow: 0 8px 24px rgba(0,232,135,0.25);
+}
+.btn-primary:hover { box-shadow: 0 12px 32px rgba(0,232,135,0.38); transform: translateY(-1px); }
+
+.btn-blue {
+  background: linear-gradient(135deg, var(--blue) 0%, #2196f3 100%);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(56,178,248,0.2);
+}
+.btn-blue:hover { box-shadow: 0 12px 28px rgba(56,178,248,0.33); transform: translateY(-1px); }
+
+.btn-amber {
+  background: linear-gradient(135deg, var(--amber) 0%, #e0850c 100%);
+  color: #000;
+  box-shadow: 0 8px 24px rgba(245,166,35,0.25);
+}
+.btn-amber:hover { transform: translateY(-1px); }
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--red), #c0392b);
+  color: #fff;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  font-size: 0.82rem;
+}
+.btn-ghost:hover { border-color: rgba(255,255,255,0.15); color: var(--text); }
+
+/* ─── CLOCK / USER TAG ─────────────────────────────────────── */
+.hero-header { text-align: center; margin-bottom: 24px; }
+.clock-display {
+  font-family: 'Syne', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--blue);
+}
+.user-tag {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  color: var(--green);
+  font-size: 0.95rem;
+  margin-top: 4px;
+  letter-spacing: .02em;
+}
+
+/* ─── CAMERA ───────────────────────────────────────────────── */
+.cam-frame {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 16px;
+  background: #000;
+  position: relative;
+}
+.cam-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 1px rgba(0,232,135,0.08);
+  pointer-events: none;
+}
+video { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ─── RESULTS ──────────────────────────────────────────────── */
+#results {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.rcard {
+  background: var(--elevated);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+  border-top: 3px solid var(--blue);
+  position: relative;
+  overflow: hidden;
+}
+.rcard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--blue), transparent);
+  opacity: 0.4;
+}
+.rtag {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 8px;
+}
+.rtxt {
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: #94a3b8;
+  white-space: pre-line;
+}
+
+/* ─── SCORE BAR ────────────────────────────────────────────── */
+.score-wrap { padding: 12px 0 24px; }
+.score-track {
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(to right, #ff4757 0%, #f97316 35%, #eab308 65%, #00e887 100%);
+  position: relative;
+}
+.score-pin {
+  position: absolute;
+  top: -11px;
+  width: 32px; height: 32px;
+  background: #fff;
+  border: 3px solid var(--bg);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  transition: left 1.2s cubic-bezier(.22,1,.36,1);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #000;
+  z-index: 2;
+}
+.score-pin::after {
+  content: '▾';
+  position: absolute;
+  bottom: -18px;
+  font-size: 1rem;
+  color: #fff;
+}
+
+/* ─── HISTORY ──────────────────────────────────────────────── */
+.history-item {
+  background: var(--elevated);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+  border-left: 2px solid var(--green);
+  color: #94a3b8;
+}
+.history-item b { color: var(--text); font-size: 0.78rem; display: block; margin-bottom: 3px; }
+
+/* ─── SECTION PANEL ────────────────────────────────────────── */
+.panel {
+  display: none;
+  margin-top: 12px;
+  padding: 20px;
+  background: var(--elevated);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.panel.open { display: block; }
+.panel-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--green);
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+/* ─── PARTNER BOX ──────────────────────────────────────────── */
+.partner-panel {
+  display: none;
+  margin-top: 12px;
+  background: rgba(255,71,87,0.05);
+  border: 1px solid rgba(255,71,87,0.2);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.partner-panel.open { display: block; }
+.partner-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--red);
+  text-align: center;
+  margin-bottom: 14px;
+}
+#partnerResult {
+  margin-top: 12px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  text-align: center;
+  color: var(--text);
+}
+
+/* ─── PREMIUM ──────────────────────────────────────────────── */
+.premium-box {
+  margin-top: 20px;
+  background: rgba(245,166,35,0.06);
+  border: 1px solid rgba(245,166,35,0.2);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: center;
+}
+.premium-label {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 14px;
+}
+#paypal-button-container { margin-top: 12px; min-height: 130px; }
+
+/* ─── DIVIDER ──────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 20px 0;
+}
+
+/* ─── LOADING PULSE ────────────────────────────────────────── */
+.loading-pulse {
+  text-align: center;
+  padding: 20px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  color: var(--muted);
+  font-size: 0.85rem;
+  letter-spacing: .05em;
+  animation: breathe 1.5s ease-in-out infinite;
+}
+
+/* ─── SCROLLBAR ────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ─── VIEW TRANSITIONS ─────────────────────────────────────── */
+.view { animation: fadeUp .35s ease-out; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+
 </head>
 <body>
 
-<div class="app-card">
+<div class="shell">
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-        <div style="display: flex; align-items: center;">
-            <span onclick="changeLang('tr')" style="font-size: 1.8rem; cursor: pointer; margin-right: 15px;" title="Türkçe">🇹🇷</span>
-            <span onclick="changeLang('en')" style="font-size: 1.8rem; cursor: pointer;" title="English">🇺🇸</span>
-        </div>
-        <div id="streakBadge" class="streak-badge" style="margin-left:10px;">
-            🔥 <span id="streakCount">0</span> <span id="txtStreak">Seri</span>
-        </div>
-        <div style="display: flex;">
-            <div class="bell-container" onclick="toggleNotifications()" id="bellIcon" style="display:none;">
-                <span class="bell-icon">🔔</span>
-                <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
-                <div class="notif-dropdown" id="notifDropdown">
-                    <h4 style="color:white; margin-bottom:10px; text-align:center;">Bildirimler</h4>
-                    <div id="notifList"><p style="text-align:center; font-size:0.8rem;">Bildirim yok.</p></div>
-                </div>
-            </div>
-            <div class="friends-btn" id="friendListBtn" onclick="toggleFriends()" style="display:none;">
-                👤
-                <div class="friends-dropdown" id="friendsDropdown">
-                    <h4 style="color:white; margin-bottom:10px; text-align:center;">Takip Ettiklerin</h4>
-                    <div id="friendsListContainer"></div>
-                </div>
-            </div>
-        </div>
+  <!-- ── TOP BAR ──────────────────────────────────────────── -->
+
+  <div class="topbar">
+    <div class="lang-switcher">
+      <div class="lang-btn" onclick="changeLang('tr')" title="Türkçe">🇹🇷</div>
+      <div class="lang-btn" onclick="changeLang('en')" title="English">🇺🇸</div>
     </div>
 
-    <div id="loginView" class="auth-container">
-        <h1 id="txtL1">BIO-CHEF</h1>
-        <input type="email" id="lEmail" placeholder="E-posta">
-        <input type="password" id="lPass" placeholder="Şifre">
-        <button class="btn btn-main" id="txtL4" onclick="doLogin()">GİRİŞ YAP</button>
-        <button class="btn btn-outline" id="txtL5" style="border:none;" onclick="doReset()">Şifremi Unuttum?</button>
-        <button class="btn btn-outline" id="txtL6" onclick="toggleView('regView')">Kayıt Ol</button>
-    </div>
-
-    <div id="regView" class="auth-container" style="display:none;">
-        <h1 id="txtR7">KAYIT OL</h1>
-        <input type="email" id="rEmail" placeholder="E-posta">
-        <input type="text" id="rUser" placeholder="Kullanıcı Adı (Örn: fit_chef)">
-        <input type="password" id="rPass" placeholder="Şifre">
-        <button class="btn btn-sub" id="txtR8" onclick="doRegister()">HESABI OLUŞTUR</button>
-        <button class="btn btn-outline" id="txtR9" onclick="toggleView('loginView')">Geri Dön</button>
-    </div>
-
-    <div id="mainView" style="display:none;">
-        <div style="text-align: center; margin-bottom: 20px;">
-            <div id="clock" style="font-size: 2.2rem; font-weight: 800; color: var(--accent);">00:00:00</div>
-            <div id="uMail" class="user-tag"></div> 
-        </div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <input type="number" id="uAge" placeholder="YAŞ">
-            <input type="number" id="uWeight" placeholder="KİLO">
-        </div>
-        <select id="uGoal">
-            <option id="opt1" value="Kilo Vermek">Kilo Vermek (-)</option>
-            <option id="opt2" value="Kilo Almak">Kilo Almak (+)</option>
-            <option id="opt3" value="Kiloyu Korumak">Kiloyu Korumak (=)</option>
-        </select>
-        <div class="cam-box"><video id="video" autoplay playsinline onclick="this.play()"></video></div>
-        <canvas id="canvas" style="display:none;"></canvas>
-        <button class="btn btn-main" id="btnAnalyzeText" onclick="runAI('yemek')">📸 ANALİZ ET</button>
-        <div id="results"></div>
-        <button class="btn btn-main" id="btnPdf" style="display:none; background: #ef4444; margin-top:15px;" onclick="downloadPDF()">📄 PDF OLARAK KAYDET</button>
-
-        <button class="btn btn-outline" id="btnHistToggle" onclick="toggleHistory()" style="margin-top:25px;">📚 GEÇMİŞ ANALİZLERİM</button>
-        <div id="historyPanel" style="display:none; margin-top:15px; padding:15px; border-radius:15px; border: 1px solid #2d3748;">
-            <h3 id="txtHistTitle" style="text-align:center; color:var(--primary); margin-bottom:10px;">Son Taramalarınız</h3>
-            <div id="historyList"></div>
-        </div>
-
-        <button class="btn btn-outline" id="btnPartnerToggle" style="border-color: var(--danger); color: var(--danger);" onclick="togglePartner()">👫 KANKA / ÇİFT ARENASI</button>
-        <div id="partnerPanel" class="partner-box" style="display:none;">
-            <h3 id="txtPartTitle" style="color:var(--danger); margin-bottom:10px;">Partnerini Denetle! 🚨</h3>
-            <input type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin" style="background: rgba(0,0,0,0.5);">
-            <button class="btn btn-sub" id="btnAddFriend" style="background: var(--accent); margin-bottom:5px;" onclick="sendFriendRequest()">➕ ARKADAŞ EKLE İSTEĞİ AT</button>
-            <button class="btn btn-sub" id="btnCheckPart" style="background: var(--danger);" onclick="checkPartner()">🔍 DURUMUNU SORGULA</button>
-            <div id="partnerResult" style="margin-top:15px; font-weight:bold; white-space:pre-line;"></div>
-        </div>
-
-        <div class="premium-area">
-            <button class="btn btn-sub" id="txtBtnPlan" style="margin-top:0; background: var(--premium); color: black;" onclick="handlePlanClick()">📅 HAFTALIK PLANINIZI ÇIKARIN</button>
-            <div id="premiumLockInfo" style="margin-top: 15px;">
-                <div class="premium-title" id="txtPrem">PREMIUM ÜYE | 0.99 $</div>
-                <div id="paypal-button-container"></div>
-            </div>
-        </div>
-
-        <button class="btn btn-outline" id="txtOut" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
-    </div>
+```
+<div id="streakBadge" class="streak">
+  🔥 <span id="streakCount">0</span>&nbsp;<span id="txtStreak">Seri</span>
 </div>
 
+<div class="topbar-right">
+  <!-- Notifications -->
+  <div class="icon-btn" id="bellIcon" onclick="toggleNotifications()">
+    🔔
+    <span class="badge" id="notifBadge">0</span>
+    <div class="dropdown" id="notifDropdown">
+      <h4>Bildirimler</h4>
+      <div id="notifList"><p style="text-align:center;font-size:0.75rem;color:var(--muted);">Bildirim yok.</p></div>
+    </div>
+  </div>
+
+  <!-- Friends -->
+  <div class="icon-btn" id="friendListBtn" onclick="toggleFriends()">
+    👤
+    <div class="dropdown" id="friendsDropdown">
+      <h4>Takip Ettiklerin</h4>
+      <div id="friendsListContainer"><p style="text-align:center;font-size:0.75rem;color:var(--muted);">Takip yok.</p></div>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- ── LOGIN ────────────────────────────────────────────── -->
+
+  <div id="loginView" class="content view">
+    <div class="wordmark" id="txtL1">BIO-CHEF</div>
+    <input class="field" type="email"    id="lEmail" placeholder="E-posta">
+    <input class="field" type="password" id="lPass"  placeholder="Şifre">
+    <button class="btn btn-primary" id="txtL4" onclick="doLogin()">GİRİŞ YAP</button>
+    <button class="btn btn-ghost"   id="txtL5" onclick="doReset()" style="border:none;">Şifremi Unuttum?</button>
+    <button class="btn btn-ghost"   id="txtL6" onclick="toggleView('regView')">Kayıt Ol</button>
+  </div>
+
+  <!-- ── REGISTER ──────────────────────────────────────────── -->
+
+  <div id="regView" class="content view" style="display:none;">
+    <div class="wordmark" id="txtR7">KAYIT OL</div>
+    <input class="field" type="email"    id="rEmail" placeholder="E-posta">
+    <input class="field" type="text"     id="rUser"  placeholder="Kullanıcı Adı (Örn: fit_chef)">
+    <input class="field" type="password" id="rPass"  placeholder="Şifre">
+    <button class="btn btn-blue"  id="txtR8" onclick="doRegister()">HESABI OLUŞTUR</button>
+    <button class="btn btn-ghost" id="txtR9" onclick="toggleView('loginView')">Geri Dön</button>
+  </div>
+
+  <!-- ── MAIN ──────────────────────────────────────────────── -->
+
+  <div id="mainView" class="content view" style="display:none;">
+
+```
+<div class="hero-header">
+  <div class="clock-display" id="clock">00:00:00</div>
+  <div class="user-tag" id="uMail"></div>
+</div>
+
+<div class="field-row">
+  <input class="field" type="number" id="uAge"    placeholder="YAŞ">
+  <input class="field" type="number" id="uWeight" placeholder="KİLO">
+</div>
+
+<select class="field" id="uGoal">
+  <option id="opt1" value="Kilo Vermek">Kilo Vermek (−)</option>
+  <option id="opt2" value="Kilo Almak">Kilo Almak (+)</option>
+  <option id="opt3" value="Kiloyu Korumak">Kiloyu Korumak (=)</option>
+</select>
+
+<div class="cam-frame">
+  <video id="video" autoplay playsinline onclick="this.play()"></video>
+</div>
+<canvas id="canvas" style="display:none;"></canvas>
+
+<button class="btn btn-primary" id="btnAnalyzeText" onclick="runAI('yemek')">📸 ANALİZ ET</button>
+
+<!-- Results -->
+<div id="results"></div>
+<button class="btn btn-danger" id="btnPdf" style="display:none; margin-top:12px;" onclick="downloadPDF()">📄 PDF OLARAK KAYDET</button>
+
+<div class="divider"></div>
+
+<!-- History -->
+<button class="btn btn-ghost" id="btnHistToggle" onclick="toggleHistory()">📚 GEÇMİŞ ANALİZLERİM</button>
+<div class="panel" id="historyPanel">
+  <div class="panel-title" id="txtHistTitle">Son Taramalarınız</div>
+  <div id="historyList"></div>
+</div>
+
+<!-- Partner -->
+<button class="btn btn-ghost" id="btnPartnerToggle"
+  style="border-color:rgba(255,71,87,0.3); color:var(--red); margin-top:8px;"
+  onclick="togglePartner()">👫 KANKA / ÇİFT ARENASI</button>
+
+<div class="partner-panel" id="partnerPanel">
+  <div class="partner-title" id="txtPartTitle">Partnerini Denetle! 🚨</div>
+  <input class="field" type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin" style="background:var(--bg);">
+  <button class="btn btn-blue" id="btnAddFriend" onclick="sendFriendRequest()">➕ Arkadaş İsteği Gönder</button>
+  <button class="btn btn-danger" id="btnCheckPart" onclick="checkPartner()" style="margin-top:6px;">🔍 Durumunu Sorgula</button>
+  <div id="partnerResult"></div>
+</div>
+
+<!-- Premium -->
+<div class="premium-box">
+  <button class="btn btn-amber" id="txtBtnPlan" onclick="handlePlanClick()" style="margin-top:0;">
+    📅 HAFTALIK PLANIMI ÇIKAR
+  </button>
+  <div id="premiumLockInfo" style="margin-top:16px;">
+    <div class="premium-label" id="txtPrem">PREMIUM ÜYELİK · $0.99</div>
+    <div id="paypal-button-container"></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<button class="btn btn-ghost" id="txtOut" onclick="auth.signOut(); location.reload();">
+  Güvenli Çıkış
+</button>
+```
+
+  </div><!-- /mainView -->
+
+</div><!-- /shell -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     LOGIC — identical functionality, cleaner structure
+═══════════════════════════════════════════════════════════════ -->
+
 <script>
-    let currentLang = 'tr';
-    const langData = {
-        tr: {
-            appTitle: "BIO-CHEF", emailHolder: "E-posta", passHolder: "Şifre", btnLogin: "GİRİŞ YAP", btnReset: "Şifremi Unuttum?", btnReg: "Kayıt Ol",
-            regTitle: "KAYIT OL", btnCreate: "HESABI OLUŞTUR", btnBack: "Geri Dön", ageHolder: "YAŞ", weightHolder: "KİLO",
-            g1: "Kilo Vermek (-)", g2: "Kilo Almak (+)", g3: "Kiloyu Korumak (=)", btnAna: "📸 ANALİZ ET", btnPlan: "📅 HAFTALIK PLANINIZI ÇIKARIN",
-            premTitle: "PREMIUM ÜYE | 0.99 $", btnOut: "GÜVENLİ ÇIKIŞ", errMail: "Mail veya Kullanıcı Adı eksik.", errInfo: "Bilgileri girin.",
-            errPlan: "Haftalık plan için aşağıdan Premium üyeliğinizi başlatın.", errMsg: "Hata!", errUserTaken: "Bu kullanıcı adı zaten alınmış!",
-            loading: "🔍 İnceleniyor...", headersYemek: ["HEDEF SKORU 🎯", "AÇLIK KRONOMETRESİ ⏳", "ÜRÜN ÖZETİ", "BESİN DEĞERLERİ", "HEDEF ANALİZİ", "NET TAVSİYE"],
-            headersPlan: ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"], payDesc: "Bio-Chef Pro Haftalık Plan Erişimi",
-            paySucc: "Ödeme Başarılı!", btnPdfTxt: "📄 PDF OLARAK KAYDET", btnHistTxt: "📚 GEÇMİŞ ANALİZLERİM", histTitle: "Son Taramalarınız",
-            noHist: "Henüz geçmiş yok.", streakTxt: "Seri", btnPartToggle: "👫 KANKA / ÇİFT ARENASI", partTitle: "Partnerini Denetle! 🚨",
-            partInput: "Kullanıcı Adı Girin", btnPartCheck: "🔍 DURUMUNU SORGULA", partErr: "Lütfen partner kullanıcı adı girin.",
-            partNoData: "Önce ona arkadaşlık isteği atmalısın!", partCatch: "🚨 YAKALANDI! Skor: ", partGood: "✅ Sadık! Skor: "
-        },
-        en: {
-            appTitle: "BIO-CHEF", emailHolder: "Email", passHolder: "Password", btnLogin: "LOGIN", btnReset: "Forgot?", btnReg: "Sign Up",
-            regTitle: "SIGN UP", btnCreate: "CREATE ACCOUNT", btnBack: "Back", ageHolder: "AGE", weightHolder: "WEIGHT",
-            g1: "Lose Weight", g2: "Gain Weight", g3: "Maintain", btnAna: "📸 ANALYZE", btnPlan: "📅 GET WEEKLY PLAN",
-            premTitle: "PREMIUM | $0.99", btnOut: "LOGOUT", errMail: "Missing info.", errInfo: "Enter info.",
-            errPlan: "Start Premium for plan.", errMsg: "Error!", errUserTaken: "Username taken!",
-            loading: "🔍 Analyzing...", headersYemek: ["GOAL SCORE 🎯", "HUNGER ⏳", "SUMMARY", "NUTRITION", "GOAL ANALYSIS", "ADVICE"],
-            headersPlan: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"], payDesc: "Bio-Chef Pro Access",
-            paySucc: "Success!", btnPdfTxt: "📄 SAVE AS PDF", btnHistTxt: "📚 MY HISTORY", histTitle: "Recent Scans",
-            noHist: "No history.", streakTxt: "Streak", btnPartToggle: "👫 BUDDY ARENA", partTitle: "Inspect Partner!",
-            partInput: "Enter Username", btnPartCheck: "🔍 CHECK", partErr: "Enter username.",
-            partNoData: "Send request first!", partCatch: "🚨 CAUGHT! Score: ", partGood: "✅ Loyal! Score: "
+/* ─── i18n ──────────────────────────────────────────────────── */
+let currentLang = 'tr';
+const L = {
+  tr: {
+    appTitle:'BIO-CHEF', emailHolder:'E-posta', passHolder:'Şifre', btnLogin:'GİRİŞ YAP',
+    btnReset:'Şifremi Unuttum?', btnReg:'Kayıt Ol', regTitle:'KAYIT OL', btnCreate:'HESABI OLUŞTUR',
+    btnBack:'Geri Dön', ageHolder:'YAŞ', weightHolder:'KİLO',
+    g1:'Kilo Vermek (−)', g2:'Kilo Almak (+)', g3:'Kiloyu Korumak (=)',
+    btnAna:'📸 ANALİZ ET', btnPlan:'📅 HAFTALIK PLANIMI ÇIKAR',
+    premTitle:'PREMIUM ÜYELİK · $0.99', btnOut:'Güvenli Çıkış',
+    errMail:'Lütfen bilgileri eksiksiz girin.', errInfo:'Yaş ve kilo giriniz.',
+    errPlan:'Haftalık plan için Premium üyeliği başlatın.',
+    errUserTaken:'Bu kullanıcı adı zaten alınmış!',
+    loading:'🔍 İnceleniyor…',
+    headersYemek:['HEDEF SKORU 🎯','AÇLIK KRONOMETRESİ ⏳','ÜRÜN ÖZETİ','BESİN DEĞERLERİ','HEDEF ANALİZİ','NET TAVSİYE'],
+    headersPlan:['PAZARTESİ','SALI','ÇARŞAMBA','PERŞEMBE','CUMA','CUMARTESİ','PAZAR'],
+    payDesc:'Bio-Chef Pro Erişimi', paySucc:'Ödeme Başarılı!',
+    btnPdfTxt:'📄 PDF OLARAK KAYDET', btnHistTxt:'📚 GEÇMİŞ ANALİZLERİM',
+    histTitle:'Son Taramalarınız', noHist:'Henüz geçmiş yok.', streakTxt:'Seri',
+    btnPartToggle:'👫 KANKA / ÇİFT ARENASI', partTitle:'Partnerini Denetle! 🚨',
+    partInput:'Kullanıcı Adı Girin', btnAddFriend:'➕ Arkadaş İsteği Gönder',
+    btnPartCheck:'🔍 Durumunu Sorgula', partErr:'Lütfen kullanıcı adı girin.',
+    partNoData:'Önce arkadaşlık isteği göndermelisin!',
+    partCatch:'🚨 YAKALANDI! Skor: ', partGood:'✅ Sadık! Skor: '
+  },
+  en: {
+    appTitle:'BIO-CHEF', emailHolder:'Email', passHolder:'Password', btnLogin:'LOGIN',
+    btnReset:'Forgot Password?', btnReg:'Sign Up', regTitle:'SIGN UP', btnCreate:'CREATE ACCOUNT',
+    btnBack:'Back', ageHolder:'AGE', weightHolder:'WEIGHT',
+    g1:'Lose Weight', g2:'Gain Weight', g3:'Maintain',
+    btnAna:'📸 ANALYZE', btnPlan:'📅 GET WEEKLY PLAN',
+    premTitle:'PREMIUM MEMBERSHIP · $0.99', btnOut:'Logout',
+    errMail:'Please fill in all fields.', errInfo:'Enter age and weight.',
+    errPlan:'Start Premium to access the weekly plan.',
+    errUserTaken:'Username already taken!',
+    loading:'🔍 Analyzing…',
+    headersYemek:['GOAL SCORE 🎯','HUNGER ⏳','SUMMARY','NUTRITION','GOAL ANALYSIS','ADVICE'],
+    headersPlan:['MON','TUE','WED','THU','FRI','SAT','SUN'],
+    payDesc:'Bio-Chef Pro Access', paySucc:'Payment Successful!',
+    btnPdfTxt:'📄 SAVE AS PDF', btnHistTxt:'📚 MY HISTORY',
+    histTitle:'Recent Scans', noHist:'No history yet.', streakTxt:'Streak',
+    btnPartToggle:'👫 BUDDY ARENA', partTitle:'Inspect Partner! 🚨',
+    partInput:'Enter Username', btnAddFriend:'➕ Send Friend Request',
+    btnPartCheck:'🔍 Check Status', partErr:'Please enter a username.',
+    partNoData:'Send a friend request first!',
+    partCatch:'🚨 CAUGHT! Score: ', partGood:'✅ Loyal! Score: '
+  }
+};
+
+function changeLang(l) {
+  currentLang = l;
+  const t = L[l];
+  set('txtL1', t.appTitle); set('txtR7', t.regTitle);
+  ph('lEmail', t.emailHolder); ph('lPass', t.passHolder);
+  ph('rEmail', t.emailHolder); ph('rPass', t.passHolder);
+  set('txtL4', t.btnLogin); set('txtL5', t.btnReset); set('txtL6', t.btnReg);
+  set('txtR8', t.btnCreate); set('txtR9', t.btnBack);
+  ph('uAge', t.ageHolder); ph('uWeight', t.weightHolder);
+  set('opt1', t.g1); set('opt2', t.g2); set('opt3', t.g3);
+  set('btnAnalyzeText', t.btnAna); set('txtBtnPlan', t.btnPlan);
+  set('txtPrem', t.premTitle); set('txtOut', t.btnOut);
+  set('btnPdf', t.btnPdfTxt); set('btnHistToggle', t.btnHistTxt);
+  set('txtHistTitle', t.histTitle); set('txtStreak', t.streakTxt);
+  set('btnPartnerToggle', t.btnPartToggle); set('txtPartTitle', t.partTitle);
+  ph('partnerUser', t.partInput); set('btnCheckPart', t.btnPartCheck);
+  set('btnAddFriend', t.btnAddFriend);
+}
+function set(id, val) { const el = document.getElementById(id); if(el) el.innerText = val; }
+function ph(id, val)  { const el = document.getElementById(id); if(el) el.placeholder = val; }
+
+/* ─── FIREBASE ──────────────────────────────────────────────── */
+const firebaseConfig = {
+  apiKey:"AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
+  authDomain:"voice2post-9e8ca.firebaseapp.com",
+  projectId:"voice2post-9e8ca",
+  storageBucket:"voice2post-9e8ca.firebasestorage.app",
+  messagingSenderId:"511446656614",
+  appId:"1:511446656614:web:32101ee70299543c716fa7"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+let isVip  = false;
+
+/* ─── VIEW ROUTING ──────────────────────────────────────────── */
+function toggleView(id) {
+  ['loginView','regView','mainView'].forEach(v => {
+    const el = document.getElementById(v);
+    el.style.display = v === id ? 'block' : 'none';
+    if(v === id) el.classList.add('view');
+  });
+}
+
+/* ─── CLOCK ─────────────────────────────────────────────────── */
+setInterval(() => {
+  const el = document.getElementById('clock');
+  if(el) el.innerText = new Date().toLocaleTimeString();
+}, 1000);
+
+/* ─── AUTH STATE ────────────────────────────────────────────── */
+auth.onAuthStateChanged(user => {
+  if (user) {
+    toggleView('mainView');
+    const name = user.displayName || user.email.split('@')[0];
+    document.getElementById('uMail').innerText = '@' + name;
+    isVip = localStorage.getItem('vip_' + user.uid) === 'true';
+    document.getElementById('premiumLockInfo').style.display = isVip ? 'none' : 'block';
+    if (!isVip) initPayPal();
+
+    document.getElementById('bellIcon').classList.add('visible');
+    document.getElementById('friendListBtn').classList.add('visible');
+
+    listenNotifications();
+    listenFriends();
+    showStreak();
+
+    const me = name.toLowerCase();
+    db.collection('partner_data').doc(me).set({ username: me }, { merge: true });
+    navigator.mediaDevices.getUserMedia({ video: { facingMode:'environment' } })
+      .then(s => document.getElementById('video').srcObject = s);
+  } else {
+    toggleView('loginView');
+  }
+});
+
+/* ─── AUTH ACTIONS ──────────────────────────────────────────── */
+async function doLogin() {
+  try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); }
+  catch(e) { alert(e.message); }
+}
+
+async function doRegister() {
+  const u = document.getElementById('rUser').value.trim();
+  const e = document.getElementById('rEmail').value;
+  const p = document.getElementById('rPass').value;
+  if (!u || !e || !p) return alert('Eksik bilgi.');
+  try {
+    const check = await db.collection('partner_data').doc(u.toLowerCase()).get();
+    if (check.exists) return alert(L[currentLang].errUserTaken);
+    const cred = await auth.createUserWithEmailAndPassword(e, p);
+    await cred.user.updateProfile({ displayName: u });
+    await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase() }, { merge: true });
+    location.reload();
+  } catch(err) { alert(err.message); }
+}
+
+function doReset() {
+  auth.sendPasswordResetEmail(document.getElementById('lEmail').value)
+    .then(() => alert('Şifre sıfırlama bağlantısı gönderildi.'));
+}
+
+/* ─── NOTIFICATIONS ─────────────────────────────────────────── */
+function toggleNotifications() {
+  document.getElementById('friendsDropdown').classList.remove('open');
+  document.getElementById('notifDropdown').classList.toggle('open');
+}
+function toggleFriends() {
+  document.getElementById('notifDropdown').classList.remove('open');
+  document.getElementById('friendsDropdown').classList.toggle('open');
+}
+
+function listenNotifications() {
+  const me = (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]).toLowerCase();
+  db.collection('notifications').where('toUser','==',me).onSnapshot(snap => {
+    const list  = document.getElementById('notifList');
+    const badge = document.getElementById('notifBadge');
+    list.innerHTML = '';
+    let c = 0;
+    snap.forEach(doc => {
+      c++;
+      const d = doc.data();
+      let html = '<div class="notif-item">';
+      if (d.type === 'friend_request') {
+        html += `🤝 @${d.fromUser} takip etmek istiyor.<br>
+          <button class="notif-accept" onclick="acceptFriend('${d.fromUser}','${doc.id}')">Kabul Et</button>`;
+      } else {
+        html += `${d.message}<br>
+          <button class="notif-accept" onclick="deleteNotif('${doc.id}')">Sil</button>`;
+      }
+      html += '</div>';
+      list.innerHTML += html;
+    });
+    badge.innerText = c;
+    badge.classList.toggle('show', c > 0);
+    if (c === 0) list.innerHTML = '<p style="text-align:center;font-size:0.75rem;color:var(--muted);">Bildirim yok.</p>';
+  });
+}
+
+function acceptFriend(u, id) {
+  const me = auth.currentUser.displayName.toLowerCase();
+  db.collection('partner_data').doc(me).update({ friends: firebase.firestore.FieldValue.arrayUnion(u) });
+  db.collection('partner_data').doc(u).update({ friends: firebase.firestore.FieldValue.arrayUnion(me) });
+  db.collection('notifications').doc(id).delete();
+}
+
+function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
+
+function listenFriends() {
+  const me = (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]).toLowerCase();
+  db.collection('partner_data').doc(me).onSnapshot(doc => {
+    const container = document.getElementById('friendsListContainer');
+    container.innerHTML = '';
+    if (doc.exists && doc.data().friends && doc.data().friends.length) {
+      doc.data().friends.forEach(f => {
+        container.innerHTML += `<div class="friend-link" onclick="checkSpecific('${f}')">@${f}</div>`;
+      });
+    } else {
+      container.innerHTML = '<p style="text-align:center;font-size:0.75rem;color:var(--muted);">Takip yok.</p>';
+    }
+  });
+}
+
+function checkSpecific(u) {
+  document.getElementById('partnerUser').value = u;
+  document.getElementById('partnerPanel').classList.add('open');
+  checkPartner();
+  toggleFriends();
+}
+
+/* ─── PARTNER ────────────────────────────────────────────────── */
+function togglePartner() {
+  document.getElementById('partnerPanel').classList.toggle('open');
+}
+
+function sendFriendRequest() {
+  const u  = document.getElementById('partnerUser').value.trim().toLowerCase();
+  const me = auth.currentUser.displayName.toLowerCase();
+  if (!u || u === me) return alert(L[currentLang].partErr);
+  db.collection('notifications').add({ toUser:u, fromUser:me, type:'friend_request', timestamp:Date.now() });
+  alert('İstek gönderildi.');
+}
+
+function checkPartner() {
+  const u   = document.getElementById('partnerUser').value.trim().toLowerCase();
+  const res = document.getElementById('partnerResult');
+  db.collection('partner_data').doc(u).get().then(doc => {
+    if (doc.exists && doc.data().score !== undefined) {
+      const s = doc.data().score;
+      res.innerText = (s < 7 ? L[currentLang].partCatch : L[currentLang].partGood) + s + '/10';
+      res.style.color = s < 7 ? 'var(--red)' : 'var(--green)';
+    } else {
+      res.innerText = L[currentLang].partNoData;
+      res.style.color = 'var(--muted)';
+    }
+  });
+}
+
+/* ─── AI ANALYSIS ────────────────────────────────────────────── */
+async function runAI(mode) {
+  const resDiv = document.getElementById('results');
+  const age    = document.getElementById('uAge').value;
+  const weight = document.getElementById('uWeight').value;
+  if (!age || !weight) return alert(L[currentLang].errInfo);
+
+  resDiv.innerHTML = `<div class="loading-pulse">${L[currentLang].loading}</div>`;
+  resDiv.style.display = 'flex';
+
+  let img = '';
+  if (mode === 'yemek') {
+    const vid  = document.getElementById('video');
+    const canv = document.createElement('canvas');
+    canv.width = 640; canv.height = 480;
+    canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
+    img = canv.toDataURL('image/jpeg', 0.7);
+  }
+
+  try {
+    const r = await fetch('/api/analyze', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        mode, image: img,
+        user_data:`Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`,
+        lang: currentLang
+      })
+    });
+    const data = await r.json();
+    resDiv.innerHTML = '';
+
+    const sections = data.analysis.split(/\d\./).filter(s => s.trim().length > 5);
+    const heads    = mode === 'plan' ? L[currentLang].headersPlan : L[currentLang].headersYemek;
+    let score = 5;
+
+    sections.forEach((txt, i) => {
+      const card = document.createElement('div');
+      card.className = 'rcard';
+      let content = txt.trim();
+
+      if (mode === 'yemek' && i === 0) {
+        const match = content.match(/\[SKOR:\s*(\d+)\]/i);
+        if (match) {
+          score = parseInt(match[1]);
+          content = content.replace(match[0], '').trim();
+          updateStreak(score);
         }
-    };
-
-    function changeLang(l) {
-        currentLang = l;
-        document.getElementById('txtL1').innerText = langData[l].appTitle;
-        document.getElementById('lEmail').placeholder = langData[l].emailHolder;
-        document.getElementById('lPass').placeholder = langData[l].passHolder;
-        document.getElementById('txtL4').innerText = langData[l].btnLogin;
-        document.getElementById('txtL5').innerText = langData[l].btnReset;
-        document.getElementById('txtL6').innerText = langData[l].btnReg;
-        document.getElementById('txtR7').innerText = langData[l].regTitle;
-        document.getElementById('rEmail').placeholder = langData[l].emailHolder;
-        document.getElementById('rPass').placeholder = langData[l].passHolder;
-        document.getElementById('txtR8').innerText = langData[l].btnCreate;
-        document.getElementById('txtR9').innerText = langData[l].btnBack;
-        document.getElementById('uAge').placeholder = langData[l].ageHolder;
-        document.getElementById('uWeight').placeholder = langData[l].weightHolder;
-        document.getElementById('opt1').innerText = langData[l].g1;
-        document.getElementById('opt2').innerText = langData[l].g2;
-        document.getElementById('opt3').innerText = langData[l].g3;
-        document.getElementById('btnAnalyzeText').innerText = langData[l].btnAna;
-        document.getElementById('txtBtnPlan').innerText = langData[l].btnPlan;
-        document.getElementById('txtPrem').innerText = langData[l].premTitle;
-        document.getElementById('txtOut').innerText = langData[l].btnOut;
-        document.getElementById('btnPdf').innerText = langData[l].btnPdfTxt;
-        document.getElementById('btnHistToggle').innerText = langData[l].btnHistTxt;
-        document.getElementById('txtHistTitle').innerText = langData[l].histTitle;
-        document.getElementById('txtStreak').innerText = langData[l].streakTxt; 
-        document.getElementById('btnPartnerToggle').innerText = langData[l].btnPartToggle;
-        document.getElementById('txtPartTitle').innerText = langData[l].partTitle;
-        document.getElementById('partnerUser').placeholder = langData[l].partInput; 
-        document.getElementById('btnCheckPart').innerText = langData[l].btnPartCheck;
-    }
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
-        authDomain: "voice2post-9e8ca.firebaseapp.com",
-        projectId: "voice2post-9e8ca",
-        storageBucket: "voice2post-9e8ca.firebasestorage.app",
-        messagingSenderId: "511446656614",
-        appId: "1:511446656614:web:32101ee70299543c716fa7"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore(); 
-    let isVip = false;
-
-    function toggleView(id) {
-        document.getElementById('loginView').style.display = 'none';
-        document.getElementById('regView').style.display = 'none';
-        document.getElementById('mainView').style.display = 'none';
-        document.getElementById(id).style.display = 'block';
-    }
-
-    setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
-
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            toggleView('mainView');
-            let display = user.displayName ? "@" + user.displayName : "@" + user.email.split('@')[0];
-            document.getElementById('uMail').innerText = display;
-            isVip = localStorage.getItem('vip_' + user.uid) === 'true';
-            if(!isVip) { document.getElementById('premiumLockInfo').style.display = 'block'; initPayPal(); } 
-            else { document.getElementById('premiumLockInfo').style.display = 'none'; }
-            document.getElementById('bellIcon').style.display = 'flex'; 
-            document.getElementById('friendListBtn').style.display = 'flex'; 
-            listenNotifications(); listenFriends(); showStreak();
-            let me = user.displayName ? user.displayName.toLowerCase() : user.email.split('@')[0].toLowerCase();
-            db.collection('partner_data').doc(me).set({ username: me }, { merge: true });
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
-        } else { toggleView('loginView'); }
+        const pct = (score / 10) * 100;
+        card.innerHTML = `
+          <div class="rtag">${heads[i] || 'DETAY'}</div>
+          <div class="rtxt">${content}</div>
+          <div class="score-wrap">
+            <div class="score-track">
+              <div class="score-pin" style="left:${pct}%">${score}</div>
+            </div>
+          </div>`;
+      } else {
+        card.innerHTML = `
+          <div class="rtag">${heads[i] || 'DETAY'}</div>
+          <div class="rtxt">${content}</div>`;
+      }
+      resDiv.appendChild(card);
     });
 
-    async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); } }
-    async function doRegister() { 
-        const u = document.getElementById('rUser').value.trim();
-        const e = document.getElementById('rEmail').value;
-        const p = document.getElementById('rPass').value;
-        if(!u || !e || !p) return alert("Eksik.");
-        try { 
-            const check = await db.collection('partner_data').doc(u.toLowerCase()).get();
-            if(check.exists) return alert(langData[currentLang].errUserTaken);
-            const cred = await auth.createUserWithEmailAndPassword(e, p);
-            await cred.user.updateProfile({ displayName: u });
-            await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase() }, { merge: true });
-            location.reload(); 
-        } catch(err) { alert(err.message); } 
-    }
+    document.getElementById('btnPdf').style.display = 'block';
+    if (mode === 'yemek') saveHistory(score, data.analysis);
+  } catch(e) {
+    resDiv.innerHTML = `<div class="loading-pulse" style="color:var(--red);">Bir hata oluştu.</div>`;
+  }
+}
 
-    function toggleNotifications() {
-        const d = document.getElementById('notifDropdown');
-        document.getElementById('friendsDropdown').style.display = 'none';
-        d.style.display = d.style.display === 'none' ? 'block' : 'none';
-    }
+/* ─── HISTORY ────────────────────────────────────────────────── */
+function saveHistory(score, raw) {
+  const me  = (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]).toLowerCase();
+  db.collection('partner_data').doc(me).set(
+    { score, lastMeal: raw.substring(0,50), time: new Date().toLocaleTimeString() },
+    { merge: true }
+  );
+  const key = 'history_' + auth.currentUser.uid;
+  const arr = JSON.parse(localStorage.getItem(key) || '[]');
+  arr.unshift({ summary:`Skor: ${score}/10`, date: new Date().toLocaleString() });
+  localStorage.setItem(key, JSON.stringify(arr.slice(0, 10)));
+}
 
-    function toggleFriends() {
-        const d = document.getElementById('friendsDropdown');
-        document.getElementById('notifDropdown').style.display = 'none';
-        d.style.display = d.style.display === 'none' ? 'block' : 'none';
-    }
+function toggleHistory() {
+  const p = document.getElementById('historyPanel');
+  p.classList.toggle('open');
+  if (p.classList.contains('open')) {
+    const arr  = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
+    const list = document.getElementById('historyList');
+    list.innerHTML = arr.length
+      ? arr.map(h => `<div class="history-item"><b>${h.date}</b>${h.summary}</div>`).join('')
+      : `<p style="color:var(--muted); font-size:0.82rem; text-align:center;">${L[currentLang].noHist}</p>`;
+  }
+}
 
-    function listenFriends() {
-        let me = auth.currentUser.displayName ? auth.currentUser.displayName.toLowerCase() : auth.currentUser.email.split('@')[0].toLowerCase();
-        db.collection('partner_data').doc(me).onSnapshot(doc => {
-            const container = document.getElementById('friendsListContainer');
-            container.innerHTML = '';
-            if(doc.exists && doc.data().friends) {
-                doc.data().friends.forEach(f => {
-                    container.innerHTML += `<div class="friend-link" onclick="checkSpecific('${f}')">@${f}</div>`;
-                });
-            } else { container.innerHTML = '<p style="text-align:center;font-size:0.7rem;">Takip yok.</p>'; }
-        });
-    }
+/* ─── STREAK ─────────────────────────────────────────────────── */
+function showStreak() {
+  const d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}');
+  if (d.count > 0) {
+    const badge = document.getElementById('streakBadge');
+    badge.style.display = 'flex';
+    document.getElementById('streakCount').innerText = d.count;
+  }
+}
 
-    function checkSpecific(u) {
-        document.getElementById('partnerUser').value = u;
-        document.getElementById('partnerPanel').style.display = 'block';
-        checkPartner(); toggleFriends();
-    }
+function updateStreak(s) {
+  const key = 'streak_' + auth.currentUser.uid;
+  const d   = JSON.parse(localStorage.getItem(key) || '{"count":0,"last":""}');
+  const t   = new Date().toLocaleDateString();
+  if (s >= 7) { if (d.last !== t) d.count++; d.last = t; } else { d.count = 0; }
+  localStorage.setItem(key, JSON.stringify(d));
+  showStreak();
+}
 
-    function listenNotifications() {
-        let me = auth.currentUser.displayName ? auth.currentUser.displayName.toLowerCase() : auth.currentUser.email.split('@')[0].toLowerCase();
-        db.collection('notifications').where('toUser', '==', me).onSnapshot(snap => {
-            const list = document.getElementById('notifList');
-            const badge = document.getElementById('notifBadge');
-            list.innerHTML = ''; let c = 0;
-            snap.forEach(doc => {
-                c++; let d = doc.data();
-                let html = `<div class="notif-item">`;
-                if(d.type === 'friend_request') {
-                    html += `🤝 @${d.fromUser} takip etmek istiyor.<br><button class="notif-btn" onclick="acceptFriend('${d.fromUser}','${doc.id}')">Kabul Et</button>`;
-                } else { html += `${d.message}<br><button class="notif-btn" onclick="deleteNotif('${doc.id}')">Sil</button>`; }
-                html += `</div>`; list.innerHTML += html;
-            });
-            badge.style.display = c > 0 ? 'flex' : 'none'; badge.innerText = c;
-        });
-    }
+/* ─── PAYPAL ─────────────────────────────────────────────────── */
+function initPayPal() {
+  paypal.Buttons({
+    createOrder: (d, a) => a.order.create({ purchase_units:[{ amount:{ value:'0.99' } }] }),
+    onApprove:   (d, a) => a.order.capture().then(() => {
+      localStorage.setItem('vip_' + auth.currentUser.uid, 'true');
+      location.reload();
+    })
+  }).render('#paypal-button-container');
+}
 
-    function acceptFriend(u, id) {
-        let me = auth.currentUser.displayName.toLowerCase();
-        db.collection('partner_data').doc(me).update({ friends: firebase.firestore.FieldValue.arrayUnion(u) });
-        db.collection('partner_data').doc(u).update({ friends: firebase.firestore.FieldValue.arrayUnion(me) });
-        db.collection('notifications').doc(id).delete();
-    }
+function handlePlanClick() {
+  if (!isVip) return alert(L[currentLang].errPlan);
+  runAI('plan');
+}
 
-    function sendFriendRequest() {
-        const u = document.getElementById('partnerUser').value.trim().toLowerCase();
-        let me = auth.currentUser.displayName.toLowerCase();
-        if(!u || u === me) return alert(langData[currentLang].partErr);
-        db.collection('notifications').add({ toUser: u, fromUser: me, type: 'friend_request', timestamp: Date.now() });
-        alert("Gönderildi.");
-    }
-
-    async function runAI(mode) {
-        const resDiv = document.getElementById('results');
-        const age = document.getElementById('uAge').value;
-        const weight = document.getElementById('uWeight').value;
-        if(!age || !weight) return alert(langData[currentLang].errInfo);
-        resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
-        resDiv.style.display = 'flex';
-        let img = "";
-        if(mode === 'yemek') {
-            const vid = document.getElementById('video');
-            const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
-            canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
-            img = canv.toDataURL('image/jpeg', 0.7);
-        }
-        try {
-            const r = await fetch('/api/analyze', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mode, image: img, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`, lang: currentLang })
-            });
-            const d = await r.json(); resDiv.innerHTML = '';
-            const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
-            const heads = mode === 'plan' ? langData[currentLang].headersPlan : langData[currentLang].headersYemek;
-            let score = 5;
-            sections.forEach((txt, i) => {
-                const card = document.createElement('div'); card.className = 'report-card';
-                let content = txt.trim();
-                if(mode === 'yemek' && i === 0) {
-                    const match = content.match(/\[SKOR:\s*(\d+)\]/i);
-                    if(match) { score = parseInt(match[1]); content = content.replace(match[0], '').trim(); updateStreak(score); }
-                    let left = (score/10)*100;
-                    card.innerHTML = `<div class="report-tag">${heads[i]}</div><div class="report-txt">${content}</div>
-                    <div class="score-wrapper"><div class="score-bar"><div class="score-marker" style="left:${left}%">${score}</div></div></div>`;
-                } else { card.innerHTML = `<div class="report-tag">${heads[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`; }
-                resDiv.appendChild(card);
-            });
-            document.getElementById('btnPdf').style.display = 'block';
-            if(mode === 'yemek') saveHistory(score, d.analysis);
-        } catch(e) { alert(langData[currentLang].errMsg); }
-    }
-
-    function saveHistory(score, raw) {
-        let me = auth.currentUser.displayName.toLowerCase();
-        db.collection('partner_data').doc(me).set({ score: score, lastMeal: raw.substring(0, 50), time: new Date().toLocaleTimeString() }, { merge: true });
-        let key = 'history_' + auth.currentUser.uid;
-        let arr = JSON.parse(localStorage.getItem(key) || '[]');
-        arr.unshift({ summary: `Skor: ${score}/10`, date: new Date().toLocaleString() });
-        localStorage.setItem(key, JSON.stringify(arr.slice(0, 10)));
-    }
-
-    function toggleHistory() {
-        const p = document.getElementById('historyPanel');
-        p.style.display = p.style.display === 'none' ? 'block' : 'none';
-        if(p.style.display === 'block') {
-            const list = document.getElementById('historyList');
-            let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-            list.innerHTML = arr.length ? arr.map(h => `<div class="history-box"><b>${h.date}</b><br>${h.summary}</div>`).join('') : "Henüz yok.";
-        }
-    }
-
-    function togglePartner() {
-        const p = document.getElementById('partnerPanel');
-        p.style.display = p.style.display === 'none' ? 'block' : 'none';
-    }
-
-    function checkPartner() {
-        const u = document.getElementById('partnerUser').value.trim().toLowerCase();
-        const res = document.getElementById('partnerResult');
-        db.collection('partner_data').doc(u).get().then(doc => {
-            if(doc.exists && doc.data().score !== undefined) {
-                let s = doc.data().score;
-                res.innerText = (s < 7 ? langData[currentLang].partCatch : langData[currentLang].partGood) + s + "/10";
-            } else { res.innerText = "Veri yok."; }
-        });
-    }
-
-    function showStreak() {
-        let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}');
-        if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; }
-    }
-
-    function updateStreak(s) {
-        let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0, "last":""}');
-        let t = new Date().toLocaleDateString();
-        if(s >= 7) { if(d.last !== t) d.count++; d.last = t; } else { d.count = 0; }
-        localStorage.setItem('streak_' + auth.currentUser.uid, JSON.stringify(d)); showStreak();
-    }
-
-    function initPayPal() {
-        paypal.Buttons({
-            createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: '0.99' } }] }),
-            onApprove: (d, a) => a.order.capture().then(() => { localStorage.setItem('vip_' + auth.currentUser.uid, 'true'); location.reload(); })
-        }).render('#paypal-button-container');
-    }
-
-    function handlePlanClick() { if(!isVip) return alert(langData[currentLang].errPlan); runAI('plan'); }
-    function downloadPDF() { html2pdf().from(document.getElementById('results')).save(); }
-    function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
-    function doReset() { auth.sendPasswordResetEmail(document.getElementById('lEmail').value).then(() => alert("Gönderildi.")); }
+function downloadPDF() { html2pdf().from(document.getElementById('results')).save(); }
 </script>
+
 </body>
 </html>
