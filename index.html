@@ -30,7 +30,13 @@
         .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); }
         .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
         .report-txt { font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
-        .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); cursor: pointer; transition: 0.2s; }
+        
+        /* Geçmiş Kutusu Şablonu */
+        .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; gap: 4px; }
+        .history-box:hover { background: rgba(255,255,255,0.1); }
+        .history-meta { font-size: 0.7rem; color: #94a3b8; font-weight: bold; }
+        .history-meal { color: var(--text); font-weight: 800; }
+
         .score-wrapper { margin-top: 20px; margin-bottom: 10px; width: 100%; position: relative; padding-bottom: 20px; }
         .score-bar { height: 14px; width: 100%; border-radius: 7px; background: linear-gradient(to right, #ef4444 0%, #f97316 35%, #eab308 65%, #22c55e 100%); position: relative; }
         .score-marker { position: absolute; top: -10px; width: 30px; height: 30px; background: #fff; border: 3px solid #1e293b; border-radius: 50%; transform: translateX(-50%); transition: left 1s ease-out; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 900; color: #000; z-index: 2; }
@@ -49,7 +55,6 @@
         .modal-content { background: var(--card); margin: auto; padding: 20px; border-radius: 25px; max-width: 400px; border: 1px solid var(--primary); }
         .partner-box { background: rgba(239, 68, 68, 0.05); border: 1px dashed var(--danger); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
 
-        /* Yeni Arkadaş Kutusu Stili */
         .friend-pill { display: block; padding: 12px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; margin-bottom: 8px; color: var(--primary); font-weight: 800; cursor: pointer; transition: 0.3s; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
         .friend-pill:hover { transform: translateY(-2px); border-color: var(--primary); background: #162031; }
         .friend-report-pill { background: #0b0f1a; border: 1px solid var(--danger); border-radius: 15px; padding: 10px; margin-top: 8px; font-size: 0.75rem; text-align: left; animation: fadeIn 0.5s; }
@@ -149,7 +154,7 @@
 
         <button class="btn btn-outline" id="btnHistToggle" onclick="toggleHistory()" style="margin-top:25px;">📚 GEÇMİŞ ANALİZLERİM</button>
         <div id="historyPanel" style="display:none; margin-top:15px; padding:15px; border-radius:15px; border: 1px solid #2d3748;">
-            <h3 id="txtHistTitle" style="text-align:center; color:var(--primary); margin-bottom:10px;">Son Taramalarınız</h3>
+            <h3 id="txtHistTitle" style="text-align:center; color:var(--primary); margin-bottom:10px;">Son 24 Saat</h3>
             <div id="historyList"></div>
         </div>
 
@@ -184,14 +189,14 @@
         tr: {
             appTitle: "BIO-CHEF", login: "GİRİŞ YAP", forgot: "Şifremi Unuttum?", reg: "Kayıt Ol", create: "HESABI OLUŞTUR", back: "Geri Dön",
             age: "YAŞ", weight: "KİLO", g1: "Kilo Vermek (-)", g2: "Kilo Almak (+)", g3: "Kiloyu Korumak (=)", btnAna: "📸 ANALİZ ET", 
-            streak: "Seri", loading: "🔍 İNCELENİYOR...", retry: "🔄 YENİDEN ANALİZ ET", histTitle: "Son Taramalarınız", partTitle: "Partnerini Denetle! 🚨",
+            streak: "Seri", loading: "🔍 İNCELENİYOR...", retry: "🔄 YENİDEN ANALİZ ET", histTitle: "Son 24 Saat", partTitle: "Partnerini Denetle! 🚨",
             partAdd: "➕ TAKİP İSTEĞİ AT", partCheck: "🔍 DURUMUNU SORGULA", plan: "📅 HAFTALIK PLANINIZI ÇIKARIN", prem: "PREMIUM ÜYE | 0.99 $", 
             out: "GÜVENLİ ÇIKIŞ", headers: ["SKOR 🎯","AÇLIK ⏳","ÖZET","BESİN","ANALİZ","TAVSİYE"], roleU: "DANIŞAN", roleD: "DİYETİSYEN"
         },
         en: {
             appTitle: "BIO-CHEF", login: "LOGIN", forgot: "Forgot Password?", reg: "Sign Up", create: "CREATE ACCOUNT", back: "Back",
             age: "AGE", weight: "WEIGHT", g1: "Lose Weight (-)", g2: "Gain Weight (+)", g3: "Maintain Weight (=)", btnAna: "📸 ANALYZE", 
-            streak: "Streak", loading: "🔍 ANALYZING...", retry: "🔄 RE-ANALYZE", histTitle: "Recent Scans", partTitle: "Inspect Partner! 🚨",
+            streak: "Streak", loading: "🔍 ANALYZING...", retry: "🔄 RE-ANALYZE", histTitle: "Last 24 Hours", partTitle: "Inspect Partner! 🚨",
             partAdd: "➕ SEND FOLLOW REQUEST", partCheck: "🔍 CHECK STATUS", plan: "📅 GET WEEKLY PLAN", prem: "PREMIUM | 0.99 $", 
             out: "SECURE LOGOUT", headers: ["SCORE 🎯","HUNGER ⏳","SUMMARY","NUTRITION","GOAL ANALYSIS","ADVICE"], roleU: "USER", roleD: "DIETICIAN"
         }
@@ -308,9 +313,14 @@
             const headers = langData[currentLang].headers;
 
             let score = 5;
+            let mealName = "Bilinmeyen Yemek";
             sections.forEach((txt, i) => {
                 const card = document.createElement('div'); card.className = 'report-card';
                 let content = txt.trim();
+                
+                // Ürün özeti kısmından yemek adını yakalamaya çalış
+                if(i === 2) mealName = content.split('\n')[0].substring(0, 30);
+
                 if(content.includes('[SKOR:')) {
                     const match = content.match(/\[SKOR:\s*(\d+)\]/i);
                     if(match) { 
@@ -325,7 +335,8 @@
             document.getElementById('btnPdf').style.display = 'block';
             document.getElementById('btnRetry').style.display = 'block';
             document.getElementById('freezeLayer').style.display = 'none';
-            saveHistory(score, d.analysis);
+            
+            if(mode === 'yemek') saveHistory(score, d.analysis, mealName);
             resDiv.scrollIntoView();
         } catch(e) { 
             document.getElementById('freezeLayer').style.display = 'none';
@@ -379,15 +390,30 @@
         alert("Takip isteği başarıyla gönderildi.");
     }
 
-    function saveHistory(score, raw) {
+    function saveHistory(score, raw, meal) {
         const me = auth.currentUser.displayName.toLowerCase();
-        const timestamp = new Date().toLocaleString();
-        db.collection('partner_data').doc(me).set({ score, time: timestamp, lastMealName: raw.substring(0, 30) }, { merge: true });
-        db.collection('partner_data').doc(me).collection('history').add({ score, fullText: raw, date: timestamp });
+        const now = new Date();
+        const timestampStr = now.toLocaleString();
+        const unixTime = now.getTime();
+        
+        db.collection('partner_data').doc(me).set({ 
+            score, 
+            time: timestampStr, 
+            lastMealName: meal 
+        }, { merge: true });
+
+        db.collection('partner_data').doc(me).collection('history').add({ 
+            score, 
+            fullText: raw, 
+            date: timestampStr, 
+            unix: unixTime,
+            mealName: meal
+        });
+
         let key = 'history_' + auth.currentUser.uid;
         let arr = JSON.parse(localStorage.getItem(key) || '[]');
-        arr.unshift({ summary: `Skor: ${score}/10`, date: timestamp, detail: raw });
-        localStorage.setItem(key, JSON.stringify(arr.slice(0, 10)));
+        arr.unshift({ summary: `Skor: ${score}/10`, date: timestampStr, detail: raw, meal: meal, unix: unixTime });
+        localStorage.setItem(key, JSON.stringify(arr.slice(0, 50)));
     }
 
     function toggleHistory() {
@@ -396,7 +422,27 @@
         if(p.style.display === 'block') {
             const list = document.getElementById('historyList');
             let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-            list.innerHTML = arr.length ? arr.map(h => `<div class="history-box" onclick="openDetail(\`${h.detail.replace(/`/g, "'")}\`)"><b>📅 ${h.date}</b><br>${h.summary} <br><small style="color:var(--accent)">Detay İçin Tıkla 🔍</small></div>`).join('') : "Geçmiş bulunamadı.";
+            
+            const nowUnix = new Date().getTime();
+            const oneDayUnix = 24 * 60 * 60 * 1000;
+            
+            // Son 24 saat filtresi
+            const last24h = arr.filter(item => (nowUnix - item.unix) < oneDayUnix);
+
+            if(last24h.length === 0) {
+                list.innerHTML = "<p style='text-align:center; padding:10px;'>Son 24 saat içinde tarama bulunamadı.</p>";
+                return;
+            }
+
+            list.innerHTML = last24h.map(h => {
+                const dateParts = h.date.split(' '); // [Tarih, Saat]
+                return `
+                <div class="history-box" onclick="openDetail(\`${h.detail.replace(/`/g, "'")}\`)">
+                    <div class="history-meta">📅 ${dateParts[0]} | 🕒 ${dateParts[1]} | ⭐ ${h.summary}</div>
+                    <div class="history-meal">🍽️ ${h.meal || 'Analiz Edilen Gıda'}</div>
+                    <div style="font-size:0.65rem; color:var(--accent); text-align:right;">Detay Gör 🔍</div>
+                </div>`;
+            }).join('');
         }
     }
 
@@ -408,7 +454,6 @@
         db.collection('partner_data').doc(u).get().then(doc => {
             if(doc.exists) {
                 const data = doc.data();
-                // Son 24 saat kontrolü (Basit tarih karşılaştırma)
                 let s = data.score || 0;
                 let statusIcon = s < 7 ? "🚨 YAKALANDI!" : "✅ Sadık!";
                 
@@ -419,9 +464,16 @@
                     <div style="font-size:0.7rem; color:#94a3b8; margin-top:5px;">🕒 ${data.time || '-'}</div>
                 </div>`;
 
-                db.collection('partner_data').doc(u).collection('history').orderBy('date', 'desc').limit(3).get().then(snap => {
+                db.collection('partner_data').doc(u).collection('history').orderBy('unix', 'desc').limit(3).get().then(snap => {
                     let html = '<p style="color:var(--primary); margin-top:10px; font-size:0.8rem;">Son Öğün Geçmişi:</p>';
-                    snap.forEach(h => html += `<div class="history-box" style="font-size:0.7rem; border-color:var(--danger);"><b>${h.data().date}</b> - Skor: ${h.data().score}/10</div>`);
+                    snap.forEach(h => {
+                        const hData = h.data();
+                        html += `
+                        <div class="history-box" style="font-size:0.7rem; border-color:var(--danger);">
+                            <div class="history-meta">📅 ${hData.date}</div>
+                            <div class="history-meal">🍴 ${hData.mealName || 'Öğün'} (Skor: ${hData.score})</div>
+                        </div>`;
+                    });
                     histRes.innerHTML = html;
                 });
             } else { res.innerText = "Veri yok veya takip izni yok."; }
@@ -433,7 +485,6 @@
         document.getElementById('partnerPanel').style.display = 'block'; 
         checkPartner(); 
         toggleFriends(); 
-        // Sayfanın altına (Partner Paneline) Kaydır
         document.getElementById('partnerPanel').scrollIntoView();
     }
 
