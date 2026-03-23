@@ -29,15 +29,9 @@
         #paypal-button-container { margin-top: 10px; min-height: 150px; }
 
         #results { display: none; flex-direction: column; gap: 12px; margin-top: 25px; padding: 15px; background: var(--bg); border-radius: 20px; }
-        .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); position: relative; overflow: hidden; }
+        .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); }
         .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
         .report-txt { font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
-
-        /* VIP KİLİT TASARIMI */
-        .vip-locked { filter: blur(5px); pointer-events: none; user-select: none; opacity: 0.6; }
-        .lock-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5; cursor: pointer; }
-        .premium-badge { color: var(--premium); font-size: 2rem; margin-bottom: 5px; filter: drop-shadow(0 0 10px var(--premium)); }
-        .premium-lock-text { color: white; font-weight: 900; font-size: 0.8rem; letter-spacing: 1px; text-align: center; padding: 0 10px; }
 
         .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); }
 
@@ -58,14 +52,7 @@
         .notif-item { background: #0b0f1a; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 0.8rem; color: #cbd5e1; border-left: 3px solid var(--accent); }
         .notif-btn { background: var(--primary); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; margin-top: 5px; font-weight:bold; }
         
-        .user-tag { font-size: 0.9rem; font-weight: 900; color: var(--primary); margin-top: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-        
-        .dashboard-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 20px; border: 1px solid #1e293b; margin-bottom: 20px; }
-        .dash-side { text-align: center; width: 30%; display: flex; flex-direction: column; justify-content: center; }
-        .dash-center { text-align: center; width: 40%; }
-        .dash-title { font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; }
-        .dash-value { font-size: 1.8rem; font-weight: 900; color: #64748b; transition: color 0.3s; }
-        .avatar-emoji { font-size: 2rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); transition: transform 0.3s; }
+        .user-tag { font-size: 1.1rem; font-weight: 900; color: var(--primary); margin-top: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
@@ -110,22 +97,9 @@
     </div>
 
     <div id="mainView" style="display:none;">
-        
-        <div class="dashboard-bar">
-            <div class="dash-side">
-                <div class="dash-title" id="txtDailyAvg">GÜNLÜK ORT.</div>
-                <div class="dash-value" id="dailyAvgVal">-</div>
-            </div>
-
-            <div class="dash-center">
-                <div id="clock" style="font-size: 1.6rem; font-weight: 800; color: var(--accent);">00:00:00</div>
-                <div id="uMail" class="user-tag"></div> 
-            </div>
-
-            <div class="dash-side">
-                <div class="dash-title" id="txtAvatar">AVATARIN</div>
-                <div class="avatar-emoji" id="avatarVal">👤</div>
-            </div>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div id="clock" style="font-size: 2.2rem; font-weight: 800; color: var(--accent);">00:00:00</div>
+            <div id="uMail" class="user-tag"></div> 
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
@@ -184,18 +158,17 @@
             g1: "Kilo Vermek (-)", g2: "Kilo Almak (+)", g3: "Kiloyu Korumak (=)",
             btnAna: "📸 ANALİZ ET", btnPlan: "📅 HAFTALIK PLANINIZI ÇIKARIN", premTitle: "PREMIUM ÜYE | 0.99 $", btnOut: "GÜVENLİ ÇIKIŞ",
             errMail: "Mail veya Kullanıcı Adı eksik.", errInfo: "Bilgileri girin.", errPlan: "Haftalık plan için aşağıdan Premium üyeliğinizi başlatın.", errMsg: "Hata!",
+            // EKLENEN: Kullanıcı adı alınmış uyarısı çevirisi
             errUserTaken: "Bu kullanıcı adı zaten alınmış! Lütfen başka bir ad seçin.", 
             loading: "🔍 İnceleniyor...", 
-            headersYemek: ["HEDEF SKORU 🎯", "AÇLIK KRONOMETRESİ ⏳", "ÜRÜN ÖZETİ", "BESİN DEĞERLERİ", "HEDEF ANALİZİ", "VÜCUT FALI 🔮", "NET TAVSİYE"],
+            headersYemek: ["HEDEF SKORU 🎯", "AÇLIK KRONOMETRESİ ⏳", "ÜRÜN ÖZETİ", "BESİN DEĞERLERİ", "HEDEF ANALİZİ", "NET TAVSİYE"],
             headersPlan: ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"],
             payDesc: "Bio-Chef Pro Haftalık Plan Erişimi", paySucc: "Ödeme Başarılı! VIP özellikler aktif edildi.",
             btnPdfTxt: "📄 PDF OLARAK KAYDET", btnHistTxt: "📚 GEÇMİŞ ANALİZLERİM", histTitle: "Son Taramalarınız", noHist: "Henüz geçmiş yok.",
             markerInfo: "Sen", streakTxt: "Seri",
             btnPartToggle: "👫 KANKA / ÇİFT ARENASI", partTitle: "Partnerini Denetle! 🚨", partInput: "Kullanıcı Adı Girin", btnPartCheck: "🔍 DURUMUNU SORGULA",
             partErr: "Lütfen partner kullanıcı adı girin.", partNoData: "Önce ona arkadaşlık isteği atmalı ve onun kabul etmesini beklemelisin!",
-            partCatch: "🚨 YAKALANDI! Partnerin gizlice kötü besleniyor!\nSkoru: ", partGood: "✅ Partnerin diyete sadık!\nSkoru: ",
-            dailyAvgTxt: "GÜNLÜK ORT.", avatarTxt: "AVATARIN",
-            vipLockedMsg: "GELECEĞİ GÖRMEK İÇİN VIP OL!"
+            partCatch: "🚨 YAKALANDI! Partnerin gizlice kötü besleniyor!\nSkoru: ", partGood: "✅ Partnerin diyete sadık!\nSkoru: "
         },
         en: {
             appTitle: "BIO-CHEF", emailHolder: "Email", passHolder: "Password", btnLogin: "LOGIN", btnReset: "Forgot Password?", btnReg: "Sign Up",
@@ -204,18 +177,17 @@
             g1: "Lose Weight (-)", g2: "Gain Weight (+)", g3: "Maintain Weight (=)",
             btnAna: "📸 ANALYZE", btnPlan: "📅 GET WEEKLY PLAN", premTitle: "PREMIUM MEMBER | $0.99", btnOut: "SECURE LOGOUT",
             errMail: "Missing email or username.", errInfo: "Enter info.", errPlan: "Start Premium below for weekly plan.", errMsg: "Error!",
+            // EKLENEN: Kullanıcı adı alınmış uyarısı çevirisi
             errUserTaken: "This username is already taken! Please choose another one.",
             loading: "🔍 Analyzing...", 
-            headersYemek: ["GOAL SCORE 🎯", "HUNGER STOPWATCH ⏳", "PRODUCT SUMMARY", "NUTRITION FACTS", "GOAL ANALYSIS", "BODY FORTUNE 🔮", "NET ADVICE"],
+            headersYemek: ["GOAL SCORE 🎯", "HUNGER STOPWATCH ⏳", "PRODUCT SUMMARY", "NUTRITION FACTS", "GOAL ANALYSIS", "NET ADVICE"],
             headersPlan: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
             payDesc: "Bio-Chef Pro Weekly Plan Access", paySucc: "Payment Successful! VIP features activated.",
             btnPdfTxt: "📄 DOWNLOAD AS PDF", btnHistTxt: "📚 MY HISTORY", histTitle: "Recent Scans", noHist: "No history yet.",
             markerInfo: "You", streakTxt: "Streak",
             btnPartToggle: "👫 BUDDY / COUPLE ARENA", partTitle: "Inspect Your Partner! 🚨", partInput: "Enter Username", btnPartCheck: "🔍 CHECK STATUS",
             partErr: "Please enter partner username.", partNoData: "You must send a friend request first and wait for approval!",
-            partCatch: "🚨 CAUGHT! Your partner is eating bad secretly!\nScore: ", partGood: "✅ Your partner is staying fit!\nScore: ",
-            dailyAvgTxt: "DAILY AVG.", avatarTxt: "AVATAR",
-            vipLockedMsg: "BECOME VIP TO SEE YOUR FUTURE!"
+            partCatch: "🚨 CAUGHT! Your partner is eating bad secretly!\nScore: ", partGood: "✅ Your partner is staying fit!\nScore: "
         }
     };
 
@@ -250,8 +222,6 @@
         document.getElementById('txtPartTitle').innerText = langData[l].partTitle;
         document.getElementById('partnerUser').placeholder = langData[l].partInput; 
         document.getElementById('btnCheckPart').innerText = langData[l].btnPartCheck;
-        document.getElementById('txtDailyAvg').innerText = langData[l].dailyAvgTxt;
-        document.getElementById('txtAvatar').innerText = langData[l].avatarTxt;
     }
 
     const firebaseConfig = {
@@ -293,41 +263,12 @@
             let activeUser = user.displayName ? user.displayName.toLowerCase() : user.email.split('@')[0].toLowerCase();
             db.collection('partner_data').doc(activeUser).set({ username: activeUser }, { merge: true });
             
-            renderDailyStats();
-
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
         } else { 
             toggleView('loginView'); 
             document.getElementById('bellIcon').style.display = 'none';
         }
     });
-
-    function updateDailyStats(newScore) {
-        if(!auth.currentUser) return;
-        let uid = auth.currentUser.uid;
-        let today = new Date().toLocaleDateString();
-        let dailyData = JSON.parse(localStorage.getItem('daily_' + uid) || '{"date":"","total":0,"count":0}');
-        if(dailyData.date !== today) { dailyData = { date: today, total: newScore, count: 1 }; } 
-        else { dailyData.total += newScore; dailyData.count += 1; }
-        localStorage.setItem('daily_' + uid, JSON.stringify(dailyData));
-        renderDailyStats(); 
-    }
-
-    function renderDailyStats() {
-        if(!auth.currentUser) return;
-        let uid = auth.currentUser.uid;
-        let today = new Date().toLocaleDateString();
-        let dailyData = JSON.parse(localStorage.getItem('daily_' + uid) || '{"date":"","total":0,"count":0}');
-        const avgValEl = document.getElementById('dailyAvgVal');
-        const avatarEl = document.getElementById('avatarVal');
-        if(dailyData.date === today && dailyData.count > 0) {
-            let avg = (dailyData.total / dailyData.count).toFixed(1);
-            avgValEl.innerText = avg;
-            if(avg >= 7) { avgValEl.style.color = "var(--primary)"; avatarEl.innerText = "🦸‍♂️💪"; } 
-            else if(avg >= 4) { avgValEl.style.color = "var(--premium)"; avatarEl.innerText = "🧍‍♂️"; } 
-            else { avgValEl.style.color = "var(--danger)"; avatarEl.innerText = "🍔🥱"; }
-        } else { avgValEl.innerText = "-"; avatarEl.innerText = "👤"; }
-    }
 
     function toggleNotifications() {
         const drop = document.getElementById('notifDropdown');
@@ -363,8 +304,13 @@
     function sendFriendRequest() {
         const pUser = document.getElementById('partnerUser').value.trim().toLowerCase();
         let myUser = auth.currentUser.displayName ? auth.currentUser.displayName.toLowerCase() : auth.currentUser.email.split('@')[0].toLowerCase();
+        
         if(!pUser || pUser === myUser) return alert(langData[currentLang].partErr);
-        db.collection('notifications').add({ toUser: pUser, fromUser: myUser, type: 'friend_request', timestamp: new Date().getTime() }).then(() => alert("İstek gönderildi!"));
+        
+        db.collection('notifications').add({
+            toUser: pUser, fromUser: myUser, type: 'friend_request', timestamp: new Date().getTime()
+        }).then(() => alert("Arkadaşlık isteği gönderildi! O kabul edince skorunu görebileceksin."))
+          .catch(() => alert("İstek gönderilemedi."));
     }
 
     function acceptFriend(friendUser, notifId) {
@@ -372,7 +318,7 @@
         db.collection('partner_data').doc(myUser).update({ friends: firebase.firestore.FieldValue.arrayUnion(friendUser) });
         db.collection('partner_data').doc(friendUser).update({ friends: firebase.firestore.FieldValue.arrayUnion(myUser) });
         deleteNotif(notifId);
-        alert("Arkadaş eklendi!");
+        alert("Arkadaş eklendi! Artık birbirinizi sorgulayabilirsiniz.");
     }
 
     function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
@@ -392,8 +338,11 @@
         let today = new Date().toLocaleDateString();
         let yesterdayObj = new Date(); yesterdayObj.setDate(yesterdayObj.getDate() - 1);
         let yesterday = yesterdayObj.toLocaleDateString();
-        if(score >= 7) { if(streakData.lastDate === yesterday) { streakData.count++; streakData.lastDate = today; } else if(streakData.lastDate !== today) { streakData.count = 1; streakData.lastDate = today; } } 
-        else { streakData.count = 0; streakData.lastDate = today; }
+
+        if(score >= 7) {
+            if(streakData.lastDate === yesterday) { streakData.count++; streakData.lastDate = today; } 
+            else if(streakData.lastDate !== today) { streakData.count = 1; streakData.lastDate = today; }
+        } else { streakData.count = 0; streakData.lastDate = today; }
         localStorage.setItem('streak_' + uid, JSON.stringify(streakData));
         showStreak();
     }
@@ -408,22 +357,39 @@
 
     async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); } }
     
+    // ==========================================
+    // EKLENEN: KULLANICI ADI BENZERSİZLİK KONTROLÜ
+    // ==========================================
     async function doRegister() { 
         const uName = document.getElementById('rUser').value.trim();
         const email = document.getElementById('rEmail').value;
         const pass = document.getElementById('rPass').value;
-        if(!uName || !email || !pass) return alert("Eksik bilgi!");
+        
+        if(!uName || !email || !pass) return alert("Lütfen tüm alanları doldurun.");
+        
+        const uNameLower = uName.toLowerCase();
+
         try { 
-            const userCheck = await db.collection('partner_data').doc(uName.toLowerCase()).get();
-            if (userCheck.exists) { return alert(langData[currentLang].errUserTaken); }
+            // 1. ADIM: Bu isim başkası tarafından alınmış mı diye Firestore'a soruyoruz
+            const userCheck = await db.collection('partner_data').doc(uNameLower).get();
+            if (userCheck.exists) {
+                // Eğer veritabanında bu isim varsa, kayıt işlemini iptal et ve uyarı ver
+                return alert(langData[currentLang].errUserTaken);
+            }
+
+            // 2. ADIM: Eğer isim boşta ise, normal kayıt işlemini tamamla
             const cred = await auth.createUserWithEmailAndPassword(email, pass);
             await cred.user.updateProfile({ displayName: uName });
-            await db.collection('partner_data').doc(uName.toLowerCase()).set({ username: uName.toLowerCase() }, { merge: true });
-            alert("Kayıt başarılı!"); location.reload(); 
+            
+            await db.collection('partner_data').doc(uNameLower).set({ username: uNameLower }, { merge: true });
+            
+            alert("Hesap başarıyla oluşturuldu!");
+            location.reload(); 
         } catch(e) { alert(e.message); } 
     }
+    // ==========================================
 
-    async function doReset() { const email = document.getElementById('lEmail').value; if(!email) return alert("E-posta!"); try { await auth.sendPasswordResetEmail(email); alert("Link gönderildi."); } catch(e) { alert(e.message); } }
+    async function doReset() { const email = document.getElementById('lEmail').value; if(!email) return alert("E-posta girin."); try { await auth.sendPasswordResetEmail(email); alert("Link gönderildi."); } catch(e) { alert(e.message); } }
     function handlePlanClick() { if(!isVip) return alert(langData[currentLang].errPlan); runAI('plan'); }
 
     async function runAI(mode) {
@@ -431,71 +397,154 @@
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
         if(!age || !weight) return alert(langData[currentLang].errInfo);
-        resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`; resDiv.style.display = 'flex';
+        
+        document.getElementById('btnPdf').style.display = 'none'; 
+        resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
+        resDiv.style.display = 'flex';
+
         let img = "";
         if(mode === 'yemek') {
-            const vid = document.getElementById('video'); const canv = document.createElement('canvas');
-            canv.width = 640; canv.height = 480; canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
-            img = canv.toDataURL('image/jpeg', 0.7); vid.pause(); 
+            const vid = document.getElementById('video');
+            const canv = document.createElement('canvas');
+            canv.width = 640; canv.height = 480;
+            canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
+            img = canv.toDataURL('image/jpeg', 0.7);
+            vid.pause(); 
         }
+
         try {
             const r = await fetch('/api/analyze', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mode, image: img, user_data: `Yaş:${age}, Kilo:${weight}`, lang: currentLang })
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ mode, image: img, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`, lang: currentLang })
             });
             const d = await r.json();
             resDiv.innerHTML = '';
+            
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
             const headers = mode === 'plan' ? langData[currentLang].headersPlan : langData[currentLang].headersYemek;
             
+            let historySummary = "Analiz";
+            let currentScore = 5;
+
             sections.forEach((text, i) => {
                 const card = document.createElement('div');
                 card.className = 'report-card';
                 let cardContent = text.trim();
 
-                // BURASI VÜCUT FALI KİLİDİ (Raporun 6. başlığı olduğunu varsayıyoruz)
-                if (mode === 'yemek' && i === 5 && !isVip) {
-                    card.innerHTML = `
-                        <div class="report-tag">${headers[i]}</div>
-                        <div class="lock-overlay" onclick="document.getElementById('premiumLockInfo').scrollIntoView({behavior: 'smooth'})">
-                            <div class="premium-badge">🏆</div>
-                            <div class="premium-lock-text">${langData[currentLang].vipLockedMsg}</div>
-                        </div>
-                        <div class="report-txt vip-locked">Geleceğin burada gizli...</div>
-                    `;
-                } else if (mode === 'yemek' && i === 0) {
+                if (mode === 'yemek' && i === 0) {
                     const scoreMatch = cardContent.match(/\[SKOR:\s*(\d+)\]/i);
                     if (scoreMatch) {
-                        let sc = parseInt(scoreMatch[1]);
-                        let leftPos = (sc / 10) * 100;
-                        card.innerHTML = `
-                        <div class="report-tag">${headers[i]}</div><div class="report-txt">${cardContent.replace(scoreMatch[0], '')}</div>
-                        <div class="score-wrapper"><div class="score-bar"><div class="score-marker" style="left: ${leftPos}%">${sc}</div></div></div>`;
-                        updateStreak(sc); updateDailyStats(sc);
+                        currentScore = parseInt(scoreMatch[1]);
+                        if(currentScore > 10) currentScore = 10;
+                        cardContent = cardContent.replace(scoreMatch[0], '').trim();
+                        updateStreak(currentScore);
                     }
+                    let leftPos = (currentScore / 10) * 100;
+                    
+                    let scoreBarHtml = `
+                    <div class="score-wrapper">
+                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#94a3b8; margin-bottom:5px;">
+                            <span>Kötü (0)</span><span>Orta</span><span>Mükemmel (10)</span>
+                        </div>
+                        <div class="score-bar">
+                            <div class="score-marker" style="left: ${leftPos}%;">${currentScore}</div>
+                        </div>
+                    </div>`;
+                    
+                    card.innerHTML = `<div class="report-tag">${headers[i]}</div><div class="report-txt">${cardContent}</div>${scoreBarHtml}`;
+                    historySummary = `Skor: ${currentScore}/10 - ` + cardContent.substring(0, 30) + "...";
                 } else {
-                    card.innerHTML = `<div class="report-tag">${headers[i] || 'DETAY'}</div><div class="report-txt">${cardContent}</div>`;
+                    card.innerHTML = `<div class="report-tag">${headers[i] || 'DETAY / DETAIL'}</div><div class="report-txt">${cardContent}</div>`;
                 }
                 resDiv.appendChild(card);
             });
+            
             document.getElementById('btnPdf').style.display = 'block';
+
+            if (auth.currentUser && mode === 'yemek') {
+                let histKey = 'history_' + auth.currentUser.uid;
+                let histArray = JSON.parse(localStorage.getItem(histKey) || '[]');
+                histArray.unshift({ summary: historySummary, date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString() });
+                if(histArray.length > 10) histArray.pop(); 
+                localStorage.setItem(histKey, JSON.stringify(histArray));
+
+                let myUser = auth.currentUser.displayName ? auth.currentUser.displayName.toLowerCase() : auth.currentUser.email.split('@')[0].toLowerCase();
+                db.collection('partner_data').doc(myUser).set({
+                    lastMeal: historySummary, score: currentScore, time: new Date().toLocaleTimeString()
+                }, { merge: true });
+
+                if (currentScore < 3 || currentScore >= 7) {
+                    db.collection('partner_data').doc(myUser).get().then(doc => {
+                        if(doc.exists && doc.data().friends) {
+                            let msg = currentScore < 3 ? `🚨 Partnerin @${myUser} kötü beslendi (Skor: ${currentScore})! Çabuk müdahale et!` : `✅ Partnerin @${myUser} harika beslendi (Skor: ${currentScore})! Onu tebrik et!`;
+                            doc.data().friends.forEach(friendUser => {
+                                db.collection('notifications').add({ toUser: friendUser, fromUser: 'Sistem', type: 'alert', message: msg, timestamp: new Date().getTime() });
+                            });
+                        }
+                    });
+                }
+            }
+
+            setTimeout(() => { resDiv.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
+
         } catch (e) { alert(langData[currentLang].errMsg); }
     }
 
-    function downloadPDF() { html2pdf().from(document.getElementById('results')).save(); }
-    function toggleHistory() { const p = document.getElementById('historyPanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
-    function togglePartner() { const p = document.getElementById('partnerPanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
+    function downloadPDF() {
+        const element = document.getElementById('results');
+        const opt = { margin: 0.5, filename: 'BioChef_Rapor.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
+        html2pdf().set(opt).from(element).save();
+    }
+
+    function toggleHistory() {
+        const panel = document.getElementById('historyPanel');
+        const listDiv = document.getElementById('historyList');
+        if (panel.style.display === 'none') {
+            panel.style.display = 'block';
+            if(!auth.currentUser) return;
+            let histKey = 'history_' + auth.currentUser.uid;
+            let histArray = JSON.parse(localStorage.getItem(histKey) || '[]');
+            listDiv.innerHTML = '';
+            if (histArray.length === 0) { listDiv.innerHTML = `<p style="text-align:center; color:#94a3b8;">${langData[currentLang].noHist}</p>`; } 
+            else { histArray.forEach((data) => { listDiv.innerHTML += `<div class="history-box"><b>🗓️ ${data.date}</b><br>${data.summary}</div>`; }); }
+        } else { panel.style.display = 'none'; }
+    }
+
+    function togglePartner() {
+        const panel = document.getElementById('partnerPanel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+
     function checkPartner() {
         const pUser = document.getElementById('partnerUser').value.trim().toLowerCase();
         const resDiv = document.getElementById('partnerResult');
-        if(!pUser) return;
+        if(!pUser || !auth.currentUser) return alert(langData[currentLang].partErr);
+
         resDiv.innerHTML = "Sorgulanıyor...";
-        let myUser = auth.currentUser.displayName.toLowerCase();
-        db.collection('partner_data').doc(myUser).get().then(myDoc => {
+
+        let myUser = auth.currentUser.displayName ? auth.currentUser.displayName.toLowerCase() : auth.currentUser.email.split('@')[0].toLowerCase();
+        db.collection('partner_data').doc(myUser).get().then((myDoc) => {
             if(myDoc.exists && myDoc.data().friends && myDoc.data().friends.includes(pUser)) {
-                db.collection('partner_data').doc(pUser).get().then(doc => { resDiv.innerHTML = doc.exists ? "Partner Skor: " + doc.data().score : "Veri yok"; });
-            } else { resDiv.innerHTML = langData[currentLang].partNoData; }
-        });
+                db.collection('partner_data').doc(pUser).get().then((doc) => {
+                    if (doc.exists && doc.data().lastMeal) {
+                        const data = doc.data();
+                        if(data.score < 7) {
+                            resDiv.style.color = "var(--danger)";
+                            resDiv.innerText = langData[currentLang].partCatch + data.score + "/10!\nSon Yemek: " + data.lastMeal + "\nSaat: " + data.time;
+                        } else {
+                            resDiv.style.color = "var(--primary)";
+                            resDiv.innerText = langData[currentLang].partGood + data.score + "/10!\nSon Yemek: " + data.lastMeal + "\nSaat: " + data.time;
+                        }
+                    } else {
+                        resDiv.style.color = "#94a3b8"; resDiv.innerText = "Bu kullanıcı henüz analiz yapmamış.";
+                    }
+                });
+            } else {
+                resDiv.style.color = "#94a3b8";
+                resDiv.innerText = langData[currentLang].partNoData; 
+            }
+        }).catch(() => { resDiv.innerText = "Hata! Firebase veritabanı kurallarınızı (Rules) kontrol edin."; });
     }
 </script>
 </body>
