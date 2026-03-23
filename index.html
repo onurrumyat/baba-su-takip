@@ -12,9 +12,15 @@
     
     <style>
         :root { --bg: #0b0f1a; --card: #161b2a; --primary: #10b981; --accent: #0ea5e9; --premium: #f59e0b; --text: #f1f5f9; --danger: #ef4444; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
         body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
         .app-card { width: 100%; max-width: 420px; background: var(--card); border-radius: 35px; padding: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); height: fit-content; position: relative; }
+        
+        /* Yeni Giriş Ekranı Tasarımı */
+        .role-selector { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        .role-btn { flex: 1; padding: 12px; border-radius: 12px; border: 2px solid #2d3748; background: transparent; color: #94a3b8; cursor: pointer; font-weight: 700; transition: 0.3s; }
+        .role-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(16, 185, 129, 0.1); }
+
         .auth-container h1 { font-size: 2.2rem; text-align: center; margin-bottom: 20px; color: var(--primary); font-weight: 900; }
         input, select { width: 100%; padding: 15px; border-radius: 15px; background: #0b0f1a; border: 1px solid #2d3748; color: white; margin-bottom: 12px; text-align: center; }
         .btn { width: 100%; padding: 18px; border-radius: 18px; border: none; font-weight: 700; cursor: pointer; color: white; transition: 0.3s; }
@@ -30,14 +36,24 @@
         .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); }
         .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
         .report-txt { font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
-        .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); }
+        
+        .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); cursor: pointer; transition: 0.2s; }
+        .history-box:hover { background: rgba(255,255,255,0.1); }
+        
         .score-wrapper { margin-top: 20px; margin-bottom: 10px; width: 100%; position: relative; padding-bottom: 20px; }
         .score-bar { height: 14px; width: 100%; border-radius: 7px; background: linear-gradient(to right, #ef4444 0%, #f97316 35%, #eab308 65%, #22c55e 100%); position: relative; }
         .score-marker { position: absolute; top: -10px; width: 30px; height: 30px; background: #fff; border: 3px solid #1e293b; border-radius: 50%; transform: translateX(-50%); transition: left 1s ease-out; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 900; color: #000; z-index: 2; }
         .score-marker::after { content: '📍'; position: absolute; bottom: -20px; font-size: 1rem; }
+        
         .streak-badge { display:none; background:rgba(249, 115, 22, 0.15); color:#f97316; padding:8px 15px; border-radius:20px; font-weight:900; font-size:0.9rem; border:1px solid #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.3); animation: pulse 2s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        
         .partner-box { background: rgba(239, 68, 68, 0.05); border: 1px dashed var(--danger); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
+        
+        /* Modal Stili */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); padding: 20px; align-items: center; justify-content: center; }
+        .modal-content { background: var(--card); width: 100%; max-width: 380px; padding: 25px; border-radius: 30px; border: 1px solid var(--primary); max-height: 80vh; overflow-y: auto; }
+        
         .bell-container { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; }
         .bell-icon { font-size: 1.5rem; }
         .notif-badge { position: absolute; top: 0; right: 0; background: var(--danger); color: white; font-size: 0.6rem; font-weight: 900; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
@@ -51,6 +67,14 @@
     </style>
 </head>
 <body>
+
+<div id="detailModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle" style="color:var(--primary); margin-bottom:15px; font-size:1.2rem;">Detaylı Analiz</h2>
+        <div id="modalContent" class="report-txt"></div>
+        <button class="btn btn-sub" onclick="document.getElementById('detailModal').style.display='none'">KAPAT</button>
+    </div>
+</div>
 
 <div class="app-card">
 
@@ -83,6 +107,10 @@
 
     <div id="loginView" class="auth-container">
         <h1 id="txtL1">BIO-CHEF</h1>
+        <div class="role-selector">
+            <button class="role-btn active" onclick="selectRole(this, 'Danışan')">DANIŞAN</button>
+            <button class="role-btn" onclick="selectRole(this, 'Diyetisyen')">DİYETİSYEN</button>
+        </div>
         <input type="email" id="lEmail" placeholder="E-posta">
         <input type="password" id="lPass" placeholder="Şifre">
         <button class="btn btn-main" id="txtL4" onclick="doLogin()">GİRİŞ YAP</button>
@@ -92,6 +120,10 @@
 
     <div id="regView" class="auth-container" style="display:none;">
         <h1 id="txtR7">KAYIT OL</h1>
+        <div class="role-selector">
+            <button class="role-btn active" onclick="selectRole(this, 'Danışan')">DANIŞAN</button>
+            <button class="role-btn" onclick="selectRole(this, 'Diyetisyen')">DİYETİSYEN</button>
+        </div>
         <input type="email" id="rEmail" placeholder="E-posta">
         <input type="text" id="rUser" placeholder="Kullanıcı Adı (Örn: fit_chef)">
         <input type="password" id="rPass" placeholder="Şifre">
@@ -105,8 +137,8 @@
             <div id="uMail" class="user-tag"></div> 
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <input type="number" id="uAge" placeholder="YAŞ">
-            <input type="number" id="uWeight" placeholder="KİLO">
+            <input type="number" id="uAge" placeholder="YAŞ" onchange="savePersonalData()">
+            <input type="number" id="uWeight" placeholder="KİLO" onchange="savePersonalData()">
         </div>
         <select id="uGoal">
             <option id="opt1" value="Kilo Vermek">Kilo Vermek (-)</option>
@@ -132,6 +164,7 @@
             <button class="btn btn-sub" id="btnAddFriend" style="background: var(--accent); margin-bottom:5px;" onclick="sendFriendRequest()">➕ ARKADAŞ EKLE İSTEĞİ AT</button>
             <button class="btn btn-sub" id="btnCheckPart" style="background: var(--danger);" onclick="checkPartner()">🔍 DURUMUNU SORGULA</button>
             <div id="partnerResult" style="margin-top:15px; font-weight:bold; white-space:pre-line;"></div>
+            <div id="partnerHistory" style="margin-top:10px; text-align: left;"></div>
         </div>
 
         <div class="premium-area">
@@ -148,6 +181,14 @@
 
 <script>
     let currentLang = 'tr';
+    let selectedRole = 'Danışan';
+
+    function selectRole(btn, role) {
+        document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedRole = role;
+    }
+
     const langData = {
         tr: {
             appTitle: "BIO-CHEF", emailHolder: "E-posta", passHolder: "Şifre", btnLogin: "GİRİŞ YAP", btnReset: "Şifremi Unuttum?", btnReg: "Kayıt Ol",
@@ -222,6 +263,16 @@
     const db = firebase.firestore(); 
     let isVip = false;
 
+    function savePersonalData() {
+        const age = document.getElementById('uAge').value;
+        const weight = document.getElementById('uWeight').value;
+        localStorage.setItem('uAge', age);
+        localStorage.setItem('uWeight', weight);
+        if(auth.currentUser) {
+            db.collection('users').doc(auth.currentUser.uid).set({ age, weight }, { merge: true });
+        }
+    }
+
     function toggleView(id) {
         document.getElementById('loginView').style.display = 'none';
         document.getElementById('regView').style.display = 'none';
@@ -236,6 +287,11 @@
             toggleView('mainView');
             let display = user.displayName ? "@" + user.displayName : "@" + user.email.split('@')[0];
             document.getElementById('uMail').innerText = display;
+            
+            // Kalıcı Veri Yükleme
+            document.getElementById('uAge').value = localStorage.getItem('uAge') || "";
+            document.getElementById('uWeight').value = localStorage.getItem('uWeight') || "";
+
             isVip = localStorage.getItem('vip_' + user.uid) === 'true';
             if(!isVip) { document.getElementById('premiumLockInfo').style.display = 'block'; initPayPal(); } 
             else { document.getElementById('premiumLockInfo').style.display = 'none'; }
@@ -259,7 +315,7 @@
             if(check.exists) return alert(langData[currentLang].errUserTaken);
             const cred = await auth.createUserWithEmailAndPassword(e, p);
             await cred.user.updateProfile({ displayName: u });
-            await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase() }, { merge: true });
+            await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase(), role: selectedRole }, { merge: true });
             location.reload(); 
         } catch(err) { alert(err.message); } 
     }
@@ -292,6 +348,7 @@
     function checkSpecific(u) {
         document.getElementById('partnerUser').value = u;
         document.getElementById('partnerPanel').style.display = 'block';
+        document.getElementById('partnerPanel').scrollIntoView({ behavior: 'smooth' }); // Akıllı Kaydırma
         checkPartner(); toggleFriends();
     }
 
@@ -333,8 +390,10 @@
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
         if(!age || !weight) return alert(langData[currentLang].errInfo);
+        
         resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
         resDiv.style.display = 'flex';
+        
         let img = "";
         if(mode === 'yemek') {
             const vid = document.getElementById('video');
@@ -347,33 +406,53 @@
                 method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ mode, image: img, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`, lang: currentLang })
             });
-            const d = await r.json(); resDiv.innerHTML = '';
+            const d = await r.json(); 
+            resDiv.innerHTML = '';
+            
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
             const heads = mode === 'plan' ? langData[currentLang].headersPlan : langData[currentLang].headersYemek;
             let score = 5;
+
             sections.forEach((txt, i) => {
                 const card = document.createElement('div'); card.className = 'report-card';
                 let content = txt.trim();
+                
+                // Koşullu Skor: Sadece yemek modunda
                 if(mode === 'yemek' && i === 0) {
                     const match = content.match(/\[SKOR:\s*(\d+)\]/i);
                     if(match) { score = parseInt(match[1]); content = content.replace(match[0], '').trim(); updateStreak(score); }
                     let left = (score/10)*100;
                     card.innerHTML = `<div class="report-tag">${heads[i]}</div><div class="report-txt">${content}</div>
                     <div class="score-wrapper"><div class="score-bar"><div class="score-marker" style="left:${left}%">${score}</div></div></div>`;
-                } else { card.innerHTML = `<div class="report-tag">${heads[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`; }
+                } else { 
+                    card.innerHTML = `<div class="report-tag">${heads[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`; 
+                }
                 resDiv.appendChild(card);
             });
+            
             document.getElementById('btnPdf').style.display = 'block';
+            resDiv.scrollIntoView({ behavior: 'smooth' }); // Akıllı Kaydırma
+            
             if(mode === 'yemek') saveHistory(score, d.analysis);
-        } catch(e) { alert(langData[currentLang].errMsg); }
+        } catch(e) { 
+            // Hata mesajını sessizce geç veya sadece konsola yaz
+            console.error(e);
+            resDiv.innerHTML = `<p style="text-align:center; color:var(--danger);">Analiz tamamlanamadı, lütfen tekrar deneyin.</p>`;
+        }
     }
 
     function saveHistory(score, raw) {
         let me = auth.currentUser.displayName.toLowerCase();
-        db.collection('partner_data').doc(me).set({ score: score, lastMeal: raw.substring(0, 50), time: new Date().toLocaleTimeString() }, { merge: true });
+        let date = new Date().toLocaleString();
+        let summary = raw.substring(0, 60) + "...";
+        
+        // Veritabanına detaylı kaydet
+        db.collection('partner_data').doc(me).collection('history').add({ score, raw, date });
+        db.collection('partner_data').doc(me).set({ score: score, lastMeal: summary, time: new Date().toLocaleTimeString() }, { merge: true });
+        
         let key = 'history_' + auth.currentUser.uid;
         let arr = JSON.parse(localStorage.getItem(key) || '[]');
-        arr.unshift({ summary: `Skor: ${score}/10`, date: new Date().toLocaleString() });
+        arr.unshift({ summary, date, score, raw });
         localStorage.setItem(key, JSON.stringify(arr.slice(0, 10)));
     }
 
@@ -383,8 +462,22 @@
         if(p.style.display === 'block') {
             const list = document.getElementById('historyList');
             let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-            list.innerHTML = arr.length ? arr.map(h => `<div class="history-box"><b>${h.date}</b><br>${h.summary}</div>`).join('') : "Henüz yok.";
+            // Gelişmiş Geçmiş Paneli
+            list.innerHTML = arr.length ? arr.map((h, i) => `
+                <div class="history-box" onclick="openModal(${i})">
+                    <b>${h.date}</b><br>
+                    <span>🍴 ${h.summary}</span><br>
+                    <b style="color:var(--primary)">Skor: ${h.score}/10</b>
+                </div>`).join('') : "Henüz geçmiş yok.";
         }
+    }
+
+    function openModal(index) {
+        let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
+        let item = arr[index];
+        document.getElementById('modalTitle').innerText = item.date + " - Analiz";
+        document.getElementById('modalContent').innerText = item.raw;
+        document.getElementById('detailModal').style.display = 'flex';
     }
 
     function togglePartner() {
@@ -395,11 +488,30 @@
     function checkPartner() {
         const u = document.getElementById('partnerUser').value.trim().toLowerCase();
         const res = document.getElementById('partnerResult');
+        const histDiv = document.getElementById('partnerHistory');
+        
         db.collection('partner_data').doc(u).get().then(doc => {
-            if(doc.exists && doc.data().score !== undefined) {
-                let s = doc.data().score;
-                res.innerText = (s < 7 ? langData[currentLang].partCatch : langData[currentLang].partGood) + s + "/10";
-            } else { res.innerText = "Veri yok."; }
+            if(doc.exists) {
+                let data = doc.data();
+                if(data.score !== undefined) {
+                    let s = data.score;
+                    res.innerText = (s < 7 ? langData[currentLang].partCatch : langData[currentLang].partGood) + s + "/10";
+                    
+                    // Partner Geçmişi Takibi
+                    db.collection('partner_data').doc(u).collection('history').orderBy('date', 'desc').limit(5).get().then(snap => {
+                        let html = '<h4 style="color:var(--accent); font-size:0.8rem; margin-top:10px;">Partner Son Analizleri:</h4>';
+                        snap.forEach(hDoc => {
+                            let h = hDoc.data();
+                            html += `
+                            <div class="history-box" style="border-left-color: var(--danger); cursor:default;">
+                                <b>${h.date}</b><br>
+                                Skor: ${h.score}/10
+                            </div>`;
+                        });
+                        histDiv.innerHTML = html;
+                    });
+                }
+            } else { res.innerText = "Veri yok."; histDiv.innerHTML = ""; }
         });
     }
 
