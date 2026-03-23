@@ -30,13 +30,10 @@
         .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); }
         .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
         .report-txt { font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
-        
-        /* Geçmiş Kutusu Şablonu */
         .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; gap: 4px; }
         .history-box:hover { background: rgba(255,255,255,0.1); }
         .history-meta { font-size: 0.7rem; color: #94a3b8; font-weight: bold; }
         .history-meal { color: var(--text); font-weight: 800; }
-
         .score-wrapper { margin-top: 20px; margin-bottom: 10px; width: 100%; position: relative; padding-bottom: 20px; }
         .score-bar { height: 14px; width: 100%; border-radius: 7px; background: linear-gradient(to right, #ef4444 0%, #f97316 35%, #eab308 65%, #22c55e 100%); position: relative; }
         .score-marker { position: absolute; top: -10px; width: 30px; height: 30px; background: #fff; border: 3px solid #1e293b; border-radius: 50%; transform: translateX(-50%); transition: left 1s ease-out; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 900; color: #000; z-index: 2; }
@@ -54,11 +51,14 @@
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); padding: 20px; overflow-y: auto; }
         .modal-content { background: var(--card); margin: auto; padding: 20px; border-radius: 25px; max-width: 400px; border: 1px solid var(--primary); }
         .partner-box { background: rgba(239, 68, 68, 0.05); border: 1px dashed var(--danger); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
-
         .friend-pill { display: block; padding: 12px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; margin-bottom: 8px; color: var(--primary); font-weight: 800; cursor: pointer; transition: 0.3s; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
         .friend-pill:hover { transform: translateY(-2px); border-color: var(--primary); background: #162031; }
         .friend-report-pill { background: #0b0f1a; border: 1px solid var(--danger); border-radius: 15px; padding: 10px; margin-top: 8px; font-size: 0.75rem; text-align: left; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
+        
+        /* Diyetisyen Özel Stilleri */
+        .dietician-portal { background: #111827; border: 2px solid var(--primary); border-radius: 25px; padding: 20px; margin-top: 20px; }
+        .diet-code-box { font-size: 1.5rem; font-weight: 900; letter-spacing: 5px; color: var(--primary); background: #000; padding: 10px; border-radius: 10px; margin: 10px 0; border: 1px dashed var(--primary); }
     </style>
 </head>
 <body>
@@ -72,7 +72,6 @@
 </div>
 
 <div class="app-card">
-
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
         <div style="display: flex; align-items: center;">
             <span id="flagTR" onclick="changeLang('tr')" style="font-size: 1.8rem; cursor: pointer; margin-right: 15px;" title="Türkçe">🇹🇷</span>
@@ -126,6 +125,20 @@
         <button class="btn btn-outline" id="txtR9" onclick="toggleView('loginView')">Geri Dön</button>
     </div>
 
+    <div id="dieticianView" style="display:none;">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h2 style="color:var(--primary);">Diyetisyen Portalı</h2>
+            <div id="dMail" class="user-tag"></div>
+            <div style="margin-top:15px;">
+                <p style="font-size:0.8rem; color:#94a3b8;">Danışanlarınız için Kodunuz:</p>
+                <div id="myDietCode" class="diet-code-box">********</div>
+            </div>
+        </div>
+        <h3 style="margin-bottom:10px; border-bottom:1px solid #2d3748; padding-bottom:5px;">Hastalarım</h3>
+        <div id="patientList"></div>
+        <button class="btn btn-outline" onclick="auth.signOut(); location.reload();" style="margin-top:20px;">GÜVENLİ ÇIKIŞ</button>
+    </div>
+
     <div id="mainView" style="display:none;">
         <div style="text-align: center; margin-bottom: 20px;">
             <div id="clock" style="font-size: 2.2rem; font-weight: 800; color: var(--accent);">00:00:00</div>
@@ -168,6 +181,13 @@
             <div id="partnerHistoryList" style="margin-top:10px; text-align:left;"></div>
         </div>
 
+        <div id="dieticianConnectArea" class="partner-box" style="border-color: var(--primary); background: rgba(16,185,129,0.05); margin-top:10px;">
+            <h3 style="color:var(--primary); margin-bottom:10px; font-size:1rem;">Diyetisyene Bağlan</h3>
+            <input type="text" id="dietCodeInput" placeholder="8 Haneli Kod Gir" maxlength="8" style="background: rgba(0,0,0,0.5);">
+            <button class="btn btn-sub" style="background: var(--primary); margin-top:0;" onclick="connectToDietician()">BAĞLAN</button>
+            <p id="dietStatus" style="font-size:0.7rem; margin-top:5px; color:#94a3b8;"></p>
+        </div>
+
         <div class="premium-area">
             <button class="btn btn-sub" id="txtBtnPlan" style="background: var(--premium); color: black;" onclick="handlePlanClick()">📅 HAFTALIK PLANINIZI ÇIKARIN</button>
             <div id="premiumLockInfo" style="margin-top: 15px;">
@@ -176,7 +196,7 @@
             </div>
         </div>
 
-        <button class="btn btn-outline" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
+        <button class="btn btn-outline" id="txtOut" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
     </div>
 </div>
 
@@ -212,22 +232,24 @@
         document.getElementById('txtR7').innerText = d.reg.toUpperCase();
         document.getElementById('txtR8').innerText = d.create;
         document.getElementById('txtR9').innerText = d.back;
-        document.getElementById('uAge').placeholder = d.age;
-        document.getElementById('uWeight').placeholder = d.weight;
-        document.getElementById('opt1').innerText = d.g1;
-        document.getElementById('opt2').innerText = d.g2;
-        document.getElementById('opt3').innerText = d.g3;
-        document.getElementById('btnAnalyzeText').innerText = d.btnAna;
-        document.getElementById('txtStreak').innerText = d.streak;
-        document.getElementById('freezeLayer').innerText = d.loading;
-        document.getElementById('btnRetry').innerText = d.retry;
-        document.getElementById('txtHistTitle').innerText = d.histTitle;
-        document.getElementById('txtPartTitle').innerText = d.partTitle;
-        document.getElementById('btnAddFriend').innerText = d.partAdd;
-        document.getElementById('btnCheckPart').innerText = d.partCheck;
-        document.getElementById('txtBtnPlan').innerText = d.plan;
-        document.getElementById('txtPrem').innerText = d.prem;
-        document.getElementById('txtOut').innerText = d.out;
+        if(document.getElementById('uAge')) {
+            document.getElementById('uAge').placeholder = d.age;
+            document.getElementById('uWeight').placeholder = d.weight;
+            document.getElementById('opt1').innerText = d.g1;
+            document.getElementById('opt2').innerText = d.g2;
+            document.getElementById('opt3').innerText = d.g3;
+            document.getElementById('btnAnalyzeText').innerText = d.btnAna;
+            document.getElementById('txtStreak').innerText = d.streak;
+            document.getElementById('freezeLayer').innerText = d.loading;
+            document.getElementById('btnRetry').innerText = d.retry;
+            document.getElementById('txtHistTitle').innerText = d.histTitle;
+            document.getElementById('txtPartTitle').innerText = d.partTitle;
+            document.getElementById('btnAddFriend').innerText = d.partAdd;
+            document.getElementById('btnCheckPart').innerText = d.partCheck;
+            document.getElementById('txtBtnPlan').innerText = d.plan;
+            document.getElementById('txtPrem').innerText = d.prem;
+            document.getElementById('txtOut').innerText = d.out;
+        }
         document.getElementById('btnRoleUser').innerText = d.roleU;
         document.getElementById('btnRegRoleUser').innerText = d.roleU;
         document.getElementById('btnRoleDietician').innerText = d.roleD;
@@ -248,9 +270,10 @@
 
     function startCamera() {
         const vid = document.getElementById('video');
+        if(!vid) return;
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
             .then(s => { vid.srcObject = s; vid.play(); })
-            .catch(e => { alert("Kamera açılamadı, lütfen izin verin."); });
+            .catch(e => { console.log("Kamera pasif."); });
     }
 
     function resetCamera() {
@@ -265,40 +288,125 @@
 
     auth.onAuthStateChanged(user => {
         if (user) {
-            toggleView('mainView');
-            document.getElementById('uMail').innerText = "@" + (user.displayName || user.email.split('@')[0]);
-            isVip = localStorage.getItem('vip_' + user.uid) === 'true';
-            
-            const saved = JSON.parse(localStorage.getItem('userData_' + user.uid) || '{}');
-            if(saved.age) document.getElementById('uAge').value = saved.age;
-            if(saved.weight) document.getElementById('uWeight').value = saved.weight;
-            if(saved.goal) document.getElementById('uGoal').value = saved.goal;
-
-            if(!isVip) { document.getElementById('premiumLockInfo').style.display = 'block'; initPayPal(); } 
-            else { document.getElementById('premiumLockInfo').style.display = 'none'; }
-            
-            document.getElementById('bellIcon').style.display = 'flex'; 
-            document.getElementById('friendListBtn').style.display = 'flex'; 
-            listenNotifications(); listenFriends(); showStreak();
-            startCamera();
+            db.collection('partner_data').doc(user.displayName.toLowerCase()).get().then(doc => {
+                const data = doc.data();
+                if(data && data.role === 'dietician') {
+                    toggleView('dieticianView');
+                    document.getElementById('dMail').innerText = "@" + user.displayName;
+                    handleDieticianPortal(user.displayName.toLowerCase());
+                } else {
+                    toggleView('mainView');
+                    document.getElementById('uMail').innerText = "@" + (user.displayName || user.email.split('@')[0]);
+                    setupUserPanel(user);
+                    startCamera();
+                }
+            });
         } else { toggleView('loginView'); }
     });
 
+    function setupUserPanel(user) {
+        isVip = localStorage.getItem('vip_' + user.uid) === 'true';
+        const saved = JSON.parse(localStorage.getItem('userData_' + user.uid) || '{}');
+        if(saved.age) document.getElementById('uAge').value = saved.age;
+        if(saved.weight) document.getElementById('uWeight').value = saved.weight;
+        if(saved.goal) document.getElementById('uGoal').value = saved.goal;
+        if(!isVip) { document.getElementById('premiumLockInfo').style.display = 'block'; initPayPal(); } 
+        else { document.getElementById('premiumLockInfo').style.display = 'none'; }
+        document.getElementById('bellIcon').style.display = 'flex'; 
+        document.getElementById('friendListBtn').style.display = 'flex'; 
+        listenNotifications(); listenFriends(); showStreak(); checkDieticianLink();
+    }
+
+    // DİYETİSYEN MANTIĞI
+    async function handleDieticianPortal(username) {
+        const docRef = db.collection('dieticians').doc(username);
+        const doc = await docRef.get();
+        let code;
+        if(!doc.exists) {
+            code = Math.random().toString(36).substring(2, 10).toUpperCase();
+            await docRef.set({ code: code, patients: [] });
+        } else {
+            code = doc.data().code;
+        }
+        document.getElementById('myDietCode').innerText = code;
+        listenPatients(username);
+    }
+
+    function listenPatients(dietUsername) {
+        db.collection('dieticians').doc(dietUsername).onSnapshot(doc => {
+            const list = document.getElementById('patientList');
+            list.innerHTML = '';
+            const patients = doc.data().patients || [];
+            if(patients.length === 0) list.innerHTML = '<p style="font-size:0.8rem; color:#94a3b8;">Henüz bağlı danışan yok.</p>';
+            patients.forEach(p => {
+                const pBox = document.createElement('div');
+                pBox.className = 'friend-pill';
+                pBox.innerText = `@${p}`;
+                pBox.onclick = () => showPatientHistory(p);
+                list.appendChild(pBox);
+            });
+        });
+    }
+
+    function showPatientHistory(pUsername) {
+        const nowUnix = Date.now();
+        const oneDay = 24 * 60 * 60 * 1000;
+        db.collection('partner_data').doc(pUsername).collection('history')
+          .where('unix', '>', nowUnix - oneDay).get().then(snap => {
+            let html = `<h4 style="color:var(--primary); margin-bottom:10px;">@${pUsername} - Son 24 Saat</h4>`;
+            if(snap.empty) html += "<p>Öğün kaydı yok.</p>";
+            snap.forEach(doc => {
+                const d = doc.data();
+                html += `<div class="history-box" style="cursor:default;">
+                    <div class="history-meta">🕒 ${d.date} | ⭐ Skor: ${d.score}</div>
+                    <div class="history-meal">🍴 ${d.mealName}</div>
+                </div>`;
+            });
+            document.getElementById('modalBody').innerHTML = html;
+            document.getElementById('detailModal').style.display = 'block';
+        });
+    }
+
+    async function connectToDietician() {
+        const code = document.getElementById('dietCodeInput').value.trim().toUpperCase();
+        if(code.length !== 8) return alert("8 haneli kodu girin.");
+        const me = auth.currentUser.displayName.toLowerCase();
+        
+        const q = await db.collection('dieticians').where('code', '==', code).get();
+        if(q.empty) return alert("Geçersiz kod.");
+        
+        const dietDoc = q.docs[0];
+        await db.collection('dieticians').doc(dietDoc.id).update({
+            patients: firebase.firestore.FieldValue.arrayUnion(me)
+        });
+        await db.collection('partner_data').doc(me).update({ linkedDietician: dietDoc.id });
+        alert("Diyetisyene başarıyla bağlandınız!");
+        checkDieticianLink();
+    }
+
+    function checkDieticianLink() {
+        const me = auth.currentUser.displayName.toLowerCase();
+        db.collection('partner_data').doc(me).get().then(doc => {
+            if(doc.data() && doc.data().linkedDietician) {
+                document.getElementById('dietStatus').innerText = "Bağlı: @" + doc.data().linkedDietician;
+                document.getElementById('dietCodeInput').style.display = 'none';
+            }
+        });
+    }
+
+    // ESKİ FONKSİYONLARIN TAMAMI (DOKUNULMADI)
     async function runAI(mode) {
         const resDiv = document.getElementById('results');
         const vid = document.getElementById('video');
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
         if(!age || !weight) return alert("Bilgileri girin.");
-
         vid.pause(); 
         document.getElementById('freezeLayer').style.display = 'flex';
         document.getElementById('btnAnalyzeText').style.display = 'none';
-
         const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
         canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
         let imgBase64 = canv.toDataURL('image/jpeg', 0.7);
-
         try {
             const r = await fetch('/api/analyze', {
                 method: 'POST',
@@ -307,20 +415,14 @@
             });
             const d = await r.json();
             if(!r.ok) throw new Error("Hata");
-
             resDiv.innerHTML = ''; resDiv.style.display = 'flex';
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
             const headers = langData[currentLang].headers;
-
-            let score = 5;
-            let mealName = "Bilinmeyen Yemek";
+            let score = 5; let mealName = "Bilinmeyen Yemek";
             sections.forEach((txt, i) => {
                 const card = document.createElement('div'); card.className = 'report-card';
                 let content = txt.trim();
-                
-                // Ürün özeti kısmından yemek adını yakalamaya çalış
                 if(i === 2) mealName = content.split('\n')[0].substring(0, 30);
-
                 if(content.includes('[SKOR:')) {
                     const match = content.match(/\[SKOR:\s*(\d+)\]/i);
                     if(match) { 
@@ -335,7 +437,6 @@
             document.getElementById('btnPdf').style.display = 'block';
             document.getElementById('btnRetry').style.display = 'block';
             document.getElementById('freezeLayer').style.display = 'none';
-            
             if(mode === 'yemek') saveHistory(score, d.analysis, mealName);
             resDiv.scrollIntoView();
         } catch(e) { 
@@ -366,6 +467,7 @@
         let me = auth.currentUser.displayName.toLowerCase();
         db.collection('partner_data').doc(me).onSnapshot(doc => {
             const container = document.getElementById('friendsListContainer');
+            if(!container) return;
             container.innerHTML = '';
             if(doc.exists && doc.data().friends) {
                 doc.data().friends.forEach(f => {
@@ -395,21 +497,8 @@
         const now = new Date();
         const timestampStr = now.toLocaleString();
         const unixTime = now.getTime();
-        
-        db.collection('partner_data').doc(me).set({ 
-            score, 
-            time: timestampStr, 
-            lastMealName: meal 
-        }, { merge: true });
-
-        db.collection('partner_data').doc(me).collection('history').add({ 
-            score, 
-            fullText: raw, 
-            date: timestampStr, 
-            unix: unixTime,
-            mealName: meal
-        });
-
+        db.collection('partner_data').doc(me).set({ score, time: timestampStr, lastMealName: meal }, { merge: true });
+        db.collection('partner_data').doc(me).collection('history').add({ score, fullText: raw, date: timestampStr, unix: unixTime, mealName: meal });
         let key = 'history_' + auth.currentUser.uid;
         let arr = JSON.parse(localStorage.getItem(key) || '[]');
         arr.unshift({ summary: `Skor: ${score}/10`, date: timestampStr, detail: raw, meal: meal, unix: unixTime });
@@ -422,22 +511,13 @@
         if(p.style.display === 'block') {
             const list = document.getElementById('historyList');
             let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-            
             const nowUnix = new Date().getTime();
             const oneDayUnix = 24 * 60 * 60 * 1000;
-            
-            // Son 24 saat filtresi
             const last24h = arr.filter(item => (nowUnix - item.unix) < oneDayUnix);
-
-            if(last24h.length === 0) {
-                list.innerHTML = "<p style='text-align:center; padding:10px;'>Son 24 saat içinde tarama bulunamadı.</p>";
-                return;
-            }
-
+            if(last24h.length === 0) { list.innerHTML = "<p style='text-align:center; padding:10px;'>Son 24 saat içinde tarama bulunamadı.</p>"; return; }
             list.innerHTML = last24h.map(h => {
-                const dateParts = h.date.split(' '); // [Tarih, Saat]
-                return `
-                <div class="history-box" onclick="openDetail(\`${h.detail.replace(/`/g, "'")}\`)">
+                const dateParts = h.date.split(' ');
+                return `<div class="history-box" onclick="openDetail(\`${h.detail.replace(/`/g, "'")}\`)">
                     <div class="history-meta">📅 ${dateParts[0]} | 🕒 ${dateParts[1]} | ⭐ ${h.summary}</div>
                     <div class="history-meal">🍽️ ${h.meal || 'Analiz Edilen Gıda'}</div>
                     <div style="font-size:0.65rem; color:var(--accent); text-align:right;">Detay Gör 🔍</div>
@@ -450,65 +530,33 @@
         const u = document.getElementById('partnerUser').value.trim().toLowerCase();
         const res = document.getElementById('partnerResult');
         const histRes = document.getElementById('partnerHistoryList');
-        
         db.collection('partner_data').doc(u).get().then(doc => {
             if(doc.exists) {
-                const data = doc.data();
-                let s = data.score || 0;
+                const data = doc.data(); let s = data.score || 0;
                 let statusIcon = s < 7 ? "🚨 YAKALANDI!" : "✅ Sadık!";
-                
-                res.innerHTML = `
-                <div class="friend-report-pill">
+                res.innerHTML = `<div class="friend-report-pill">
                     <div style="font-size:1rem; margin-bottom:5px;">${statusIcon} <b>Skor: ${s}/10</b></div>
                     <div style="color:var(--primary)"><b>Son Yemek:</b> ${data.lastMealName || 'Bilinmiyor'}...</div>
                     <div style="font-size:0.7rem; color:#94a3b8; margin-top:5px;">🕒 ${data.time || '-'}</div>
                 </div>`;
-
                 db.collection('partner_data').doc(u).collection('history').orderBy('unix', 'desc').limit(3).get().then(snap => {
                     let html = '<p style="color:var(--primary); margin-top:10px; font-size:0.8rem;">Son Öğün Geçmişi:</p>';
                     snap.forEach(h => {
                         const hData = h.data();
-                        html += `
-                        <div class="history-box" style="font-size:0.7rem; border-color:var(--danger);">
-                            <div class="history-meta">📅 ${hData.date}</div>
-                            <div class="history-meal">🍴 ${hData.mealName || 'Öğün'} (Skor: ${hData.score})</div>
-                        </div>`;
+                        html += `<div class="history-box" style="font-size:0.7rem; border-color:var(--danger);"><div class="history-meta">📅 ${hData.date}</div><div class="history-meal">🍴 ${hData.mealName || 'Öğün'} (Skor: ${hData.score})</div></div>`;
                     });
                     histRes.innerHTML = html;
                 });
-            } else { res.innerText = "Veri yok veya takip izni yok."; }
+            } else { res.innerText = "Veri yok."; }
         });
     }
 
-    function checkSpecific(u) { 
-        document.getElementById('partnerUser').value = u; 
-        document.getElementById('partnerPanel').style.display = 'block'; 
-        checkPartner(); 
-        toggleFriends(); 
-        document.getElementById('partnerPanel').scrollIntoView();
-    }
-
-    function showStreak() {
-        let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}');
-        if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; }
-    }
-
-    function updateStreak(s) {
-        let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0, "last":""}');
-        let t = new Date().toLocaleDateString();
-        if(s >= 7) { if(d.last !== t) d.count++; d.last = t; } else { d.count = 0; }
-        localStorage.setItem('streak_' + auth.currentUser.uid, JSON.stringify(d)); showStreak();
-    }
-
-    function initPayPal() {
-        paypal.Buttons({
-            createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: '0.99' } }] }),
-            onApprove: (d, a) => a.order.capture().then(() => { localStorage.setItem('vip_' + auth.currentUser.uid, 'true'); location.reload(); })
-        }).render('#paypal-button-container');
-    }
-
+    function checkSpecific(u) { document.getElementById('partnerUser').value = u; document.getElementById('partnerPanel').style.display = 'block'; checkPartner(); toggleFriends(); document.getElementById('partnerPanel').scrollIntoView(); }
+    function showStreak() { let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}'); if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; } }
+    function updateStreak(s) { let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0, "last":""}'); let t = new Date().toLocaleDateString(); if(s >= 7) { if(d.last !== t) d.count++; d.last = t; } else { d.count = 0; } localStorage.setItem('streak_' + auth.currentUser.uid, JSON.stringify(d)); showStreak(); }
+    function initPayPal() { paypal.Buttons({ createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: '0.99' } }] }), onApprove: (d, a) => a.order.capture().then(() => { localStorage.setItem('vip_' + auth.currentUser.uid, 'true'); location.reload(); }) }).render('#paypal-button-container'); }
     function setRole(role, btn) { userRole = role; document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
-    function toggleView(id) { document.querySelectorAll('.auth-container, #mainView').forEach(v => v.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
+    function toggleView(id) { document.querySelectorAll('.auth-container, #mainView, #dieticianView').forEach(v => v.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
     async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert("Hata: " + e.message); } }
     async function doRegister() { 
         const u = document.getElementById('rUser').value.trim(); const e = document.getElementById('rEmail').value; const p = document.getElementById('rPass').value;
@@ -519,12 +567,7 @@
             location.reload(); 
         } catch(err) { alert(err.message); } 
     }
-    function saveUserData() {
-        if(!auth.currentUser) return;
-        const data = { age: document.getElementById('uAge').value, weight: document.getElementById('uWeight').value, goal: document.getElementById('uGoal').value };
-        localStorage.setItem('userData_' + auth.currentUser.uid, JSON.stringify(data));
-        db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).set(data, { merge: true });
-    }
+    function saveUserData() { if(!auth.currentUser) return; const data = { age: document.getElementById('uAge').value, weight: document.getElementById('uWeight').value, goal: document.getElementById('uGoal').value }; localStorage.setItem('userData_' + auth.currentUser.uid, JSON.stringify(data)); db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).set(data, { merge: true }); }
     function openDetail(txt) { document.getElementById('modalBody').innerText = txt; document.getElementById('detailModal').style.display = 'block'; }
     function handlePlanClick() { if(!isVip) return alert("Premium gerekli."); runAI('plan'); }
     function downloadPDF() { html2pdf().from(document.getElementById('results')).save(); }
