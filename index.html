@@ -1,1790 +1,526 @@
 <!DOCTYPE html>
-
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<script>
-// Suppress noisy cross-origin script errors (PayPal, Firebase CDN, etc.)
-window.addEventListener('error', function(e) {
-  if (!e.message || e.message === 'Script error.' || e.message === 'Script error') {
-    e.preventDefault();
-    return;
-  }
-}, true);
-window.addEventListener('unhandledrejection', function(e) {
-  if (e.reason && e.reason.message) {
-    console.warn('[BioChef]', e.reason.message);
-  }
-  e.preventDefault();
-});
-</script>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Bio-Chef Pro</title>
-
-<!-- Fonts: stable Google Fonts only -->
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-<!-- Firebase compat SDK (official Google CDN) -->
-
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
-<!-- html2pdf -->
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" onerror="console.error('[BioChef] html2pdf yuklenemedi')"></script>
-
-<!-- PayPal: lazily loaded after Firebase init to avoid race -->
-
-<script>
-window._loadPayPal = function() {
-  if(window._paypalLoaded) return;
-  window._paypalLoaded = true;
-  var s = document.createElement('script');
-  s.src = 'https://www.paypal.com/sdk/js?client-id=AdOeigm877SXMe7mMtuEMPUeGkY9WcgyIJPbzGJU2HP1CS_eaGcn4O0FnUEoB3JFmDXEHSnxx5Do-pIN&currency=USD&components=buttons';
-  s.onload  = function() { if(window._paypalCb) window._paypalCb(); };
-  s.onerror = function() { console.error('[BioChef] PayPal SDK yuklenemedi'); };
-  document.head.appendChild(s);
-};
-</script>
-
-<style>
-/* ═══════════════════════════════════════════════
-   DESIGN TOKENS
-═══════════════════════════════════════════════ */
-:root {
-  --bg:        #04060d;
-  --s1:        #080d1a;
-  --s2:        #0d1426;
-  --s3:        #111b33;
-  --border:    rgba(255,255,255,0.06);
-  --border-h:  rgba(255,255,255,0.12);
-
-  --g:         #00f5a0;   /* mint green */
-  --g2:        #00c97e;
-  --b:         #3b9eff;   /* electric blue */
-  --b2:        #1a7de8;
-  --amber:     #f5c842;
-  --red:       #ff3d5a;
-
-  --text:      #f0f4ff;
-  --sub:       #8892aa;
-  --muted:     #3d4a66;
-
-  --r:         16px;
-  --r-lg:      24px;
-  --r-xl:      32px;
-
-  --shadow:    0 24px 64px rgba(0,0,0,0.7);
-  --glow-g:    0 0 40px rgba(0,245,160,0.15);
-  --glow-b:    0 0 40px rgba(59,158,255,0.15);
-  --glow-a:    0 0 40px rgba(245,200,66,0.2);
-
-  --ff-head:   'Plus Jakarta Sans', sans-serif;
-  --ff-body:   'Plus Jakarta Sans', system-ui, sans-serif;
-
-  --dur:       .22s;
-  --ease:      cubic-bezier(.4,0,.2,1);
-}
-
-/* ═══════════════════════════════════════════════
-   RESET
-═══════════════════════════════════════════════ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-
-body {
-  font-family: var(--ff-body);
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  padding: 20px 16px 60px;
-  /* Animated noise grain */
-  position: relative;
-  overflow-x: hidden;
-}
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 0;
-  opacity: .5;
-}
-
-/* Ambient blobs */
-body::after {
-  content: '';
-  position: fixed;
-  width: 600px; height: 600px;
-  top: -200px; left: -200px;
-  background: radial-gradient(circle, rgba(0,245,160,0.05) 0%, transparent 65%);
-  pointer-events: none;
-  animation: blobDrift 20s ease-in-out infinite alternate;
-}
-@keyframes blobDrift {
-  0%   { transform: translate(0,0) scale(1); }
-  100% { transform: translate(80px, 120px) scale(1.15); }
-}
-
-/* ═══════════════════════════════════════════════
-   SHELL
-═══════════════════════════════════════════════ */
-.shell {
-  width: 100%;
-  max-width: 448px;
-  background: var(--s1);
-  border-radius: var(--r-xl);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.04);
-  position: relative;
-  z-index: 1;
-  overflow: hidden;
-}
-.shell::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0,245,160,0.4), transparent);
-}
-
-/* ═══════════════════════════════════════════════
-   TOP BAR
-═══════════════════════════════════════════════ */
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 22px;
-  border-bottom: 1px solid var(--border);
-  background: rgba(255,255,255,0.01);
-  backdrop-filter: blur(8px);
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-
-.lang-row { display: flex; gap: 8px; }
-.lang-btn {
-  width: 34px; height: 34px;
-  border-radius: 10px;
-  background: var(--s2);
-  border: 1px solid var(--border);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.1rem;
-  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur);
-  user-select: none;
-}
-.lang-btn:hover { border-color: var(--g); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,245,160,0.2); }
-
-.topbar-center { display: flex; align-items: center; }
-
-.streak {
-  display: none;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--ff-head);
-  font-weight: 600;
-  font-size: .8rem;
-  letter-spacing: .04em;
-  color: var(--amber);
-  background: rgba(245,200,66,0.08);
-  border: 1px solid rgba(245,200,66,0.2);
-  padding: 6px 14px;
-  border-radius: 50px;
-  animation: streakPulse 3s ease-in-out infinite;
-  white-space: nowrap;
-}
-@keyframes streakPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(245,200,66,0); }
-  50%      { box-shadow: 0 0 0 6px rgba(245,200,66,0); }
-}
-
-.topbar-right { display: flex; gap: 8px; align-items: center; }
-
-.icon-btn {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  width: 36px; height: 36px;
-  border-radius: 10px;
-  background: var(--s2);
-  border: 1px solid var(--border);
-  font-size: 1rem;
-  cursor: pointer;
-  position: relative;
-  transition: border-color var(--dur), transform var(--dur), box-shadow var(--dur);
-  user-select: none;
-}
-.icon-btn:hover { border-color: var(--border-h); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-.icon-btn.show { display: flex; }
-
-.notif-dot {
-  position: absolute;
-  top: -3px; right: -3px;
-  width: 14px; height: 14px;
-  background: var(--red);
-  color: #fff;
-  font-size: .55rem;
-  font-weight: 700;
-  border-radius: 50%;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--s1);
-  animation: dotPop .3s var(--ease);
-}
-@keyframes dotPop { from { transform: scale(0); } to { transform: scale(1); } }
-.notif-dot.show { display: flex; }
-
-/* ═══════════════════════════════════════════════
-   DROPDOWN
-═══════════════════════════════════════════════ */
-.dropdown {
-  display: none;
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  width: 280px;
-  background: var(--s2);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 14px;
-  z-index: 200;
-  box-shadow: 0 24px 48px rgba(0,0,0,0.8);
-  max-height: 300px;
-  overflow-y: auto;
-  animation: dropIn .2s var(--ease);
-}
-@keyframes dropIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.dropdown.open { display: block; }
-.dropdown-title {
-  font-family: var(--ff-head);
-  font-size: .68rem;
-  font-weight: 600;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--sub);
-  text-align: center;
-  margin-bottom: 12px;
-}
-.notif-item {
-  background: var(--s3);
-  border-radius: 12px;
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  font-size: .8rem;
-  color: var(--sub);
-  border-left: 2px solid var(--b);
-  line-height: 1.5;
-}
-.notif-item:last-child { margin-bottom: 0; }
-.btn-accept {
-  display: inline-flex;
-  align-items: center;
-  margin-top: 6px;
-  background: var(--g);
-  color: #000;
-  border: none;
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-size: .72rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: opacity var(--dur);
-}
-.btn-accept:hover { opacity: .85; }
-
-.friend-item {
-  display: flex;
-  align-items: center;
-  padding: 10px 12px;
-  background: var(--s3);
-  border-radius: 12px;
-  margin-bottom: 6px;
-  color: var(--g);
-  font-weight: 600;
-  font-size: .85rem;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: border-color var(--dur), transform var(--dur);
-}
-.friend-item:hover { border-color: var(--g); transform: translateX(3px); }
-.friend-item .fa { margin-right: 8px; font-size: 1rem; }
-
-/* ═══════════════════════════════════════════════
-   CONTENT
-═══════════════════════════════════════════════ */
-.content {
-  padding: 28px 24px 32px;
-  animation: fadeUp .35s var(--ease);
-}
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ═══════════════════════════════════════════════
-   LOGO / WORDMARK
-═══════════════════════════════════════════════ */
-.wordmark {
-  font-family: var(--ff-head);
-  font-size: 3rem;
-  font-weight: 700;
-  letter-spacing: -.04em;
-  text-align: center;
-  margin-bottom: 4px;
-  line-height: 1;
-  background: linear-gradient(135deg, var(--g) 0%, var(--b) 60%, var(--g) 100%);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmer 4s ease-in-out infinite;
-}
-@keyframes shimmer {
-  0%,100% { background-position: 0% 50%; }
-  50%      { background-position: 100% 50%; }
-}
-.wordmark-sub {
-  font-family: var(--ff-body);
-  font-size: .78rem;
-  font-weight: 500;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--sub);
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-/* ═══════════════════════════════════════════════
-   ROLE TOGGLE (Danışan / Diyetisyen)
-═══════════════════════════════════════════════ */
-.role-toggle {
-  display: flex;
-  background: var(--s2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 4px;
-  margin-bottom: 22px;
-  gap: 4px;
-}
-.role-btn {
-  flex: 1;
-  padding: 10px 8px;
-  border-radius: 9px;
-  border: none;
-  background: transparent;
-  color: var(--sub);
-  font-family: var(--ff-body);
-  font-weight: 600;
-  font-size: .82rem;
-  cursor: pointer;
-  transition: all var(--dur) var(--ease);
-  white-space: nowrap;
-}
-.role-btn.active {
-  background: var(--s3);
-  color: var(--text);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-}
-.role-btn .emoji { margin-right: 5px; }
-
-/* ═══════════════════════════════════════════════
-   INPUTS
-═══════════════════════════════════════════════ */
-.field {
-  width: 100%;
-  padding: 15px 18px;
-  border-radius: var(--r);
-  background: var(--s2);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-family: var(--ff-body);
-  font-size: .9rem;
-  margin-bottom: 10px;
-  transition: border-color var(--dur), box-shadow var(--dur);
-  outline: none;
-  text-align: center;
-  -webkit-appearance: none;
-}
-.field:focus { border-color: var(--g); box-shadow: var(--glow-g); }
-.field::placeholder { color: var(--muted); }
-.field option { background: var(--s2); }
-
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-/* ═══════════════════════════════════════════════
-   BUTTONS
-═══════════════════════════════════════════════ */
-.btn {
-  width: 100%;
-  padding: 16px 20px;
-  border-radius: var(--r);
-  border: none;
-  font-family: var(--ff-head);
-  font-weight: 600;
-  font-size: .88rem;
-  letter-spacing: .04em;
-  cursor: pointer;
-  transition: all var(--dur) var(--ease);
-  outline: none;
-  position: relative;
-  overflow: hidden;
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-.btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(rgba(255,255,255,0.06), transparent);
-  pointer-events: none;
-}
-.btn:active { transform: scale(.97); }
-
-.btn-g {
-  background: linear-gradient(135deg, var(--g) 0%, var(--g2) 100%);
-  color: #021a0e;
-  box-shadow: 0 8px 32px rgba(0,245,160,0.3);
-}
-.btn-g:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(0,245,160,0.45); }
-
-.btn-b {
-  background: linear-gradient(135deg, var(--b) 0%, var(--b2) 100%);
-  color: #fff;
-  box-shadow: 0 8px 32px rgba(59,158,255,0.25);
-}
-.btn-b:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(59,158,255,0.4); }
-
-.btn-amber {
-  background: linear-gradient(135deg, var(--amber) 0%, #d4a320 100%);
-  color: #1a0f00;
-  box-shadow: 0 8px 32px rgba(245,200,66,0.25);
-}
-.btn-amber:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(245,200,66,0.4); }
-
-.btn-red {
-  background: linear-gradient(135deg, var(--red) 0%, #cc1f38 100%);
-  color: #fff;
-  box-shadow: 0 8px 24px rgba(255,61,90,0.3);
-}
-.btn-red:hover { transform: translateY(-2px); }
-
-.btn-ghost {
-  background: transparent;
-  color: var(--sub);
-  border: 1px solid var(--border);
-  font-family: var(--ff-body);
-  font-weight: 500;
-  font-size: .82rem;
-}
-.btn-ghost:hover { border-color: var(--border-h); color: var(--text); background: rgba(255,255,255,0.03); }
-
-.btn-danger-ghost {
-  background: transparent;
-  color: var(--red);
-  border: 1px solid rgba(255,61,90,0.25);
-  font-family: var(--ff-body);
-  font-weight: 500;
-}
-.btn-danger-ghost:hover { background: rgba(255,61,90,0.06); border-color: rgba(255,61,90,0.5); }
-
-/* ═══════════════════════════════════════════════
-   CLOCK / USER HEADER
-═══════════════════════════════════════════════ */
-.main-header {
-  text-align: center;
-  margin-bottom: 22px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--border);
-}
-.clock {
-  font-family: var(--ff-head);
-  font-size: 2.6rem;
-  font-weight: 700;
-  letter-spacing: -.03em;
-  color: var(--b);
-  line-height: 1;
-}
-.user-tag {
-  font-family: var(--ff-head);
-  font-size: .9rem;
-  font-weight: 600;
-  color: var(--g);
-  margin-top: 6px;
-  letter-spacing: .03em;
-}
-.role-label {
-  display: inline-block;
-  margin-top: 6px;
-  font-size: .7rem;
-  font-weight: 600;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  padding: 3px 10px;
-  border-radius: 50px;
-  background: rgba(59,158,255,0.1);
-  color: var(--b);
-  border: 1px solid rgba(59,158,255,0.2);
-}
-
-/* ═══════════════════════════════════════════════
-   CAMERA
-═══════════════════════════════════════════════ */
-.cam-wrap {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: var(--r-lg);
-  overflow: hidden;
-  border: 1px solid var(--border);
-  margin-bottom: 14px;
-  background: #000;
-}
-.cam-wrap::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: var(--r-lg);
-  box-shadow: inset 0 0 0 1px rgba(0,245,160,0.06);
-  pointer-events: none;
-  z-index: 1;
-}
-/* Scanning line */
-.cam-wrap::after {
-  content: '';
-  position: absolute;
-  left: 10%; right: 10%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--g), transparent);
-  top: 0;
-  animation: scan 3s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 2;
-  opacity: 0;
-}
-.cam-wrap.active::after { opacity: 1; }
-@keyframes scan {
-  0%   { top: 10%; opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
-  100% { top: 90%; opacity: 0; }
-}
-video { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-/* Camera corner brackets */
-.cam-bracket {
-  position: absolute;
-  width: 24px; height: 24px;
-  border-color: var(--g);
-  border-style: solid;
-  opacity: .6;
-  z-index: 3;
-  pointer-events: none;
-}
-.cam-bracket.tl { top: 14px; left: 14px; border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
-.cam-bracket.tr { top: 14px; right: 14px; border-width: 2px 2px 0 0; border-radius: 0 4px 0 0; }
-.cam-bracket.bl { bottom: 14px; left: 14px; border-width: 0 0 2px 2px; border-radius: 0 0 0 4px; }
-.cam-bracket.br { bottom: 14px; right: 14px; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
-
-/* ═══════════════════════════════════════════════
-   SECTION DIVIDER
-═══════════════════════════════════════════════ */
-.section-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 24px 0 16px;
-}
-.section-divider span {
-  font-family: var(--ff-head);
-  font-size: .68rem;
-  font-weight: 600;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--muted);
-  white-space: nowrap;
-}
-.section-divider::before,
-.section-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
-/* ═══════════════════════════════════════════════
-   RESULTS
-═══════════════════════════════════════════════ */
-#results {
-  display: none;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.rcard {
-  background: var(--s2);
-  border-radius: var(--r);
-  padding: 18px 20px;
-  border: 1px solid var(--border);
-  border-top: 2px solid var(--b);
-  position: relative;
-  overflow: hidden;
-  transition: border-color var(--dur), box-shadow var(--dur);
-  animation: cardIn .4s var(--ease) backwards;
-}
-.rcard:hover { border-color: rgba(59,158,255,0.3); box-shadow: var(--glow-b); }
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.rcard:nth-child(1) { animation-delay: 0s; }
-.rcard:nth-child(2) { animation-delay: .07s; }
-.rcard:nth-child(3) { animation-delay: .14s; }
-.rcard:nth-child(4) { animation-delay: .21s; }
-.rcard:nth-child(5) { animation-delay: .28s; }
-.rcard:nth-child(6) { animation-delay: .35s; }
-
-.rtag {
-  font-family: var(--ff-head);
-  font-size: .65rem;
-  font-weight: 700;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--b);
-  margin-bottom: 8px;
-}
-.rtxt {
-  font-size: .88rem;
-  line-height: 1.7;
-  color: var(--sub);
-  white-space: pre-line;
-}
-
-/* ═══════════════════════════════════════════════
-   SCORE BAR
-═══════════════════════════════════════════════ */
-.score-wrap { margin: 16px 0 8px; }
-.score-track {
-  height: 8px;
-  border-radius: 4px;
-  background: linear-gradient(to right, #ff3d5a 0%, #f97316 30%, #f5c842 60%, #00f5a0 100%);
-  position: relative;
-  overflow: visible;
-}
-.score-pin {
-  position: absolute;
-  top: 50%;
-  width: 36px; height: 36px;
-  background: #fff;
-  border: 3px solid var(--bg);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: left 1.4s cubic-bezier(.34,1.56,.64,1);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 0 4px rgba(255,255,255,0.1);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--ff-head);
-  font-size: .75rem;
-  font-weight: 700;
-  color: #000;
-  z-index: 2;
-}
-.score-pin::after {
-  content: '▾';
-  position: absolute;
-  bottom: -20px;
-  color: var(--sub);
-  font-size: .9rem;
-}
-.score-labels {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 18px;
-  font-size: .7rem;
-  color: var(--muted);
-  font-family: var(--ff-head);
-  font-weight: 500;
-}
-
-/* ═══════════════════════════════════════════════
-   COLLAPSIBLE PANELS
-═══════════════════════════════════════════════ */
-.panel-toggle {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 18px;
-  background: var(--s2);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  cursor: pointer;
-  margin-top: 10px;
-  transition: border-color var(--dur), background var(--dur);
-  font-family: var(--ff-body);
-  font-size: .87rem;
-  font-weight: 600;
-  color: var(--sub);
-  user-select: none;
-}
-.panel-toggle:hover { border-color: var(--border-h); background: var(--s3); color: var(--text); }
-.panel-toggle .arrow {
-  font-size: .75rem;
-  transition: transform var(--dur);
-  color: var(--muted);
-}
-.panel-toggle.open .arrow { transform: rotate(180deg); }
-
-.panel-body {
-  display: none;
-  background: var(--s2);
-  border: 1px solid var(--border);
-  border-top: none;
-  border-radius: 0 0 var(--r) var(--r);
-  padding: 18px;
-  margin-top: -4px;
-}
-.panel-body.open { display: block; animation: panelOpen .25s var(--ease); }
-@keyframes panelOpen {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.panel-head {
-  font-family: var(--ff-head);
-  font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--g);
-  margin-bottom: 14px;
-  text-align: center;
-}
-
-/* ═══════════════════════════════════════════════
-   HISTORY
-═══════════════════════════════════════════════ */
-.hist-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
-  background: var(--s3);
-  border-radius: 12px;
-  margin-bottom: 8px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: border-color var(--dur), transform var(--dur);
-}
-.hist-item:last-child { margin-bottom: 0; }
-.hist-item:hover { border-color: var(--g); transform: translateX(3px); }
-.hist-info { flex: 1; }
-.hist-date { font-size: .72rem; color: var(--muted); margin-bottom: 3px; }
-.hist-summary { font-size: .85rem; font-weight: 600; color: var(--text); }
-.hist-score {
-  font-family: var(--ff-head);
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--g);
-}
-
-/* ═══════════════════════════════════════════════
-   PARTNER PANEL
-═══════════════════════════════════════════════ */
-.partner-wrap {
-  background: rgba(255,61,90,0.04);
-  border: 1px solid rgba(255,61,90,0.15);
-  border-radius: var(--r);
-  padding: 20px;
-}
-.partner-head {
-  font-family: var(--ff-head);
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--red);
-  text-align: center;
-  margin-bottom: 16px;
-}
-#partnerResult {
-  margin-top: 14px;
-  font-family: var(--ff-head);
-  font-weight: 700;
-  font-size: 1rem;
-  text-align: center;
-  padding: 14px;
-  border-radius: 12px;
-  background: var(--s3);
-  display: none;
-}
-
-.partner-hist-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  background: var(--s3);
-  border-radius: 10px;
-  margin-bottom: 6px;
-  font-size: .82rem;
-  color: var(--sub);
-}
-.partner-hist-score {
-  font-family: var(--ff-head);
-  font-weight: 700;
-  color: var(--text);
-}
-
-/* ═══════════════════════════════════════════════
-   PREMIUM
-═══════════════════════════════════════════════ */
-.premium-box {
-  background: linear-gradient(135deg, rgba(245,200,66,0.06) 0%, rgba(245,200,66,0.02) 100%);
-  border: 1px solid rgba(245,200,66,0.18);
-  border-radius: var(--r-lg);
-  padding: 22px;
-  margin-top: 10px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-.premium-box::before {
-  content: '✦ PREMIUM';
-  position: absolute;
-  top: 12px; right: 14px;
-  font-family: var(--ff-head);
-  font-size: .6rem;
-  font-weight: 700;
-  letter-spacing: .12em;
-  color: var(--amber);
-  opacity: .6;
-}
-.premium-label {
-  font-family: var(--ff-head);
-  font-weight: 700;
-  font-size: .72rem;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--amber);
-  margin-bottom: 16px;
-  display: block;
-}
-#paypal-button-container { margin-top: 14px; min-height: 120px; }
-
-/* ═══════════════════════════════════════════════
-   MODAL (History Detail)
-═══════════════════════════════════════════════ */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  backdrop-filter: blur(8px);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  animation: fadeIn .2s var(--ease);
-}
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.modal-overlay.open { display: flex; }
-.modal {
-  background: var(--s2);
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
-  padding: 28px;
-  width: 100%;
-  max-width: 420px;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: var(--shadow);
-  animation: modalUp .3s var(--ease);
-}
-@keyframes modalUp {
-  from { transform: translateY(30px); opacity: 0; }
-  to   { transform: translateY(0); opacity: 1; }
-}
-.modal-title {
-  font-family: var(--ff-head);
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 6px;
-}
-.modal-date { font-size: .8rem; color: var(--muted); margin-bottom: 18px; }
-.modal-body { font-size: .88rem; line-height: 1.7; color: var(--sub); white-space: pre-line; }
-.modal-close {
-  width: 100%;
-  margin-top: 20px;
-  padding: 13px;
-  border-radius: 12px;
-  background: var(--s3);
-  border: 1px solid var(--border);
-  color: var(--sub);
-  font-family: var(--ff-body);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background var(--dur);
-}
-.modal-close:hover { background: var(--s1); color: var(--text); }
-
-/* ═══════════════════════════════════════════════
-   LOADING
-═══════════════════════════════════════════════ */
-.loading-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  padding: 32px;
-  background: var(--s2);
-  border-radius: var(--r);
-  border: 1px solid var(--border);
-}
-.loading-dots {
-  display: flex;
-  gap: 6px;
-}
-.loading-dots span {
-  width: 8px; height: 8px;
-  background: var(--g);
-  border-radius: 50%;
-  animation: bounce .9s ease-in-out infinite;
-}
-.loading-dots span:nth-child(2) { animation-delay: .15s; }
-.loading-dots span:nth-child(3) { animation-delay: .3s; }
-@keyframes bounce {
-  0%,100% { transform: translateY(0); opacity: .4; }
-  50%      { transform: translateY(-8px); opacity: 1; }
-}
-.loading-text {
-  font-family: var(--ff-head);
-  font-size: .82rem;
-  font-weight: 600;
-  color: var(--sub);
-  letter-spacing: .06em;
-}
-
-/* ═══════════════════════════════════════════════
-   SCROLLBAR
-═══════════════════════════════════════════════ */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 2px; }
-
-/* ═══════════════════════════════════════════════
-   UTILITY
-═══════════════════════════════════════════════ */
-.mt-8  { margin-top: 8px; }
-.mt-16 { margin-top: 16px; }
-.mt-24 { margin-top: 24px; }
-.empty-state {
-  text-align: center;
-  font-size: .82rem;
-  color: var(--muted);
-  padding: 16px 0;
-}
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bio-Chef Pro | VIP Analiz</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=AdOeigm877SXMe7mMtuEMPUeGkY9WcgyIJPbzGJU2HP1CS_eaGcn4O0FnUEoB3JFmDXEHSnxx5Do-pIN&currency=USD&components=buttons"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        :root { --bg: #0b0f1a; --card: #161b2a; --primary: #10b981; --accent: #0ea5e9; --premium: #f59e0b; --text: #f1f5f9; --danger: #ef4444; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
+        .app-card { width: 100%; max-width: 420px; background: var(--card); border-radius: 35px; padding: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); height: fit-content; position: relative; }
+        .auth-container h1 { font-size: 2.2rem; text-align: center; margin-bottom: 20px; color: var(--primary); font-weight: 900; }
+        input, select { width: 100%; padding: 15px; border-radius: 15px; background: #0b0f1a; border: 1px solid #2d3748; color: white; margin-bottom: 12px; text-align: center; }
+        .btn { width: 100%; padding: 18px; border-radius: 18px; border: none; font-weight: 700; cursor: pointer; color: white; transition: 0.3s; }
+        .btn-main { background: var(--primary); }
+        .btn-sub { background: var(--accent); margin-top: 10px; }
+        .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #2d3748; margin-top: 10px; font-size: 0.8rem; }
+        .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 2px solid #1e293b; margin-bottom: 20px; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        .premium-area { background: rgba(245, 158, 11, 0.08); border: 2px solid var(--premium); border-radius: 25px; padding: 20px; margin-top: 20px; text-align: center; }
+        .premium-title { font-weight: 900; color: var(--premium); font-size: 1.1rem; margin-bottom: 15px; }
+        #paypal-button-container { margin-top: 10px; min-height: 150px; }
+        #results { display: none; flex-direction: column; gap: 12px; margin-top: 25px; padding: 15px; background: var(--bg); border-radius: 20px; }
+        .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); }
+        .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
+        .report-txt { font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
+        .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); cursor: pointer; transition: 0.2s; }
+        .history-box:hover { background: rgba(255,255,255,0.1); }
+        .score-wrapper { margin-top: 20px; margin-bottom: 10px; width: 100%; position: relative; padding-bottom: 20px; }
+        .score-bar { height: 14px; width: 100%; border-radius: 7px; background: linear-gradient(to right, #ef4444 0%, #f97316 35%, #eab308 65%, #22c55e 100%); position: relative; }
+        .score-marker { position: absolute; top: -10px; width: 30px; height: 30px; background: #fff; border: 3px solid #1e293b; border-radius: 50%; transform: translateX(-50%); transition: left 1s ease-out; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 900; color: #000; z-index: 2; }
+        .score-marker::after { content: '📍'; position: absolute; bottom: -20px; font-size: 1rem; }
+        .streak-badge { display:none; background:rgba(249, 115, 22, 0.15); color:#f97316; padding:8px 15px; border-radius:20px; font-weight:900; font-size:0.9rem; border:1px solid #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.3); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        .partner-box { background: rgba(239, 68, 68, 0.05); border: 1px dashed var(--danger); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
+        .bell-container { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; }
+        .bell-icon { font-size: 1.5rem; }
+        .notif-badge { position: absolute; top: 0; right: 0; background: var(--danger); color: white; font-size: 0.6rem; font-weight: 900; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .notif-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 280px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 10px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.8); max-height: 300px; overflow-y: auto; }
+        .notif-item { background: #0b0f1a; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 0.8rem; color: #cbd5e1; border-left: 3px solid var(--accent); }
+        .notif-btn { background: var(--primary); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; margin-top: 5px; font-weight:bold; }
+        .user-tag { font-size: 1.1rem; font-weight: 900; color: var(--primary); margin-top: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .friends-btn { font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; margin-left: 10px; position: relative; }
+        .friends-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 250px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 10px; z-index: 101; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        .friend-link { display: block; padding: 10px; background: #0b0f1a; border-radius: 10px; margin-bottom: 5px; color: var(--primary); font-weight: bold; cursor: pointer; text-decoration: none; font-size: 0.9rem; text-align: center; }
+        
+        /* Modal Style */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); padding: 20px; overflow-y: auto; }
+        .modal-content { background: var(--card); margin: auto; padding: 20px; border-radius: 25px; max-width: 400px; border: 1px solid var(--primary); }
+        
+        /* Role Toggle Style */
+        .role-selector { display: flex; background: #0b0f1a; border-radius: 15px; margin-bottom: 15px; padding: 5px; border: 1px solid #2d3748; }
+        .role-btn { flex: 1; padding: 10px; border-radius: 10px; border: none; background: transparent; color: #94a3b8; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .role-btn.active { background: var(--primary); color: white; }
+    </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════
-     HISTORY DETAIL MODAL
-══════════════════════════════════════════ -->
-
-<div class="modal-overlay" id="histModal" onclick="if(event.target===this) closeModal()">
-  <div class="modal">
-    <div class="modal-title" id="modalTitle">Analiz Detayı</div>
-    <div class="modal-date" id="modalDate"></div>
-    <div class="modal-body" id="modalBody"></div>
-    <button class="modal-close" onclick="closeModal()">Kapat</button>
-  </div>
+<div id="detailModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitle" style="color:var(--primary); margin-bottom:15px; text-align:center;">Analiz Detayı</h3>
+        <div id="modalBody" class="report-txt"></div>
+        <button class="btn btn-sub" onclick="document.getElementById('detailModal').style.display='none'">Kapat</button>
+    </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     MAIN SHELL
-══════════════════════════════════════════ -->
+<div class="app-card">
 
-<div class="shell">
-
-  <!-- TOP BAR -->
-
-  <div class="topbar">
-    <div class="lang-row">
-      <div class="lang-btn" onclick="changeLang('tr')" title="Türkçe">🇹🇷</div>
-      <div class="lang-btn" onclick="changeLang('en')" title="English">🇺🇸</div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+        <div style="display: flex; align-items: center;">
+            <span onclick="changeLang('tr')" style="font-size: 1.8rem; cursor: pointer; margin-right: 15px;" title="Türkçe">🇹🇷</span>
+            <span onclick="changeLang('en')" style="font-size: 1.8rem; cursor: pointer;" title="English">🇺🇸</span>
+        </div>
+        <div id="streakBadge" class="streak-badge" style="margin-left:10px;">
+            🔥 <span id="streakCount">0</span> <span id="txtStreak">Seri</span>
+        </div>
+        <div style="display: flex;">
+            <div class="bell-container" onclick="toggleNotifications()" id="bellIcon" style="display:none;">
+                <span class="bell-icon">🔔</span>
+                <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                <div class="notif-dropdown" id="notifDropdown">
+                    <h4 style="color:white; margin-bottom:10px; text-align:center;">Bildirimler</h4>
+                    <div id="notifList"><p style="text-align:center; font-size:0.8rem;">Bildirim yok.</p></div>
+                </div>
+            </div>
+            <div class="friends-btn" id="friendListBtn" onclick="toggleFriends()" style="display:none;">
+                👤
+                <div class="friends-dropdown" id="friendsDropdown">
+                    <h4 style="color:white; margin-bottom:10px; text-align:center;">Takip Ettiklerin</h4>
+                    <div id="friendsListContainer"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-```
-<div class="topbar-center">
-  <div class="streak" id="streakBadge">
-    🔥 <span id="streakCount">0</span>&thinsp;<span id="txtStreak">Seri</span>
-  </div>
-</div>
-
-<div class="topbar-right">
-  <div class="icon-btn" id="bellBtn" onclick="toggleDropdown('notifDrop')">
-    🔔
-    <span class="notif-dot" id="notifDot">0</span>
-    <div class="dropdown" id="notifDrop">
-      <div class="dropdown-title">Bildirimler</div>
-      <div id="notifList"><div class="empty-state">Bildirim yok.</div></div>
+    <div id="loginView" class="auth-container">
+        <h1 id="txtL1">BIO-CHEF</h1>
+        <div class="role-selector">
+            <button class="role-btn active" onclick="setRole('user', this)">DANIŞAN</button>
+            <button class="role-btn" onclick="setRole('dietician', this)">DİYETİSYEN</button>
+        </div>
+        <input type="email" id="lEmail" placeholder="E-posta">
+        <input type="password" id="lPass" placeholder="Şifre">
+        <button class="btn btn-main" id="txtL4" onclick="doLogin()">GİRİŞ YAP</button>
+        <button class="btn btn-outline" id="txtL5" style="border:none;" onclick="doReset()">Şifremi Unuttum?</button>
+        <button class="btn btn-outline" id="txtL6" onclick="toggleView('regView')">Kayıt Ol</button>
     </div>
-  </div>
-  <div class="icon-btn" id="friendBtn" onclick="toggleDropdown('friendDrop')">
-    👤
-    <div class="dropdown" id="friendDrop">
-      <div class="dropdown-title">Takip Ettiklerin</div>
-      <div id="friendList"><div class="empty-state">Takip yok.</div></div>
+
+    <div id="regView" class="auth-container" style="display:none;">
+        <h1 id="txtR7">KAYIT OL</h1>
+        <div class="role-selector">
+            <button class="role-btn active" onclick="setRole('user', this)">DANIŞAN</button>
+            <button class="role-btn" onclick="setRole('dietician', this)">DİYETİSYEN</button>
+        </div>
+        <input type="email" id="rEmail" placeholder="E-posta">
+        <input type="text" id="rUser" placeholder="Kullanıcı Adı (Örn: fit_chef)">
+        <input type="password" id="rPass" placeholder="Şifre">
+        <button class="btn btn-sub" id="txtR8" onclick="doRegister()">HESABI OLUŞTUR</button>
+        <button class="btn btn-outline" id="txtR9" onclick="toggleView('loginView')">Geri Dön</button>
     </div>
-  </div>
+
+    <div id="mainView" style="display:none;">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div id="clock" style="font-size: 2.2rem; font-weight: 800; color: var(--accent);">00:00:00</div>
+            <div id="uMail" class="user-tag"></div> 
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <input type="number" id="uAge" placeholder="YAŞ" onchange="saveUserData()">
+            <input type="number" id="uWeight" placeholder="KİLO" onchange="saveUserData()">
+        </div>
+        <select id="uGoal" onchange="saveUserData()">
+            <option id="opt1" value="Kilo Vermek">Kilo Vermek (-)</option>
+            <option id="opt2" value="Kilo Almak">Kilo Almak (+)</option>
+            <option id="opt3" value="Kiloyu Korumak">Kiloyu Korumak (=)</option>
+        </select>
+        <div class="cam-box"><video id="video" autoplay playsinline onclick="this.play()"></video></div>
+        <canvas id="canvas" style="display:none;"></canvas>
+        <button class="btn btn-main" id="btnAnalyzeText" onclick="runAI('yemek')">📸 ANALİZ ET</button>
+        <div id="results"></div>
+        <button class="btn btn-main" id="btnPdf" style="display:none; background: #ef4444; margin-top:15px;" onclick="downloadPDF()">📄 PDF OLARAK KAYDET</button>
+
+        <button class="btn btn-outline" id="btnHistToggle" onclick="toggleHistory()" style="margin-top:25px;">📚 GEÇMİŞ ANALİZLERİM</button>
+        <div id="historyPanel" style="display:none; margin-top:15px; padding:15px; border-radius:15px; border: 1px solid #2d3748;">
+            <h3 id="txtHistTitle" style="text-align:center; color:var(--primary); margin-bottom:10px;">Son Taramalarınız</h3>
+            <div id="historyList"></div>
+        </div>
+
+        <button class="btn btn-outline" id="btnPartnerToggle" style="border-color: var(--danger); color: var(--danger);" onclick="togglePartner()">👫 KANKA / ÇİFT ARENASI</button>
+        <div id="partnerPanel" class="partner-box" style="display:none;">
+            <h3 id="txtPartTitle" style="color:var(--danger); margin-bottom:10px;">Partnerini Denetle! 🚨</h3>
+            <input type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin" style="background: rgba(0,0,0,0.5);">
+            <button class="btn btn-sub" id="btnAddFriend" style="background: var(--accent); margin-bottom:5px;" onclick="sendFriendRequest()">➕ ARKADAŞ EKLE İSTEĞİ AT</button>
+            <button class="btn btn-sub" id="btnCheckPart" style="background: var(--danger);" onclick="checkPartner()">🔍 DURUMUNU SORGULA</button>
+            <div id="partnerResult" style="margin-top:15px; font-weight:bold; white-space:pre-line;"></div>
+            <div id="partnerHistoryList" style="margin-top:10px; text-align:left;"></div>
+        </div>
+
+        <div class="premium-area">
+            <button class="btn btn-sub" id="txtBtnPlan" style="margin-top:0; background: var(--premium); color: black;" onclick="handlePlanClick()">📅 HAFTALIK PLANINIZI ÇIKARIN</button>
+            <div id="premiumLockInfo" style="margin-top: 15px;">
+                <div class="premium-title" id="txtPrem">PREMIUM ÜYE | 0.99 $</div>
+                <div id="paypal-button-container"></div>
+            </div>
+        </div>
+
+        <button class="btn btn-outline" id="txtOut" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
+    </div>
 </div>
-```
-
-  </div>
-
-  <!-- ── LOGIN ── -->
-
-  <div id="loginView" class="content">
-    <div class="wordmark" id="txtL1">BIO-CHEF</div>
-    <div class="wordmark-sub">AI Food Intelligence</div>
-
-```
-<div class="role-toggle" id="loginRoleSwitcher">
-  <button class="role-btn active" id="roleD" onclick="setRole('danisan')"><span class="emoji">🥗</span>Danışan</button>
-  <button class="role-btn" id="roleDiet" onclick="setRole('diyetisyen')"><span class="emoji">🩺</span>Diyetisyen</button>
-</div>
-
-<input class="field" type="email"    id="lEmail" placeholder="E-posta">
-<input class="field" type="password" id="lPass"  placeholder="Şifre">
-<button class="btn btn-g"     id="txtL4" onclick="doLogin()">GİRİŞ YAP</button>
-<button class="btn btn-ghost" id="txtL5" style="border:none;" onclick="doReset()">Şifremi Unuttum?</button>
-<button class="btn btn-ghost" id="txtL6" onclick="toggleView('regView')">Kayıt Ol</button>
-```
-
-  </div>
-
-  <!-- ── REGISTER ── -->
-
-  <div id="regView" class="content" style="display:none;">
-    <div class="wordmark" id="txtR7">KAYIT OL</div>
-    <div class="wordmark-sub">Hesap Oluştur</div>
-
-```
-<div class="role-toggle" id="regRoleSwitcher">
-  <button class="role-btn active" id="regRoleD" onclick="setRegRole('danisan')"><span class="emoji">🥗</span>Danışan</button>
-  <button class="role-btn" id="regRoleDiet" onclick="setRegRole('diyetisyen')"><span class="emoji">🩺</span>Diyetisyen</button>
-</div>
-
-<input class="field" type="email"    id="rEmail" placeholder="E-posta">
-<input class="field" type="text"     id="rUser"  placeholder="Kullanıcı Adı">
-<input class="field" type="password" id="rPass"  placeholder="Şifre">
-<button class="btn btn-b"     id="txtR8" onclick="doRegister()">HESABI OLUŞTUR</button>
-<button class="btn btn-ghost" id="txtR9" onclick="toggleView('loginView')">← Geri Dön</button>
-```
-
-  </div>
-
-  <!-- ── MAIN ── -->
-
-  <div id="mainView" class="content" style="display:none;">
-
-```
-<div class="main-header">
-  <div class="clock" id="clock">00:00:00</div>
-  <div class="user-tag" id="uMail"></div>
-  <span class="role-label" id="roleDisplayLabel">Danışan</span>
-</div>
-
-<div class="field-row">
-  <input class="field" type="number" id="uAge"    placeholder="YAŞ">
-  <input class="field" type="number" id="uWeight" placeholder="KİLO (kg)">
-</div>
-<select class="field" id="uGoal">
-  <option id="opt1" value="Kilo Vermek">Kilo Vermek (−)</option>
-  <option id="opt2" value="Kilo Almak">Kilo Almak (+)</option>
-  <option id="opt3" value="Kiloyu Korumak">Kiloyu Korumak (=)</option>
-</select>
-
-<!-- CAMERA -->
-<div class="cam-wrap" id="camWrap">
-  <div class="cam-bracket tl"></div>
-  <div class="cam-bracket tr"></div>
-  <div class="cam-bracket bl"></div>
-  <div class="cam-bracket br"></div>
-  <video id="video" autoplay playsinline onclick="this.play()"></video>
-</div>
-<canvas id="canvas" style="display:none;"></canvas>
-
-<button class="btn btn-g" id="btnAnalyze" onclick="runAI('yemek')">📸 ANALİZ ET</button>
-
-<!-- RESULTS -->
-<div id="results"></div>
-<button class="btn btn-red" id="btnPdf" style="display:none;" onclick="downloadPDF()">📄 PDF OLARAK KAYDET</button>
-
-<!-- HISTORY -->
-<div class="section-divider mt-24"><span>Geçmiş & Sosyal</span></div>
-
-<div class="panel-toggle" id="histToggle" onclick="togglePanel('hist')">
-  <span>📚 <span id="txtHistBtn">GEÇMİŞ ANALİZLERİM</span></span>
-  <span class="arrow">▾</span>
-</div>
-<div class="panel-body" id="histBody">
-  <div class="panel-head" id="txtHistTitle">Son Taramalarınız</div>
-  <div id="historyList"><div class="empty-state">Henüz geçmiş yok.</div></div>
-</div>
-
-<!-- PARTNER -->
-<div class="panel-toggle btn-danger-ghost" id="partToggle" onclick="togglePanel('part')" style="margin-top:8px;">
-  <span>👫 <span id="txtPartBtn">KANKA / ÇİFT ARENASI</span></span>
-  <span class="arrow">▾</span>
-</div>
-<div class="panel-body" id="partBody">
-  <div class="partner-wrap">
-    <div class="partner-head" id="txtPartTitle">Partnerini Denetle! 🚨</div>
-    <input class="field" type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin" style="background:var(--s3); margin-bottom:8px;">
-    <button class="btn btn-b"    id="btnAddFriend"  onclick="sendFriendRequest()" style="margin-top:0;">➕ Arkadaş İsteği Gönder</button>
-    <button class="btn btn-red"  id="btnCheckPart"  onclick="checkPartner()"     style="margin-top:6px;">🔍 Durumunu Sorgula</button>
-    <div id="partnerResult"></div>
-    <div id="partnerHistList" style="margin-top:12px;"></div>
-  </div>
-</div>
-
-<!-- PREMIUM -->
-<div class="section-divider mt-24"><span>Premium</span></div>
-<div class="premium-box">
-  <span class="premium-label" id="txtPrem">PREMIUM ÜYELİK · $0.99</span>
-  <button class="btn btn-amber" id="txtBtnPlan" onclick="handlePlanClick()" style="margin-top:0;">📅 HAFTALIK PLANIMI ÇIKAR</button>
-  <div id="premiumLockInfo" style="margin-top:16px;">
-    <div id="paypal-button-container"></div>
-  </div>
-</div>
-
-<div class="section-divider mt-24"></div>
-<button class="btn btn-ghost" id="txtOut" onclick="doSignOut()">Güvenli Çıkış</button>
-```
-
-  </div><!-- /mainView -->
-</div><!-- /shell -->
-
-<!-- ══════════════════════════════════════════
-     JAVASCRIPT
-══════════════════════════════════════════ -->
 
 <script>
-// Wait for Firebase SDKs to be fully loaded before running anything
-document.addEventListener('DOMContentLoaded', function() {
-// Safety check - if Firebase didn't load, show error
-if (typeof firebase === 'undefined') {
-  document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#04060d;color:#ff3d5a;font-family:sans-serif;text-align:center;padding:20px;flex-direction:column;gap:16px;"><span style="font-size:3rem">⚠️</span><b>Bağlantı hatası.</b><p style="color:#64748b;font-size:.9rem">Sayfayı yenileyin veya internet bağlantınızı kontrol edin.</p><button onclick="location.reload()" style="background:#00f5a0;color:#000;border:none;padding:12px 24px;border-radius:12px;font-weight:700;cursor:pointer;">Yenile</button></div>';
-  return;
-}
-/* ────────────────────────────────────────────
-   i18n
-──────────────────────────────────────────── */
-let currentLang = 'tr';
-const L = {
-  tr: {
-    appTitle:'BIO-CHEF', regTitle:'KAYIT OL',
-    emailH:'E-posta', passH:'Şifre', userH:'Kullanıcı Adı',
-    btnLogin:'GİRİŞ YAP', btnForgot:'Şifremi Unuttum?', btnReg:'Kayıt Ol',
-    btnCreate:'HESABI OLUŞTUR', btnBack:'← Geri Dön',
-    ageH:'YAŞ', weightH:'KİLO (kg)',
-    g1:'Kilo Vermek (−)', g2:'Kilo Almak (+)', g3:'Kiloyu Korumak (=)',
-    btnAna:'📸 ANALİZ ET', btnPlan:'📅 HAFTALIK PLANIMI ÇIKAR',
-    premTitle:'PREMIUM ÜYELİK · $0.99', btnOut:'Güvenli Çıkış',
-    errInfo:'Yaş ve kilo giriniz.', errPlan:'Haftalık plan için Premium üyeliği başlatın.',
-    errUserTaken:'Bu kullanıcı adı zaten alınmış!', loading:'Yapay zeka analiz ediyor…',
-    headsYemek:['HEDEF SKORU 🎯','AÇLIK KRONOMETRESİ ⏳','ÜRÜN ÖZETİ','BESİN DEĞERLERİ','HEDEF ANALİZİ','NET TAVSİYE'],
-    headsPlan:['PAZARTESİ','SALI','ÇARŞAMBA','PERŞEMBE','CUMA','CUMARTESİ','PAZAR'],
-    btnPdf:'📄 PDF OLARAK KAYDET', btnHist:'GEÇMİŞ ANALİZLERİM',
-    histTitle:'Son Taramalarınız', noHist:'Henüz geçmiş yok.', streakTxt:'Seri',
-    btnPart:'KANKA / ÇİFT ARENASI', partTitle:'Partnerini Denetle! 🚨',
-    partH:'Kullanıcı Adı Girin', btnAdd:'➕ Arkadaş İsteği Gönder',
-    btnCheck:'🔍 Durumunu Sorgula',
-    partNoData:'Önce arkadaşlık isteği göndermelisin!',
-    partCatch:'🚨 YAKALANDI! Skor: ', partGood:'✅ Sadık! Skor: ',
-    roleD:'Danışan', roleDiet:'Diyetisyen', noFriend:'Takip yok.', noNotif:'Bildirim yok.'
-  },
-  en: {
-    appTitle:'BIO-CHEF', regTitle:'SIGN UP',
-    emailH:'Email', passH:'Password', userH:'Username',
-    btnLogin:'LOGIN', btnForgot:'Forgot Password?', btnReg:'Sign Up',
-    btnCreate:'CREATE ACCOUNT', btnBack:'← Back',
-    ageH:'AGE', weightH:'WEIGHT (kg)',
-    g1:'Lose Weight', g2:'Gain Weight', g3:'Maintain',
-    btnAna:'📸 ANALYZE', btnPlan:'📅 GET WEEKLY PLAN',
-    premTitle:'PREMIUM · $0.99', btnOut:'Logout',
-    errInfo:'Enter age and weight.', errPlan:'Start Premium to access weekly plan.',
-    errUserTaken:'Username already taken!', loading:'AI is analyzing…',
-    headsYemek:['GOAL SCORE 🎯','HUNGER ⏳','SUMMARY','NUTRITION','GOAL ANALYSIS','ADVICE'],
-    headsPlan:['MON','TUE','WED','THU','FRI','SAT','SUN'],
-    btnPdf:'📄 SAVE AS PDF', btnHist:'MY HISTORY',
-    histTitle:'Recent Scans', noHist:'No history yet.', streakTxt:'Streak',
-    btnPart:'BUDDY ARENA', partTitle:'Inspect Partner! 🚨',
-    partH:'Enter Username', btnAdd:'➕ Send Friend Request',
-    btnCheck:'🔍 Check Status',
-    partNoData:'Send a friend request first!',
-    partCatch:'🚨 CAUGHT! Score: ', partGood:'✅ Loyal! Score: ',
-    roleD:'Client', roleDiet:'Dietitian', noFriend:'No follows.', noNotif:'No notifications.'
-  }
-};
-
-function t(k) { return L[currentLang][k] || k; }
-function s(id, val) { const el = document.getElementById(id); if(el) el.innerText = val; }
-function ph(id, val) { const el = document.getElementById(id); if(el) el.placeholder = val; }
-
-function changeLang(l) {
-  currentLang = l;
-  s('txtL1', t('appTitle')); s('txtR7', t('regTitle'));
-  ph('lEmail', t('emailH')); ph('lPass', t('passH'));
-  ph('rEmail', t('emailH')); ph('rPass', t('passH')); ph('rUser', t('userH'));
-  s('txtL4', t('btnLogin')); s('txtL5', t('btnForgot')); s('txtL6', t('btnReg'));
-  s('txtR8', t('btnCreate')); s('txtR9', t('btnBack'));
-  ph('uAge', t('ageH')); ph('uWeight', t('weightH'));
-  s('opt1', t('g1')); s('opt2', t('g2')); s('opt3', t('g3'));
-  s('btnAnalyze', t('btnAna')); s('txtBtnPlan', t('btnPlan'));
-  s('txtPrem', t('premTitle')); s('txtOut', t('btnOut'));
-  s('btnPdf', t('btnPdf')); s('txtHistBtn', t('btnHist'));
-  s('txtHistTitle', t('histTitle')); s('txtStreak', t('streakTxt'));
-  s('txtPartBtn', t('btnPart')); s('txtPartTitle', t('partTitle'));
-  ph('partnerUser', t('partH')); s('btnAddFriend', t('btnAdd'));
-  s('btnCheckPart', t('btnCheck'));
-}
-
-/* ────────────────────────────────────────────
-   ROLE
-──────────────────────────────────────────── */
-let currentRole    = 'danisan';
-let currentRegRole = 'danisan';
-
-function setRole(r) {
-  currentRole = r;
-  document.getElementById('roleD').classList.toggle('active', r === 'danisan');
-  document.getElementById('roleDiet').classList.toggle('active', r === 'diyetisyen');
-}
-function setRegRole(r) {
-  currentRegRole = r;
-  document.getElementById('regRoleD').classList.toggle('active', r === 'danisan');
-  document.getElementById('regRoleDiet').classList.toggle('active', r === 'diyetisyen');
-}
-
-/* ────────────────────────────────────────────
-   FIREBASE
-──────────────────────────────────────────── */
-firebase.initializeApp({
-  apiKey:"AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
-  authDomain:"voice2post-9e8ca.firebaseapp.com",
-  projectId:"voice2post-9e8ca",
-  storageBucket:"voice2post-9e8ca.firebasestorage.app",
-  messagingSenderId:"511446656614",
-  appId:"1:511446656614:web:32101ee70299543c716fa7"
-});
-const auth = firebase.auth();
-const db   = firebase.firestore();
-let isVip  = false;
-
-/* ────────────────────────────────────────────
-   VIEW ROUTING
-──────────────────────────────────────────── */
-function toggleView(id) {
-  ['loginView','regView','mainView'].forEach(v => {
-    document.getElementById(v).style.display = v === id ? 'block' : 'none';
-  });
-}
-
-/* ────────────────────────────────────────────
-   CLOCK
-──────────────────────────────────────────── */
-setInterval(() => {
-  const el = document.getElementById('clock');
-  if(el) el.innerText = new Date().toLocaleTimeString();
-}, 1000);
-
-/* ────────────────────────────────────────────
-   AUTH
-──────────────────────────────────────────── */
-auth.onAuthStateChanged(user => {
-  if(user) {
-    toggleView('mainView');
-    const name = user.displayName || user.email.split('@')[0];
-    document.getElementById('uMail').innerText = '@' + name;
-
-    // Load saved role
-    const savedRole = localStorage.getItem('role_' + user.uid) || 'danisan';
-    document.getElementById('roleDisplayLabel').innerText =
-      savedRole === 'diyetisyen' ? t('roleDiet') : t('roleD');
-
-    isVip = localStorage.getItem('vip_' + user.uid) === 'true';
-    document.getElementById('premiumLockInfo').style.display = isVip ? 'none' : 'block';
-    if(!isVip) initPayPal();
-
-    document.getElementById('bellBtn').classList.add('show');
-    document.getElementById('friendBtn').classList.add('show');
-
-    // Restore saved age/weight
-    const savedAge    = localStorage.getItem('age_'    + user.uid);
-    const savedWeight = localStorage.getItem('weight_' + user.uid);
-    if(savedAge)    document.getElementById('uAge').value    = savedAge;
-    if(savedWeight) document.getElementById('uWeight').value = savedWeight;
-
-    const me = name.toLowerCase();
-    db.collection('partner_data').doc(me).set({ username: me }, { merge: true });
-
-    listenNotifications(me);
-    listenFriends(me);
-    showStreak();
-    startCamera();
-  } else {
-    toggleView('loginView');
-  }
-});
-
-// Auto-save age/weight on change
-['uAge','uWeight'].forEach(id => {
-  document.getElementById(id)?.addEventListener('change', function() {
-    if(!auth.currentUser) return;
-    const key = id === 'uAge' ? 'age_' : 'weight_';
-    localStorage.setItem(key + auth.currentUser.uid, this.value);
-    // Also update Firestore
-    const me = (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]).toLowerCase();
-    const field = id === 'uAge' ? { age: this.value } : { weight: this.value };
-    db.collection('partner_data').doc(me).set(field, { merge: true });
-  });
-});
-
-async function doLogin() {
-  try { await auth.signInWithEmailAndPassword(
-    document.getElementById('lEmail').value,
-    document.getElementById('lPass').value
-  ); }
-  catch(e) { alert(e.message); }
-}
-
-async function doRegister() {
-  const u = document.getElementById('rUser').value.trim();
-  const e = document.getElementById('rEmail').value.trim();
-  const p = document.getElementById('rPass').value;
-  if(!u || !e || !p) return alert('Lütfen tüm alanları doldurun.');
-  try {
-    const check = await db.collection('partner_data').doc(u.toLowerCase()).get();
-    if(check.exists) return alert(t('errUserTaken'));
-    const cred = await auth.createUserWithEmailAndPassword(e, p);
-    await cred.user.updateProfile({ displayName: u });
-    await db.collection('partner_data').doc(u.toLowerCase()).set({
-      username: u.toLowerCase(),
-      role: currentRegRole
-    }, { merge: true });
-    localStorage.setItem('role_' + cred.user.uid, currentRegRole);
-    location.reload();
-  } catch(err) { alert(err.message); }
-}
-
-function doReset() {
-  const email = document.getElementById('lEmail').value;
-  if(!email) return alert('Lütfen e-posta adresinizi girin.');
-  auth.sendPasswordResetEmail(email).then(() => alert('Şifre sıfırlama bağlantısı gönderildi.'));
-}
-
-function doSignOut() {
-  auth.signOut().then(() => location.reload());
-}
-
-/* ────────────────────────────────────────────
-   DROPDOWN / PANEL TOGGLES
-──────────────────────────────────────────── */
-function toggleDropdown(id) {
-  // Close all dropdowns first
-  ['notifDrop','friendDrop'].forEach(d => {
-    if(d !== id) document.getElementById(d).classList.remove('open');
-  });
-  document.getElementById(id).classList.toggle('open');
-}
-// Close dropdowns on outside click
-document.addEventListener('click', e => {
-  if(!e.target.closest('.icon-btn')) {
-    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
-  }
-});
-
-function togglePanel(name) {
-  const toggle = document.getElementById(name + 'Toggle');
-  const body   = document.getElementById(name + 'Body');
-  const isOpen = body.classList.contains('open');
-  toggle.classList.toggle('open', !isOpen);
-  body.classList.toggle('open', !isOpen);
-  if(!isOpen && name === 'hist') renderHistory();
-  if(!isOpen && name === 'part') {
-    // Scroll to partner panel
-    setTimeout(() => body.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
-  }
-}
-
-/* ────────────────────────────────────────────
-   NOTIFICATIONS
-──────────────────────────────────────────── */
-function listenNotifications(me) {
-  db.collection('notifications').where('toUser','==',me).onSnapshot(snap => {
-    const list  = document.getElementById('notifList');
-    const dot   = document.getElementById('notifDot');
-    list.innerHTML = '';
-    let c = 0;
-    snap.forEach(doc => {
-      c++;
-      const d = doc.data();
-      let html = '<div class="notif-item">';
-      if(d.type === 'friend_request') {
-        html += `🤝 <b>@${d.fromUser}</b> takip etmek istiyor.<br>
-          <button class="btn-accept" onclick="acceptFriend('${d.fromUser}','${doc.id}')">Kabul Et</button>`;
-      } else {
-        html += `${d.message || ''}
-          <br><button class="btn-accept" onclick="deleteNotif('${doc.id}')" style="background:var(--red);color:#fff;">Sil</button>`;
-      }
-      html += '</div>';
-      list.innerHTML += html;
-    });
-    dot.innerText = c;
-    dot.classList.toggle('show', c > 0);
-    if(c === 0) list.innerHTML = `<div class="empty-state">${t('noNotif')}</div>`;
-  });
-}
-
-function acceptFriend(u, id) {
-  const me = (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]).toLowerCase();
-  db.collection('partner_data').doc(me).update({ friends: firebase.firestore.FieldValue.arrayUnion(u) });
-  db.collection('partner_data').doc(u).update({ friends: firebase.firestore.FieldValue.arrayUnion(me) });
-  db.collection('notifications').doc(id).delete();
-}
-function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
-
-/* ────────────────────────────────────────────
-   FRIENDS
-──────────────────────────────────────────── */
-function listenFriends(me) {
-  db.collection('partner_data').doc(me).onSnapshot(doc => {
-    const list = document.getElementById('friendList');
-    list.innerHTML = '';
-    if(doc.exists && doc.data().friends?.length) {
-      doc.data().friends.forEach(f => {
-        list.innerHTML += `
-          <div class="friend-item" onclick="openFriendCheck('${f}')">
-            <span class="fa">👤</span>@${f}
-          </div>`;
-      });
-    } else {
-      list.innerHTML = `<div class="empty-state">${t('noFriend')}</div>`;
-    }
-  });
-}
-
-function openFriendCheck(u) {
-  document.getElementById('partnerUser').value = u;
-  // Open partner panel
-  const body = document.getElementById('partBody');
-  if(!body.classList.contains('open')) togglePanel('part');
-  // Close dropdown
-  document.getElementById('friendDrop').classList.remove('open');
-  checkPartner();
-  // Scroll
-  setTimeout(() => body.scrollIntoView({ behavior:'smooth', block:'start' }), 150);
-}
-
-/* ────────────────────────────────────────────
-   PARTNER
-──────────────────────────────────────────── */
-function sendFriendRequest() {
-  const u  = document.getElementById('partnerUser').value.trim().toLowerCase();
-  const me = (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]).toLowerCase();
-  if(!u || u === me) return alert(t('partH') + ' boş olamaz.');
-  db.collection('notifications').add({ toUser:u, fromUser:me, type:'friend_request', timestamp:Date.now() });
-  alert('İstek gönderildi!');
-}
-
-function checkPartner() {
-  const u   = document.getElementById('partnerUser').value.trim().toLowerCase();
-  const res = document.getElementById('partnerResult');
-  const histList = document.getElementById('partnerHistList');
-  if(!u) return;
-  res.style.display = 'block';
-  res.innerText = '…';
-  db.collection('partner_data').doc(u).get().then(doc => {
-    if(doc.exists && doc.data().score !== undefined) {
-      const s = doc.data().score;
-      res.innerText = (s < 7 ? t('partCatch') : t('partGood')) + s + '/10';
-      res.style.color = s < 7 ? 'var(--red)' : 'var(--g)';
-    } else {
-      res.innerText = t('partNoData');
-      res.style.color = 'var(--muted)';
-    }
-    // Partner history — stored in their localStorage can't be read cross-user
-    // Show what we know from Firestore
-    const data = doc.exists ? doc.data() : {};
-    histList.innerHTML = '';
-    if(data.lastMeal) {
-      histList.innerHTML = `<div class="partner-hist-item">
-        <span>${data.time || ''} — ${data.lastMeal}</span>
-        <span class="partner-hist-score">${data.score ?? '?'}/10</span>
-      </div>`;
-    }
-  });
-}
-
-/* ────────────────────────────────────────────
-   CAMERA
-──────────────────────────────────────────── */
-function startCamera() {
-  navigator.mediaDevices.getUserMedia({ video: { facingMode:'environment' } })
-    .then(stream => {
-      const vid = document.getElementById('video');
-      vid.srcObject = stream;
-      vid.play().catch(() => {});
-    })
-    .catch(() => {
-      document.getElementById('camWrap').innerHTML = `
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
-          height:100%;color:var(--muted);font-size:.85rem;text-align:center;gap:10px;padding:20px;">
-          <span style="font-size:2.5rem;">📷</span>
-          Kamera izni reddedildi.<br>Tarayıcı ayarlarından izin verin.
-        </div>`;
-    });
-}
-
-async function captureFrame() {
-  const vid = document.getElementById('video');
-  if(!vid.srcObject) throw new Error('Kamera bağlı değil. Lütfen kamera iznini verin.');
-  if(vid.readyState < 2) {
-    await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => reject(new Error('Kamera hazırlanamadı. Sayfayı yenileyin.')), 6000);
-      vid.addEventListener('canplay', () => { clearTimeout(timeout); resolve(); }, { once:true });
-    });
-  }
-  if(vid.paused) await vid.play().catch(() => {});
-  const canv = document.createElement('canvas');
-  canv.width = 512; canv.height = 512;
-  canv.getContext('2d').drawImage(vid, 0, 0, 512, 512);
-  const img = canv.toDataURL('image/jpeg', 0.65);
-  if(img.length < 6000) throw new Error('Kamera görüntüsü alınamadı. Kameranızı kontrol edin.');
-  return img;
-}
-
-/* ────────────────────────────────────────────
-   AI ANALYSIS
-──────────────────────────────────────────── */
-async function runAI(mode) {
-  const resDiv  = document.getElementById('results');
-  const age     = document.getElementById('uAge').value;
-  const weight  = document.getElementById('uWeight').value;
-  if(!age || !weight) return alert(t('errInfo'));
-
-  // Scanning animation
-  document.getElementById('camWrap').classList.add('active');
-
-  resDiv.style.display = 'flex';
-  resDiv.innerHTML = `
-    <div class="loading-card">
-      <div class="loading-dots"><span></span><span></span><span></span></div>
-      <div class="loading-text">${t('loading')}</div>
-    </div>`;
-
-  // Scroll to results
-  setTimeout(() => resDiv.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
-
-  let img = '';
-  if(mode === 'yemek') {
-    try { img = await captureFrame(); }
-    catch(camErr) {
-      document.getElementById('camWrap').classList.remove('active');
-      resDiv.innerHTML = `<div class="loading-card"><div class="loading-text" style="color:var(--red);">📷 ${camErr.message}</div></div>`;
-      return;
-    }
-  }
-
-  try {
-    const r = await fetch('/api/analyze', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({
-        mode, image: img,
-        user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`,
-        lang: currentLang
-      })
-    });
-
-    document.getElementById('camWrap').classList.remove('active');
-
-    if(!r.ok) {
-      const err = await r.json().catch(() => ({}));
-      throw new Error(err.error || `Sunucu hatası (${r.status})`);
-    }
-
-    const data = await r.json();
-    if(!data.analysis) throw new Error('Analiz sonucu boş geldi.');
-
-    resDiv.innerHTML = '';
-    const sections = data.analysis.split(/\d+\./).filter(s => s.trim().length > 5);
-    const heads    = mode === 'plan' ? t('headsPlan') : t('headsYemek');
-    let score = 5;
-
-    sections.forEach((txt, i) => {
-      const card = document.createElement('div');
-      card.className = 'rcard';
-      card.style.animationDelay = (i * .07) + 's';
-      let content = txt.trim();
-
-      // Score — only in yemek mode
-      if(mode === 'yemek' && i === 0) {
-        const match = content.match(/\[SKOR:\s*(\d+)\]/i);
-        if(match) {
-          score   = parseInt(match[1]);
-          content = content.replace(match[0], '').trim();
-          updateStreak(score);
+    let currentLang = 'tr';
+    let userRole = 'user';
+    const langData = {
+        tr: {
+            appTitle: "BIO-CHEF", emailHolder: "E-posta", passHolder: "Şifre", btnLogin: "GİRİŞ YAP", btnReset: "Şifremi Unuttum?", btnReg: "Kayıt Ol",
+            regTitle: "KAYIT OL", btnCreate: "HESABI OLUŞTUR", btnBack: "Geri Dön", ageHolder: "YAŞ", weightHolder: "KİLO",
+            g1: "Kilo Vermek (-)", g2: "Kilo Almak (+)", g3: "Kiloyu Korumak (=)", btnAna: "📸 ANALİZ ET", btnPlan: "📅 HAFTALIK PLANINIZI ÇIKARIN",
+            premTitle: "PREMIUM ÜYE | 0.99 $", btnOut: "GÜVENLİ ÇIKIŞ", errMail: "Mail veya Kullanıcı Adı eksik.", errInfo: "Bilgileri girin.",
+            errPlan: "Haftalık plan için aşağıdan Premium üyeliğinizi başlatın.", errMsg: "Hata!", errUserTaken: "Bu kullanıcı adı zaten alınmış!",
+            loading: "🔍 İnceleniyor...", headersYemek: ["HEDEF SKORU 🎯", "AÇLIK KRONOMETRESİ ⏳", "ÜRÜN ÖZETİ", "BESİN DEĞERLERİ", "HEDEF ANALİZİ", "NET TAVSİYE"],
+            headersPlan: ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"], payDesc: "Bio-Chef Pro Haftalık Plan Erişimi",
+            paySucc: "Ödeme Başarılı!", btnPdfTxt: "📄 PDF OLARAK KAYDET", btnHistTxt: "📚 GEÇMİŞ ANALİZLERİM", histTitle: "Son Taramalarınız",
+            noHist: "Henüz geçmiş yok.", streakTxt: "Seri", btnPartToggle: "👫 KANKA / ÇİFT ARENASI", partTitle: "Partnerini Denetle! 🚨",
+            partInput: "Kullanıcı Adı Girin", btnPartCheck: "🔍 DURUMUNU SORGULA", partErr: "Lütfen partner kullanıcı adı girin.",
+            partNoData: "Önce ona arkadaşlık isteği atmalısın!", partCatch: "🚨 YAKALANDI! Skor: ", partGood: "✅ Sadık! Skor: "
+        },
+        en: {
+            appTitle: "BIO-CHEF", emailHolder: "Email", passHolder: "Password", btnLogin: "LOGIN", btnReset: "Forgot?", btnReg: "Sign Up",
+            regTitle: "SIGN UP", btnCreate: "CREATE ACCOUNT", btnBack: "Back", ageHolder: "AGE", weightHolder: "WEIGHT",
+            g1: "Lose Weight", g2: "Gain Weight", g3: "Maintain", btnAna: "📸 ANALYZE", btnPlan: "📅 GET WEEKLY PLAN",
+            premTitle: "PREMIUM | $0.99", btnOut: "LOGOUT", errMail: "Missing info.", errInfo: "Enter info.",
+            errPlan: "Start Premium for plan.", errMsg: "Error!", errUserTaken: "Username taken!",
+            loading: "🔍 Analyzing...", headersYemek: ["GOAL SCORE 🎯", "HUNGER ⏳", "SUMMARY", "NUTRITION", "GOAL ANALYSIS", "ADVICE"],
+            headersPlan: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"], payDesc: "Bio-Chef Pro Access",
+            paySucc: "Success!", btnPdfTxt: "📄 SAVE AS PDF", btnHistTxt: "📚 MY HISTORY", histTitle: "Recent Scans",
+            noHist: "No history.", streakTxt: "Streak", btnPartToggle: "👫 BUDDY ARENA", partTitle: "Inspect Partner!",
+            partInput: "Enter Username", btnPartCheck: "🔍 CHECK", partErr: "Enter username.",
+            partNoData: "Send request first!", partCatch: "🚨 CAUGHT! Score: ", partGood: "✅ Loyal! Score: "
         }
-        const pct = (score / 10) * 100;
-        card.innerHTML = `
-          <div class="rtag">${heads[i] || 'DETAY'}</div>
-          <div class="rtxt">${content}</div>
-          <div class="score-wrap">
-            <div class="score-track">
-              <div class="score-pin" style="left:${pct}%" id="scorePin">${score}</div>
-            </div>
-            <div class="score-labels"><span>Kötü</span><span>Orta</span><span>Mükemmel</span></div>
-          </div>`;
-      } else {
-        card.innerHTML = `
-          <div class="rtag">${heads[i] || 'DETAY'}</div>
-          <div class="rtxt">${content}</div>`;
-      }
-      resDiv.appendChild(card);
+    };
+
+    function changeLang(l) {
+        currentLang = l;
+        document.getElementById('txtL1').innerText = langData[l].appTitle;
+        document.getElementById('lEmail').placeholder = langData[l].emailHolder;
+        document.getElementById('lPass').placeholder = langData[l].passHolder;
+        document.getElementById('txtL4').innerText = langData[l].btnLogin;
+        document.getElementById('txtL5').innerText = langData[l].btnReset;
+        document.getElementById('txtL6').innerText = langData[l].btnReg;
+        document.getElementById('txtR7').innerText = langData[l].regTitle;
+        document.getElementById('rEmail').placeholder = langData[l].emailHolder;
+        document.getElementById('rPass').placeholder = langData[l].passHolder;
+        document.getElementById('txtR8').innerText = langData[l].btnCreate;
+        document.getElementById('txtR9').innerText = langData[l].btnBack;
+        document.getElementById('uAge').placeholder = langData[l].ageHolder;
+        document.getElementById('uWeight').placeholder = langData[l].weightHolder;
+        document.getElementById('opt1').innerText = langData[l].g1;
+        document.getElementById('opt2').innerText = langData[l].g2;
+        document.getElementById('opt3').innerText = langData[l].g3;
+        document.getElementById('btnAnalyzeText').innerText = langData[l].btnAna;
+        document.getElementById('txtBtnPlan').innerText = langData[l].btnPlan;
+        document.getElementById('txtPrem').innerText = langData[l].premTitle;
+        document.getElementById('txtOut').innerText = langData[l].btnOut;
+        document.getElementById('btnPdf').innerText = langData[l].btnPdfTxt;
+        document.getElementById('btnHistToggle').innerText = langData[l].btnHistTxt;
+        document.getElementById('txtHistTitle').innerText = langData[l].histTitle;
+        document.getElementById('txtStreak').innerText = langData[l].streakTxt; 
+        document.getElementById('btnPartnerToggle').innerText = langData[l].btnPartToggle;
+        document.getElementById('txtPartTitle').innerText = langData[l].partTitle;
+        document.getElementById('partnerUser').placeholder = langData[l].partInput; 
+        document.getElementById('btnCheckPart').innerText = langData[l].btnPartCheck;
+    }
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
+        authDomain: "voice2post-9e8ca.firebaseapp.com",
+        projectId: "voice2post-9e8ca",
+        storageBucket: "voice2post-9e8ca.firebasestorage.app",
+        messagingSenderId: "511446656614",
+        appId: "1:511446656614:web:32101ee70299543c716fa7"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore(); 
+    let isVip = false;
+
+    function setRole(role, btn) {
+        userRole = role;
+        const btns = btn.parentElement.querySelectorAll('.role-btn');
+        btns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    function toggleView(id) {
+        document.getElementById('loginView').style.display = 'none';
+        document.getElementById('regView').style.display = 'none';
+        document.getElementById('mainView').style.display = 'none';
+        document.getElementById(id).style.display = 'block';
+    }
+
+    setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            toggleView('mainView');
+            let display = user.displayName ? "@" + user.displayName : "@" + user.email.split('@')[0];
+            document.getElementById('uMail').innerText = display;
+            isVip = localStorage.getItem('vip_' + user.uid) === 'true';
+            
+            // Veri Yükleme
+            const saved = JSON.parse(localStorage.getItem('userData_' + user.uid) || '{}');
+            if(saved.age) document.getElementById('uAge').value = saved.age;
+            if(saved.weight) document.getElementById('uWeight').value = saved.weight;
+            if(saved.goal) document.getElementById('uGoal').value = saved.goal;
+
+            if(!isVip) { document.getElementById('premiumLockInfo').style.display = 'block'; initPayPal(); } 
+            else { document.getElementById('premiumLockInfo').style.display = 'none'; }
+            document.getElementById('bellIcon').style.display = 'flex'; 
+            document.getElementById('friendListBtn').style.display = 'flex'; 
+            listenNotifications(); listenFriends(); showStreak();
+            
+            let me = user.displayName ? user.displayName.toLowerCase() : user.email.split('@')[0].toLowerCase();
+            db.collection('partner_data').doc(me).set({ username: me, role: userRole }, { merge: true });
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
+        } else { toggleView('loginView'); }
     });
 
-    document.getElementById('btnPdf').style.display = 'flex';
-    if(mode === 'yemek') saveHistory(score, data.analysis);
+    function saveUserData() {
+        if(!auth.currentUser) return;
+        const data = {
+            age: document.getElementById('uAge').value,
+            weight: document.getElementById('uWeight').value,
+            goal: document.getElementById('uGoal').value
+        };
+        localStorage.setItem('userData_' + auth.currentUser.uid, JSON.stringify(data));
+        let me = auth.currentUser.displayName.toLowerCase();
+        db.collection('partner_data').doc(me).set(data, { merge: true });
+    }
 
-    // Scroll to results
-    setTimeout(() => resDiv.scrollIntoView({ behavior:'smooth', block:'start' }), 200);
+    async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); } }
+    async function doRegister() { 
+        const u = document.getElementById('rUser').value.trim();
+        const e = document.getElementById('rEmail').value;
+        const p = document.getElementById('rPass').value;
+        if(!u || !e || !p) return alert("Eksik.");
+        try { 
+            const check = await db.collection('partner_data').doc(u.toLowerCase()).get();
+            if(check.exists) return alert(langData[currentLang].errUserTaken);
+            const cred = await auth.createUserWithEmailAndPassword(e, p);
+            await cred.user.updateProfile({ displayName: u });
+            await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase(), role: userRole }, { merge: true });
+            location.reload(); 
+        } catch(err) { alert(err.message); } 
+    }
 
-  } catch(e) {
-    document.getElementById('camWrap').classList.remove('active');
-    console.error('[BioChef]', e);
-    resDiv.innerHTML = `<div class="loading-card"><div class="loading-text" style="color:var(--red);">⚠️ ${e.message}</div></div>`;
-  }
-}
+    function toggleNotifications() {
+        const d = document.getElementById('notifDropdown');
+        document.getElementById('friendsDropdown').style.display = 'none';
+        d.style.display = d.style.display === 'none' ? 'block' : 'none';
+    }
 
-/* ────────────────────────────────────────────
-   HISTORY
-──────────────────────────────────────────── */
-function saveHistory(score, raw) {
-  const me  = (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]).toLowerCase();
-  const now = new Date();
-  db.collection('partner_data').doc(me).set({
-    score, lastMeal: raw.substring(0,60), time: now.toLocaleTimeString()
-  }, { merge: true });
+    function toggleFriends() {
+        const d = document.getElementById('friendsDropdown');
+        document.getElementById('notifDropdown').style.display = 'none';
+        d.style.display = d.style.display === 'none' ? 'block' : 'none';
+    }
 
-  const key = 'history_' + auth.currentUser.uid;
-  const arr = JSON.parse(localStorage.getItem(key) || '[]');
-  arr.unshift({ score, date: now.toLocaleString(), raw });
-  localStorage.setItem(key, JSON.stringify(arr.slice(0,20)));
-}
+    function listenFriends() {
+        let me = auth.currentUser.displayName ? auth.currentUser.displayName.toLowerCase() : auth.currentUser.email.split('@')[0].toLowerCase();
+        db.collection('partner_data').doc(me).onSnapshot(doc => {
+            const container = document.getElementById('friendsListContainer');
+            container.innerHTML = '';
+            if(doc.exists && doc.data().friends) {
+                doc.data().friends.forEach(f => {
+                    container.innerHTML += `<div class="friend-link" onclick="checkSpecific('${f}')">@${f}</div>`;
+                });
+            } else { container.innerHTML = '<p style="text-align:center;font-size:0.7rem;">Takip yok.</p>'; }
+        });
+    }
 
-function renderHistory() {
-  const list = document.getElementById('historyList');
-  const arr  = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-  if(!arr.length) {
-    list.innerHTML = `<div class="empty-state">${t('noHist')}</div>`;
-    return;
-  }
-  list.innerHTML = arr.map((h, i) => `
-    <div class="hist-item" onclick="openHistModal(${i})">
-      <div class="hist-info">
-        <div class="hist-date">${h.date}</div>
-        <div class="hist-summary">Skor ${h.score}/10 — Analiz görüntüle →</div>
-      </div>
-      <div class="hist-score">${h.score}</div>
-    </div>`).join('');
-}
+    function checkSpecific(u) {
+        document.getElementById('partnerUser').value = u;
+        document.getElementById('partnerPanel').style.display = 'block';
+        document.getElementById('partnerPanel').scrollIntoView();
+        checkPartner(); toggleFriends();
+    }
 
-function openHistModal(i) {
-  const arr  = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-  const item = arr[i];
-  if(!item) return;
-  document.getElementById('modalTitle').innerText = `Skor: ${item.score}/10`;
-  document.getElementById('modalDate').innerText  = item.date;
-  document.getElementById('modalBody').innerText  = item.raw || '—';
-  document.getElementById('histModal').classList.add('open');
-}
+    function listenNotifications() {
+        let me = auth.currentUser.displayName ? auth.currentUser.displayName.toLowerCase() : auth.currentUser.email.split('@')[0].toLowerCase();
+        db.collection('notifications').where('toUser', '==', me).onSnapshot(snap => {
+            const list = document.getElementById('notifList');
+            const badge = document.getElementById('notifBadge');
+            list.innerHTML = ''; let c = 0;
+            snap.forEach(doc => {
+                c++; let d = doc.data();
+                let html = `<div class="notif-item">`;
+                if(d.type === 'friend_request') {
+                    html += `🤝 @${d.fromUser} takip etmek istiyor.<br><button class="notif-btn" onclick="acceptFriend('${d.fromUser}','${doc.id}')">Kabul Et</button>`;
+                } else { html += `${d.message}<br><button class="notif-btn" onclick="deleteNotif('${doc.id}')">Sil</button>`; }
+                html += `</div>`; list.innerHTML += html;
+            });
+            badge.style.display = c > 0 ? 'flex' : 'none'; badge.innerText = c;
+        });
+    }
 
-function closeModal() {
-  document.getElementById('histModal').classList.remove('open');
-}
+    function acceptFriend(u, id) {
+        let me = auth.currentUser.displayName.toLowerCase();
+        db.collection('partner_data').doc(me).update({ friends: firebase.firestore.FieldValue.arrayUnion(u) });
+        db.collection('partner_data').doc(u).update({ friends: firebase.firestore.FieldValue.arrayUnion(me) });
+        db.collection('notifications').doc(id).delete();
+    }
 
-/* ────────────────────────────────────────────
-   STREAK
-──────────────────────────────────────────── */
-function showStreak() {
-  const key = 'streak_' + auth.currentUser.uid;
-  const d   = JSON.parse(localStorage.getItem(key) || '{"count":0}');
-  const badge = document.getElementById('streakBadge');
-  if(d.count > 0) {
-    badge.style.display = 'flex';
-    document.getElementById('streakCount').innerText = d.count;
-  }
-}
-function updateStreak(score) {
-  const key = 'streak_' + auth.currentUser.uid;
-  const d   = JSON.parse(localStorage.getItem(key) || '{"count":0,"last":""}');
-  const today = new Date().toLocaleDateString();
-  if(score >= 7) { if(d.last !== today) d.count++; d.last = today; }
-  else { d.count = 0; }
-  localStorage.setItem(key, JSON.stringify(d));
-  showStreak();
-}
+    function sendFriendRequest() {
+        const u = document.getElementById('partnerUser').value.trim().toLowerCase();
+        let me = auth.currentUser.displayName.toLowerCase();
+        if(!u || u === me) return alert(langData[currentLang].partErr);
+        db.collection('notifications').add({ toUser: u, fromUser: me, type: 'friend_request', timestamp: Date.now() });
+        alert("Gönderildi.");
+    }
 
-/* ────────────────────────────────────────────
-   PAYPAL
-──────────────────────────────────────────── */
-function initPayPal() {
-  function renderButtons() {
-    paypal.Buttons({
-      createOrder: (d, a) => a.order.create({ purchase_units:[{ amount:{ value:'0.99' } }] }),
-      onApprove:   (d, a) => a.order.capture().then(() => {
-        localStorage.setItem('vip_' + auth.currentUser.uid, 'true');
-        location.reload();
-      })
-    }).render('#paypal-button-container').catch(e => console.error('PayPal render hatasi:', e));
-  }
-  // Use lazy loader defined in <head>
-  window._paypalCb = renderButtons;
-  if(typeof window._loadPayPal === 'function') window._loadPayPal();
-}
+    async function runAI(mode) {
+        const resDiv = document.getElementById('results');
+        const age = document.getElementById('uAge').value;
+        const weight = document.getElementById('uWeight').value;
+        if(!age || !weight) return alert(langData[currentLang].errInfo);
+        resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
+        resDiv.style.display = 'flex';
+        resDiv.scrollIntoView();
+        let img = "";
+        if(mode === 'yemek') {
+            const vid = document.getElementById('video');
+            const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
+            canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
+            img = canv.toDataURL('image/jpeg', 0.7);
+        }
+        try {
+            const r = await fetch('/api/analyze', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ mode, image: img, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`, lang: currentLang })
+            });
+            const d = await r.json(); resDiv.innerHTML = '';
+            const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
+            const heads = mode === 'plan' ? langData[currentLang].headersPlan : langData[currentLang].headersYemek;
+            let score = 5;
+            sections.forEach((txt, i) => {
+                const card = document.createElement('div'); card.className = 'report-card';
+                let content = txt.trim();
+                // Koşullu Skor: Sadece Yemek modunda ve skor gelmişse göster
+                if(mode === 'yemek' && i === 0 && content.includes('[SKOR:')) {
+                    const match = content.match(/\[SKOR:\s*(\d+)\]/i);
+                    if(match) { 
+                        score = parseInt(match[1]); content = content.replace(match[0], '').trim(); updateStreak(score); 
+                        let left = (score/10)*100;
+                        card.innerHTML = `<div class="report-tag">${heads[i]}</div><div class="report-txt">${content}</div>
+                        <div class="score-wrapper"><div class="score-bar"><div class="score-marker" style="left:${left}%">${score}</div></div></div>`;
+                    }
+                } else { card.innerHTML = `<div class="report-tag">${heads[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`; }
+                resDiv.appendChild(card);
+            });
+            document.getElementById('btnPdf').style.display = 'block';
+            if(mode === 'yemek') saveHistory(score, d.analysis);
+        } catch(e) { alert(langData[currentLang].errMsg); }
+    }
 
-function handlePlanClick() {
-  if(!isVip) return alert(t('errPlan'));
-  runAI('plan');
-}
+    function saveHistory(score, raw) {
+        let me = auth.currentUser.displayName.toLowerCase();
+        let timestamp = new Date().toLocaleString();
+        
+        db.collection('partner_data').doc(me).set({ 
+            score: score, 
+            lastMeal: raw.substring(0, 50), 
+            time: timestamp 
+        }, { merge: true });
 
-function downloadPDF() {
-  html2pdf().from(document.getElementById('results')).save('biochef-analiz.pdf');
-}
+        // Koleksiyon olarak da kaydet (Detaylar için)
+        db.collection('partner_data').doc(me).collection('history').add({
+            score: score,
+            fullText: raw,
+            date: timestamp
+        });
 
-}); // end DOMContentLoaded
+        let key = 'history_' + auth.currentUser.uid;
+        let arr = JSON.parse(localStorage.getItem(key) || '[]');
+        arr.unshift({ summary: `Skor: ${score}/10`, date: timestamp, detail: raw });
+        localStorage.setItem(key, JSON.stringify(arr.slice(0, 10)));
+    }
+
+    function openDetail(txt) {
+        document.getElementById('modalBody').innerText = txt;
+        document.getElementById('detailModal').style.display = 'block';
+    }
+
+    function toggleHistory() {
+        const p = document.getElementById('historyPanel');
+        p.style.display = p.style.display === 'none' ? 'block' : 'none';
+        if(p.style.display === 'block') {
+            const list = document.getElementById('historyList');
+            let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
+            list.innerHTML = arr.length ? arr.map(h => `
+                <div class="history-box" onclick="openDetail(\`${h.detail.replace(/`/g, "'")}\`)">
+                    <b>📅 ${h.date}</b><br>${h.summary} <br><small style="color:var(--accent)">Detay İçin Tıkla 🔍</small>
+                </div>`).join('') : "Henüz yok.";
+        }
+    }
+
+    function togglePartner() {
+        const p = document.getElementById('partnerPanel');
+        p.style.display = p.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function checkPartner() {
+        const u = document.getElementById('partnerUser').value.trim().toLowerCase();
+        const res = document.getElementById('partnerResult');
+        const histRes = document.getElementById('partnerHistoryList');
+        
+        db.collection('partner_data').doc(u).get().then(doc => {
+            if(doc.exists && doc.data().score !== undefined) {
+                let s = doc.data().score;
+                res.innerText = (s < 7 ? langData[currentLang].partCatch : langData[currentLang].partGood) + s + "/10";
+                
+                // Partner Geçmişini Çek
+                db.collection('partner_data').doc(u).collection('history').orderBy('date', 'desc').limit(5).get().then(snap => {
+                    let html = '<p style="color:var(--primary); margin-top:10px; font-size:0.8rem;">Son Öğünleri:</p>';
+                    snap.forEach(h => {
+                        let hd = h.data();
+                        html += `<div class="history-box" style="font-size:0.7rem;"><b>${hd.date}</b> - Skor: ${hd.score}/10</div>`;
+                    });
+                    histRes.innerHTML = html;
+                });
+
+            } else { res.innerText = "Veri yok veya takip etmiyorsunuz."; histRes.innerHTML = ""; }
+        });
+    }
+
+    function showStreak() {
+        let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}');
+        if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; }
+    }
+
+    function updateStreak(s) {
+        let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0, "last":""}');
+        let t = new Date().toLocaleDateString();
+        if(s >= 7) { if(d.last !== t) d.count++; d.last = t; } else { d.count = 0; }
+        localStorage.setItem('streak_' + auth.currentUser.uid, JSON.stringify(d)); showStreak();
+    }
+
+    function initPayPal() {
+        paypal.Buttons({
+            createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: '0.99' } }] }),
+            onApprove: (d, a) => a.order.capture().then(() => { localStorage.setItem('vip_' + auth.currentUser.uid, 'true'); location.reload(); })
+        }).render('#paypal-button-container');
+    }
+
+    function handlePlanClick() { if(!isVip) return alert(langData[currentLang].errPlan); runAI('plan'); }
+    function downloadPDF() { html2pdf().from(document.getElementById('results')).save(); }
+    function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
+    function doReset() { auth.sendPasswordResetEmail(document.getElementById('lEmail').value).then(() => alert("Gönderildi.")); }
 </script>
-
 </body>
 </html>
