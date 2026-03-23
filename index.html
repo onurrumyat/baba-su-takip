@@ -83,13 +83,24 @@
 <div id="sportQuestionsModal" class="modal">
     <div class="modal-content">
         <h3 style="color:var(--premium); text-align:center; margin-bottom:15px;">🏋️ Spor Programı Hazırlığı</h3>
-        <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:10px;">Size en uygun programı hazırlamam için:</p>
-        <input type="number" id="sqAge" placeholder="Yaşınız">
-        <input type="number" id="sqWeight" placeholder="Kilonuz (kg)">
-        <input type="number" id="sqDays" placeholder="Haftada kaç gün spor yapabilirsiniz?">
-        <input type="text" id="sqEquipment" placeholder="Mekan (Ev/Salon) ve Ekipman Durumu">
-        <input type="text" id="sqInjury" placeholder="Sakatlık veya engel var mı?">
-        <button class="btn btn-main" style="background:var(--premium); color:black;" onclick="generateSportProgram()">PROGRAMI OLUŞTUR</button>
+        <div id="sportLoading" style="display:none; text-align:center; padding:20px;">
+            <div class="streak-badge" style="display:inline-block; margin-bottom:15px;">⏳ Lütfen Bekleyin...</div>
+            <p style="font-size:0.9rem;">Size özel profesyonel programınız oluşturuluyor...</p>
+        </div>
+        <div id="sportForm">
+            <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:10px;">Size en uygun programı hazırlamam için:</p>
+            <input type="number" id="sqAge" placeholder="Yaşınız">
+            <input type="number" id="sqWeight" placeholder="Kilonuz (kg)">
+            <input type="number" id="sqDays" placeholder="Haftada kaç gün spor yapabilirsiniz? (1-7)">
+            <select id="sqGoal">
+                <option value="Kilo Vermek / Yağ Yakmak">Kilo Vermek / Yağ Yakmak</option>
+                <option value="Kas Kazanmak / Hacim">Kas Kazanmak / Hacim</option>
+                <option value="Sıkılaşmak / Formu Korumak">Sıkılaşmak / Formu Korumak</option>
+            </select>
+            <input type="text" id="sqEquipment" placeholder="Mekan (Ev/Salon) ve Ekipman Durumu">
+            <input type="text" id="sqInjury" placeholder="Sakatlık veya engel var mı?">
+            <button class="btn btn-main" style="background:var(--premium); color:black;" onclick="generateSportProgram()">PROGRAMI OLUŞTUR</button>
+        </div>
         <button class="btn btn-outline" onclick="document.getElementById('sportQuestionsModal').style.display='none'">İptal</button>
     </div>
 </div>
@@ -98,7 +109,8 @@
     <div class="modal-content">
         <h3 id="modalTitle" style="color:var(--primary); margin-bottom:15px; text-align:center;">Analiz Detayı</h3>
         <div id="modalBody" class="report-txt" style="max-height: 400px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px;"></div>
-        <button class="btn btn-sub" style="margin-top:15px;" onclick="document.getElementById('detailModal').style.display='none'">Kapat</button>
+        <button id="btnPdfDownload" class="btn btn-main" style="display:none; background:var(--danger); margin-top:15px;" onclick="downloadModalPDF()">📄 PROGRAMI PDF İNDİR</button>
+        <button class="btn btn-sub" style="margin-top:10px;" onclick="document.getElementById('detailModal').style.display='none'">Kapat</button>
     </div>
 </div>
 
@@ -419,7 +431,9 @@
                             </div>`;
                 });
             }
+            document.getElementById('modalTitle').innerText = "Hasta Raporu";
             document.getElementById('modalBody').innerHTML = html;
+            document.getElementById('btnPdfDownload').style.display = 'none';
             document.getElementById('detailModal').style.display = 'block';
         });
     }
@@ -442,7 +456,7 @@
             const d = await r.json();
             display.innerHTML += `<div class="msg-lara">${d.analysis}</div>`;
             display.scrollTop = display.scrollHeight;
-        } catch(e) { display.innerHTML += `<div class="msg-lara">Üzgünüm, şu an Lara çevrimdışı.</div>`; }
+        } catch(e) { display.innerHTML += `<div class="msg-lara">Şu an yanıt veremiyorum.</div>`; }
     }
 
     async function generateSportProgram() {
@@ -451,40 +465,63 @@
         const days = document.getElementById('sqDays').value;
         const equip = document.getElementById('sqEquipment').value;
         const injury = document.getElementById('sqInjury').value;
+        const goal = document.getElementById('sqGoal').value;
+        
         if(!days || !age || !weight) return alert("Lütfen yaş, kilo ve gün sayısını girin.");
-        document.getElementById('sportQuestionsModal').style.display = 'none';
-        runAI('spor', `Yaş:${age}, Kilo:${weight}, Haftalık:${days} gün, Ekipman:${equip}, Engel:${injury}`);
+
+        // Bekleme ekranını göster
+        document.getElementById('sportForm').style.display = 'none';
+        document.getElementById('sportLoading').style.display = 'block';
+
+        const info = `Yaş:${age}, Kilo:${weight}, Haftalık:${days} gün, Hedef:${goal}, Ekipman:${equip}, Sakatlık:${injury}`;
+        
+        try {
+            const r = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ mode: 'spor', user_data: info, lang: currentLang })
+            });
+            const d = await r.json();
+            
+            document.getElementById('sportQuestionsModal').style.display = 'none';
+            document.getElementById('modalTitle').innerText = "Haftalık Spor Programın";
+            document.getElementById('modalBody').innerHTML = `<div id="sportPlanContent" style="white-space:pre-line; color:white; font-size:0.9rem;">${d.analysis}</div>`;
+            document.getElementById('btnPdfDownload').style.display = 'block';
+            document.getElementById('detailModal').style.display = 'block';
+        } catch(e) { alert("Hata oluştu."); }
+        
+        // Formu eski haline getir
+        document.getElementById('sportForm').style.display = 'block';
+        document.getElementById('sportLoading').style.display = 'none';
     }
 
-    async function runAI(mode, extra = "") {
+    function downloadModalPDF() {
+        const element = document.getElementById('modalBody');
+        html2pdf().from(element).save('BioChef_Spor_Plani.pdf');
+    }
+
+    async function runAI(mode) {
         const resDiv = document.getElementById('results');
         const vid = document.getElementById('video');
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
         const goal = document.getElementById('uGoal').value;
-        if(mode === 'yemek' && (!age || !weight)) return alert("Bilgileri girin.");
-        if(mode === 'yemek') { vid.pause(); document.getElementById('freezeLayer').style.display = 'flex'; document.getElementById('btnAnalyzeText').style.display = 'none'; }
+        if(!age || !weight) return alert("Bilgileri girin.");
+        vid.pause(); document.getElementById('freezeLayer').style.display = 'flex'; document.getElementById('btnAnalyzeText').style.display = 'none';
         const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
-        if(mode === 'yemek') canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
-        let imgBase64 = mode === 'yemek' ? canv.toDataURL('image/jpeg', 0.7) : null;
+        canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
+        let imgBase64 = canv.toDataURL('image/jpeg', 0.7);
         try {
             const r = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mode, image: imgBase64, user_data: `Kullanıcı Hedefi:${goal}. ${extra}`, lang: currentLang })
+                body: JSON.stringify({ mode, image: imgBase64, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${goal}`, lang: currentLang })
             });
             const d = await r.json();
-            if(!r.ok) throw new Error("Hata");
-            if(mode === 'spor') {
-                document.getElementById('modalTitle').innerText = "Haftalık Spor Programın";
-                document.getElementById('modalBody').innerHTML = `<div style="white-space:pre-line;">${d.analysis}</div>`;
-                document.getElementById('detailModal').style.display = 'block';
-                return;
-            }
             resDiv.innerHTML = ''; resDiv.style.display = 'flex';
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
             const headers = langData[currentLang].headers;
-            let score = 5; let mealName = "Bilinmeyen Yemek";
+            let score = 5; let mealName = "Yemek";
             sections.forEach((txt, i) => {
                 const card = document.createElement('div'); card.className = 'report-card';
                 let content = txt.trim();
@@ -498,12 +535,8 @@
                 resDiv.appendChild(card);
             });
             document.getElementById('btnPdf').style.display = 'block'; document.getElementById('btnRetry').style.display = 'block'; document.getElementById('freezeLayer').style.display = 'none';
-            if(mode === 'yemek') saveHistory(score, d.analysis, mealName);
-            resDiv.scrollIntoView();
-        } catch(e) { 
-            document.getElementById('freezeLayer').style.display = 'none'; document.getElementById('btnAnalyzeText').style.display = 'block';
-            if(vid) vid.play(); alert("Hata oluştu.");
-        }
+            saveHistory(score, d.analysis, mealName); resDiv.scrollIntoView();
+        } catch(e) { document.getElementById('freezeLayer').style.display = 'none'; document.getElementById('btnAnalyzeText').style.display = 'block'; vid.play(); alert("Hata."); }
     }
 
     async function connectToDietician() {
@@ -524,7 +557,7 @@
         const me = auth.currentUser.displayName.toLowerCase();
         db.collection('partner_data').doc(me).get().then(doc => {
             if(doc.exists && doc.data().linkedDietician) {
-                document.getElementById('dietStatus').innerText = "DURUM: @" + doc.data().linkedDietician + " bağlısınız.";
+                document.getElementById('dietStatus').innerText = "Bağlı: @" + doc.data().linkedDietician;
                 document.getElementById('dietCodeInput').style.display = 'none';
             }
         });
@@ -561,22 +594,20 @@
     function sendFriendRequest() {
         const u = document.getElementById('partnerUser').value.trim().toLowerCase();
         let me = auth.currentUser.displayName.toLowerCase();
-        if(!u || u === me) return alert("Geçersiz kullanıcı.");
-        db.collection('notifications').add({ toUser: u, fromUser: me, type: 'friend_request', message: `@${me} seni takip etmek istiyor.`, timestamp: Date.now() });
-        alert("Takip isteği gönderildi.");
+        if(!u || u === me) return;
+        db.collection('notifications').add({ toUser: u, fromUser: me, type: 'friend', message: `@${me} seni takip etmek istiyor.`, timestamp: Date.now() });
+        alert("İstek atıldı.");
     }
 
     function saveHistory(score, raw, meal) {
         const me = auth.currentUser.displayName.toLowerCase();
-        const now = new Date();
-        const timestampStr = now.toLocaleString();
-        const unixTime = now.getTime();
-        db.collection('partner_data').doc(me).set({ score, time: timestampStr, lastMealName: meal }, { merge: true });
-        db.collection('partner_data').doc(me).collection('history').add({ score, fullText: raw, date: timestampStr, unix: unixTime, mealName: meal });
-        let key = 'history_' + auth.currentUser.uid;
-        let arr = JSON.parse(localStorage.getItem(key) || '[]');
-        arr.unshift({ summary: `Skor: ${score}/10`, date: timestampStr, detail: raw, meal: meal, unix: unixTime });
-        localStorage.setItem(key, JSON.stringify(arr.slice(0, 50)));
+        const now = Date.now();
+        const tStr = new Date().toLocaleString();
+        db.collection('partner_data').doc(me).set({ score, time: tStr, lastMealName: meal }, { merge: true });
+        db.collection('partner_data').doc(me).collection('history').add({ score, fullText: raw, date: tStr, unix: now, mealName: meal });
+        let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
+        arr.unshift({ summary: `Skor: ${score}/10`, date: tStr, detail: raw, meal: meal, unix: now });
+        localStorage.setItem('history_' + auth.currentUser.uid, JSON.stringify(arr.slice(0, 50)));
     }
 
     function toggleHistory() {
@@ -585,8 +616,7 @@
         if(p.style.display === 'block') {
             const list = document.getElementById('historyList');
             let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-            const nowUnix = Date.now();
-            const last24h = arr.filter(item => (nowUnix - item.unix) < 86400000);
+            const last24h = arr.filter(item => (Date.now() - item.unix) < 86400000);
             if(last24h.length === 0) { list.innerHTML = "<p>Son 24 saatte veri yok.</p>"; return; }
             list.innerHTML = last24h.map(h => `<div class="history-box" onclick="openDetail(\`${h.detail.replace(/`/g, "'")}\`)"><div class="history-meta">🕒 ${h.date} | ⭐ ${h.summary}</div><div class="history-meal">🍽️ ${h.meal}</div></div>`).join('');
         }
@@ -598,7 +628,7 @@
         db.collection('partner_data').doc(u).get().then(doc => {
             if(doc.exists) {
                 db.collection('partner_data').doc(u).collection('history').orderBy('unix', 'desc').limit(1).get().then(snap => {
-                    if(snap.empty) { res.innerHTML = "Veri yok."; return; }
+                    if(snap.empty) return;
                     const d = snap.docs[0].data();
                     const dateParts = d.date.split(' ');
                     res.innerHTML = `<div class="friend-report-pill" style="border: 2px solid var(--primary); background: rgba(16, 185, 129, 0.1);">
@@ -616,18 +646,17 @@
     function updateStreak(s) { let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0, "last":""}'); let t = new Date().toLocaleDateString(); if(s >= 7) { if(d.last !== t) d.count++; d.last = t; } else { d.count = 0; } localStorage.setItem('streak_' + auth.currentUser.uid, JSON.stringify(d)); showStreak(); }
     function setRole(role, btn) { userRole = role; document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
     function toggleView(id) { document.querySelectorAll('.auth-container, #mainView, #dieticianView').forEach(v => v.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
-    async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert("Hata: " + e.message); } }
+    async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert("Hata"); } }
     async function doRegister() { 
         const u = document.getElementById('rUser').value.trim(); const e = document.getElementById('rEmail').value; const p = document.getElementById('rPass').value;
         try { 
-            const check = await db.collection('partner_data').doc(u.toLowerCase()).get(); if(check.exists) return alert("Alınmış.");
             const cred = await auth.createUserWithEmailAndPassword(e, p); await cred.user.updateProfile({ displayName: u });
             await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase(), role: userRole }, { merge: true });
             location.reload(); 
         } catch(err) { alert(err.message); } 
     }
     function saveUserData() { if(!auth.currentUser) return; const data = { age: document.getElementById('uAge').value, weight: document.getElementById('uWeight').value, goal: document.getElementById('uGoal').value }; localStorage.setItem('userData_' + auth.currentUser.uid, JSON.stringify(data)); db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).set(data, { merge: true }); }
-    function openDetail(txt) { document.getElementById('modalBody').innerText = txt; document.getElementById('detailModal').style.display = 'block'; }
+    function openDetail(txt) { document.getElementById('modalTitle').innerText = "Analiz Detayı"; document.getElementById('modalBody').innerText = txt; document.getElementById('btnPdfDownload').style.display = 'none'; document.getElementById('detailModal').style.display = 'block'; }
     function downloadPDF() { html2pdf().from(document.getElementById('results')).save(); }
     function toggleNotifications() { const d = document.getElementById('notifDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
     function toggleFriends() { const d = document.getElementById('friendsDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
