@@ -17,14 +17,15 @@
         .app-card { width: 100%; max-width: 420px; background: var(--card); border-radius: 35px; padding: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); height: fit-content; position: relative; }
         .auth-container h1 { font-size: 2.2rem; text-align: center; margin-bottom: 20px; color: var(--primary); font-weight: 900; }
         input, select { width: 100%; padding: 15px; border-radius: 15px; background: #0b0f1a; border: 1px solid #2d3748; color: white; margin-bottom: 12px; text-align: center; }
-        .btn { width: 100%; padding: 18px; border-radius: 18px; border: none; font-weight: 700; cursor: pointer; color: white; transition: 0.3s; display: block; text-align: center; text-decoration: none; }
-        .btn-main { background: var(--primary); width: 100%; }
-        .btn-sub { background: var(--accent); margin-top: 10px; width: 100%; }
-        .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #2d3748; margin-top: 10px; font-size: 0.8rem; width: 100%; }
+        .btn { width: 100%; padding: 18px; border-radius: 18px; border: none; font-weight: 700; cursor: pointer; color: white; transition: 0.3s; display: block; text-align: center; }
+        .btn-main { background: var(--primary); }
+        .btn-sub { background: var(--accent); margin-top: 10px; }
+        .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #2d3748; margin-top: 10px; font-size: 0.8rem; }
         .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 2px solid #1e293b; margin-bottom: 20px; }
         video { width: 100%; height: 100%; object-fit: cover; }
         .premium-area { background: rgba(245, 158, 11, 0.08); border: 2px solid var(--premium); border-radius: 25px; padding: 20px; margin-top: 20px; text-align: center; }
         .premium-title { font-weight: 900; color: var(--premium); font-size: 1.1rem; margin-bottom: 15px; }
+        #paypal-button-container { margin-top: 10px; min-height: 150px; }
         #results { display: none; flex-direction: column; gap: 12px; margin-top: 25px; padding: 15px; background: var(--bg); border-radius: 20px; }
         .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); }
         .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
@@ -40,11 +41,11 @@
         .notif-dropdown, .friends-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 260px; background: #1e293b; border-radius: 15px; padding: 15px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         .friend-link { display: block; padding: 10px; background: #0b0f1a; border-radius: 10px; margin-bottom: 5px; color: var(--primary); font-weight: bold; cursor: pointer; text-align: center; }
         
-        /* Premium Rozet Stili */
-        .premium-badge { display: none; background: var(--primary); color: white; font-size: 0.65rem; font-weight: 900; padding: 4px 10px; border-radius: 50px; margin-left: 8px; vertical-align: middle; border: 1px solid rgba(255,255,255,0.2); }
-        .ref-container { display: none; background: #1a202c; border: 1px solid var(--premium); border-radius: 20px; padding: 15px; margin-top: 10px; }
+        /* Premium Badge Style */
+        .premium-badge { display: none; background: var(--primary); color: white; font-size: 0.65rem; font-weight: 900; padding: 4px 12px; border-radius: 50px; margin-left: 8px; border: 1px solid rgba(255,255,255,0.2); text-transform: uppercase; }
+        .ref-container { display: none; background: #1a202c; border: 1px solid var(--premium); border-radius: 25px; padding: 15px; margin-top: 10px; }
         .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .ref-box { background: #0b0f1a; padding: 10px; border-radius: 12px; text-align: center; border: 1px solid #2d3748; }
+        .ref-box { background: #0b0f1a; padding: 10px; border-radius: 15px; text-align: center; border: 1px solid #2d3748; }
     </style>
 </head>
 <body>
@@ -146,12 +147,12 @@
                 <div class="ref-box">
                     <div id="txtRefMy" style="font-size:0.65rem; color:#94a3b8; margin-bottom:5px;">Referans Kodum</div>
                     <div id="myRefCode" style="font-family:monospace; font-size:1.1rem; color:var(--premium); font-weight:bold;">-----</div>
-                    <button class="btn" style="background:var(--accent); font-size:0.6rem; padding:5px; margin-top:5px;" onclick="copyMyCode()">KOPYALA</button>
+                    <button class="btn" style="background:var(--accent); font-size:0.6rem; padding:5px; margin-top:5px; width:100%;" onclick="copyMyCode()">KOPYALA</button>
                 </div>
                 <div class="ref-box">
                     <div id="txtRefInp" style="font-size:0.65rem; color:#94a3b8; margin-bottom:5px;">Kod Gir (Hediye Et)</div>
-                    <input type="text" id="inputRefCode" placeholder="Kod..." style="padding:5px; font-size:0.8rem; border-radius:8px; margin-bottom:5px;">
-                    <button class="btn" style="background:var(--primary); font-size:0.6rem; padding:5px;" onclick="submitFriendCode()">GÖNDER</button>
+                    <input type="text" id="inputRefCode" placeholder="Kod..." style="padding:5px; font-size:0.8rem; border-radius:8px; margin-bottom:5px; width:100%;">
+                    <button class="btn" style="background:var(--primary); font-size:0.6rem; padding:5px; width:100%;" onclick="submitFriendCode()">GÖNDER</button>
                 </div>
             </div>
         </div>
@@ -173,7 +174,7 @@
             partInput: "Kullanıcı Adı Girin", btnFriendReq: "➕ ARKADAŞ EKLE İSTEĞİ AT", btnCheck: "🔍 DURUMUNU SORGULA",
             errInfo: "Bilgi eksik.", errPrem: "Premium gereklidir.", loading: "🔍 İnceleniyor...",
             partCatch: "🚨 KÖTÜ SKOR!", partGood: "✅ SADIK DİYET!", noHist: "Henüz geçmiş yok.",
-            refMy: "Referans Kodum", refInp: "Kod Gir (Hediye Et)", refSucc: "Tebrikler! Arkadaşınız 1 aylık VIP üyelik kazandı!"
+            refMy: "Referans Kodum", refInp: "Kod Gir (Hediye Et)", refSucc: "Tebrikler! Arkadaşınız 1 aylık VIP kazandı!"
         },
         en: {
             appTitle: "BIO-CHEF", emailPlaceholder: "Email", passPlaceholder: "Password", btnLogin: "LOGIN", btnForgot: "Forgot Password?", btnReg: "Sign Up",
@@ -181,10 +182,10 @@
             g1: "Lose Weight", g2: "Gain Weight", g3: "Maintain", btnAnalyze: "📸 ANALYZE", btnPlan: "📅 GET WEEKLY PLAN",
             premTitle: "PREMIUM MEMBER | $0.99", btnLogout: "SECURE LOGOUT", btnInvite: "🎁 INVITE FRIEND (1 MO VIP)", streak: "Streak",
             notif: "Notifications", follow: "Following", hist: "Recent Scans", partTitle: "Inspect Partner! 🚨",
-            partInput: "Enter Username", btnFriendReq: "➕ ADD FRIEND REQUEST", btnCheck: "🔍 CHECK STATUS",
+            partInput: "Enter Username", btnFriendReq: "➕ ADD FRIEND", btnCheck: "🔍 CHECK STATUS",
             errInfo: "Missing info.", errPrem: "Premium required.", loading: "🔍 Analyzing...",
-            partCatch: "🚨 BAD DIET!", partGood: "✅ LOYAL DIET!", noHist: "No history yet.",
-            refMy: "My Ref Code", refInp: "Enter Code", refSucc: "Congrats! Your friend won 1 month VIP!"
+            partCatch: "🚨 BAD DIET!", partGood: "✅ LOYAL!", noHist: "No history yet.",
+            refMy: "My Ref Code", refInp: "Enter Code", refSucc: "Success! Your friend won 1 month VIP!"
         }
     };
 
@@ -198,6 +199,7 @@
         document.getElementById('btnGoReg').innerText = d.btnReg;
         document.getElementById('txtRegTitle').innerText = d.regTitle;
         document.getElementById('rEmail').placeholder = d.emailPlaceholder;
+        document.getElementById('rUser').placeholder = "Username";
         document.getElementById('rPass').placeholder = d.passPlaceholder;
         document.getElementById('btnDoReg').innerText = d.btnDoReg;
         document.getElementById('btnGoLogin').innerText = d.btnBack;
@@ -231,41 +233,48 @@
             let me = user.displayName || user.email.split('@')[0];
             document.getElementById('uMail').innerText = "@" + me;
             loadUserInfo(); generateMyRefCode(me);
-            
             db.collection('vip_users').doc(user.uid).onSnapshot(doc => {
                 isVipGlobal = (doc.exists && doc.data().expiry > Date.now()) || localStorage.getItem('vip_'+user.uid) === 'true';
                 document.getElementById('premiumLockInfo').style.display = isVipGlobal ? 'none' : 'block';
                 document.getElementById('vipBadge').style.display = isVipGlobal ? 'inline-block' : 'none';
                 if(!isVipGlobal) initPayPal();
             });
-
             document.getElementById('bellIcon').style.display='flex'; document.getElementById('friendListBtn').style.display='flex';
             listenNotifications(); listenFriends(); showStreak();
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
         } else { toggleView('loginView'); }
     });
 
-    function generateMyRefCode(username) {
-        let code = ""; for(let i=0; i<username.length; i++) code += username.charCodeAt(i);
+    function generateMyRefCode(u) {
+        let code = ""; for(let i=0; i<u.length; i++) code += u.charCodeAt(i);
         code = code.substring(0,6);
         document.getElementById('myRefCode').innerText = code;
-        db.collection('referral_codes').doc(code).set({ ownerId: auth.currentUser.uid, ownerName: username }, {merge:true});
+        db.collection('referral_codes').doc(code).set({ ownerId: auth.currentUser.uid, ownerName: u }, {merge:true});
     }
 
     function submitFriendCode() {
-        const inputCode = document.getElementById('inputRefCode').value.trim();
-        if(!inputCode) return alert("Kod girin!");
-        db.collection('referral_codes').doc(inputCode).get().then(doc => {
+        const input = document.getElementById('inputRefCode').value.trim();
+        if(!input) return alert("Kod?");
+        db.collection('referral_codes').doc(input).get().then(doc => {
             if(doc.exists) {
                 const ownerId = doc.data().ownerId;
-                if(ownerId === auth.currentUser.uid) return alert("Kendi kodunu giremezsin!");
+                if(ownerId === auth.currentUser.uid) return alert("Kendi kodun!");
                 const thirtyDays = Date.now() + (30 * 24 * 60 * 60 * 1000);
                 db.collection('vip_users').doc(ownerId).set({ expiry: thirtyDays }, { merge: true });
                 alert(langData[currentLang].refSucc);
                 document.getElementById('inputRefCode').value = "";
-                toggleRefPanel();
-            } else { alert("Geçersiz kod!"); }
+            } else { alert("Geçersiz!"); }
         });
+    }
+
+    function initPayPal() {
+        const container = document.getElementById('paypal-button-container');
+        container.innerHTML = "";
+        paypal.Buttons({
+            style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
+            createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: '0.99', currency_code: 'USD' } }] }),
+            onApprove: (d, a) => a.order.capture().then(det => { localStorage.setItem('vip_'+auth.currentUser.uid, 'true'); location.reload(); })
+        }).render('#paypal-button-container');
     }
 
     async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); } }
@@ -283,8 +292,7 @@
 
     function saveUserInfo() {
         const u = auth.currentUser; if(!u) return;
-        const d = { age: document.getElementById('uAge').value, weight: document.getElementById('uWeight').value, goal: document.getElementById('uGoal').value };
-        db.collection('user_profiles').doc(u.uid).set(d, { merge: true });
+        db.collection('user_profiles').doc(u.uid).set({ age: document.getElementById('uAge').value, weight: document.getElementById('uWeight').value, goal: document.getElementById('uGoal').value }, { merge: true });
     }
 
     function loadUserInfo() {
@@ -314,7 +322,7 @@
             });
             const d = await r.json(); resDiv.innerHTML = '';
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
-            let score = 5; let foodName = "Bilinmiyor";
+            let score = 5; let foodName = "---";
             sections.forEach((txt, i) => {
                 const card = document.createElement('div'); card.className = 'report-card';
                 let content = txt.trim();
@@ -353,15 +361,15 @@
     function copyMyCode() { const c = document.getElementById('myRefCode').innerText; navigator.clipboard.writeText(c).then(() => alert("Kopyalandı: " + c)); }
     function listenFriends() { let me = auth.currentUser.displayName.toLowerCase(); db.collection('partner_data').doc(me).onSnapshot(doc => { const container = document.getElementById('friendsListContainer'); container.innerHTML = ''; if(doc.exists && doc.data().friends) { doc.data().friends.forEach(f => { container.innerHTML += `<div class="friend-link" onclick="scrollToPartner('${f}')">@${f}</div>`; }); } }); }
     function scrollToPartner(u) { document.getElementById('partnerUser').value = u; document.getElementById('partnerPanel').style.display = 'block'; document.getElementById('partnerPanel').scrollIntoView({ behavior: 'smooth' }); toggleFriends(); }
-    function listenNotifications() { let me = auth.currentUser.displayName.toLowerCase(); db.collection('notifications').where('toUser', '==', me).onSnapshot(snap => { const list = document.getElementById('notifList'); const badge = document.getElementById('notifBadge'); list.innerHTML = ''; let c = 0; snap.forEach(doc => { c++; let d = doc.data(); list.innerHTML += `<div class="notif-item">🤝 @${d.fromUser} istek attı. <button onclick="acceptFriend(\''+d.fromUser+'\',\''+doc.id+'\')">Kabul Et</button></div>`; }); badge.style.display = c > 0 ? 'flex' : 'none'; badge.innerText = c; }); }
+    function listenNotifications() { let me = auth.currentUser.displayName.toLowerCase(); db.collection('notifications').where('toUser', '==', me).onSnapshot(snap => { const list = document.getElementById('notifList'); const badge = document.getElementById('notifBadge'); list.innerHTML = ''; let c = 0; snap.forEach(doc => { c++; let d = doc.data(); list.innerHTML += `<div class="notif-item">${d.type === 'friend_request' ? '🤝 @'+d.fromUser+' istek attı. <button onclick="acceptFriend(\''+d.fromUser+'\',\''+doc.id+'\')">Kabul Et</button>' : d.message}</div>`; }); badge.style.display = c > 0 ? 'flex' : 'none'; badge.innerText = c; }); }
     function acceptFriend(u, id) { let me = auth.currentUser.displayName.toLowerCase(); db.collection('partner_data').doc(me).update({ friends: firebase.firestore.FieldValue.arrayUnion(u) }); db.collection('partner_data').doc(u).update({ friends: firebase.firestore.FieldValue.arrayUnion(me) }); db.collection('notifications').doc(id).delete(); }
     function sendFriendRequest() { const u = document.getElementById('partnerUser').value.trim().toLowerCase(); db.collection('notifications').add({ toUser: u, fromUser: auth.currentUser.displayName.toLowerCase(), type: 'friend_request' }); alert("Gönderildi."); }
+    function checkPartner() { const u = document.getElementById('partnerUser').value.trim().toLowerCase(); db.collection('partner_data').doc(u).get().then(doc => { if(doc.exists && doc.data().score !== undefined) { const d = doc.data(); document.getElementById('partnerResult').innerHTML = `<div style="background:rgba(0,0,0,0.3);padding:15px;border-radius:15px;border:1px solid var(--accent);margin-top:10px;">🗓️ ${d.date}<br>⭐ Skor: ${d.score}/10<br>🍴 ${d.lastMeal}</div>`; } }); }
     function showStreak() { let d = JSON.parse(localStorage.getItem('streak_'+auth.currentUser.uid) || '{"count":0}'); if(d.count > 0) { document.getElementById('streakBadge').style.display='block'; document.getElementById('streakCount').innerText=d.count; } }
     function updateStreak(s) { let d = JSON.parse(localStorage.getItem('streak_'+auth.currentUser.uid) || '{"count":0,"last":""}'); let t = new Date().toLocaleDateString(); if(s >= 7) { if(d.last !== t) d.count++; d.last = t; } else { d.count = 0; } localStorage.setItem('streak_'+auth.currentUser.uid, JSON.stringify(d)); showStreak(); }
-    function initPayPal() { paypal.Buttons({ createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: '0.99' } }] }), onApprove: (d, a) => a.order.capture().then(() => { localStorage.setItem('vip_'+auth.currentUser.uid, 'true'); location.reload(); }) }).render('#paypal-button-container'); }
-    function handlePlanClick() { if(!isVipGlobal) return alert(langData[currentLang].errPrem); runAI('plan'); }
-    function downloadPDF() { html2pdf().from(document.getElementById('results')).save(); }
     function doReset() { auth.sendPasswordResetEmail(document.getElementById('lEmail').value).then(() => alert("Gönderildi.")); }
+    function downloadPDF() { html2pdf().from(document.getElementById('results')).save(); }
+    function handlePlanClick() { if(!isVipGlobal) return alert(langData[currentLang].errPrem); runAI('plan'); }
     setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 </script>
 </body>
