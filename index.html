@@ -48,6 +48,12 @@
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); padding: 20px; overflow-y: auto; }
         .modal-content { background: var(--card); margin: auto; padding: 20px; border-radius: 25px; max-width: 400px; border: 1px solid var(--primary); }
         .partner-box { background: rgba(239, 68, 68, 0.05); border: 1px dashed var(--danger); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
+
+        /* Yeni Arkadaş Kutusu Stili */
+        .friend-pill { display: block; padding: 12px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; margin-bottom: 8px; color: var(--primary); font-weight: 800; cursor: pointer; transition: 0.3s; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        .friend-pill:hover { transform: translateY(-2px); border-color: var(--primary); background: #162031; }
+        .friend-report-pill { background: #0b0f1a; border: 1px solid var(--danger); border-radius: 15px; padding: 10px; margin-top: 8px; font-size: 0.75rem; text-align: left; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
     </style>
 </head>
 <body>
@@ -165,7 +171,7 @@
             </div>
         </div>
 
-        <button class="btn btn-outline" id="txtOut" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
+        <button class="btn btn-outline" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
     </div>
 </div>
 
@@ -352,7 +358,7 @@
             container.innerHTML = '';
             if(doc.exists && doc.data().friends) {
                 doc.data().friends.forEach(f => {
-                    container.innerHTML += `<div class="friend-link" onclick="checkSpecific('${f}')">@${f}</div>`;
+                    container.innerHTML += `<div class="friend-pill" onclick="checkSpecific('${f}')">@${f}</div>`;
                 });
             } else { container.innerHTML = '<p style="text-align:center;font-size:0.7rem;">Takip yok.</p>'; }
         });
@@ -370,13 +376,13 @@
         let me = auth.currentUser.displayName.toLowerCase();
         if(!u || u === me) return alert("Kullanıcı bulunamadı.");
         db.collection('notifications').add({ toUser: u, fromUser: me, type: 'friend_request', timestamp: Date.now() });
-        alert("İstek gönderildi.");
+        alert("Takip isteği başarıyla gönderildi.");
     }
 
     function saveHistory(score, raw) {
         const me = auth.currentUser.displayName.toLowerCase();
         const timestamp = new Date().toLocaleString();
-        db.collection('partner_data').doc(me).set({ score, time: timestamp }, { merge: true });
+        db.collection('partner_data').doc(me).set({ score, time: timestamp, lastMealName: raw.substring(0, 30) }, { merge: true });
         db.collection('partner_data').doc(me).collection('history').add({ score, fullText: raw, date: timestamp });
         let key = 'history_' + auth.currentUser.uid;
         let arr = JSON.parse(localStorage.getItem(key) || '[]');
@@ -398,17 +404,37 @@
         const u = document.getElementById('partnerUser').value.trim().toLowerCase();
         const res = document.getElementById('partnerResult');
         const histRes = document.getElementById('partnerHistoryList');
+        
         db.collection('partner_data').doc(u).get().then(doc => {
-            if(doc.exists && doc.data().score !== undefined) {
-                let s = doc.data().score;
-                res.innerText = (s < 7 ? "🚨 YAKALANDI! Skor: " : "✅ Sadık! Skor: ") + s + "/10";
-                db.collection('partner_data').doc(u).collection('history').orderBy('date', 'desc').limit(5).get().then(snap => {
-                    let html = '<p style="color:var(--primary); margin-top:10px; font-size:0.8rem;">Son Öğünleri:</p>';
-                    snap.forEach(h => html += `<div class="history-box" style="font-size:0.7rem;"><b>${h.data().date}</b> - Skor: ${h.data().score}/10</div>`);
+            if(doc.exists) {
+                const data = doc.data();
+                // Son 24 saat kontrolü (Basit tarih karşılaştırma)
+                let s = data.score || 0;
+                let statusIcon = s < 7 ? "🚨 YAKALANDI!" : "✅ Sadık!";
+                
+                res.innerHTML = `
+                <div class="friend-report-pill">
+                    <div style="font-size:1rem; margin-bottom:5px;">${statusIcon} <b>Skor: ${s}/10</b></div>
+                    <div style="color:var(--primary)"><b>Son Yemek:</b> ${data.lastMealName || 'Bilinmiyor'}...</div>
+                    <div style="font-size:0.7rem; color:#94a3b8; margin-top:5px;">🕒 ${data.time || '-'}</div>
+                </div>`;
+
+                db.collection('partner_data').doc(u).collection('history').orderBy('date', 'desc').limit(3).get().then(snap => {
+                    let html = '<p style="color:var(--primary); margin-top:10px; font-size:0.8rem;">Son Öğün Geçmişi:</p>';
+                    snap.forEach(h => html += `<div class="history-box" style="font-size:0.7rem; border-color:var(--danger);"><b>${h.data().date}</b> - Skor: ${h.data().score}/10</div>`);
                     histRes.innerHTML = html;
                 });
-            } else { res.innerText = "Önce arkadaş olmalısınız!"; }
+            } else { res.innerText = "Veri yok veya takip izni yok."; }
         });
+    }
+
+    function checkSpecific(u) { 
+        document.getElementById('partnerUser').value = u; 
+        document.getElementById('partnerPanel').style.display = 'block'; 
+        checkPartner(); 
+        toggleFriends(); 
+        // Sayfanın altına (Partner Paneline) Kaydır
+        document.getElementById('partnerPanel').scrollIntoView();
     }
 
     function showStreak() {
@@ -430,7 +456,6 @@
         }).render('#paypal-button-container');
     }
 
-    function checkSpecific(u) { document.getElementById('partnerUser').value = u; document.getElementById('partnerPanel').style.display = 'block'; checkPartner(); toggleFriends(); }
     function setRole(role, btn) { userRole = role; document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
     function toggleView(id) { document.querySelectorAll('.auth-container, #mainView').forEach(v => v.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
     async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert("Hata: " + e.message); } }
