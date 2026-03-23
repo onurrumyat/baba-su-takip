@@ -6,16 +6,17 @@ export default async function handler(req, res) {
     const languageInstruction = lang === 'en' ? "RESPONSE LANGUAGE MUST BE ENGLISH." : "YANIT DİLİ TÜRKÇE OLMALIDIR.";
 
     let systemPrompt = mode === 'plan' 
-        ? `Sen profesyonel bir diyetisyensin. Kullanıcı: ${user_data}. 7 günlük planı GÜN GÜN, sadece öğün ve yemek adı olarak kısa ve net ver. ${languageInstruction}`
-        : `Sen kıdemli gıda uzmanısın ve gelecek öngörüsü yapabilen bir biyologsun. Kullanıcı: ${user_data}. 
+        ? `Sen profesyonel bir diyetisyensin. Kullanıcı: ${user_data}. 7 günlük planı GÜN GÜN ver. ${languageInstruction}`
+        : `Sen kıdemli bir biyolog ve vücut falcısısın. Kullanıcı: ${user_data}. 
+           GÖREVİN: Tabağı analiz et ve VIP kullanıcıya ÖNÜMÜZDEKİ 24 SAATİN kehanetini ver.
            FORMAT:
-           1. [SKOR: X] formatında skor ve açıklama.
-           2. AÇLIK KRONOMETRESİ ⏳: Net süre.
-           3. ÜRÜN ÖZETİ.
-           4. BESİN DEĞERLERİ.
-           5. HEDEF ANALİZİ.
-           6. VIP GELECEK ÖNGÖRÜSÜ 🔮: Bu yemek yarın sabahki şişkinliği, enerjiyi ve 10 yıl sonraki hücresel yaşlanmayı nasıl etkiler? (Fal gibi ama bilimsel temelli öngörü).
-           7. NET TAVSİYE.
+           1. [SKOR: X] yaz ve tek cümleyle puanla.
+           2. AÇLIK KRONOMETRESİ ⏳: Bu tabak seni ne kadar süre tok tutar?
+           3. ÜRÜN ÖZETİ: Gördüğün her şeyi listele.
+           4. BESİN DEĞERLERİ: Kalori, Protein, Karb, Yağ.
+           5. HEDEF ANALİZİ: Kullanıcının hedefine uygunluk durumu.
+           6. 24 SAATLİK VÜCUT KEHANETİ 🔮: (VIP ÖZELLİK) Bu yemekten sonraki 4. saatte, 12. saatte ve yarın sabah uyandığında vücudunda neler olacak? (Örn: Enerji çöküşü, susuzluk, ödem, zihinsel berraklık vb.) Fal gibi ama biyolojik gerçeklerle anlat.
+           7. NET TAVSİYE: Profesyonel son söz.
            ${languageInstruction}`;
 
     try {
@@ -25,8 +26,8 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 model: "gpt-4o",
                 messages: [{ role: "system", content: systemPrompt }, 
-                           { role: "user", content: mode === 'plan' ? "Net beslenme planı çıkar." : [{ type: "text", text: "Gıdayı analiz et, skoru, acıkma süresini ve VIP gelecek öngörüsünü ver." }, { type: "image_url", image_url: { url: image } }] }],
-                max_tokens: 1000, temperature: 0.2
+                           { role: "user", content: mode === 'plan' ? "Plan çıkar." : [{ type: "text", text: "Analiz et ve 24 saatlik kehaneti yaz." }, { type: "image_url", image_url: { url: image } }] }],
+                max_tokens: 1000, temperature: 0.3
             })
         });
         const data = await response.json();
