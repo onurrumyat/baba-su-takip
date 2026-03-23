@@ -60,7 +60,7 @@
         .friend-report-pill { background: #0b0f1a; border: 1px solid var(--danger); border-radius: 15px; padding: 10px; margin-top: 8px; font-size: 0.75rem; text-align: left; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
 
-        /* Diyetisyen Özel Bölümü */
+        /* Diyetisyen Özel Bölümü CSS */
         .dietician-card { background: linear-gradient(135deg, #0f172a, #1e293b); border: 2px solid var(--accent); border-radius: 25px; padding: 20px; margin-bottom: 20px; text-align: center; }
         .dietician-code { font-size: 2.2rem; font-weight: 900; color: var(--premium); letter-spacing: 5px; margin: 15px 0; border: 2px dashed var(--premium); padding: 10px; border-radius: 15px; background: rgba(0,0,0,0.3); }
         .patient-list-item { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 15px; margin-bottom: 10px; border-left: 4px solid var(--primary); cursor: pointer; transition: 0.3s; text-align: left; }
@@ -295,7 +295,7 @@
         const code = document.getElementById('dietCodeInput').value.trim().toUpperCase();
         if (code.length !== 8) return alert("8 haneli kodu girin.");
         await db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).update({ connectedDietCode: code });
-        alert("Diyetisyene başarıyla bağlandınız!");
+        alert("Diyetisyene bağlandınız!");
     }
 
     function listenPatients(code) {
@@ -304,7 +304,7 @@
             snap.forEach(doc => {
                 const p = doc.data(); const div = document.createElement('div');
                 div.className = 'patient-list-item';
-                div.innerHTML = `<b>@${p.username}</b><br><small>Skor: ${p.score || '--'} | Hedef: ${p.goal || '--'}</small>`;
+                div.innerHTML = `<b>@${p.username}</b><br><small>Son Skor: ${p.score || '--'}/10 | Hedef: ${p.goal || '--'}</small>`;
                 div.onclick = () => showPatientDetail(p.username);
                 list.appendChild(div);
             });
@@ -312,7 +312,7 @@
     }
 
     async function showPatientDetail(username) {
-        const snap = await db.collection('partner_data').doc(username.toLowerCase()).collection('history').orderBy('unix', 'desc').limit(10).get();
+        const snap = await db.collection('partner_data').doc(username.toLowerCase()).collection('history').orderBy('unix', 'desc').limit(15).get();
         let html = `<h4 style='color:var(--primary)'>@${username} - Son 24 Saatlik Rapor</h4>`;
         snap.forEach(h => {
             const d = h.data(); html += `<div class='history-box' style='border-color:var(--danger)'><b>🕒 ${d.date}</b><br>Yemek: ${d.mealName}<br>Hedef Skoru: ${d.score}/10</div>`;
@@ -344,7 +344,7 @@
                     if(match) { score = parseInt(match[1]); content = content.replace(match[0], '').trim(); updateStreak(score); }
                     let left = (score/10)*100;
                     card.innerHTML = `<div class="report-tag">SKOR</div><div class="report-txt">${content}</div><div class="score-wrapper"><div class="score-bar"><div class="score-marker" style="left:${left}%">${score}</div></div></div>`;
-                } else card.innerHTML = `<div class="report-tag">BÖLÜM</div><div class="report-txt">${content}</div>`;
+                } else card.innerHTML = `<div class="report-tag">BİLGİ</div><div class="report-txt">${content}</div>`;
                 resDiv.appendChild(card);
             });
             document.getElementById('btnRetry').style.display = 'block'; document.getElementById('btnPdf').style.display = 'block';
@@ -353,7 +353,7 @@
         } catch(e) { resetCamera(); alert("Hata."); }
     }
 
-    // --- VERİ KAYIT VE DİĞER ---
+    // --- VERİ KAYIT VE DİĞER FONKSİYONLAR (Eksiksiz) ---
     function saveHistory(score, raw, meal) {
         const me = auth.currentUser.displayName.toLowerCase(); const now = new Date(); const unix = now.getTime(); const date = now.toLocaleString();
         db.collection('partner_data').doc(me).set({ score, time: date, lastMealName: meal }, { merge: true });
@@ -410,7 +410,7 @@
         });
     }
 
-    // --- EKSTRA FONKSİYONLAR ---
+    // --- EKSTRA YARDIMCI FONKSİYONLAR ---
     function setRole(r, b) { userRole = r; b.parentElement.querySelectorAll('button').forEach(btn => btn.classList.remove('active')); b.classList.add('active'); }
     function toggleView(id) { ['loginView','regView','mainView','dieticianView'].forEach(v => document.getElementById(v).style.display = 'none'); document.getElementById(id).style.display = 'block'; }
     async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); } }
