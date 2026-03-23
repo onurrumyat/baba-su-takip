@@ -51,6 +51,14 @@
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); padding: 20px; overflow-y: auto; }
         .modal-content { background: var(--card); margin: auto; padding: 20px; border-radius: 25px; max-width: 400px; border: 1px solid var(--primary); }
         .partner-box { background: rgba(239, 68, 68, 0.05); border: 1px dashed var(--danger); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
+        
+        /* Diyetisyen Hasta Kartı Stilleri */
+        .patient-card { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--primary); padding: 20px; border-radius: 20px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); }
+        .patient-card:hover { transform: translateY(-3px); background: #1c2536; box-shadow: 0 0 15px var(--primary); }
+        .patient-info { display: flex; flex-direction: column; gap: 4px; }
+        .patient-name { font-size: 1.1rem; font-weight: 900; color: #fff; }
+        .patient-last { font-size: 0.7rem; color: var(--primary); font-weight: bold; }
+        .patient-arrow { font-size: 1.2rem; color: var(--primary); }
     </style>
 </head>
 <body>
@@ -58,8 +66,8 @@
 <div id="detailModal" class="modal">
     <div class="modal-content">
         <h3 id="modalTitle" style="color:var(--primary); margin-bottom:15px; text-align:center;">Analiz Detayı</h3>
-        <div id="modalBody" class="report-txt"></div>
-        <button class="btn btn-sub" onclick="document.getElementById('detailModal').style.display='none'">Kapat</button>
+        <div id="modalBody" class="report-txt" style="max-height: 400px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px;"></div>
+        <button class="btn btn-sub" style="margin-top:15px;" onclick="document.getElementById('detailModal').style.display='none'">Kapat</button>
     </div>
 </div>
 
@@ -128,7 +136,7 @@
                 <div id="currentCodeDisplay" style="margin-top:10px; font-weight:bold; color:var(--premium); font-size: 1.1rem;"></div>
             </div>
         </div>
-        <h3 style="margin-bottom:10px; border-bottom:1px solid #2d3748; padding-bottom:5px;">Bağlı Hastalarım</h3>
+        <h3 style="margin-bottom:15px; border-bottom:1px solid #2d3748; padding-bottom:5px;">Bağlı Hastalarım</h3>
         <div id="patientList"></div>
         <button class="btn btn-outline" onclick="auth.signOut(); location.reload();" style="margin-top:20px;">GÜVENLİ ÇIKIŞ</button>
     </div>
@@ -306,7 +314,6 @@
         listenNotifications(); listenFriends(); showStreak(); checkDieticianLink();
     }
 
-    // --- DİYETİSYEN KOD KAYDETME VE PORTAL ---
     async function handleDieticianPortal(username) {
         db.collection('dieticians').doc(username).onSnapshot(doc => {
             if(doc.exists && doc.data().code) {
@@ -321,18 +328,10 @@
         const username = auth.currentUser.displayName.toLowerCase();
         const code = document.getElementById('myDietCodeInput').value.trim().toUpperCase();
         if(code.length < 4) return alert("Kod en az 4 haneli olmalıdır.");
-        
         try {
-            // Diyetisyen ID'si (username) ile kodu ve kendi ismini sisteme kaydet
-            await db.collection('dieticians').doc(username).set({ 
-                code: code,
-                dieticianName: username 
-            }, { merge: true });
-            
-            alert("TEBRİKLER! Kodunuz sisteme kaydedildi. Artık danışanlarınız '" + code + "' koduyla size bağlanabilir.");
-        } catch(e) {
-            alert("Hata: " + e.message);
-        }
+            await db.collection('dieticians').doc(username).set({ code: code, dieticianName: username }, { merge: true });
+            alert("TEBRİKLER! Kodunuz sisteme kaydedildi.");
+        } catch(e) { alert("Hata: " + e.message); }
     }
 
     function listenPatients(dietUsername) {
@@ -341,11 +340,19 @@
             list.innerHTML = '';
             if(doc.exists && doc.data().patients) {
                 doc.data().patients.forEach(p => {
-                    const pBox = document.createElement('div');
-                    pBox.className = 'friend-pill';
-                    pBox.innerText = `@${p}`;
-                    pBox.onclick = () => showPatientHistory(p);
-                    list.appendChild(pBox);
+                    const card = document.createElement('div');
+                    card.className = 'patient-card';
+                    card.onclick = () => showPatientHistory(p);
+                    
+                    // Hasta ismi ve son durum bilgisi
+                    card.innerHTML = `
+                        <div class="patient-info">
+                            <span class="patient-name">@${p}</span>
+                            <span class="patient-last">Verileri Gör 📊</span>
+                        </div>
+                        <span class="patient-arrow">➔</span>
+                    `;
+                    list.appendChild(card);
                 });
             } else { list.innerHTML = '<p style="font-size:0.8rem; color:#94a3b8;">Bağlı hasta bulunmuyor.</p>'; }
         });
@@ -355,16 +362,29 @@
         const nowUnix = Date.now();
         const oneDay = 24 * 60 * 60 * 1000;
         db.collection('partner_data').doc(pUsername).collection('history')
-          .where('unix', '>', nowUnix - oneDay).get().then(snap => {
-            let html = `<h4 style="color:var(--primary); margin-bottom:10px;">@${pUsername} - Son 24 Saat</h4>`;
-            if(snap.empty) html += "<p>Bugün henüz öğün taranmamış.</p>";
-            snap.forEach(doc => {
-                const d = doc.data();
-                html += `<div class="history-box" style="cursor:default;">
-                    <div class="history-meta">🕒 ${d.date} | ⭐ Skor: ${d.score}</div>
-                    <div class="history-meal">🍴 ${d.mealName}</div>
-                </div>`;
-            });
+          .where('unix', '>', nowUnix - oneDay).orderBy('unix', 'desc').get().then(snap => {
+            let html = `<div style="text-align:center; border-bottom:1px solid var(--primary); padding-bottom:10px; margin-bottom:15px;">
+                            <h2 style="color:var(--primary);">@${pUsername}</h2>
+                            <p style="font-size:0.7rem; color:#94a3b8;">Son 24 Saatin Detaylı Raporu</p>
+                        </div>`;
+            if(snap.empty) {
+                html += "<p style='text-align:center;'>Bu kullanıcı bugün henüz öğün taraması yapmamış.</p>";
+            } else {
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    html += `
+                        <div style="background: rgba(255,255,255,0.05); border-left: 4px solid var(--accent); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+                            <div style="font-size:0.7rem; color:var(--accent); font-weight:bold; margin-bottom:5px;">🕒 ${d.date}</div>
+                            <div style="font-size:1rem; font-weight:900; color:#fff; margin-bottom:10px;">🍽️ ${d.mealName}</div>
+                            <div style="font-size:0.85rem; color:#cbd5e1; line-height:1.5; white-space:pre-line; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+                                ${d.fullText}
+                            </div>
+                            <div style="margin-top:10px; display:inline-block; background:var(--primary); color:white; padding:4px 10px; border-radius:10px; font-size:0.7rem; font-weight:bold;">
+                                SKOR: ${d.score}/10
+                            </div>
+                        </div>`;
+                });
+            }
             document.getElementById('modalBody').innerHTML = html;
             document.getElementById('detailModal').style.display = 'block';
         });
@@ -374,23 +394,13 @@
         const code = document.getElementById('dietCodeInput').value.trim().toUpperCase();
         if(!code) return alert("Lütfen kod girin.");
         const me = auth.currentUser.displayName.toLowerCase();
-        
-        // Bu kodu kullanan diyetisyeni bul
         const q = await db.collection('dieticians').where('code', '==', code).get();
-        if(q.empty) return alert("HATA: Bu kodla eşleşen bir diyetisyen bulunamadı.");
-        
+        if(q.empty) return alert("HATA: Kod bulunamadı.");
         const dietDoc = q.docs[0];
-        const dieticianID = dietDoc.id; // Diyetisyenin kullanıcı adı
-
-        // 1. Diyetisyenin hasta listesine beni ekle
-        await db.collection('dieticians').doc(dieticianID).update({
-            patients: firebase.firestore.FieldValue.arrayUnion(me)
-        });
-        
-        // 2. Benim profilime hangi diyetisyene bağlı olduğumu yaz
+        const dieticianID = dietDoc.id;
+        await db.collection('dieticians').doc(dieticianID).update({ patients: firebase.firestore.FieldValue.arrayUnion(me) });
         await db.collection('partner_data').doc(me).update({ linkedDietician: dieticianID });
-        
-        alert("BAŞARILI! @" + dieticianID + " diyetisyenine bağlandınız. Öğünleriniz artık kendisi tarafından takip edilecek.");
+        alert("BAŞARILI! @" + dieticianID + " diyetisyenine bağlandınız.");
         checkDieticianLink();
     }
 
@@ -398,13 +408,12 @@
         const me = auth.currentUser.displayName.toLowerCase();
         db.collection('partner_data').doc(me).get().then(doc => {
             if(doc.exists && doc.data().linkedDietician) {
-                document.getElementById('dietStatus').innerText = "DURUM: @" + doc.data().linkedDietician + " diyetisyenine bağlısınız.";
+                document.getElementById('dietStatus').innerText = "DURUM: @" + doc.data().linkedDietician + " bağlısınız.";
                 document.getElementById('dietCodeInput').style.display = 'none';
             }
         });
     }
 
-    // --- DİĞER FONKSİYONLAR ---
     async function runAI(mode) {
         const resDiv = document.getElementById('results');
         const vid = document.getElementById('video');
