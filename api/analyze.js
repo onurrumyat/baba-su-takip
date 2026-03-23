@@ -1,29 +1,38 @@
 // api/analyze.js
-// Bio-Chef Pro — AI Food Analysis Endpoint (GPT-4o Integrated)
+// Bio-Chef Pro — AI Analysis Endpoint (GPT-4o Integrated)
 // ─────────────────────────────────────────────────────────
 
-const ALLOWED_MODES = ['yemek', 'plan'];
+const ALLOWED_MODES = ['yemek', 'spor', 'lara']; // 'plan' kaldırıldı, yeni modlar eklendi.
 
 const buildPrompt = (mode, user_data, lang) => {
     const langRule = lang === 'en' 
         ? 'RESPONSE LANGUAGE: ENGLISH ONLY.' 
         : 'YANIT DİLİ: YALNIZCA TÜRKÇE.';
 
-    if (mode === 'plan') {
+    if (mode === 'spor') {
         return {
-            system: `Sen uzman bir diyetisyen ve beslenme koçusun. 
-            Kullanıcı profili: ${user_data}. 
-            7 günlük beslenme planı oluştur. Her gün için:
-            
-            - Kahvaltı, Öğle, Akşam, Ara Öğün
-            Format: "GÜN: öğün — yemek" şeklinde kısa ve net yaz.
+            system: `Sen profesyonel bir fitness ve spor koçusun. 
+            Kullanıcı profili ve tercihleri: ${user_data}. 
+            Bu bilgilere göre 7 günlük estetik ve uygulanabilir bir spor programı oluştur. 
+            Her gün için antrenman veya dinlenme planını, hareketleri, set ve tekrar sayılarını belirt.
+            Format: Gün bazlı, profesyonel ve motive edici olsun.
             ${langRule}`,
-            user: lang === 'en' 
-                ? 'Create a clear 7-day meal plan.' 
-                : '7 günlük net beslenme planımı çıkar.',
+            user: "Bana uygun 7 günlük spor programımı çıkar.",
         };
     }
 
+    if (mode === 'lara') {
+        return {
+            system: `Senin adın Lara. Sen Bio-Chef Pro sisteminin yapay zeka diyetisyenisin. 
+            Sadece diyet, sağlıklı yemekler, besin değerleri ve spor konularında uzman bir asistan gibi davran. 
+            Kullanıcı bu konular dışında bir şey sorarsa kibarca sadece bu alanlarda yardımcı olabileceğini belirt.
+            Yanıtların kısa, uzman ve destekleyici olsun.
+            ${langRule}`,
+            user: user_data, // Chatbox'tan gelen direkt mesaj
+        };
+    }
+
+    // Orijinal Yemek Analiz Modu (Dokunulmadı)
     return {
         system: `Sen kıdemli bir gıda bilimcisi ve klinik diyetisyensin.
         Kullanıcı profili: ${user_data}.
@@ -73,13 +82,11 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Görüntü eksik.' });
     }
     if (!process.env.OPENAI_API_KEY) {
-        console.error('[BioChef] OPENAI_API_KEY tanımlı değil.');
         return res.status(500).json({ error: 'Sunucu yapılandırma hatası.' });
     }
 
     const prompt = buildPrompt(mode, user_data, lang);
 
-    // Görseli prompt içine yerleştirme
     const userContent = mode === 'yemek' 
         ? prompt.user.map(b => 
             b.type === 'image_url' 
@@ -106,12 +113,6 @@ export default async function handler(req, res) {
             }),
         });
 
-        if (!openaiRes.ok) {
-            const body = await openaiRes.text();
-            console.error('[BioChef] OpenAI HTTP hatası:', openaiRes.status, body);
-            return res.status(502).json({ error: 'Yapay zeka servisi yanıt vermedi.' });
-        }
-
         const data = await openaiRes.json();
         const analysis = data?.choices?.[0]?.message?.content?.trim();
 
@@ -122,7 +123,6 @@ export default async function handler(req, res) {
         return res.status(200).json({ analysis });
 
     } catch (err) {
-        console.error('[BioChef] Sistem hatası:', err);
         return res.status(500).json({ error: 'Sistem hatası.' });
     }
 }
