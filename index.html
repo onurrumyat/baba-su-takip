@@ -12,7 +12,7 @@
     
     <style>
         :root { --bg: #0b0f1a; --card: #161b2a; --primary: #10b981; --accent: #0ea5e9; --premium: #f59e0b; --text: #f1f5f9; --danger: #ef4444; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
         .app-card { width: 100%; max-width: 420px; background: var(--card); border-radius: 35px; padding: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); height: fit-content; position: relative; }
         .auth-container h1 { font-size: 2.2rem; text-align: center; margin-bottom: 20px; color: var(--primary); font-weight: 900; }
@@ -21,9 +21,8 @@
         .btn-main { background: var(--primary); }
         .btn-sub { background: var(--accent); margin-top: 10px; }
         .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #2d3748; margin-top: 10px; font-size: 0.8rem; }
-        .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 2px solid #1e293b; margin-bottom: 20px; position: relative; }
-        video { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block; }
-        #capturedImage { width: 100% !important; height: 100% !important; object-fit: cover !important; display: none; position: absolute; top: 0; left: 0; z-index: 5; }
+        .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 2px solid #1e293b; margin-bottom: 20px; }
+        video { width: 100%; height: 100%; object-fit: cover; }
         .premium-area { background: rgba(245, 158, 11, 0.08); border: 2px solid var(--premium); border-radius: 25px; padding: 20px; margin-top: 20px; text-align: center; }
         .premium-title { font-weight: 900; color: var(--premium); font-size: 1.1rem; margin-bottom: 15px; }
         #paypal-button-container { margin-top: 10px; min-height: 150px; }
@@ -31,21 +30,11 @@
         .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); }
         .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
         .report-txt { font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
-        
-        /* Geçmiş Kutucuk Tasarımı */
-        .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); cursor: pointer; transition: 0.2s; }
-        .history-box:hover { background: rgba(255,255,255,0.1); }
-        
+        .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); }
         .score-wrapper { margin-top: 20px; margin-bottom: 10px; width: 100%; position: relative; padding-bottom: 20px; }
         .score-bar { height: 14px; width: 100%; border-radius: 7px; background: linear-gradient(to right, #ef4444 0%, #f97316 35%, #eab308 65%, #22c55e 100%); position: relative; }
         .score-marker { position: absolute; top: -10px; width: 30px; height: 30px; background: #fff; border: 3px solid #1e293b; border-radius: 50%; transform: translateX(-50%); transition: left 1s ease-out; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 900; color: #000; z-index: 2; }
         .score-marker::after { content: '📍'; position: absolute; bottom: -20px; font-size: 1rem; }
-        
-        /* VIP Detay Modalı */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; padding: 20px; align-items: center; justify-content: center; }
-        .modal-content { background: var(--card); border-radius: 30px; padding: 25px; width: 100%; max-width: 380px; border: 2px solid var(--primary); box-shadow: 0 0 30px rgba(16, 185, 129, 0.3); }
-        .modal-body { color: #cbd5e1; font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; max-height: 60vh; overflow-y: auto; margin-top: 15px; }
-
         .streak-badge { display:none; background:rgba(249, 115, 22, 0.15); color:#f97316; padding:8px 15px; border-radius:20px; font-weight:900; font-size:0.9rem; border:1px solid #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.3); animation: pulse 2s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         .partner-box { background: rgba(239, 68, 68, 0.05); border: 1px dashed var(--danger); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
@@ -62,17 +51,6 @@
     </style>
 </head>
 <body>
-
-<div id="detailModal" class="modal">
-    <div class="modal-content">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <b style="color:var(--primary); font-size: 1.2rem;">VIP ANALİZ DETAYI</b>
-            <span style="cursor:pointer; font-size: 1.5rem;" onclick="document.getElementById('detailModal').style.display='none'">✕</span>
-        </div>
-        <div class="modal-body" id="modalBody"></div>
-        <button class="btn btn-main" style="margin-top:20px;" onclick="document.getElementById('detailModal').style.display='none'">KAPAT</button>
-    </div>
-</div>
 
 <div class="app-card">
 
@@ -127,26 +105,23 @@
             <div id="uMail" class="user-tag"></div> 
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <input type="number" id="uAge" placeholder="YAŞ" oninput="saveBioData()">
-            <input type="number" id="uWeight" placeholder="KİLO" oninput="saveBioData()">
+            <input type="number" id="uAge" placeholder="YAŞ">
+            <input type="number" id="uWeight" placeholder="KİLO">
         </div>
-        <select id="uGoal" onchange="saveBioData()">
+        <select id="uGoal">
             <option id="opt1" value="Kilo Vermek">Kilo Vermek (-)</option>
             <option id="opt2" value="Kilo Almak">Kilo Almak (+)</option>
             <option id="opt3" value="Kiloyu Korumak">Kiloyu Korumak (=)</option>
         </select>
-        <div class="cam-box">
-            <video id="video" autoplay playsinline onclick="this.play()"></video>
-            <img id="capturedImage" alt="Captured Frame">
-        </div>
+        <div class="cam-box"><video id="video" autoplay playsinline onclick="this.play()"></video></div>
         <canvas id="canvas" style="display:none;"></canvas>
         <button class="btn btn-main" id="btnAnalyzeText" onclick="runAI('yemek')">📸 ANALİZ ET</button>
         <div id="results"></div>
         <button class="btn btn-main" id="btnPdf" style="display:none; background: #ef4444; margin-top:15px;" onclick="downloadPDF()">📄 PDF OLARAK KAYDET</button>
 
-        <button class="btn btn-outline" id="btnHistToggle" onclick="toggleHistory()" style="margin-top:25px;">📚 SON 24 SAAT ANALİZLERİM</button>
+        <button class="btn btn-outline" id="btnHistToggle" onclick="toggleHistory()" style="margin-top:25px;">📚 GEÇMİŞ ANALİZLERİM</button>
         <div id="historyPanel" style="display:none; margin-top:15px; padding:15px; border-radius:15px; border: 1px solid #2d3748;">
-            <h3 id="txtHistTitle" style="text-align:center; color:var(--primary); margin-bottom:10px;">Günün Özeti</h3>
+            <h3 id="txtHistTitle" style="text-align:center; color:var(--primary); margin-bottom:10px;">Son Taramalarınız</h3>
             <div id="historyList"></div>
         </div>
 
@@ -182,7 +157,7 @@
             errPlan: "Haftalık plan için aşağıdan Premium üyeliğinizi başlatın.", errMsg: "Hata!", errUserTaken: "Bu kullanıcı adı zaten alınmış!",
             loading: "🔍 İnceleniyor...", headersYemek: ["HEDEF SKORU 🎯", "AÇLIK KRONOMETRESİ ⏳", "ÜRÜN ÖZETİ", "BESİN DEĞERLERİ", "HEDEF ANALİZİ", "NET TAVSİYE"],
             headersPlan: ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"], payDesc: "Bio-Chef Pro Haftalık Plan Erişimi",
-            paySucc: "Ödeme Başarılı!", btnPdfTxt: "📄 PDF OLARAK KAYDET", btnHistTxt: "📚 SON 24 SAAT ANALİZLERİM", histTitle: "Günün Özeti",
+            paySucc: "Ödeme Başarılı!", btnPdfTxt: "📄 PDF OLARAK KAYDET", btnHistTxt: "📚 GEÇMİŞ ANALİZLERİM", histTitle: "Son Taramalarınız",
             noHist: "Henüz geçmiş yok.", streakTxt: "Seri", btnPartToggle: "👫 KANKA / ÇİFT ARENASI", partTitle: "Partnerini Denetle! 🚨",
             partInput: "Kullanıcı Adı Girin", btnPartCheck: "🔍 DURUMUNU SORGULA", partErr: "Lütfen partner kullanıcı adı girin.",
             partNoData: "Önce ona arkadaşlık isteği atmalısın!", partCatch: "🚨 YAKALANDI! Skor: ", partGood: "✅ Sadık! Skor: "
@@ -195,7 +170,7 @@
             errPlan: "Start Premium for plan.", errMsg: "Error!", errUserTaken: "Username taken!",
             loading: "🔍 Analyzing...", headersYemek: ["GOAL SCORE 🎯", "HUNGER ⏳", "SUMMARY", "NUTRITION", "GOAL ANALYSIS", "ADVICE"],
             headersPlan: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"], payDesc: "Bio-Chef Pro Access",
-            paySucc: "Success!", btnPdfTxt: "📄 SAVE AS PDF", btnHistTxt: "📚 LAST 24H HISTORY", histTitle: "Today's Summary",
+            paySucc: "Success!", btnPdfTxt: "📄 SAVE AS PDF", btnHistTxt: "📚 MY HISTORY", histTitle: "Recent Scans",
             noHist: "No history.", streakTxt: "Streak", btnPartToggle: "👫 BUDDY ARENA", partTitle: "Inspect Partner!",
             partInput: "Enter Username", btnPartCheck: "🔍 CHECK", partErr: "Enter username.",
             partNoData: "Send request first!", partCatch: "🚨 CAUGHT! Score: ", partGood: "✅ Loyal! Score: "
@@ -231,7 +206,7 @@
         document.getElementById('btnPartnerToggle').innerText = langData[l].btnPartToggle;
         document.getElementById('txtPartTitle').innerText = langData[l].partTitle;
         document.getElementById('partnerUser').placeholder = langData[l].partInput; 
-        document.getElementById('btnCheckPart').innerText = langData[l].btnCheckPart;
+        document.getElementById('btnCheckPart').innerText = langData[l].btnPartCheck;
     }
 
     const firebaseConfig = {
@@ -259,7 +234,6 @@
     auth.onAuthStateChanged(user => {
         if (user) {
             toggleView('mainView');
-            loadBioData();
             let display = user.displayName ? "@" + user.displayName : "@" + user.email.split('@')[0];
             document.getElementById('uMail').innerText = display;
             isVip = localStorage.getItem('vip_' + user.uid) === 'true';
@@ -273,29 +247,6 @@
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
         } else { toggleView('loginView'); }
     });
-
-    // YAŞ/KİLO VERİLERİNİ OTOMATİK KAYDET
-    function saveBioData() {
-        if(!auth.currentUser) return;
-        const d = {
-            age: document.getElementById('uAge').value,
-            weight: document.getElementById('uWeight').value,
-            goal: document.getElementById('uGoal').value
-        };
-        localStorage.setItem('bio_' + auth.currentUser.uid, JSON.stringify(d));
-        db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).set(d, {merge:true});
-    }
-
-    // YAŞ/KİLO VERİLERİNİ OTOMATİK YÜKLE
-    function loadBioData() {
-        const saved = localStorage.getItem('bio_' + auth.currentUser.uid);
-        if(saved) {
-            const d = JSON.parse(saved);
-            document.getElementById('uAge').value = d.age || '';
-            document.getElementById('uWeight').value = d.weight || '';
-            document.getElementById('uGoal').value = d.goal || 'Kilo Vermek';
-        }
-    }
 
     async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); } }
     async function doRegister() { 
@@ -382,23 +333,15 @@
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
         if(!age || !weight) return alert(langData[currentLang].errInfo);
-        
+        resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
+        resDiv.style.display = 'flex';
         let img = "";
         if(mode === 'yemek') {
             const vid = document.getElementById('video');
-            const canv = document.getElementById('canvas'); 
-            canv.width = 640; canv.height = 480;
+            const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
             canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
-            img = canv.toDataURL('image/jpeg', 0.8);
-            
-            document.getElementById('capturedImage').src = img;
-            document.getElementById('capturedImage').style.display = 'block';
-            document.getElementById('video').style.display = 'none';
+            img = canv.toDataURL('image/jpeg', 0.7);
         }
-
-        resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
-        resDiv.style.display = 'flex';
-
         try {
             const r = await fetch('/api/analyze', {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -422,27 +365,16 @@
             });
             document.getElementById('btnPdf').style.display = 'block';
             if(mode === 'yemek') saveHistory(score, d.analysis);
-        } catch(e) { console.error(e); }
+        } catch(e) { alert(langData[currentLang].errMsg); }
     }
 
     function saveHistory(score, raw) {
         let me = auth.currentUser.displayName.toLowerCase();
-        let shortMeal = raw.split("\n").find(l => l.includes("ÜRÜN ÖZETİ")) || "Yemek Analizi";
-        shortMeal = shortMeal.replace("ÜRÜN ÖZETİ:", "").trim();
-
-        const historyItem = { 
-            score, 
-            full: raw, 
-            meal: shortMeal,
-            timestamp: Date.now(), 
-            date: new Date().toLocaleString() 
-        };
-        
-        db.collection('partner_data').doc(me).update({ history: firebase.firestore.FieldValue.arrayUnion(historyItem) }).catch(() => {});
+        db.collection('partner_data').doc(me).set({ score: score, lastMeal: raw.substring(0, 50), time: new Date().toLocaleTimeString() }, { merge: true });
         let key = 'history_' + auth.currentUser.uid;
         let arr = JSON.parse(localStorage.getItem(key) || '[]');
-        arr.unshift(historyItem);
-        localStorage.setItem(key, JSON.stringify(arr));
+        arr.unshift({ summary: `Skor: ${score}/10`, date: new Date().toLocaleString() });
+        localStorage.setItem(key, JSON.stringify(arr.slice(0, 10)));
     }
 
     function toggleHistory() {
@@ -451,27 +383,8 @@
         if(p.style.display === 'block') {
             const list = document.getElementById('historyList');
             let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-            
-            // SON 24 SAAT FİLTRESİ
-            const now = Date.now();
-            const son24 = arr.filter(h => (now - h.timestamp) < 86400000);
-
-            list.innerHTML = son24.length ? son24.map(h => `
-                <div class="history-box" onclick="showDetails('${encodeURIComponent(JSON.stringify(h))}')">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        <b>${h.meal.substring(0,25)}...</b>
-                        <span style="color:var(--primary)">${h.score}/10</span>
-                    </div>
-                    <small style="color:#94a3b8">${h.date}</small>
-                </div>`).join('') : "Son 24 saatte analiz yok.";
+            list.innerHTML = arr.length ? arr.map(h => `<div class="history-box"><b>${h.date}</b><br>${h.summary}</div>`).join('') : "Henüz yok.";
         }
-    }
-
-    function showDetails(dataStr) {
-        const data = JSON.parse(decodeURIComponent(dataStr));
-        const modal = document.getElementById('detailModal');
-        document.getElementById('modalBody').innerText = data.full;
-        modal.style.display = 'flex';
     }
 
     function togglePartner() {
@@ -513,14 +426,6 @@
     function downloadPDF() { html2pdf().from(document.getElementById('results')).save(); }
     function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
     function doReset() { auth.sendPasswordResetEmail(document.getElementById('lEmail').value).then(() => alert("Gönderildi.")); }
-    
-    function resetCamera() {
-        document.getElementById('capturedImage').style.display = 'none';
-        document.getElementById('video').style.display = 'block';
-        document.getElementById('btnAnalyzeText').style.display = 'block';
-        startCamera();
-    }
 </script>
 </body>
 </html>
-
