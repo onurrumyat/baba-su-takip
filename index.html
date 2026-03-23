@@ -163,8 +163,7 @@
     };
 
     function changeLang(l) {
-        currentLang = l;
-        const d = langData[l];
+        currentLang = l; const d = langData[l];
         document.getElementById('txtL1').innerText = d.appTitle;
         document.getElementById('lEmail').placeholder = d.emailPlaceholder;
         document.getElementById('lPass').placeholder = d.passPlaceholder;
@@ -173,15 +172,12 @@
         document.getElementById('btnGoReg').innerText = d.btnReg;
         document.getElementById('txtRegTitle').innerText = d.regTitle;
         document.getElementById('rEmail').placeholder = d.emailPlaceholder;
-        document.getElementById('rUser').placeholder = "Username";
         document.getElementById('rPass').placeholder = d.passPlaceholder;
         document.getElementById('btnDoReg').innerText = d.btnDoReg;
         document.getElementById('btnGoLogin').innerText = d.btnBack;
         document.getElementById('uAge').placeholder = d.agePlaceholder;
         document.getElementById('uWeight').placeholder = d.weightPlaceholder;
-        document.getElementById('opt1').innerText = d.g1;
-        document.getElementById('opt2').innerText = d.g2;
-        document.getElementById('opt3').innerText = d.g3;
+        document.getElementById('opt1').innerText = d.g1; document.getElementById('opt2').innerText = d.g2; document.getElementById('opt3').innerText = d.g3;
         document.getElementById('btnAnalyze').innerText = d.btnAnalyze;
         document.getElementById('btnGetPlan').innerText = d.btnPlan;
         document.getElementById('txtPremTitle').innerText = d.premTitle;
@@ -201,19 +197,52 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth(); const db = firebase.firestore();
 
+    // REFERANS YAKALAYICI
+    const urlParams = new URLSearchParams(window.location.search);
+    const referrer = urlParams.get('ref');
+
     auth.onAuthStateChanged(user => {
         if (user) {
             toggleView('mainView');
             document.getElementById('uMail').innerText = "@" + (user.displayName || user.email.split('@')[0]);
             loadUserInfo();
-            isVip = localStorage.getItem('vip_'+user.uid) === 'true';
-            document.getElementById('premiumLockInfo').style.display = isVip ? 'none' : 'block';
-            if(!isVip) initPayPal();
+            db.collection('vip_users').doc(user.uid).get().then(doc => {
+                isVip = (doc.exists && doc.data().expiry > Date.now()) || localStorage.getItem('vip_'+user.uid) === 'true';
+                document.getElementById('premiumLockInfo').style.display = isVip ? 'none' : 'block';
+                if(!isVip) initPayPal();
+            });
             document.getElementById('bellIcon').style.display='flex'; document.getElementById('friendListBtn').style.display='flex';
             listenNotifications(); listenFriends(); showStreak();
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
         } else { toggleView('loginView'); }
     });
+
+    async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); } }
+    
+    async function doRegister() {
+        const u = document.getElementById('rUser').value.trim(); const e = document.getElementById('rEmail').value; const p = document.getElementById('rPass').value;
+        if(!u || !e || !p) return alert("Eksik.");
+        try { 
+            const check = await db.collection('partner_data').doc(u.toLowerCase()).get();
+            if(check.exists) return alert("Alınmış!");
+            const cred = await auth.createUserWithEmailAndPassword(e, p);
+            await cred.user.updateProfile({ displayName: u });
+            await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase() });
+            
+            // DAVET ÖDÜLÜ MANTIĞI
+            if(referrer) {
+                // Davet eden kişiyi (referrer) bul ve ona 30 gün VIP ver
+                db.collection('partner_data').where('username', '==', referrer.toLowerCase()).get().then(snap => {
+                    snap.forEach(doc => {
+                        const thirtyDays = Date.now() + (30 * 24 * 60 * 60 * 1000);
+                        db.collection('vip_users').doc(doc.id).set({ expiry: thirtyDays }, { merge: true });
+                        db.collection('notifications').add({ toUser: referrer.toLowerCase(), fromUser: 'Sistem', message: 'Tebrikler! Davet ettiğin kişi kayıt oldu, 1 ay VIP kazandın!' });
+                    });
+                });
+            }
+            location.reload();
+        } catch(err) { alert(err.message); }
+    }
 
     function saveUserInfo() {
         const user = auth.currentUser; if(!user) return;
@@ -235,21 +264,8 @@
 
     function copyInviteLink() {
         const me = auth.currentUser.displayName || auth.currentUser.uid;
-        const link = window.location.origin + "?ref=" + me;
-        navigator.clipboard.writeText(link).then(() => alert("Davet linki kopyalandı: " + link));
-    }
-
-    async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); } }
-    async function doRegister() {
-        const u = document.getElementById('rUser').value.trim(); const e = document.getElementById('rEmail').value; const p = document.getElementById('rPass').value;
-        try { 
-            const check = await db.collection('partner_data').doc(u.toLowerCase()).get();
-            if(check.exists) return alert("Alınmış!");
-            const cred = await auth.createUserWithEmailAndPassword(e, p);
-            await cred.user.updateProfile({ displayName: u });
-            await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase() });
-            location.reload();
-        } catch(err) { alert(err.message); }
+        const link = window.location.origin + window.location.pathname + "?ref=" + me;
+        navigator.clipboard.writeText(link).then(() => alert("Kopyalandı: " + link));
     }
 
     function toggleView(id) { document.getElementById('loginView').style.display='none'; document.getElementById('regView').style.display='none'; document.getElementById('mainView').style.display='none'; document.getElementById(id).style.display='block'; }
@@ -283,7 +299,7 @@
             list.innerHTML = ''; let c = 0;
             snap.forEach(doc => {
                 c++; let d = doc.data();
-                list.innerHTML += `<div class="notif-item">🤝 @${d.fromUser} istek attı.<br><button style="background:var(--primary);color:white;border:none;padding:5px;border-radius:5px;cursor:pointer;" onclick="acceptFriend('${d.fromUser}','${doc.id}')">Kabul Et</button></div>`;
+                list.innerHTML += `<div class="notif-item">${d.type === 'friend_request' ? '🤝 @'+d.fromUser+' istek attı. <button onclick="acceptFriend(\''+d.fromUser+'\',\''+doc.id+'\')">Kabul Et</button>' : d.message + ' <button onclick="db.collection(\'notifications\').doc(\''+doc.id+'\').delete()">Tamam</button>'}</div>`;
             });
             badge.style.display = c > 0 ? 'flex' : 'none'; badge.innerText = c;
         });
@@ -368,7 +384,7 @@
                 const d = doc.data();
                 let status = d.score >= 7 ? langData[currentLang].partGood : (d.score <= 3 ? langData[currentLang].partCatch : "Orta:");
                 res.innerHTML = `<div style="background:rgba(0,0,0,0.3);padding:15px;border-radius:15px;border:1px solid var(--accent);margin-top:10px;">🗓️ ${d.date} | ⏰ ${d.time}<br>⭐ Skor: ${d.score}/10<br>🍴 ${d.lastMeal}<br><small>${status}</small></div>`;
-            } else { res.innerText = langData[currentLang].partNoData || "Veri yok."; }
+            } else { res.innerText = langData[currentLang].partNoData; }
         });
     }
 
