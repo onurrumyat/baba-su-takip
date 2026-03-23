@@ -12,7 +12,7 @@
     
     <style>
         :root { --bg: #0b0f1a; --card: #161b2a; --primary: #10b981; --accent: #0ea5e9; --premium: #f59e0b; --text: #f1f5f9; --danger: #ef4444; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
         body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
         .app-card { width: 100%; max-width: 420px; background: var(--card); border-radius: 35px; padding: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); height: fit-content; position: relative; }
         .auth-container h1 { font-size: 2.2rem; text-align: center; margin-bottom: 20px; color: var(--primary); font-weight: 900; }
@@ -21,8 +21,9 @@
         .btn-main { background: var(--primary); }
         .btn-sub { background: var(--accent); margin-top: 10px; }
         .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #2d3748; margin-top: 10px; font-size: 0.8rem; }
-        .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 2px solid #1e293b; margin-bottom: 20px; }
-        video { width: 100%; height: 100%; object-fit: cover; }
+        .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 2px solid #1e293b; margin-bottom: 20px; position: relative; }
+        video, #capturedImage { width: 100%; height: 100%; object-fit: cover; }
+        #capturedImage { display: none; position: absolute; top: 0; left: 0; z-index: 5; }
         .premium-area { background: rgba(245, 158, 11, 0.08); border: 2px solid var(--premium); border-radius: 25px; padding: 20px; margin-top: 20px; text-align: center; }
         .premium-title { font-weight: 900; color: var(--premium); font-size: 1.1rem; margin-bottom: 15px; }
         #paypal-button-container { margin-top: 10px; min-height: 150px; }
@@ -30,7 +31,7 @@
         .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); }
         .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
         .report-txt { font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
-        .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); }
+        .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); cursor: pointer; }
         .score-wrapper { margin-top: 20px; margin-bottom: 10px; width: 100%; position: relative; padding-bottom: 20px; }
         .score-bar { height: 14px; width: 100%; border-radius: 7px; background: linear-gradient(to right, #ef4444 0%, #f97316 35%, #eab308 65%, #22c55e 100%); position: relative; }
         .score-marker { position: absolute; top: -10px; width: 30px; height: 30px; background: #fff; border: 3px solid #1e293b; border-radius: 50%; transform: translateX(-50%); transition: left 1s ease-out; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 900; color: #000; z-index: 2; }
@@ -38,6 +39,14 @@
         .streak-badge { display:none; background:rgba(249, 115, 22, 0.15); color:#f97316; padding:8px 15px; border-radius:20px; font-weight:900; font-size:0.9rem; border:1px solid #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.3); animation: pulse 2s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         .partner-box { background: rgba(239, 68, 68, 0.05); border: 1px dashed var(--danger); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
+        .role-selector { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }
+        .role-btn { flex: 1; padding: 10px; border-radius: 10px; background: #0b0f1a; border: 1px solid #2d3748; color: #94a3b8; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+        .role-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(16, 185, 129, 0.1); }
+        
+        /* Modal Style */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; padding: 20px; overflow-y: auto; }
+        .modal-content { background: var(--card); border-radius: 25px; padding: 25px; max-width: 400px; margin: auto; border: 1px solid var(--accent); }
+
         .bell-container { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; }
         .bell-icon { font-size: 1.5rem; }
         .notif-badge { position: absolute; top: 0; right: 0; background: var(--danger); color: white; font-size: 0.6rem; font-weight: 900; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
@@ -51,6 +60,11 @@
     </style>
 </head>
 <body>
+
+<div id="detailModal" class="modal">
+    <div class="modal-content" id="modalBody"></div>
+    <button class="btn btn-sub" onclick="document.getElementById('detailModal').style.display='none'">KAPAT</button>
+</div>
 
 <div class="app-card">
 
@@ -83,6 +97,10 @@
 
     <div id="loginView" class="auth-container">
         <h1 id="txtL1">BIO-CHEF</h1>
+        <div class="role-selector">
+            <div class="role-btn active" onclick="setRole('danisan', this)">DANIŞAN</div>
+            <div class="role-btn" onclick="setRole('diyetisyen', this)">DİYETİSYEN</div>
+        </div>
         <input type="email" id="lEmail" placeholder="E-posta">
         <input type="password" id="lPass" placeholder="Şifre">
         <button class="btn btn-main" id="txtL4" onclick="doLogin()">GİRİŞ YAP</button>
@@ -92,6 +110,10 @@
 
     <div id="regView" class="auth-container" style="display:none;">
         <h1 id="txtR7">KAYIT OL</h1>
+        <div class="role-selector">
+            <div class="role-btn active" onclick="setRole('danisan', this)">DANIŞAN</div>
+            <div class="role-btn" onclick="setRole('diyetisyen', this)">DİYETİSYEN</div>
+        </div>
         <input type="email" id="rEmail" placeholder="E-posta">
         <input type="text" id="rUser" placeholder="Kullanıcı Adı (Örn: fit_chef)">
         <input type="password" id="rPass" placeholder="Şifre">
@@ -105,17 +127,24 @@
             <div id="uMail" class="user-tag"></div> 
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <input type="number" id="uAge" placeholder="YAŞ">
-            <input type="number" id="uWeight" placeholder="KİLO">
+            <input type="number" id="uAge" placeholder="YAŞ" onchange="saveUserData()">
+            <input type="number" id="uWeight" placeholder="KİLO" onchange="saveUserData()">
         </div>
-        <select id="uGoal">
+        <select id="uGoal" onchange="saveUserData()">
             <option id="opt1" value="Kilo Vermek">Kilo Vermek (-)</option>
             <option id="opt2" value="Kilo Almak">Kilo Almak (+)</option>
             <option id="opt3" value="Kiloyu Korumak">Kiloyu Korumak (=)</option>
         </select>
-        <div class="cam-box"><video id="video" autoplay playsinline onclick="this.play()"></video></div>
+        
+        <div class="cam-box">
+            <video id="video" autoplay playsinline></video>
+            <img id="capturedImage" alt="Captured">
+        </div>
+        
         <canvas id="canvas" style="display:none;"></canvas>
         <button class="btn btn-main" id="btnAnalyzeText" onclick="runAI('yemek')">📸 ANALİZ ET</button>
+        <button class="btn btn-sub" id="btnRetake" style="display:none; background: #64748b;" onclick="resetCamera()">🔄 YENİDEN ÇEK</button>
+        
         <div id="results"></div>
         <button class="btn btn-main" id="btnPdf" style="display:none; background: #ef4444; margin-top:15px;" onclick="downloadPDF()">📄 PDF OLARAK KAYDET</button>
 
@@ -129,9 +158,12 @@
         <div id="partnerPanel" class="partner-box" style="display:none;">
             <h3 id="txtPartTitle" style="color:var(--danger); margin-bottom:10px;">Partnerini Denetle! 🚨</h3>
             <input type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin" style="background: rgba(0,0,0,0.5);">
-            <button class="btn btn-sub" id="btnAddFriend" style="background: var(--accent); margin-bottom:5px;" onclick="sendFriendRequest()">➕ ARKADAŞ EKLE İSTEĞİ AT</button>
-            <button class="btn btn-sub" id="btnCheckPart" style="background: var(--danger);" onclick="checkPartner()">🔍 DURUMUNU SORGULA</button>
+            <div style="display:flex; gap:5px;">
+                <button class="btn btn-sub" id="btnAddFriend" style="background: var(--accent); font-size: 0.7rem; flex:1;" onclick="sendFriendRequest()">➕ TAKİP ET</button>
+                <button class="btn btn-sub" id="btnCheckPart" style="background: var(--danger); font-size: 0.7rem; flex:1;" onclick="checkPartner()">🔍 SORGULA</button>
+            </div>
             <div id="partnerResult" style="margin-top:15px; font-weight:bold; white-space:pre-line;"></div>
+            <div id="partnerHistoryList" style="margin-top:10px; text-align:left;"></div>
         </div>
 
         <div class="premium-area">
@@ -148,6 +180,7 @@
 
 <script>
     let currentLang = 'tr';
+    let userRole = 'danisan';
     const langData = {
         tr: {
             appTitle: "BIO-CHEF", emailHolder: "E-posta", passHolder: "Şifre", btnLogin: "GİRİŞ YAP", btnReset: "Şifremi Unuttum?", btnReg: "Kayıt Ol",
@@ -176,6 +209,13 @@
             partNoData: "Send request first!", partCatch: "🚨 CAUGHT! Score: ", partGood: "✅ Loyal! Score: "
         }
     };
+
+    function setRole(role, el) {
+        userRole = role;
+        const btns = el.parentElement.querySelectorAll('.role-btn');
+        btns.forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+    }
 
     function changeLang(l) {
         currentLang = l;
@@ -234,6 +274,7 @@
     auth.onAuthStateChanged(user => {
         if (user) {
             toggleView('mainView');
+            loadUserData();
             let display = user.displayName ? "@" + user.displayName : "@" + user.email.split('@')[0];
             document.getElementById('uMail').innerText = display;
             isVip = localStorage.getItem('vip_' + user.uid) === 'true';
@@ -243,10 +284,45 @@
             document.getElementById('friendListBtn').style.display = 'flex'; 
             listenNotifications(); listenFriends(); showStreak();
             let me = user.displayName ? user.displayName.toLowerCase() : user.email.split('@')[0].toLowerCase();
-            db.collection('partner_data').doc(me).set({ username: me }, { merge: true });
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => document.getElementById('video').srcObject = s);
+            db.collection('partner_data').doc(me).set({ username: me, role: userRole }, { merge: true });
+            startCamera();
         } else { toggleView('loginView'); }
     });
+
+    function startCamera() {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => {
+            document.getElementById('video').srcObject = s;
+            document.getElementById('video').style.display = 'block';
+            document.getElementById('capturedImage').style.display = 'none';
+        });
+    }
+
+    function resetCamera() {
+        document.getElementById('btnRetake').style.display = 'none';
+        document.getElementById('btnAnalyzeText').style.display = 'block';
+        startCamera();
+    }
+
+    function saveUserData() {
+        if(!auth.currentUser) return;
+        const data = {
+            age: document.getElementById('uAge').value,
+            weight: document.getElementById('uWeight').value,
+            goal: document.getElementById('uGoal').value
+        };
+        localStorage.setItem('userData_' + auth.currentUser.uid, JSON.stringify(data));
+        db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).set(data, {merge: true});
+    }
+
+    function loadUserData() {
+        const saved = localStorage.getItem('userData_' + auth.currentUser.uid);
+        if(saved) {
+            const data = JSON.parse(saved);
+            document.getElementById('uAge').value = data.age || '';
+            document.getElementById('uWeight').value = data.weight || '';
+            document.getElementById('uGoal').value = data.goal || 'Kilo Vermek';
+        }
+    }
 
     async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); } }
     async function doRegister() { 
@@ -259,7 +335,7 @@
             if(check.exists) return alert(langData[currentLang].errUserTaken);
             const cred = await auth.createUserWithEmailAndPassword(e, p);
             await cred.user.updateProfile({ displayName: u });
-            await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase() }, { merge: true });
+            await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase(), role: userRole }, { merge: true });
             location.reload(); 
         } catch(err) { alert(err.message); } 
     }
@@ -292,6 +368,7 @@
     function checkSpecific(u) {
         document.getElementById('partnerUser').value = u;
         document.getElementById('partnerPanel').style.display = 'block';
+        document.getElementById('partnerPanel').scrollIntoView();
         checkPartner(); toggleFriends();
     }
 
@@ -333,15 +410,27 @@
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
         if(!age || !weight) return alert(langData[currentLang].errInfo);
-        resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
-        resDiv.style.display = 'flex';
+        
         let img = "";
         if(mode === 'yemek') {
             const vid = document.getElementById('video');
-            const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
+            const canv = document.getElementById('canvas'); 
+            canv.width = 640; canv.height = 480;
             canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
             img = canv.toDataURL('image/jpeg', 0.7);
+            
+            // Fotoğrafı dondur
+            document.getElementById('capturedImage').src = img;
+            document.getElementById('capturedImage').style.display = 'block';
+            document.getElementById('video').style.display = 'none';
+            document.getElementById('btnAnalyzeText').style.display = 'none';
+            document.getElementById('btnRetake').style.display = 'block';
         }
+
+        resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
+        resDiv.style.display = 'flex';
+        resDiv.scrollIntoView();
+
         try {
             const r = await fetch('/api/analyze', {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -351,6 +440,7 @@
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
             const heads = mode === 'plan' ? langData[currentLang].headersPlan : langData[currentLang].headersYemek;
             let score = 5;
+            
             sections.forEach((txt, i) => {
                 const card = document.createElement('div'); card.className = 'report-card';
                 let content = txt.trim();
@@ -364,17 +454,33 @@
                 resDiv.appendChild(card);
             });
             document.getElementById('btnPdf').style.display = 'block';
-            if(mode === 'yemek') saveHistory(score, d.analysis);
+            if(mode === 'yemek') saveHistory(score, d.analysis, img);
         } catch(e) { alert(langData[currentLang].errMsg); }
     }
 
-    function saveHistory(score, raw) {
+    function saveHistory(score, raw, img) {
         let me = auth.currentUser.displayName.toLowerCase();
-        db.collection('partner_data').doc(me).set({ score: score, lastMeal: raw.substring(0, 50), time: new Date().toLocaleTimeString() }, { merge: true });
+        const historyItem = { score, full: raw, thumb: raw.substring(0, 40) + "...", date: new Date().toLocaleString() };
+        
+        db.collection('partner_data').doc(me).update({ 
+            score: score, 
+            history: firebase.firestore.FieldValue.arrayUnion(historyItem)
+        });
+
         let key = 'history_' + auth.currentUser.uid;
         let arr = JSON.parse(localStorage.getItem(key) || '[]');
-        arr.unshift({ summary: `Skor: ${score}/10`, date: new Date().toLocaleString() });
-        localStorage.setItem(key, JSON.stringify(arr.slice(0, 10)));
+        arr.unshift(historyItem);
+        localStorage.setItem(key, JSON.stringify(arr.slice(0, 15)));
+    }
+
+    function showDetails(dataStr) {
+        const data = JSON.parse(decodeURIComponent(dataStr));
+        const modal = document.getElementById('detailModal');
+        const body = document.getElementById('modalBody');
+        body.innerHTML = `<h2 style="color:var(--primary)">Analiz Detayı</h2><hr style="margin:10px 0;opacity:0.2;">
+                          <p style="font-size:0.8rem; color:var(--accent)">${data.date}</p>
+                          <div class="report-txt" style="margin-top:15px; background:rgba(255,255,255,0.05); padding:15px; border-radius:10px;">${data.full}</div>`;
+        modal.style.display = 'flex';
     }
 
     function toggleHistory() {
@@ -383,7 +489,11 @@
         if(p.style.display === 'block') {
             const list = document.getElementById('historyList');
             let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-            list.innerHTML = arr.length ? arr.map(h => `<div class="history-box"><b>${h.date}</b><br>${h.summary}</div>`).join('') : "Henüz yok.";
+            list.innerHTML = arr.length ? arr.map(h => `
+                <div class="history-box" onclick="showDetails('${encodeURIComponent(JSON.stringify(h))}')">
+                    <b>${h.date}</b> | <span style="color:var(--premium)">Skor: ${h.score}/10</span><br>
+                    <small>${h.thumb}</small>
+                </div>`).join('') : "Henüz yok.";
         }
     }
 
@@ -395,11 +505,23 @@
     function checkPartner() {
         const u = document.getElementById('partnerUser').value.trim().toLowerCase();
         const res = document.getElementById('partnerResult');
+        const histList = document.getElementById('partnerHistoryList');
+        
         db.collection('partner_data').doc(u).get().then(doc => {
-            if(doc.exists && doc.data().score !== undefined) {
-                let s = doc.data().score;
+            if(doc.exists) {
+                let d = doc.data();
+                let s = d.score || 0;
                 res.innerText = (s < 7 ? langData[currentLang].partCatch : langData[currentLang].partGood) + s + "/10";
-            } else { res.innerText = "Veri yok."; }
+                
+                if(d.history) {
+                    histList.innerHTML = `<h4 style="margin:10px 0; color:var(--accent);">Partner Geçmişi:</h4>` + 
+                    d.history.slice(-5).reverse().map(h => `
+                        <div class="history-box" style="font-size:0.7rem;" onclick="showDetails('${encodeURIComponent(JSON.stringify(h))}')">
+                            <b>${h.date}</b> - Skor: ${h.score}
+                        </div>
+                    `).join('');
+                }
+            } else { res.innerText = "Veri yok."; histList.innerHTML = ""; }
         });
     }
 
