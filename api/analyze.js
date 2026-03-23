@@ -7,15 +7,15 @@ export default async function handler(req, res) {
 
     let systemPrompt = mode === 'plan' 
         ? `Sen profesyonel bir diyetisyensin. Kullanıcı: ${user_data}. 7 günlük planı GÜN GÜN, sadece öğün ve yemek adı olarak kısa ve net ver. ${languageInstruction}`
-        : `Sen kıdemli gıda uzmanısın. Kullanıcı: ${user_data}. 
-           ÖNEMLİ: Görüntüdeki kişilere odaklanma, doğrudan gıdaya odaklan. 
+        : `Sen kıdemli gıda uzmanısın ve gelecek öngörüsü yapabilen bir biyologsun. Kullanıcı: ${user_data}. 
            FORMAT:
-           1. HEDEF UYUM SKORU: Kullanıcının hedefine uygunluk skoru 1 ile 10 arasında olmalı. YAZIYA KESİNLİKLE ŞU FORMATTA BAŞLA: "[SKOR: X]". Sonrasında tek cümle açıklama yap.
-           2. AÇLIK KRONOMETRESİ ⏳: Bu tabağın glisemik indeksi ve sindirim süresine göre tahmini acıkma süresini net saat/dakika olarak ver.
-           3. ÜRÜN ÖZETİ: Gördüğün gıdanın tam adı ve porsiyonu.
-           4. BESİN DEĞERLERİ: Kalori (kcal), Protein (g), Karbonhidrat (g), Yağ (g) net rakamlarla.
-           5. HEDEF ANALİZİ: Kullanıcının hedefine uygunluk durumu.
-           6. NET TAVSİYE: Tüketim onayı ve profesyonel görüş.
+           1. [SKOR: X] formatında skor ve açıklama.
+           2. AÇLIK KRONOMETRESİ ⏳: Net süre.
+           3. ÜRÜN ÖZETİ.
+           4. BESİN DEĞERLERİ.
+           5. HEDEF ANALİZİ.
+           6. VIP GELECEK ÖNGÖRÜSÜ 🔮: Bu yemek yarın sabahki şişkinliği, enerjiyi ve 10 yıl sonraki hücresel yaşlanmayı nasıl etkiler? (Fal gibi ama bilimsel temelli öngörü).
+           7. NET TAVSİYE.
            ${languageInstruction}`;
 
     try {
@@ -25,8 +25,8 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 model: "gpt-4o",
                 messages: [{ role: "system", content: systemPrompt }, 
-                           { role: "user", content: mode === 'plan' ? "Net beslenme planı çıkar." : [{ type: "text", text: "Gıdayı analiz et, skoru ve acıkma süresini ver." }, { type: "image_url", image_url: { url: image } }] }],
-                max_tokens: 800, temperature: 0.1
+                           { role: "user", content: mode === 'plan' ? "Net beslenme planı çıkar." : [{ type: "text", text: "Gıdayı analiz et, skoru, acıkma süresini ve VIP gelecek öngörüsünü ver." }, { type: "image_url", image_url: { url: image } }] }],
+                max_tokens: 1000, temperature: 0.2
             })
         });
         const data = await response.json();
