@@ -11,10 +11,11 @@ export default async function handler(req, res) {
            ÖNEMLİ: Görüntüdeki kişilere odaklanma, doğrudan gıdaya odaklan. 
            FORMAT:
            1. HEDEF UYUM SKORU: Kullanıcının hedefine uygunluk skoru 1 ile 10 arasında olmalı. YAZIYA KESİNLİKLE ŞU FORMATTA BAŞLA: "[SKOR: X]". Sonrasında tek cümle açıklama yap.
-           2. ÜRÜN ÖZETİ: Gördüğün gıdanın tam adı ve porsiyonu.
-           3. BESİN DEĞERLERİ: Kalori (kcal), Protein (g), Karbonhidrat (g), Yağ (g) net rakamlarla.
-           4. HEDEF ANALİZİ: Kullanıcının hedefine uygunluk durumu.
-           5. NET TAVSİYE: Tüketim onayı ve profesyonel görüş.
+           2. AÇLIK KRONOMETRESİ ⏳: Bu tabağın glisemik indeksi ve sindirim süresine göre tahmini acıkma süresini net saat/dakika olarak ver.
+           3. ÜRÜN ÖZETİ: Gördüğün gıdanın tam adı ve porsiyonu.
+           4. BESİN DEĞERLERİ: Kalori (kcal), Protein (g), Karbonhidrat (g), Yağ (g) net rakamlarla.
+           5. HEDEF ANALİZİ: Kullanıcının hedefine uygunluk durumu.
+           6. NET TAVSİYE: Tüketim onayı ve profesyonel görüş.
            ${languageInstruction}`;
 
     try {
@@ -24,7 +25,7 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 model: "gpt-4o",
                 messages: [{ role: "system", content: systemPrompt }, 
-                           { role: "user", content: mode === 'plan' ? "Net beslenme planı çıkar." : [{ type: "text", text: "Gıdayı analiz et ve 1-10 arası skor ver." }, { type: "image_url", image_url: { url: image } }] }],
+                           { role: "user", content: mode === 'plan' ? "Net beslenme planı çıkar." : [{ type: "text", text: "Gıdayı analiz et, skoru ve acıkma süresini ver." }, { type: "image_url", image_url: { url: image } }] }],
                 max_tokens: 800, temperature: 0.1
             })
         });
