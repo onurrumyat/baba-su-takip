@@ -135,8 +135,9 @@
             <video id="video" autoplay playsinline onclick="this.play()"></video>
             <canvas id="snapshotCanvas"></canvas>
         </div>
-        <canvas id="canvas" style="display:none;"></canvas>
         <button class="btn btn-main" id="btnAnalyzeText" onclick="runAI('yemek')">📸 ANALİZ ET</button>
+        <button class="btn btn-sub" id="btnResetAnalyze" style="display:none; background:var(--accent);" onclick="resetAnalysis()">🔄 YENİDEN ANALİZ ET</button>
+        
         <div id="results"></div>
         <button class="btn btn-main" id="btnPdf" style="display:none; background: #ef4444; margin-top:15px;" onclick="downloadPDF()">📄 PDF OLARAK KAYDET</button>
 
@@ -292,11 +293,6 @@
         const localWeight = localStorage.getItem('bio_weight');
         if(localAge) document.getElementById('uAge').value = localAge;
         if(localWeight) document.getElementById('uWeight').value = localWeight;
-        const doc = await db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).get();
-        if(doc.exists) {
-            if(!localAge && doc.data().age) document.getElementById('uAge').value = doc.data().age;
-            if(!localWeight && doc.data().weight) document.getElementById('uWeight').value = doc.data().weight;
-        }
     }
 
     function saveProfileData() {
@@ -389,24 +385,38 @@
         alert("Gönderildi.");
     }
 
+    function resetAnalysis() {
+        document.getElementById('snapshotCanvas').style.display = 'none';
+        document.getElementById('btnAnalyzeText').style.display = 'block';
+        document.getElementById('btnResetAnalyze').style.display = 'none';
+        document.getElementById('results').innerHTML = '';
+        document.getElementById('results').style.display = 'none';
+        document.getElementById('btnPdf').style.display = 'none';
+    }
+
     async function runAI(mode) {
         const resDiv = document.getElementById('results');
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
-        const btn = document.getElementById('btnAnalyzeText');
+        const mainBtn = document.getElementById('btnAnalyzeText');
+        const resetBtn = document.getElementById('btnResetAnalyze');
         
         if(!age || !weight) return alert(langData[currentLang].errInfo);
         
-        // Görsel Fotoğraf Çekme (Dondurma)
+        // Fotoğrafı Çek ve Dondur
         const vid = document.getElementById('video');
         const snap = document.getElementById('snapshotCanvas');
         const ctx = snap.getContext('2d');
         snap.width = vid.videoWidth;
         snap.height = vid.videoHeight;
         ctx.drawImage(vid, 0, 0, snap.width, snap.height);
-        snap.style.display = 'block'; // Videonun üstüne dondurulmuş görüntüyü koy
+        snap.style.display = 'block';
 
-        btn.disabled = true; // Butonu devre dışı bırak
+        // Buton Değişimi
+        mainBtn.style.display = 'none';
+        resetBtn.style.display = 'block';
+        resetBtn.disabled = true;
+
         resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
         resDiv.style.display = 'flex';
         
@@ -417,10 +427,18 @@
                 method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ mode, image: img, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`, lang: currentLang })
             });
-            const d = await r.json(); resDiv.innerHTML = '';
+            const d = await r.json(); 
+            resDiv.innerHTML = '';
+            
+            if(!d.analysis || d.analysis.includes("Hata") || d.analysis.length < 20) {
+                resDiv.innerHTML = `<p style="color:var(--danger); text-align:center;">Ürün algılanamadı veya hata oluştu. Skor üretilmedi.</p>`;
+                resetBtn.disabled = false;
+                return;
+            }
+
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
             const heads = mode === 'plan' ? langData[currentLang].headersPlan : langData[currentLang].headersYemek;
-            let score = 5;
+            let score = null;
             
             sections.forEach((txt, i) => {
                 const card = document.createElement('div'); card.className = 'report-card';
@@ -428,27 +446,28 @@
                 
                 if(mode === 'yemek' && i === 0) {
                     const match = content.match(/\[SKOR:\s*(\d+)\]/i);
-                    if(match) { score = parseInt(match[1]); content = content.replace(match[0], '').trim(); updateStreak(score); }
-                    let left = (score/10)*100;
-                    card.innerHTML = `<div class="report-tag">${heads[i]}</div><div class="report-txt">${content}</div>
-                    <div class="score-wrapper"><div class="score-bar"><div class="score-marker" style="left:${left}%">${score}</div></div></div>`;
+                    if(match) { 
+                        score = parseInt(match[1]); 
+                        content = content.replace(match[0], '').trim(); 
+                        updateStreak(score); 
+                        let left = (score/10)*100;
+                        card.innerHTML = `<div class="report-tag">${heads[i]}</div><div class="report-txt">${content}</div>
+                        <div class="score-wrapper"><div class="score-bar"><div class="score-marker" style="left:${left}%">${score}</div></div></div>`;
+                    } else {
+                        card.innerHTML = `<div class="report-tag">${heads[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`;
+                    }
                 } else { card.innerHTML = `<div class="report-tag">${heads[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`; }
                 resDiv.appendChild(card);
             });
             
             document.getElementById('btnPdf').style.display = 'block';
             resDiv.scrollIntoView(); 
-            
-            if(mode === 'yemek') saveHistory(score, d.analysis);
-            
-            // Analiz bittikten sonra kamerayı serbest bırak ve butonu aç
-            snap.style.display = 'none';
-            btn.disabled = false;
+            if(mode === 'yemek' && score !== null) saveHistory(score, d.analysis);
+            resetBtn.disabled = false;
 
         } catch(e) { 
-            alert(langData[currentLang].errMsg); 
-            snap.style.display = 'none';
-            btn.disabled = false;
+            resDiv.innerHTML = `<p style="color:var(--danger); text-align:center;">Sistem hatası. Lütfen tekrar deneyin.</p>`;
+            resetBtn.disabled = false;
         }
     }
 
@@ -457,19 +476,18 @@
         let now = new Date();
         let date = now.toLocaleDateString();
         let time = now.toLocaleTimeString();
-        let fullDetail = raw;
-        let mealSummary = raw.split("\n")[2] || "Bilinmeyen Yemek"; 
+        let mealSummary = raw.split("\n")[2] || "Analiz Kaydı"; 
         
         db.collection('partner_data').doc(me).set({ 
             score: score, 
             lastMeal: mealSummary, 
             time: time,
-            history: firebase.firestore.FieldValue.arrayUnion({ summary: mealSummary, score: score, date: date, time: time, full: fullDetail })
+            history: firebase.firestore.FieldValue.arrayUnion({ summary: mealSummary, score: score, date: date, time: time, full: raw })
         }, { merge: true });
 
         let key = 'history_' + auth.currentUser.uid;
         let arr = JSON.parse(localStorage.getItem(key) || '[]');
-        arr.unshift({ summary: mealSummary, score: score, date: date + " " + time, full: fullDetail });
+        arr.unshift({ summary: mealSummary, score: score, date: date + " " + time, full: raw });
         localStorage.setItem(key, JSON.stringify(arr.slice(0, 10)));
     }
 
@@ -488,8 +506,7 @@
 
     function showHistoryDetail(index) {
         let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-        const data = arr[index];
-        document.getElementById('modalBody').innerText = data.full;
+        document.getElementById('modalBody').innerText = arr[index].full;
         document.getElementById('detailModal').style.display = 'flex';
     }
 
@@ -509,10 +526,8 @@
             if(doc.exists) {
                 let data = doc.data();
                 if(data.score !== undefined) {
-                    let s = data.score;
-                    res.innerText = (s < 7 ? langData[currentLang].partCatch : langData[currentLang].partGood) + s + "/10";
+                    res.innerText = (data.score < 7 ? langData[currentLang].partCatch : langData[currentLang].partGood) + data.score + "/10";
                 }
-                // Partner Geçmişi: Tarih, Saat, Skor, Ne Yedi (Büyütme yok)
                 if(data.history) {
                     hList.innerHTML = `<p style="font-size:0.8rem; color:var(--accent); margin:10px 0; text-align:center; font-weight:bold;">Partner Analiz Geçmişi</p>` + 
                         data.history.slice(-10).reverse().map(h => `
