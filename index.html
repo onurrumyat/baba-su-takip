@@ -48,6 +48,9 @@
         .friends-btn { font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; margin-left: 10px; position: relative; }
         .friends-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 250px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 10px; z-index: 101; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         .friend-link { display: block; padding: 10px; background: #0b0f1a; border-radius: 10px; margin-bottom: 5px; color: var(--primary); font-weight: bold; cursor: pointer; text-decoration: none; font-size: 0.9rem; text-align: center; }
+        
+        /* Yeni Sorgulama Butonu Stili */
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
@@ -113,9 +116,17 @@
             <option id="opt2" value="Kilo Almak">Kilo Almak (+)</option>
             <option id="opt3" value="Kiloyu Korumak">Kiloyu Korumak (=)</option>
         </select>
+
         <div class="cam-box"><video id="video" autoplay playsinline onclick="this.play()"></video></div>
         <canvas id="canvas" style="display:none;"></canvas>
+        
         <button class="btn btn-main" id="btnAnalyzeText" onclick="runAI('yemek')">📸 ANALİZ ET</button>
+        
+        <div id="btnGroupNew" class="btn-group">
+            <button class="btn btn-main" style="background:var(--primary); padding:12px; font-size:0.8rem;" onclick="runAI('yemek')">📸 TEKRARLA</button>
+            <button class="btn btn-sub" style="background:var(--accent); padding:12px; font-size:0.8rem;" onclick="resetForNewSearch()">🔄 YENİ SORGULAMA</button>
+        </div>
+
         <div id="results"></div>
         <button class="btn btn-main" id="btnPdf" style="display:none; background: #ef4444; margin-top:15px;" onclick="downloadPDF()">📄 PDF OLARAK KAYDET</button>
 
@@ -160,7 +171,7 @@
             paySucc: "Ödeme Başarılı!", btnPdfTxt: "📄 PDF OLARAK KAYDET", btnHistTxt: "📚 GEÇMİŞ ANALİZLERİM", histTitle: "Son Taramalarınız",
             noHist: "Henüz geçmiş yok.", streakTxt: "Seri", btnPartToggle: "👫 KANKA / ÇİFT ARENASI", partTitle: "Partnerini Denetle! 🚨",
             partInput: "Kullanıcı Adı Girin", btnPartCheck: "🔍 DURUMUNU SORGULA", partErr: "Lütfen partner kullanıcı adı girin.",
-            partNoData: "Önce ona arkadaşlık isteği atmalısın!", partCatch: "🚨 YAKALANDI! Skor: ", partGood: "✅ Sadık! Skor: "
+            partNoData: "Önce ona arkadaşlık isteği atmalı!", partCatch: "🚨 YAKALANDI! Skor: ", partGood: "✅ Sadık! Skor: "
         },
         en: {
             appTitle: "BIO-CHEF", emailHolder: "Email", passHolder: "Password", btnLogin: "LOGIN", btnReset: "Forgot?", btnReg: "Sign Up",
@@ -209,26 +220,12 @@
         document.getElementById('btnCheckPart').innerText = langData[l].btnPartCheck;
     }
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
-        authDomain: "voice2post-9e8ca.firebaseapp.com",
-        projectId: "voice2post-9e8ca",
-        storageBucket: "voice2post-9e8ca.firebasestorage.app",
-        messagingSenderId: "511446656614",
-        appId: "1:511446656614:web:32101ee70299543c716fa7"
-    };
+    const firebaseConfig = { apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA", authDomain: "voice2post-9e8ca.firebaseapp.com", projectId: "voice2post-9e8ca", storageBucket: "voice2post-9e8ca.firebasestorage.app", messagingSenderId: "511446656614", appId: "1:511446656614:web:32101ee70299543c716fa7" };
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore(); 
+    const auth = firebase.auth(); const db = firebase.firestore(); 
     let isVip = false;
 
-    function toggleView(id) {
-        document.getElementById('loginView').style.display = 'none';
-        document.getElementById('regView').style.display = 'none';
-        document.getElementById('mainView').style.display = 'none';
-        document.getElementById(id).style.display = 'block';
-    }
-
+    function toggleView(id) { document.getElementById('loginView').style.display='none'; document.getElementById('regView').style.display='none'; document.getElementById('mainView').style.display='none'; document.getElementById(id).style.display='block'; }
     setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 
     auth.onAuthStateChanged(user => {
@@ -237,8 +234,8 @@
             let display = user.displayName ? "@" + user.displayName : "@" + user.email.split('@')[0];
             document.getElementById('uMail').innerText = display;
             isVip = localStorage.getItem('vip_' + user.uid) === 'true';
-            if(!isVip) { document.getElementById('premiumLockInfo').style.display = 'block'; initPayPal(); } 
-            else { document.getElementById('premiumLockInfo').style.display = 'none'; }
+            document.getElementById('premiumLockInfo').style.display = isVip ? 'none' : 'block';
+            if(!isVip) initPayPal();
             document.getElementById('bellIcon').style.display = 'flex'; 
             document.getElementById('friendListBtn').style.display = 'flex'; 
             listenNotifications(); listenFriends(); showStreak();
@@ -250,9 +247,7 @@
 
     async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); } }
     async function doRegister() { 
-        const u = document.getElementById('rUser').value.trim();
-        const e = document.getElementById('rEmail').value;
-        const p = document.getElementById('rPass').value;
+        const u = document.getElementById('rUser').value.trim(); const e = document.getElementById('rEmail').value; const p = document.getElementById('rPass').value;
         if(!u || !e || !p) return alert("Eksik.");
         try { 
             const check = await db.collection('partner_data').doc(u.toLowerCase()).get();
@@ -264,17 +259,8 @@
         } catch(err) { alert(err.message); } 
     }
 
-    function toggleNotifications() {
-        const d = document.getElementById('notifDropdown');
-        document.getElementById('friendsDropdown').style.display = 'none';
-        d.style.display = d.style.display === 'none' ? 'block' : 'none';
-    }
-
-    function toggleFriends() {
-        const d = document.getElementById('friendsDropdown');
-        document.getElementById('notifDropdown').style.display = 'none';
-        d.style.display = d.style.display === 'none' ? 'block' : 'none';
-    }
+    function toggleNotifications() { const d = document.getElementById('notifDropdown'); document.getElementById('friendsDropdown').style.display = 'none'; d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
+    function toggleFriends() { const d = document.getElementById('friendsDropdown'); document.getElementById('notifDropdown').style.display = 'none'; d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
 
     function listenFriends() {
         let me = auth.currentUser.displayName ? auth.currentUser.displayName.toLowerCase() : auth.currentUser.email.split('@')[0].toLowerCase();
@@ -289,17 +275,12 @@
         });
     }
 
-    function checkSpecific(u) {
-        document.getElementById('partnerUser').value = u;
-        document.getElementById('partnerPanel').style.display = 'block';
-        checkPartner(); toggleFriends();
-    }
+    function checkSpecific(u) { document.getElementById('partnerUser').value = u; document.getElementById('partnerPanel').style.display = 'block'; checkPartner(); toggleFriends(); }
 
     function listenNotifications() {
         let me = auth.currentUser.displayName ? auth.currentUser.displayName.toLowerCase() : auth.currentUser.email.split('@')[0].toLowerCase();
         db.collection('notifications').where('toUser', '==', me).onSnapshot(snap => {
-            const list = document.getElementById('notifList');
-            const badge = document.getElementById('notifBadge');
+            const list = document.getElementById('notifList'); const badge = document.getElementById('notifBadge');
             list.innerHTML = ''; let c = 0;
             snap.forEach(doc => {
                 c++; let d = doc.data();
@@ -333,24 +314,36 @@
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
         if(!age || !weight) return alert(langData[currentLang].errInfo);
-        resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
+        
+        // 1. Kamerayı Dondur (Sabitle)
+        const vid = document.getElementById('video');
+        vid.pause();
+
+        resDiv.innerHTML = `<p id="loadingTarget" style="text-align:center; padding:20px; font-weight:bold;">${langData[currentLang].loading}</p>`;
         resDiv.style.display = 'flex';
+        
+        // 2. Analiz ediliyor yazısına otomatik kaydır
+        setTimeout(() => document.getElementById('loadingTarget').scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+
         let img = "";
         if(mode === 'yemek') {
-            const vid = document.getElementById('video');
             const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
             canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
             img = canv.toDataURL('image/jpeg', 0.7);
         }
+
         try {
             const r = await fetch('/api/analyze', {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ mode, image: img, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`, lang: currentLang })
             });
-            const d = await r.json(); resDiv.innerHTML = '';
+            const d = await r.json(); 
+            resDiv.innerHTML = '';
+            
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
             const heads = mode === 'plan' ? langData[currentLang].headersPlan : langData[currentLang].headersYemek;
             let score = 5;
+
             sections.forEach((txt, i) => {
                 const card = document.createElement('div'); card.className = 'report-card';
                 let content = txt.trim();
@@ -363,9 +356,26 @@
                 } else { card.innerHTML = `<div class="report-tag">${heads[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`; }
                 resDiv.appendChild(card);
             });
+            
             document.getElementById('btnPdf').style.display = 'block';
+            document.getElementById('btnAnalyzeText').style.display = 'none';
+            document.getElementById('btnGroupNew').style.display = 'grid';
+
+            // 3. Sonuçlara otomatik kaydır
+            setTimeout(() => resDiv.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+
             if(mode === 'yemek') saveHistory(score, d.analysis);
-        } catch(e) { alert(langData[currentLang].errMsg); }
+        } catch(e) { alert(langData[currentLang].errMsg); vid.play(); }
+    }
+
+    function resetForNewSearch() {
+        const vid = document.getElementById('video');
+        vid.play();
+        document.getElementById('results').style.display = 'none';
+        document.getElementById('btnPdf').style.display = 'none';
+        document.getElementById('btnGroupNew').style.display = 'none';
+        document.getElementById('btnAnalyzeText').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function saveHistory(score, raw) {
@@ -378,8 +388,7 @@
     }
 
     function toggleHistory() {
-        const p = document.getElementById('historyPanel');
-        p.style.display = p.style.display === 'none' ? 'block' : 'none';
+        const p = document.getElementById('historyPanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none';
         if(p.style.display === 'block') {
             const list = document.getElementById('historyList');
             let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
@@ -387,11 +396,7 @@
         }
     }
 
-    function togglePartner() {
-        const p = document.getElementById('partnerPanel');
-        p.style.display = p.style.display === 'none' ? 'block' : 'none';
-    }
-
+    function togglePartner() { const p = document.getElementById('partnerPanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
     function checkPartner() {
         const u = document.getElementById('partnerUser').value.trim().toLowerCase();
         const res = document.getElementById('partnerResult');
@@ -403,11 +408,7 @@
         });
     }
 
-    function showStreak() {
-        let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}');
-        if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; }
-    }
-
+    function showStreak() { let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}'); if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; } }
     function updateStreak(s) {
         let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0, "last":""}');
         let t = new Date().toLocaleDateString();
