@@ -21,9 +21,12 @@
         .btn-main { background: var(--primary); }
         .btn-sub { background: var(--accent); margin-top: 10px; }
         .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #2d3748; margin-top: 10px; font-size: 0.8rem; }
-        .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 2px solid #1e293b; margin-bottom: 20px; position: relative; }
-        video, #capturedImage { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Fotoğraf Genişleme Hatası Çözümü */
+        .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 2px solid #1e293b; margin-bottom: 20px; position: relative; display: flex; align-items: center; justify-content: center; }
+        video, #capturedImage { width: 100%; height: 100%; object-fit: cover; display: block; }
         #capturedImage { display: none; position: absolute; top: 0; left: 0; z-index: 5; }
+
         .premium-area { background: rgba(245, 158, 11, 0.08); border: 2px solid var(--premium); border-radius: 25px; padding: 20px; margin-top: 20px; text-align: center; }
         .premium-title { font-weight: 900; color: var(--premium); font-size: 1.1rem; margin-bottom: 15px; }
         #paypal-button-container { margin-top: 10px; min-height: 150px; }
@@ -43,8 +46,7 @@
         .role-btn { flex: 1; padding: 10px; border-radius: 10px; background: #0b0f1a; border: 1px solid #2d3748; color: #94a3b8; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
         .role-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(16, 185, 129, 0.1); }
         
-        /* Gelişmiş Detay Modalı */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; padding: 20px; overflow-y: auto; align-items: center; justify-content: center; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; padding: 20px; align-items: center; justify-content: center; }
         .modal-content { background: var(--card); border-radius: 30px; padding: 25px; width: 100%; max-width: 380px; border: 2px solid var(--primary); box-shadow: 0 0 30px rgba(16, 185, 129, 0.2); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #2d3748; padding-bottom: 10px; }
         .modal-title { color: var(--primary); font-weight: 900; font-size: 1.2rem; }
@@ -158,7 +160,7 @@
         <div id="results"></div>
         <button class="btn btn-main" id="btnPdf" style="display:none; background: #ef4444; margin-top:15px;" onclick="downloadPDF()">📄 PDF OLARAK KAYDET</button>
 
-        <button class="btn btn-outline" id="btnHistToggle" onclick="toggleHistory()" style="margin-top:25px;">📚 GEÇMİŞ ANALİZLERİM</button>
+        <button class="btn btn-outline" id="btnHistToggle" onclick="toggleHistory()" style="margin-top:25px;">📚 SON 24 SAAT ANALİZLERİM</button>
         <div id="historyPanel" style="display:none; margin-top:15px; padding:15px; border-radius:15px; border: 1px solid #2d3748;">
             <h3 id="txtHistTitle" style="text-align:center; color:var(--primary); margin-bottom:10px;">Son Taramalarınız</h3>
             <div id="historyList"></div>
@@ -199,65 +201,15 @@
             premTitle: "PREMIUM ÜYE | 0.99 $", btnOut: "GÜVENLİ ÇIKIŞ", errMail: "Mail veya Kullanıcı Adı eksik.", errInfo: "Bilgileri girin.",
             errPlan: "Haftalık plan için aşağıdan Premium üyeliğinizi başlatın.", errMsg: "Hata!", errUserTaken: "Bu kullanıcı adı zaten alınmış!",
             loading: "🔍 İnceleniyor...", headersYemek: ["HEDEF SKORU 🎯", "AÇLIK KRONOMETRESİ ⏳", "ÜRÜN ÖZETİ", "BESİN DEĞERLERİ", "HEDEF ANALİZİ", "NET TAVSİYE"],
-            headersPlan: ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"], payDesc: "Bio-Chef Pro Haftalık Plan Erişimi",
-            paySucc: "Ödeme Başarılı!", btnPdfTxt: "📄 PDF OLARAK KAYDET", btnHistTxt: "📚 GEÇMİŞ ANALİZLERİM", histTitle: "Son Taramalarınız",
-            noHist: "Henüz geçmiş yok.", streakTxt: "Seri", btnPartToggle: "👫 KANKA / ÇİFT ARENASI", partTitle: "Partnerini Denetle! 🚨",
-            partInput: "Kullanıcı Adı Girin", btnPartCheck: "🔍 DURUMUNU SORGULA", partErr: "Lütfen partner kullanıcı adı girin.",
-            partNoData: "Önce ona arkadaşlık isteği atmalısın!", partCatch: "🚨 YAKALANDI! Skor: ", partGood: "✅ Sadık! Skor: "
+            headersPlan: ["PAZARTESİ", "SALI", "ÇARŞAMBA", "PERŞEMBE", "CUMA", "CUMARTESİ", "PAZAR"]
         },
         en: {
             appTitle: "BIO-CHEF", emailHolder: "Email", passHolder: "Password", btnLogin: "LOGIN", btnReset: "Forgot?", btnReg: "Sign Up",
             regTitle: "SIGN UP", btnCreate: "CREATE ACCOUNT", btnBack: "Back", ageHolder: "AGE", weightHolder: "WEIGHT",
             g1: "Lose Weight", g2: "Gain Weight", g3: "Maintain", btnAna: "📸 ANALYZE", btnPlan: "📅 GET WEEKLY PLAN",
-            premTitle: "PREMIUM | $0.99", btnOut: "LOGOUT", errMail: "Missing info.", errInfo: "Enter info.",
-            errPlan: "Start Premium for plan.", errMsg: "Error!", errUserTaken: "Username taken!",
-            loading: "🔍 Analyzing...", headersYemek: ["GOAL SCORE 🎯", "HUNGER ⏳", "SUMMARY", "NUTRITION", "GOAL ANALYSIS", "ADVICE"],
-            headersPlan: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"], payDesc: "Bio-Chef Pro Access",
-            paySucc: "Success!", btnPdfTxt: "📄 SAVE AS PDF", btnHistTxt: "📚 MY HISTORY", histTitle: "Recent Scans",
-            noHist: "No history.", streakTxt: "Streak", btnPartToggle: "👫 BUDDY ARENA", partTitle: "Inspect Partner!",
-            partInput: "Enter Username", btnPartCheck: "🔍 CHECK", partErr: "Enter username.",
-            partNoData: "Send request first!", partCatch: "🚨 CAUGHT! Score: ", partGood: "✅ Loyal! Score: "
+            premTitle: "PREMIUM | $0.99", btnOut: "LOGOUT", loading: "🔍 Analyzing..."
         }
     };
-
-    function setRole(role, el) {
-        userRole = role;
-        const btns = el.parentElement.querySelectorAll('.role-btn');
-        btns.forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-    }
-
-    function changeLang(l) {
-        currentLang = l;
-        document.getElementById('txtL1').innerText = langData[l].appTitle;
-        document.getElementById('lEmail').placeholder = langData[l].emailHolder;
-        document.getElementById('lPass').placeholder = langData[l].passHolder;
-        document.getElementById('txtL4').innerText = langData[l].btnLogin;
-        document.getElementById('txtL5').innerText = langData[l].btnReset;
-        document.getElementById('txtL6').innerText = langData[l].btnReg;
-        document.getElementById('txtR7').innerText = langData[l].regTitle;
-        document.getElementById('rEmail').placeholder = langData[l].emailHolder;
-        document.getElementById('rPass').placeholder = langData[l].passHolder;
-        document.getElementById('txtR8').innerText = langData[l].btnCreate;
-        document.getElementById('txtR9').innerText = langData[l].btnBack;
-        document.getElementById('uAge').placeholder = langData[l].ageHolder;
-        document.getElementById('uWeight').placeholder = langData[l].weightHolder;
-        document.getElementById('opt1').innerText = langData[l].g1;
-        document.getElementById('opt2').innerText = langData[l].g2;
-        document.getElementById('opt3').innerText = langData[l].g3;
-        document.getElementById('btnAnalyzeText').innerText = langData[l].btnAna;
-        document.getElementById('txtBtnPlan').innerText = langData[l].btnPlan;
-        document.getElementById('txtPrem').innerText = langData[l].premTitle;
-        document.getElementById('txtOut').innerText = langData[l].btnOut;
-        document.getElementById('btnPdf').innerText = langData[l].btnPdfTxt;
-        document.getElementById('btnHistToggle').innerText = langData[l].btnHistTxt;
-        document.getElementById('txtHistTitle').innerText = langData[l].histTitle;
-        document.getElementById('txtStreak').innerText = langData[l].streakTxt; 
-        document.getElementById('btnPartnerToggle').innerText = langData[l].btnPartToggle;
-        document.getElementById('txtPartTitle').innerText = langData[l].partTitle;
-        document.getElementById('partnerUser').placeholder = langData[l].partInput; 
-        document.getElementById('btnCheckPart').innerText = langData[l].btnPartCheck;
-    }
 
     const firebaseConfig = {
         apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
@@ -271,6 +223,13 @@
     const auth = firebase.auth();
     const db = firebase.firestore(); 
     let isVip = false;
+
+    function setRole(role, el) {
+        userRole = role;
+        const btns = el.parentElement.querySelectorAll('.role-btn');
+        btns.forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+    }
 
     function toggleView(id) {
         document.getElementById('loginView').style.display = 'none';
@@ -350,6 +309,134 @@
         } catch(err) { alert(err.message); } 
     }
 
+    async function runAI(mode) {
+        const resDiv = document.getElementById('results');
+        const age = document.getElementById('uAge').value;
+        const weight = document.getElementById('uWeight').value;
+        if(!age || !weight) return alert(langData[currentLang].errInfo);
+        
+        let img = "";
+        if(mode === 'yemek') {
+            const vid = document.getElementById('video');
+            const canv = document.getElementById('canvas'); 
+            canv.width = 640; canv.height = 480;
+            canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
+            img = canv.toDataURL('image/jpeg', 0.8);
+            
+            document.getElementById('capturedImage').src = img;
+            document.getElementById('capturedImage').style.display = 'block';
+            document.getElementById('video').style.display = 'none';
+            document.getElementById('btnAnalyzeText').style.display = 'none';
+            document.getElementById('btnRetake').style.display = 'block';
+        }
+
+        resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
+        resDiv.style.display = 'flex';
+        resDiv.scrollIntoView();
+
+        try {
+            const r = await fetch('/api/analyze', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ mode, image: img, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`, lang: currentLang })
+            });
+            const d = await r.json(); resDiv.innerHTML = '';
+            const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
+            const heads = mode === 'plan' ? langData[currentLang].headersPlan : langData[currentLang].headersYemek;
+            let score = 5;
+            
+            sections.forEach((txt, i) => {
+                const card = document.createElement('div'); card.className = 'report-card';
+                let content = txt.trim();
+                if(mode === 'yemek' && i === 0) {
+                    const match = content.match(/\[SKOR:\s*(\d+)\]/i);
+                    if(match) { score = parseInt(match[1]); content = content.replace(match[0], '').trim(); updateStreak(score); }
+                    let left = (score/10)*100;
+                    card.innerHTML = `<div class="report-tag">${heads[i]}</div><div class="report-txt">${content}</div>
+                    <div class="score-wrapper"><div class="score-bar"><div class="score-marker" style="left:${left}%">${score}</div></div></div>`;
+                } else { card.innerHTML = `<div class="report-tag">${heads[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`; }
+                resDiv.appendChild(card);
+            });
+            document.getElementById('btnPdf').style.display = 'block';
+            if(mode === 'yemek') saveHistory(score, d.analysis);
+        } catch(e) { alert(langData[currentLang].errMsg); }
+    }
+
+    function saveHistory(score, raw) {
+        let me = auth.currentUser.displayName.toLowerCase();
+        let shortText = raw.split("\n").find(l => l.includes("ÜRÜN ÖZETİ")) || "Bilinmeyen Ürün";
+        shortText = shortText.replace("ÜRÜN ÖZETİ:", "").trim().substring(0, 30);
+
+        const historyItem = { 
+            score, 
+            full: raw, 
+            what: shortText,
+            timestamp: Date.now(), // 24 saat kontrolü için milisaniye
+            date: new Date().toLocaleString() 
+        };
+        
+        db.collection('partner_data').doc(me).update({ 
+            score: score, 
+            history: firebase.firestore.FieldValue.arrayUnion(historyItem)
+        });
+
+        let key = 'history_' + auth.currentUser.uid;
+        let arr = JSON.parse(localStorage.getItem(key) || '[]');
+        arr.unshift(historyItem);
+        localStorage.setItem(key, JSON.stringify(arr));
+    }
+
+    function toggleHistory() {
+        const p = document.getElementById('historyPanel');
+        p.style.display = p.style.display === 'none' ? 'block' : 'none';
+        if(p.style.display === 'block') {
+            const list = document.getElementById('historyList');
+            let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
+            
+            // Son 24 Saat Filtresi (24 * 60 * 60 * 1000 ms)
+            const birGunOnce = Date.now() - 86400000;
+            const son24Saat = arr.filter(h => h.timestamp > birGunOnce);
+
+            list.innerHTML = son24Saat.length ? son24Saat.map(h => `
+                <div class="history-box" onclick="showDetails('${encodeURIComponent(JSON.stringify(h))}')">
+                    <b>${h.date}</b> | <span style="color:var(--primary)">${h.score}/10</span><br>
+                    <small>🍽️ ${h.what}...</small>
+                </div>`).join('') : "Son 24 saatte analiz bulunamadı.";
+        }
+    }
+
+    function showDetails(dataStr) {
+        const data = JSON.parse(decodeURIComponent(dataStr));
+        const modal = document.getElementById('detailModal');
+        const body = document.getElementById('modalBody');
+        body.innerHTML = `📅 <b>Tarih:</b> ${data.date}\n⭐ <b>Skor:</b> ${data.score}/10\n\n${data.full}`;
+        modal.style.display = 'flex';
+    }
+
+    function checkPartner() {
+        const u = document.getElementById('partnerUser').value.trim().toLowerCase();
+        const res = document.getElementById('partnerResult');
+        const histList = document.getElementById('partnerHistoryList');
+        
+        db.collection('partner_data').doc(u).get().then(doc => {
+            if(doc.exists) {
+                let d = doc.data();
+                let s = d.score || 0;
+                res.innerHTML = `<span style="color:${s < 7 ? 'var(--danger)' : 'var(--primary)'}">${s < 7 ? '🚨 YAKALANDI!' : '✅ SADIK!'} Mevcut Puan: ${s}/10</span>`;
+                
+                if(d.history) {
+                    histList.innerHTML = `<h4 style="margin:15px 0 10px 0; color:var(--accent); font-size:0.9rem;">Partnerin Son Hareketleri:</h4>` + 
+                    d.history.slice(-5).reverse().map(h => `
+                        <div class="partner-item">
+                            <div style="font-size:0.75rem; color:#94a3b8;">📅 ${h.date}</div>
+                            <div style="font-size:0.85rem; font-weight:bold; margin:4px 0;">🍽️ ${h.what}</div>
+                            <div style="font-size:0.8rem; color:var(--premium)">⭐ Puan: ${h.score}/10</div>
+                        </div>
+                    `).join('');
+                }
+            } else { res.innerText = "Kullanıcı bulunamadı."; histList.innerHTML = ""; }
+        });
+    }
+
     function toggleNotifications() {
         const d = document.getElementById('notifDropdown');
         document.getElementById('friendsDropdown').style.display = 'none';
@@ -410,136 +497,14 @@
     function sendFriendRequest() {
         const u = document.getElementById('partnerUser').value.trim().toLowerCase();
         let me = auth.currentUser.displayName.toLowerCase();
-        if(!u || u === me) return alert(langData[currentLang].partErr);
+        if(!u || u === me) return alert("Hatalı işlem.");
         db.collection('notifications').add({ toUser: u, fromUser: me, type: 'friend_request', timestamp: Date.now() });
         alert("Gönderildi.");
-    }
-
-    async function runAI(mode) {
-        const resDiv = document.getElementById('results');
-        const age = document.getElementById('uAge').value;
-        const weight = document.getElementById('uWeight').value;
-        if(!age || !weight) return alert(langData[currentLang].errInfo);
-        
-        let img = "";
-        if(mode === 'yemek') {
-            const vid = document.getElementById('video');
-            const canv = document.getElementById('canvas'); 
-            canv.width = 640; canv.height = 480;
-            canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
-            img = canv.toDataURL('image/jpeg', 0.7);
-            
-            document.getElementById('capturedImage').src = img;
-            document.getElementById('capturedImage').style.display = 'block';
-            document.getElementById('video').style.display = 'none';
-            document.getElementById('btnAnalyzeText').style.display = 'none';
-            document.getElementById('btnRetake').style.display = 'block';
-        }
-
-        resDiv.innerHTML = `<p style="text-align:center;">${langData[currentLang].loading}</p>`;
-        resDiv.style.display = 'flex';
-        resDiv.scrollIntoView();
-
-        try {
-            const r = await fetch('/api/analyze', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mode, image: img, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`, lang: currentLang })
-            });
-            const d = await r.json(); resDiv.innerHTML = '';
-            const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
-            const heads = mode === 'plan' ? langData[currentLang].headersPlan : langData[currentLang].headersYemek;
-            let score = 5;
-            
-            sections.forEach((txt, i) => {
-                const card = document.createElement('div'); card.className = 'report-card';
-                let content = txt.trim();
-                if(mode === 'yemek' && i === 0) {
-                    const match = content.match(/\[SKOR:\s*(\d+)\]/i);
-                    if(match) { score = parseInt(match[1]); content = content.replace(match[0], '').trim(); updateStreak(score); }
-                    let left = (score/10)*100;
-                    card.innerHTML = `<div class="report-tag">${heads[i]}</div><div class="report-txt">${content}</div>
-                    <div class="score-wrapper"><div class="score-bar"><div class="score-marker" style="left:${left}%">${score}</div></div></div>`;
-                } else { card.innerHTML = `<div class="report-tag">${heads[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`; }
-                resDiv.appendChild(card);
-            });
-            document.getElementById('btnPdf').style.display = 'block';
-            if(mode === 'yemek') saveHistory(score, d.analysis);
-        } catch(e) { alert(langData[currentLang].errMsg); }
-    }
-
-    function saveHistory(score, raw) {
-        let me = auth.currentUser.displayName.toLowerCase();
-        let shortText = raw.split("\n").find(l => l.includes("ÜRÜN ÖZETİ")) || "Bilinmeyen Ürün";
-        shortText = shortText.replace("ÜRÜN ÖZETİ:", "").trim().substring(0, 30);
-
-        const historyItem = { 
-            score, 
-            full: raw, 
-            what: shortText,
-            date: new Date().toLocaleString() 
-        };
-        
-        db.collection('partner_data').doc(me).update({ 
-            score: score, 
-            history: firebase.firestore.FieldValue.arrayUnion(historyItem)
-        });
-
-        let key = 'history_' + auth.currentUser.uid;
-        let arr = JSON.parse(localStorage.getItem(key) || '[]');
-        arr.unshift(historyItem);
-        localStorage.setItem(key, JSON.stringify(arr.slice(0, 15)));
-    }
-
-    function showDetails(dataStr) {
-        const data = JSON.parse(decodeURIComponent(dataStr));
-        const modal = document.getElementById('detailModal');
-        const body = document.getElementById('modalBody');
-        body.innerHTML = `📅 <b>Tarih:</b> ${data.date}\n⭐ <b>Skor:</b> ${data.score}/10\n\n${data.full}`;
-        modal.style.display = 'flex';
-    }
-
-    function toggleHistory() {
-        const p = document.getElementById('historyPanel');
-        p.style.display = p.style.display === 'none' ? 'block' : 'none';
-        if(p.style.display === 'block') {
-            const list = document.getElementById('historyList');
-            let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-            list.innerHTML = arr.length ? arr.map(h => `
-                <div class="history-box" onclick="showDetails('${encodeURIComponent(JSON.stringify(h))}')">
-                    <b>${h.date}</b> | <span style="color:var(--primary)">${h.score}/10</span><br>
-                    <small>🍽️ ${h.what}...</small>
-                </div>`).join('') : "Henüz yok.";
-        }
     }
 
     function togglePartner() {
         const p = document.getElementById('partnerPanel');
         p.style.display = p.style.display === 'none' ? 'block' : 'none';
-    }
-
-    function checkPartner() {
-        const u = document.getElementById('partnerUser').value.trim().toLowerCase();
-        const res = document.getElementById('partnerResult');
-        const histList = document.getElementById('partnerHistoryList');
-        
-        db.collection('partner_data').doc(u).get().then(doc => {
-            if(doc.exists) {
-                let d = doc.data();
-                let s = d.score || 0;
-                res.innerHTML = `<span style="color:${s < 7 ? 'var(--danger)' : 'var(--primary)'}">${s < 7 ? '🚨 YAKALANDI!' : '✅ SADIK!'} Mevcut Puan: ${s}/10</span>`;
-                
-                if(d.history) {
-                    histList.innerHTML = `<h4 style="margin:15px 0 10px 0; color:var(--accent); font-size:0.9rem;">Partnerin Son Hareketleri:</h4>` + 
-                    d.history.slice(-5).reverse().map(h => `
-                        <div class="partner-item">
-                            <div style="font-size:0.75rem; color:#94a3b8;">📅 ${h.date}</div>
-                            <div style="font-size:0.85rem; font-weight:bold; margin:4px 0;">🍽️ ${h.what}</div>
-                            <div style="font-size:0.8rem; color:var(--premium)">⭐ Puan: ${h.score}/10</div>
-                        </div>
-                    `).join('');
-                } else { histList.innerHTML = "<p style='font-size:0.8rem; color:#94a3b8;'>Analiz geçmişi bulunamadı.</p>"; }
-            } else { res.innerText = "Kullanıcı bulunamadı."; histList.innerHTML = ""; }
-        });
     }
 
     function showStreak() {
@@ -561,10 +526,11 @@
         }).render('#paypal-button-container');
     }
 
-    function handlePlanClick() { if(!isVip) return alert(langData[currentLang].errPlan); runAI('plan'); }
+    function handlePlanClick() { if(!isVip) return alert("Premium gerekli."); runAI('plan'); }
     function downloadPDF() { html2pdf().from(document.getElementById('results')).save(); }
     function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
     function doReset() { auth.sendPasswordResetEmail(document.getElementById('lEmail').value).then(() => alert("Gönderildi.")); }
+    function changeLang(l) { currentLang = l; location.reload(); }
 </script>
 </body>
 </html>
