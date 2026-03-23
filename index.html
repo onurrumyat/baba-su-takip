@@ -16,7 +16,7 @@
         body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
         .app-card { width: 100%; max-width: 420px; background: var(--card); border-radius: 35px; padding: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); height: fit-content; position: relative; }
         
-        /* Yeni Giriş Ekranı Rol Seçimi */
+        /* Rol Seçimi */
         .role-box { display: flex; gap: 10px; margin-bottom: 20px; }
         .role-btn { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #2d3748; background: #0b0f1a; color: #94a3b8; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
         .role-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(16, 185, 129, 0.1); }
@@ -29,10 +29,9 @@
         .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #2d3748; margin-top: 10px; font-size: 0.8rem; }
         
         .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 2px solid #1e293b; margin-bottom: 20px; position: relative; }
-        video, #photoCanvas { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
-        #photoCanvas { display: none; z-index: 10; }
+        video, #snapshotCanvas { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+        #snapshotCanvas { display: none; z-index: 5; }
 
-        .premium-area { background: rgba(245, 158, 11, 0.08); border: 2px solid var(--premium); border-radius: 25px; padding: 20px; margin-top: 20px; text-align: center; }
         #results { display: none; flex-direction: column; gap: 12px; margin-top: 25px; padding: 15px; background: var(--bg); border-radius: 20px; }
         .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); }
         .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
@@ -43,7 +42,6 @@
         .score-bar { height: 14px; width: 100%; border-radius: 7px; background: linear-gradient(to right, #ef4444 0%, #f97316 35%, #eab308 65%, #22c55e 100%); position: relative; }
         .score-marker { position: absolute; top: -10px; width: 30px; height: 30px; background: #fff; border: 3px solid #1e293b; border-radius: 50%; transform: translateX(-50%); transition: left 1s ease-out; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 900; color: #000; z-index: 2; }
         
-        /* Modal Style */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: var(--card); padding: 25px; border-radius: 25px; width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto; border: 1px solid var(--primary); position: relative; }
         
@@ -67,7 +65,6 @@
 </div>
 
 <div class="app-card">
-
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
         <div style="display: flex; align-items: center;">
             <span onclick="changeLang('tr')" style="font-size: 1.8rem; cursor: pointer; margin-right: 15px;">🇹🇷</span>
@@ -80,17 +77,11 @@
             <div class="bell-container" onclick="toggleNotifications()" id="bellIcon" style="display:none;">
                 <span class="bell-icon">🔔</span>
                 <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
-                <div class="notif-dropdown" id="notifDropdown">
-                    <h4 style="color:white; margin-bottom:10px; text-align:center;">Bildirimler</h4>
-                    <div id="notifList"></div>
-                </div>
+                <div class="notif-dropdown" id="notifDropdown"><div id="notifList"></div></div>
             </div>
             <div class="friends-btn" id="friendListBtn" onclick="toggleFriends()" style="display:none;">
                 👤
-                <div class="friends-dropdown" id="friendsDropdown">
-                    <h4 style="color:white; margin-bottom:10px; text-align:center;">Takip Ettiklerin</h4>
-                    <div id="friendsListContainer"></div>
-                </div>
+                <div class="friends-dropdown" id="friendsDropdown"><div id="friendsListContainer"></div></div>
             </div>
         </div>
     </div>
@@ -98,8 +89,8 @@
     <div id="loginView" class="auth-container">
         <h1>BIO-CHEF</h1>
         <div class="role-box">
-            <button class="role-btn active" id="btnLClient" onclick="setRole('Danışan')">DANIŞAN</button>
-            <button class="role-btn" id="btnLDoc" onclick="setRole('Diyetisyen')">DİYETİSYEN</button>
+            <button class="role-btn active" onclick="setRole('Danışan', this)">DANIŞAN</button>
+            <button class="role-btn" onclick="setRole('Diyetisyen', this)">DİYETİSYEN</button>
         </div>
         <input type="email" id="lEmail" placeholder="E-posta">
         <input type="password" id="lPass" placeholder="Şifre">
@@ -111,8 +102,8 @@
     <div id="regView" class="auth-container" style="display:none;">
         <h1>KAYIT OL</h1>
         <div class="role-box">
-            <button class="role-btn active" onclick="setRole('Danışan')">DANIŞAN</button>
-            <button class="role-btn" onclick="setRole('Diyetisyen')">DİYETİSYEN</button>
+            <button class="role-btn active" onclick="setRole('Danışan', this)">DANIŞAN</button>
+            <button class="role-btn" onclick="setRole('Diyetisyen', this)">DİYETİSYEN</button>
         </div>
         <input type="email" id="rEmail" placeholder="E-posta">
         <input type="text" id="rUser" placeholder="Kullanıcı Adı">
@@ -137,9 +128,9 @@
         </select>
         <div class="cam-box">
             <video id="video" autoplay playsinline></video>
-            <canvas id="photoCanvas"></canvas>
+            <canvas id="snapshotCanvas"></canvas>
         </div>
-        <button class="btn btn-main" id="btnAnalyze" onclick="runAI('yemek')">📸 ANALİZ ET</button>
+        <button class="btn btn-main" id="btnAnalyze" onclick="runAnalysis('yemek')">📸 ANALİZ ET</button>
         <button class="btn btn-sub" id="btnReset" style="display:none;" onclick="resetCamera()">🔄 YENİDEN ANALİZ ET</button>
         
         <div id="results"></div>
@@ -147,13 +138,11 @@
 
         <button class="btn btn-outline" onclick="toggleHistory()" style="margin-top:25px;">📚 GEÇMİŞ ANALİZLERİM</button>
         <div id="historyPanel" style="display:none; margin-top:15px; padding:15px; border-radius:15px; border: 1px solid #2d3748;">
-            <h3 style="text-align:center; color:var(--primary); margin-bottom:10px;">Son Taramalarınız</h3>
             <div id="historyList"></div>
         </div>
 
         <button class="btn btn-outline" style="border-color: var(--danger); color: var(--danger);" onclick="togglePartner()">👫 KANKA / ÇİFT ARENASI</button>
         <div id="partnerPanel" class="partner-box" style="display:none;">
-            <h3>Partnerini Denetle! 🚨</h3>
             <input type="text" id="partnerUser" placeholder="Kullanıcı Adı">
             <button class="btn btn-sub" onclick="sendFriendRequest()">➕ ARKADAŞ EKLE</button>
             <button class="btn btn-sub" style="background: var(--danger);" onclick="checkPartner()">🔍 DURUMUNU SORGULA</button>
@@ -162,20 +151,19 @@
         </div>
 
         <div class="premium-area">
-            <button class="btn btn-sub" style="background: var(--premium); color: black;" onclick="handlePlanClick()">📅 HAFTALIK PLANINIZI ÇIKARIN</button>
-            <div id="premiumLockInfo">
+            <button class="btn btn-sub" id="btnPlan" style="background: var(--premium); color: black;" onclick="handlePlanClick()">📅 HAFTALIK PLAN</button>
+            <div id="premiumLockInfo" style="margin-top: 15px;">
                 <div class="premium-title">PREMIUM ÜYE | 0.99 $</div>
                 <div id="paypal-button-container"></div>
             </div>
         </div>
-
         <button class="btn btn-outline" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
     </div>
 </div>
 
 <script>
     let currentRole = 'Danışan';
-    let currentLang = 'tr';
+    let isVip = false;
     const firebaseConfig = {
         apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
         authDomain: "voice2post-9e8ca.firebaseapp.com",
@@ -188,7 +176,7 @@
     const auth = firebase.auth();
     const db = firebase.firestore(); 
 
-    function setRole(role) { currentRole = role; document.querySelectorAll('.role-btn').forEach(b => b.classList.toggle('active', b.innerText.includes(role.toUpperCase()))); }
+    function setRole(role, btn) { currentRole = role; document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
     function toggleView(id) { ['loginView','regView','mainView'].forEach(v => document.getElementById(v).style.display = (v===id?'block':'none')); }
 
     auth.onAuthStateChanged(user => {
@@ -197,6 +185,9 @@
             document.getElementById('uMail').innerText = "@" + (user.displayName || user.email.split('@')[0]);
             loadSavedProfile();
             showStreak();
+            isVip = localStorage.getItem('vip_' + user.uid) === 'true';
+            if(!isVip) { document.getElementById('premiumLockInfo').style.display = 'block'; initPayPal(); } 
+            else { document.getElementById('premiumLockInfo').style.display = 'none'; }
             document.getElementById('bellIcon').style.display = 'flex'; 
             document.getElementById('friendListBtn').style.display = 'flex'; 
             listenNotifications(); listenFriends();
@@ -207,9 +198,8 @@
     function saveProfileData() {
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
-        localStorage.setItem('uAge', age);
-        localStorage.setItem('uWeight', weight);
-        db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).set({ age, weight }, { merge: true });
+        localStorage.setItem('uAge', age); localStorage.setItem('uWeight', weight);
+        if(auth.currentUser) db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).set({ age, weight }, { merge: true });
     }
 
     function loadSavedProfile() {
@@ -217,21 +207,16 @@
         document.getElementById('uWeight').value = localStorage.getItem('uWeight') || "";
     }
 
-    async function runAI(mode) {
+    async function runAnalysis(mode) {
         const age = document.getElementById('uAge').value;
         const weight = document.getElementById('uWeight').value;
-        if(!age || !weight) return alert("Bilgileri girin.");
+        if(!age || !weight) return alert("Yaş ve Kilo girin!");
 
         const video = document.getElementById('video');
-        const canvas = document.getElementById('photoCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Fotoğrafı Çek ve Ekranı Dondur
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0);
-        canvas.style.display = 'block';
-        video.style.display = 'none';
+        const snap = document.getElementById('snapshotCanvas');
+        snap.width = video.videoWidth; snap.height = video.videoHeight;
+        snap.getContext('2d').drawImage(video, 0, 0);
+        snap.style.display = 'block'; video.style.display = 'none';
 
         document.getElementById('btnAnalyze').style.display = 'none';
         document.getElementById('btnReset').style.display = 'block';
@@ -242,14 +227,13 @@
         resDiv.scrollIntoView();
 
         try {
-            const img = canvas.toDataURL('image/jpeg', 0.7);
+            const img = snap.toDataURL('image/jpeg', 0.6);
             const r = await fetch('/api/analyze', {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mode, image: img, user_data: `Yaş:${age}, Kilo:${weight}, Hedef:${document.getElementById('uGoal').value}`, lang: currentLang })
+                body: JSON.stringify({ mode, image: img, user_data: `Yaş:${age},Kilo:${weight},Hedef:${document.getElementById('uGoal').value}`, lang: 'tr' })
             });
             const d = await r.json();
             resDiv.innerHTML = '';
-            
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
             let score = 5;
             sections.forEach((txt, i) => {
@@ -258,18 +242,18 @@
                 if(mode === 'yemek' && i === 0) {
                     const match = content.match(/\[SKOR:\s*(\d+)\]/i);
                     if(match) { score = parseInt(match[1]); content = content.replace(match[0], '').trim(); updateStreak(score); }
-                    card.innerHTML = `<div class="report-tag">HEDEF SKORU 🎯</div><div class="report-txt">${content}</div>
+                    card.innerHTML = `<div class="report-tag">SKOR 🎯</div><div class="report-txt">${content}</div>
                     <div class="score-wrapper"><div class="score-bar"><div class="score-marker" style="left:${score*10}%">${score}</div></div></div>`;
-                } else { card.innerHTML = `<div class="report-tag">ANALİZ</div><div class="report-txt">${content}</div>`; }
+                } else { card.innerHTML = `<div class="report-tag">DETAY</div><div class="report-txt">${content}</div>`; }
                 resDiv.appendChild(card);
             });
             document.getElementById('btnPdf').style.display = 'block';
             if(mode === 'yemek') saveHistory(score, d.analysis);
-        } catch(e) { resDiv.innerHTML = "Hata oluştu."; }
+        } catch(e) { resDiv.innerHTML = "Analiz başarısız."; }
     }
 
     function resetCamera() {
-        document.getElementById('photoCanvas').style.display = 'none';
+        document.getElementById('snapshotCanvas').style.display = 'none';
         document.getElementById('video').style.display = 'block';
         document.getElementById('btnAnalyze').style.display = 'block';
         document.getElementById('btnReset').style.display = 'none';
@@ -279,10 +263,9 @@
     function saveHistory(score, raw) {
         let me = auth.currentUser.displayName.toLowerCase();
         let date = new Date().toLocaleString();
-        let summary = raw.substring(0, 50) + "...";
+        let summary = raw.substring(0, 45) + "...";
         db.collection('partner_data').doc(me).update({ 
-            score, lastMeal: summary, 
-            history: firebase.firestore.FieldValue.arrayUnion({ summary, date, score, full: raw })
+            score, history: firebase.firestore.FieldValue.arrayUnion({ summary, date, score, full: raw })
         });
         let arr = JSON.parse(localStorage.getItem('hist_'+auth.currentUser.uid) || '[]');
         arr.unshift({ summary, date, score, full: raw });
@@ -290,11 +273,9 @@
     }
 
     function toggleHistory() {
-        const p = document.getElementById('historyPanel');
-        p.style.display = (p.style.display === 'none' ? 'block' : 'none');
-        const list = document.getElementById('historyList');
+        const p = document.getElementById('historyPanel'); p.style.display = (p.style.display === 'none' ? 'block' : 'none');
         let arr = JSON.parse(localStorage.getItem('hist_'+auth.currentUser.uid) || '[]');
-        list.innerHTML = arr.map((h, i) => `<div class="history-box" onclick="showModal(${i})"><b>${h.date}</b><br>${h.summary}<br><b>Skor: ${h.score}/10</b></div>`).join('');
+        document.getElementById('historyList').innerHTML = arr.map((h, i) => `<div class="history-box" onclick="showModal(${i})"><b>${h.date}</b><br>${h.summary}<br><b>Skor: ${h.score}/10</b></div>`).join('');
     }
 
     function showModal(i) {
@@ -306,42 +287,36 @@
     async function checkPartner() {
         const u = document.getElementById('partnerUser').value.toLowerCase();
         const doc = await db.collection('partner_data').doc(u).get();
-        const res = document.getElementById('partnerResult');
-        const hList = document.getElementById('partnerHistoryList');
         if(doc.exists) {
             let d = doc.data();
-            res.innerText = (d.score < 7 ? "🚨 YAKALANDI! " : "✅ Sadık! ") + "Skor: " + d.score + "/10";
-            hList.innerHTML = (d.history || []).slice(-5).reverse().map(h => `
-                <div class="history-box" style="border-left-color: var(--danger);">
-                    <b>${h.date}</b><br>Skor: ${h.score}/10<br>${h.summary}
-                </div>`).join('');
+            document.getElementById('partnerResult').innerText = (d.score < 7 ? "🚨 KAÇAMAK! " : "✅ SADIK! ") + "Skor: " + d.score;
+            document.getElementById('partnerHistoryList').innerHTML = (d.history || []).slice(-5).reverse().map(h => `<div class="history-box" style="border-left-color:var(--danger)"><b>${h.date}</b><br>Skor: ${h.score}<br>${h.summary}</div>`).join('');
             document.getElementById('partnerPanel').scrollIntoView();
         }
     }
 
-    function sendFriendRequest() {
-        db.collection('notifications').add({ toUser: document.getElementById('partnerUser').value.toLowerCase(), fromUser: auth.currentUser.displayName.toLowerCase(), type: 'friend_request' });
-        alert("Gönderildi.");
+    function initPayPal() {
+        if(document.getElementById('paypal-button-container').children.length > 0) return;
+        paypal.Buttons({
+            createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: '0.99' } }] }),
+            onApprove: (d, a) => a.order.capture().then(() => { localStorage.setItem('vip_' + auth.currentUser.uid, 'true'); location.reload(); })
+        }).render('#paypal-button-container');
     }
 
-    function listenFriends() {
-        db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).onSnapshot(doc => {
-            const container = document.getElementById('friendsListContainer');
-            container.innerHTML = (doc.data()?.friends || []).map(f => `<div class="friend-link" onclick="checkSpec('${f}')">@${f}</div>`).join('');
-        });
-    }
-
-    function checkSpec(u) { document.getElementById('partnerUser').value = u; checkPartner(); toggleFriends(); }
-    function toggleNotifications() { let d = document.getElementById('notifDropdown'); d.style.display = (d.style.display==='none'?'block':'none'); }
-    function toggleFriends() { let d = document.getElementById('friendsDropdown'); d.style.display = (d.style.display==='none'?'block':'none'); }
+    function handlePlanClick() { if(!isVip) return alert("Premium gerekli!"); runAnalysis('plan'); }
     function updateStreak(s) { 
         let d = JSON.parse(localStorage.getItem('streak_'+auth.currentUser.uid) || '{"count":0,"last":""}');
         let t = new Date().toLocaleDateString();
-        if(s >= 7) { if(d.last !== t) d.count++; d.last = t; } else { d.count = 0; }
+        if(s >= 7) { if(d.last !== t) d.count++; d.last = t; } else d.count = 0;
         localStorage.setItem('streak_'+auth.currentUser.uid, JSON.stringify(d)); showStreak();
     }
     function showStreak() { let d = JSON.parse(localStorage.getItem('streak_'+auth.currentUser.uid) || '{"count":0}'); if(d.count > 0) { document.getElementById('streakBadge').style.display='block'; document.getElementById('streakCount').innerText = d.count; } }
-    setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+    function sendFriendRequest() { db.collection('notifications').add({ toUser: document.getElementById('partnerUser').value.toLowerCase(), fromUser: auth.currentUser.displayName.toLowerCase(), type: 'friend_request' }); alert("İstek atıldı!"); }
+    function listenFriends() { db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).onSnapshot(doc => { document.getElementById('friendsListContainer').innerHTML = (doc.data()?.friends || []).map(f => `<div class="friend-link" onclick="checkSpec('${f}')">@${f}</div>`).join(''); }); }
+    function checkSpec(u) { document.getElementById('partnerUser').value = u; checkPartner(); }
+    function toggleNotifications() { let d = document.getElementById('notifDropdown'); d.style.display = (d.style.display==='none'?'block':'none'); }
+    function toggleFriends() { let d = document.getElementById('friendsDropdown'); d.style.display = (d.style.display==='none'?'block':'none'); }
+    function togglePartner() { let d = document.getElementById('partnerPanel'); d.style.display = (d.style.display==='none'?'block':'none'); }
     async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert(e.message); } }
     async function doRegister() { 
         const u = document.getElementById('rUser').value.trim().toLowerCase();
@@ -352,8 +327,7 @@
             location.reload(); 
         } catch(e) { alert(e.message); } 
     }
-    function downloadPDF() { html2pdf().from(document.getElementById('results')).save(); }
-    function doReset() { auth.sendPasswordResetEmail(document.getElementById('lEmail').value).then(() => alert("Gönderildi.")); }
+    setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 </script>
 </body>
 </html>
