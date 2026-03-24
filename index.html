@@ -56,19 +56,18 @@
         .patient-card { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--primary); padding: 15px; border-radius: 20px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); }
         .broadcast-box { background: rgba(14, 165, 233, 0.1); border: 1px solid var(--accent); padding: 15px; border-radius: 20px; margin-bottom: 20px; }
         
-        /* Buton Rengi Güncellemesi */
+        /* Buton Düzeni */
         .split-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .btn-neutral { background: var(--neutral) !important; color: white !important; font-size: 0.75rem; padding: 12px; border: 1px solid #2d3748 !important; }
-        
+        .side-by-side-btns { display: flex; gap: 10px; margin-top: 10px; }
+        .side-by-side-btns .btn { flex: 1; margin: 0; }
+
         .chat-box { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 15px; }
         .msg-lara { align-self: flex-start; background: var(--accent); color: white; padding: 10px; border-radius: 15px 15px 15px 0; font-size: 0.8rem; max-width: 85%; }
         .msg-user { align-self: flex-end; background: var(--primary); color: white; padding: 10px; border-radius: 15px 15px 0 15px; font-size: 0.8rem; max-width: 85%; }
         .loading-text { font-size: 1rem; color: var(--premium); font-weight: 900; text-align: center; padding: 20px; animation: blink 1s infinite; }
         @keyframes blink { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
         .friend-pill { display: block; padding: 10px; background: #0b0f1a; border-radius: 10px; margin-bottom: 5px; color: var(--primary); cursor: pointer; font-size: 0.8rem; text-align: left; }
-
-        .side-by-side-btns { display: flex; gap: 10px; margin-top: 10px; }
-        .side-by-side-btns .btn { flex: 1; margin: 0; }
 
         /* GÜNLÜK MAKRO LİMİT ŞABLONU */
         .macro-tracker { background: rgba(255,255,255,0.03); border-radius: 20px; padding: 15px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -306,8 +305,8 @@
         tr: {
             headers: ["YEMEK ADI 🍽️","BESİN DEĞERLERİ 📊","NET TAVSİYE 💡","ÜRÜN ÖZETİ 🔍","SKOR 🎯"],
             notif: "Bildirimler", followers: "Takip Ettiklerin", hist: "GEÇMİŞ ANALİZLERİM", detail: "Detay Gör 🔍",
-            ana: "📸 ANALİZ ET", retry: "🔄 YENİDEN ANALİZ ET", out: "GÜVENLİ ÇIKIŞ", friend: "👫 DİYET DOSTU", lara: "🤖 LARA", spor: "🏃‍♂️ SPOR",
-            seri: "Seri", loading: "🔍 İNCELENİYOR...", h1: "BIO-CHEF", login: "GİRİŞ YAP", reg: "Kayıt Ol", regTitle: "KAYIT OL"
+            ana: "📸 ANALİZ ET", retry: "🔄 YENİDEN ANALİZ ET", out: "LOGOUT", friend: "👫 DİYET DOSTU", lara: "🤖 LARA", spor: "🏃‍♂️ SPOR",
+            seri: "Seri", loading: "🔍 İNCELENİYOR...", spLoading: "PLANINIZ OLUŞTURULUYOR...", h1: "BIO-CHEF", login: "GİRİŞ YAP", reg: "Kayıt Ol", regTitle: "KAYIT OL"
         },
         en: {
             headers: ["MEAL NAME 🍽️","NUTRITION 📊","ADVICE 💡","SUMMARY 🔍","SCORE 🎯"],
@@ -322,12 +321,10 @@
         const c = (dailyTotals.carb / dailyLimits.carb) * 100;
         const f = (dailyTotals.fat / dailyLimits.fat) * 100;
         const cal = (dailyTotals.cal / dailyLimits.cal) * 100;
-
         document.getElementById('barProtein').style.width = Math.min(p, 100) + '%';
         document.getElementById('barCarb').style.width = Math.min(c, 100) + '%';
         document.getElementById('barFat').style.width = Math.min(f, 100) + '%';
         document.getElementById('barCal').style.width = Math.min(cal, 100) + '%';
-
         document.getElementById('valProtein').innerText = `${Math.round(dailyTotals.protein)} / ${dailyLimits.protein}g`;
         document.getElementById('valCarb').innerText = `${Math.round(dailyTotals.carb)} / ${dailyLimits.carb}g`;
         document.getElementById('valFat').innerText = `${Math.round(dailyTotals.fat)} / ${dailyLimits.fat}g`;
@@ -340,14 +337,13 @@
         dailyTotals = { protein: 0, carb: 0, fat: 0, cal: 0 };
         arr.forEach(h => {
             if(new Date(h.unix).toLocaleDateString() === today) {
-                // Regex ile metin içindeki rakamları ayıkla
-                const p = h.detail.match(/Protein:\s*(\d+)/i);
-                const c = h.detail.match(/Karbonhidrat:\s*(\d+)/i);
-                const f = h.detail.match(/Yağ:\s*(\d+)/i);
+                const prot = h.detail.match(/Protein:\s*(\d+)/i);
+                const carb = h.detail.match(/Karbonhidrat:\s*(\d+)/i);
+                const fat = h.detail.match(/Yağ:\s*(\d+)/i);
                 const cal = h.detail.match(/Kalori:\s*(\d+)/i);
-                if(p) dailyTotals.protein += parseInt(p[1]);
-                if(c) dailyTotals.carb += parseInt(c[1]);
-                if(f) dailyTotals.fat += parseInt(f[1]);
+                if(prot) dailyTotals.protein += parseInt(prot[1]);
+                if(carb) dailyTotals.carb += parseInt(carb[1]);
+                if(fat) dailyTotals.fat += parseInt(fat[1]);
                 if(cal) dailyTotals.cal += parseInt(cal[1]);
             }
         });
@@ -409,7 +405,6 @@
         const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
         canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
         let img = canv.toDataURL('image/jpeg', 0.7);
-
         try {
             const r = await fetch('/api/analyze', {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -420,7 +415,6 @@
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 2);
             const headers = langData[currentLang].headers;
             let finalScore = 5; let mealName = "Yemek";
-
             sections.forEach((txt, i) => {
                 const card = document.createElement('div'); card.className = 'report-card';
                 let content = txt.trim(); if (i === 0) mealName = content.substring(0,30);
@@ -580,7 +574,7 @@
 
     function checkSpecific(u) { document.getElementById('partnerUser').value = u; checkPartner(); toggleFriends(); document.getElementById('partnerPanel').style.display = 'block'; document.getElementById('partnerPanel').scrollIntoView({ behavior: 'smooth' }); }
     function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
-    function openDetail(txt) { document.getElementById('modalTitle').innerText = "Öğün Detayı"; document.getElementById('modalBody').innerHTML = `<div style="white-space:pre-line;">${txt}</div>`; document.getElementById('detailModal').style.display = 'block'; }
+    function openDetail(txt) { document.getElementById('modalBody').innerHTML = `<div style="white-space:pre-line;">${txt}</div>`; document.getElementById('detailModal').style.display = 'block'; }
     function resetCamera() { document.getElementById('video').play(); document.getElementById('freezeLayer').style.display = 'none'; document.getElementById('results').style.display = 'none'; document.getElementById('btnAna').style.display = 'block'; document.getElementById('btnRetry').style.display = 'none'; }
     function toggleView(id) { document.querySelectorAll('.auth-container, #mainView, #dieticianView').forEach(v => v.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
     async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert("Giriş Hatası"); } }
@@ -596,8 +590,22 @@
     function resetSportModal() { document.getElementById('sportInputArea').style.display = 'block'; document.getElementById('sportLoadingArea').style.display = 'none'; document.getElementById('sportResultArea').style.display = 'none'; }
     function downloadSportPDF() { html2pdf().from(document.getElementById('sportPlanContent')).save('Spor_Programi.pdf'); }
     function downloadPDF() { html2pdf().from(document.getElementById('results')).save('BioChef_Analiz.pdf'); }
-    function sendFriendRequest() { const u = document.getElementById('partnerUser').value.trim().toLowerCase(); db.collection('notifications').add({ toUser: u, fromUser: auth.currentUser.displayName.toLowerCase(), message: "@"+auth.currentUser.displayName+" takip isteği attı.", timestamp: Date.now() }); alert("Gönderildi."); }
     function showStreak() { let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}'); if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; } }
+    
+    // AI BUZDOLABI GURMESİ MODÜLÜ (EKLEME)
+    async function runFridgeGuru() {
+        const vid = document.getElementById('video'); document.getElementById('freezeLayer').innerText = "İÇERİK ANALİZ EDİLİYOR...";
+        document.getElementById('freezeLayer').style.display = 'flex'; vid.pause();
+        const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
+        canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
+        let img = canv.toDataURL('image/jpeg', 0.7);
+        try {
+            const r = await fetch('/api/analyze', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode: 'yemek', image: img, user_data: "Bu malzemelerle bana 3 farklı sağlıklı tarif öner.", lang: currentLang }) });
+            const d = await r.json();
+            openDetail(d.analysis); resetCamera();
+        } catch(e) { alert("Hata"); resetCamera(); }
+    }
+
     setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 </script>
 </body>
