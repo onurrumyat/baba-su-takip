@@ -89,6 +89,11 @@
             <input type="number" id="sqAge" placeholder="Yaşınız">
             <input type="number" id="sqWeight" placeholder="Kilonuz (kg)">
             <input type="number" id="sqDays" placeholder="Haftada kaç gün spor yapabilirsiniz?">
+            <select id="sqGoal" style="text-align-last: center;">
+                <option value="Yağ Yakımı">Yağ Yakımı</option>
+                <option value="Kas Kütlesi">Kas Kütlesi</option>
+                <option value="Form Koruma">Form Koruma</option>
+            </select>
             <input type="text" id="sqEquipment" placeholder="Mekan (Ev/Salon) ve Ekipman Durumu">
             <input type="text" id="sqInjury" placeholder="Sakatlık veya engel var mı?">
             <button class="btn btn-main" style="background:var(--premium); color:black;" onclick="generateSportProgram()">PROGRAMI OLUŞTUR</button>
@@ -100,7 +105,7 @@
             <h3 style="color:var(--primary); text-align:center; margin-bottom:15px;">Size Özel Spor Planı</h3>
             <div id="sportPlanContent" class="report-txt" style="max-height: 350px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px;"></div>
             <button class="btn btn-sub" style="background:var(--danger); margin-top:15px;" onclick="downloadSportPDF()">📄 PDF OLARAK İNDİR</button>
-            <button class="btn btn-outline" style="margin-top:10px;" onclick="resetSportModal()">YENİ PROGRAM OLUŞTUR</button>
+            <button class="btn btn-outline" style="margin-top:10px;" onclick="resetSportModal()">YENİDEN DÜZENLE</button>
         </div>
         <button class="btn btn-outline" id="sportModalCloseBtn" onclick="document.getElementById('sportQuestionsModal').style.display='none'; resetSportModal();">Kapat</button>
     </div>
@@ -437,6 +442,7 @@
         });
     }
 
+    // --- LARA & SPOR SİSTEMİ ---
     async function askLara() {
         const inp = document.getElementById('laraInput');
         const display = document.getElementById('laraChatDisplay');
@@ -457,18 +463,16 @@
         } catch(e) { display.innerHTML += `<div class="msg-lara">Şu an yanıt veremiyorum.</div>`; }
     }
 
-    // SPOR MODU GÜNCELLEMELERİ
     async function generateSportProgram() {
         const age = document.getElementById('sqAge').value;
         const weight = document.getElementById('sqWeight').value;
         const days = document.getElementById('sqDays').value;
+        const goal = document.getElementById('sqGoal').value;
         const equip = document.getElementById('sqEquipment').value;
         const injury = document.getElementById('sqInjury').value;
-        const goal = document.getElementById('sqGoal').value;
         
-        if(!days || !age || !weight) return alert("Lütfen yaş, kilo ve gün sayısını girin.");
+        if(!days || !age || !weight) return alert("Yaş, kilo ve gün sayısını girin.");
 
-        // AYNI EKRAN BÜYÜKLÜĞÜNDE BEKLEME EKRANI
         document.getElementById('sportInputArea').style.display = 'none';
         document.getElementById('sportLoadingArea').style.display = 'block';
 
@@ -482,10 +486,9 @@
             });
             const d = await r.json();
             
-            // PLAN GÖRÜNTÜLEME
             document.getElementById('sportLoadingArea').style.display = 'none';
             document.getElementById('sportResultArea').style.display = 'block';
-            document.getElementById('sportPlanContent').innerHTML = d.analysis;
+            document.getElementById('sportPlanContent').innerText = d.analysis;
             
         } catch(e) { 
             alert("Hata oluştu."); 
@@ -523,6 +526,7 @@
             });
             const d = await r.json();
             if(!r.ok) throw new Error("Hata");
+            
             resDiv.innerHTML = ''; resDiv.style.display = 'flex';
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
             const headers = langData[currentLang].headers;
