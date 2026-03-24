@@ -28,6 +28,7 @@
         .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
         .report-txt { font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
         
+        /* Görsel Puan Çubuğu */
         .score-container { margin-top: 15px; }
         .score-label { display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 5px; color: #94a3b8; font-weight: bold; }
         .score-bar-bg { height: 12px; width: 100%; background: linear-gradient(to right, #ef4444, #f59e0b, #10b981); border-radius: 6px; position: relative; }
@@ -39,25 +40,20 @@
         .history-meal { color: var(--text); font-weight: 800; }
         .streak-badge { display:none; background:rgba(249, 115, 22, 0.15); color:#f97316; padding:8px 15px; border-radius:20px; font-weight:900; font-size:0.9rem; border:1px solid #f97316; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        
-        /* BİLDİRİM VE ARKADAŞ dropdown stilleri */
         .bell-container, .friends-btn { cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; position: relative; }
         .notif-badge { position: absolute; top: 0; right: 0; background: var(--danger); color: white; font-size: 0.6rem; font-weight: 900; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .notif-dropdown, .friends-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 280px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 15px; z-index: 100; max-height: 350px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        .notif-item { background: #0b0f1a; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 0.8rem; border-left: 3px solid var(--accent); color: #cbd5e1; }
+        .notif-dropdown, .friends-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 280px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 10px; z-index: 100; max-height: 300px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        .notif-item { background: #0b0f1a; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 0.8rem; border-left: 3px solid var(--accent); }
         .notif-btn { background: var(--primary); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; margin-top: 5px; font-weight:bold; }
-        
         .user-tag { font-size: 1.1rem; font-weight: 900; color: var(--primary); margin-top: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         .role-selector { display: flex; background: #0b0f1a; border-radius: 15px; margin-bottom: 15px; padding: 5px; border: 1px solid #2d3748; }
         .role-btn { flex: 1; padding: 10px; border-radius: 10px; border: none; background: transparent; color: #94a3b8; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .role-btn.active { background: var(--primary); color: white; }
-        
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); padding: 20px; overflow-y: auto; }
         .modal-content { background: var(--card); margin: auto; padding: 20px; border-radius: 25px; max-width: 400px; border: 1px solid var(--primary); }
         .partner-box { background: rgba(255,255,255,0.05); border: 1px dashed var(--neutral); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
         .patient-card { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--primary); padding: 20px; border-radius: 20px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); }
         .broadcast-box { background: rgba(14, 165, 233, 0.1); border: 1px solid var(--accent); padding: 15px; border-radius: 20px; margin-bottom: 20px; }
-        
         .split-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .btn-neutral { background: var(--neutral); color: white; font-size: 0.75rem; padding: 12px; }
         .chat-box { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 15px; }
@@ -65,7 +61,6 @@
         .msg-user { align-self: flex-end; background: var(--primary); color: white; padding: 10px; border-radius: 15px 15px 0 15px; font-size: 0.8rem; max-width: 85%; }
         .loading-text { font-size: 1rem; color: var(--premium); font-weight: 900; text-align: center; padding: 20px; animation: blink 1s infinite; }
         @keyframes blink { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
-        .friend-pill { display: block; padding: 10px; background: #0b0f1a; border-radius: 10px; margin-bottom: 5px; color: var(--primary); cursor: pointer; font-size: 0.8rem; text-align: left; }
     </style>
 </head>
 <body>
@@ -74,10 +69,10 @@
     <div class="modal-content" style="max-width: 400px;">
         <h3 style="color:var(--accent); text-align:center; margin-bottom:15px;">🤖 YZ Diyetisyen: LARA</h3>
         <div id="laraChatDisplay" class="chat-box">
-            <div class="msg-lara">Merhaba! Ben Lara. Çok kısa ve can alıcı yanıtlar veririm. Sadece diyet, yemek ve spor konularına odaklıyım.</div>
+            <div class="msg-lara">Merhaba! Ben Lara. Size sadece diyet, yemek ve spor konularında yardımcı olabilirim. Ne sormak istersiniz?</div>
         </div>
         <div style="display:flex; gap:5px;">
-            <input type="text" id="laraInput" placeholder="Sorunuz..." style="margin-bottom:0;">
+            <input type="text" id="laraInput" placeholder="Sorunuzu yazın..." style="margin-bottom:0;">
             <button class="btn btn-main" onclick="askLara()" style="width:60px; padding:0;">🚀</button>
         </div>
         <button class="btn btn-outline" onclick="document.getElementById('laraModal').style.display='none'">Kapat</button>
@@ -97,7 +92,7 @@
                 <option value="Kas Kütlesi">Kas Kütlesi</option>
                 <option value="Form Koruma">Form Koruma</option>
             </select>
-            <input type="text" id="sqEquipment" placeholder="Mekan ve Ekipman Durumu">
+            <input type="text" id="sqEquipment" placeholder="Mekan (Ev/Salon) ve Ekipman Durumu">
             <input type="text" id="sqInjury" placeholder="Sakatlık veya engel var mı?">
             <button class="btn btn-main" style="background:var(--premium); color:black;" onclick="generateSportProgram()">PROGRAMI OLUŞTUR</button>
         </div>
@@ -116,7 +111,7 @@
 
 <div id="detailModal" class="modal">
     <div class="modal-content">
-        <h3 id="modalTitle" style="color:var(--primary); margin-bottom:15px; text-align:center;">Detay</h3>
+        <h3 id="modalTitle" style="color:var(--primary); margin-bottom:15px; text-align:center;">Analiz Detayı</h3>
         <div id="modalBody" class="report-txt" style="max-height: 400px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px;"></div>
         <button class="btn btn-sub" style="margin-top:15px;" onclick="document.getElementById('detailModal').style.display='none'">Kapat</button>
     </div>
@@ -357,8 +352,6 @@
         if(saved.age) document.getElementById('uAge').value = saved.age;
         if(saved.weight) document.getElementById('uWeight').value = saved.weight;
         if(saved.goal) document.getElementById('uGoal').value = saved.goal;
-        document.getElementById('bellIcon').style.display = 'flex'; 
-        document.getElementById('friendListBtn').style.display = 'flex'; 
         listenNotifications(); listenFriends(); showStreak(); checkDieticianLink();
     }
 
@@ -421,17 +414,12 @@
 
     function showPatientHistory(pUsername) {
         db.collection('partner_data').doc(pUsername).collection('history').orderBy('unix', 'desc').get().then(snap => {
-            let html = `<div style="text-align:center; border-bottom:1px solid var(--primary); padding-bottom:10px; margin-bottom:15px;"><h2 style="color:var(--primary);">@${pUsername}</h2></div>`;
-            if(snap.empty) { html += "<p>Bugün veri yok.</p>"; } else {
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    html += `<div style="background: rgba(255,255,255,0.05); border-left: 4px solid var(--accent); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
-                                <div style="font-size:0.7rem; color:var(--accent); font-weight:bold;">🕒 ${d.date}</div>
-                                <div style="font-size:1rem; font-weight:900; color:#fff;">🍽️ ${d.mealName}</div>
-                                <div style="font-size:0.85rem; color:#cbd5e1; white-space:pre-line;">${d.fullText}</div>
-                            </div>`;
-                });
-            }
+            let html = `<h2 style="color:var(--primary); text-align:center;">@${pUsername}</h2>`;
+            if(snap.empty) html += "<p>Veri yok.</p>";
+            snap.forEach(doc => {
+                const d = doc.data();
+                html += `<div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px;"><div style="font-size:0.7rem; color:var(--accent); font-weight:bold;">🕒 ${d.date}</div><div style="font-size:1rem; font-weight:900; color:#fff;">🍽️ ${d.mealName}</div><div style="font-size:0.85rem; color:#cbd5e1; white-space:pre-line;">${d.fullText}</div></div>`;
+            });
             document.getElementById('modalTitle').innerText = "Hasta Raporu";
             document.getElementById('modalBody').innerHTML = html;
             document.getElementById('detailModal').style.display = 'block';
@@ -448,9 +436,7 @@
         display.scrollTop = display.scrollHeight;
         try {
             const r = await fetch('/api/analyze', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mode: 'lara', user_data: q, lang: currentLang })
+                method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode: 'lara', user_data: q, lang: currentLang })
             });
             const d = await r.json();
             display.innerHTML += `<div class="msg-lara">${d.analysis}</div>`;
@@ -462,18 +448,14 @@
         const age = document.getElementById('sqAge').value;
         const weight = document.getElementById('sqWeight').value;
         const days = document.getElementById('sqDays').value;
-        const equip = document.getElementById('sqEquipment').value;
-        const injury = document.getElementById('sqInjury').value;
         const goal = document.getElementById('sqGoal').value;
-        if(!days || !age || !weight) return alert("Yaş, kilo ve gün sayısını girin.");
+        if(!days || !age || !weight) return alert("Lütfen yaş, kilo ve gün sayısını girin.");
         document.getElementById('sportInputArea').style.display = 'none';
         document.getElementById('sportLoadingArea').style.display = 'block';
-        const info = `Yaş:${age}, Kilo:${weight}, Haftalık:${days} gün, Hedef:${goal}, Ekipman:${equip}, Sakatlık:${injury}`;
+        const info = `Yaş:${age}, Kilo:${weight}, Gün:${days}, Hedef:${goal}`;
         try {
             const r = await fetch('/api/analyze', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mode: 'spor', user_data: info, lang: currentLang })
+                method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode: 'spor', user_data: info, lang: currentLang })
             });
             const d = await r.json();
             document.getElementById('sportLoadingArea').style.display = 'none';
@@ -506,7 +488,7 @@
         let imgBase64 = mode === 'yemek' ? canv.toDataURL('image/jpeg', 0.7) : null;
         try {
             const r = await fetch('/api/analyze', {
-                method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode, image: imgBase64, user_data: `Kullanıcı Hedefi:${goal}. ${extra}`, lang: currentLang })
+                method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode, image: imgBase64, user_data: `Kullanıcı Hedefi:${goal}`, lang: currentLang })
             });
             const d = await r.json();
             if(!r.ok) throw new Error("Hata");
@@ -514,28 +496,49 @@
             resDiv.innerHTML = ''; resDiv.style.display = 'flex';
             const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
             const headers = langData[currentLang].headers;
+            
+            // Sıralama Mantığı: 1.Yemek Adı, 2.Besin Değerleri, 3.Tavsiye, 4.Özet, 5.Skor (En altta)
+            // Backend'den gelen verinin bu sırada olması için api/analyze.js güncellenmelidir.
+            
             let finalScore = 5;
             let mealNameForHistory = "Yemek";
 
             sections.forEach((txt, i) => {
                 const card = document.createElement('div'); card.className = 'report-card';
                 let content = txt.trim();
+                
                 if (i === 0) mealNameForHistory = content.substring(0, 30);
+
                 if (content.includes('[SKOR:')) {
                     const match = content.match(/\[SKOR:\s*(\d+)\]/i);
                     if(match) { 
-                        finalScore = parseInt(match[1]); content = content.replace(match[0], '').trim();
-                        updateStreak(finalScore); let leftPos = (finalScore / 10) * 100;
+                        finalScore = parseInt(match[1]); 
+                        content = content.replace(match[0], '').trim();
+                        updateStreak(finalScore);
+                        let leftPos = (finalScore / 10) * 100;
                         card.innerHTML = `<div class="report-tag">${headers[i]}</div><div class="report-txt">${content}</div>
-                            <div class="score-container"><div class="score-label"><span>Sağlıksız</span><span>Mükemmel</span></div><div class="score-bar-bg"><div class="score-pointer" style="left:${leftPos}%"></div></div><div style="text-align:center; margin-top:10px; font-weight:900; color:var(--primary); font-size:1.2rem;">${finalScore} / 10</div></div>`;
+                            <div class="score-container">
+                                <div class="score-label"><span>Sağlıksız</span><span>Mükemmel</span></div>
+                                <div class="score-bar-bg"><div class="score-pointer" style="left:${leftPos}%"></div></div>
+                                <div style="text-align:center; margin-top:10px; font-weight:900; color:var(--primary); font-size:1.2rem;">${finalScore} / 10</div>
+                            </div>`;
                     }
-                } else { card.innerHTML = `<div class="report-tag">${headers[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`; }
+                } else {
+                    card.innerHTML = `<div class="report-tag">${headers[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`;
+                }
                 resDiv.appendChild(card);
             });
-            document.getElementById('btnPdf').style.display = 'block'; document.getElementById('btnRetry').style.display = 'block'; document.getElementById('freezeLayer').style.display = 'none';
+
+            document.getElementById('btnPdf').style.display = 'block';
+            document.getElementById('btnRetry').style.display = 'block';
+            document.getElementById('freezeLayer').style.display = 'none';
             if(mode === 'yemek') saveHistory(finalScore, d.analysis, mealNameForHistory);
             resDiv.scrollIntoView();
-        } catch(e) { document.getElementById('freezeLayer').style.display = 'none'; document.getElementById('btnAnalyzeText').style.display = 'block'; if(vid) vid.play(); alert("Hata."); }
+        } catch(e) { 
+            document.getElementById('freezeLayer').style.display = 'none'; 
+            document.getElementById('btnAnalyzeText').style.display = 'block';
+            if(vid) vid.play(); alert("Hata oluştu.");
+        }
     }
 
     async function connectToDietician() {
@@ -547,7 +550,7 @@
         const dietDoc = q.docs[0];
         await db.collection('dieticians').doc(dietDoc.id).update({ patients: firebase.firestore.FieldValue.arrayUnion(me) });
         await db.collection('partner_data').doc(me).update({ linkedDietician: dietDoc.id });
-        alert("Bağlandınız.");
+        alert("Başarıyla bağlandınız!");
         checkDieticianLink();
     }
 
@@ -555,7 +558,7 @@
         const me = auth.currentUser.displayName.toLowerCase();
         db.collection('partner_data').doc(me).get().then(doc => {
             if(doc.exists && doc.data().linkedDietician) {
-                document.getElementById('dietStatus').innerText = "Bağlı: @" + doc.data().linkedDietician;
+                document.getElementById('dietStatus').innerText = "DURUM: @" + doc.data().linkedDietician + " bağlısınız.";
                 document.getElementById('dietCodeInput').style.display = 'none';
             }
         });
@@ -566,10 +569,7 @@
         db.collection('notifications').where('toUser', '==', me).onSnapshot(snap => {
             const list = document.getElementById('notifList'); const badge = document.getElementById('notifBadge');
             list.innerHTML = ''; let c = 0;
-            snap.forEach(doc => {
-                c++; const d = doc.data();
-                list.innerHTML += `<div class="notif-item">${d.message}<br><button class="notif-btn" onclick="deleteNotif('${doc.id}')">Sil</button></div>`;
-            });
+            snap.forEach(doc => { c++; list.innerHTML += `<div class="notif-item">${doc.data().message}<br><button class="notif-btn" onclick="deleteNotif('${doc.id}')">Sil</button></div>`; });
             badge.style.display = c > 0 ? 'flex' : 'none'; badge.innerText = c;
         });
     }
@@ -579,10 +579,7 @@
         db.collection('partner_data').doc(me).onSnapshot(doc => {
             const container = document.getElementById('friendsListContainer');
             if(container && doc.exists && doc.data().friends) {
-                container.innerHTML = '';
-                doc.data().friends.forEach(f => {
-                    container.innerHTML += `<div class="friend-pill" onclick="checkSpecific('${f}')">@${f}</div>`;
-                });
+                container.innerHTML = ''; doc.data().friends.forEach(f => { container.innerHTML += `<div class="friend-pill" onclick="checkSpecific('${f}')">@${f}</div>`; });
             }
         });
     }
@@ -591,7 +588,7 @@
         const u = document.getElementById('partnerUser').value.trim().toLowerCase();
         let me = auth.currentUser.displayName.toLowerCase();
         if(!u || u === me) return;
-        db.collection('notifications').add({ toUser: u, fromUser: me, type: 'friend_req', message: `@${me} seni takip etmek istiyor.`, timestamp: Date.now() });
+        db.collection('notifications').add({ toUser: u, fromUser: me, type: 'friend_request', message: `@${me} seni takip etmek istiyor.`, timestamp: Date.now() });
         alert("İstek atıldı.");
     }
 
@@ -624,10 +621,9 @@
                 db.collection('partner_data').doc(u).collection('history').orderBy('unix', 'desc').limit(1).get().then(snap => {
                     if(snap.empty) return;
                     const d = snap.docs[0].data();
-                    const dp = d.date.split(' ');
-                    res.innerHTML = `<div class="friend-report-pill" style="border: 2px solid var(--primary); background: rgba(16, 185, 129, 0.1);">📅 ${dp[0]} | 🕒 ${dp[1]}<br>🍽️ ${d.mealName}<br>⭐ Skor: ${d.score}/10<br>${d.fullText}</div>`;
+                    res.innerHTML = `<div class="friend-report-pill" style="border: 2px solid var(--primary); background: rgba(16, 185, 129, 0.1);">📅 ${d.date}<br>🍽️ ${d.mealName}<br>⭐ Skor: ${d.score}/10<br>${d.fullText}</div>`;
                 });
-            }
+            } else { res.innerText = "Kullanıcı bulunamadı."; }
         });
     }
 
@@ -646,13 +642,12 @@
         } catch(err) { alert(err.message); } 
     }
     function saveUserData() { if(!auth.currentUser) return; const data = { age: document.getElementById('uAge').value, weight: document.getElementById('uWeight').value, goal: document.getElementById('uGoal').value }; localStorage.setItem('userData_' + auth.currentUser.uid, JSON.stringify(data)); db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).set(data, { merge: true }); }
-    function openDetail(txt) { document.getElementById('modalTitle').innerText = "Analiz Detayı"; document.getElementById('modalBody').innerText = txt; document.getElementById('detailModal').style.display = 'block'; }
+    function openDetail(txt) { document.getElementById('modalTitle').innerText = "Detay"; document.getElementById('modalBody').innerText = txt; document.getElementById('detailModal').style.display = 'block'; }
     function downloadPDF() { html2pdf().from(document.getElementById('results')).save(); }
     function toggleNotifications() { const d = document.getElementById('notifDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
     function toggleFriends() { const d = document.getElementById('friendsDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
     function togglePartner() { const p = document.getElementById('partnerPanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
     function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
-    function doReset() { auth.sendPasswordResetEmail(document.getElementById('lEmail').value).then(() => alert("E-posta gönderildi.")); }
     setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 </script>
 </body>
