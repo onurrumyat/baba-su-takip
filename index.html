@@ -56,10 +56,7 @@
         .patient-card { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--primary); padding: 15px; border-radius: 20px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); }
         .broadcast-box { background: rgba(14, 165, 233, 0.1); border: 1px solid var(--accent); padding: 15px; border-radius: 20px; margin-bottom: 20px; }
         
-        /* Yan Yana Butonlar Düzeni */
-        .side-by-side-btns { display: flex; gap: 10px; margin-top: 10px; }
-        .side-by-side-btns .btn { flex: 1; margin-top: 0; }
-
+        /* Buton Rengi Güncellemesi */
         .split-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .btn-neutral { background: var(--neutral) !important; color: white !important; font-size: 0.75rem; padding: 12px; border: 1px solid #2d3748 !important; }
         
@@ -77,7 +74,7 @@
     <div class="modal-content" style="max-width: 400px;">
         <h3 id="txtLaraTitle" style="color:var(--accent); text-align:center; margin-bottom:15px;">🤖 YZ Diyetisyen: LARA</h3>
         <div id="laraChatDisplay" class="chat-box">
-            <div class="msg-lara">Merhaba! Ben Lara. Size sadece diyet, yemek ve spor konularında yardımcı olabilirim. Ne sormak istersiniz?</div>
+            <div id="txtLaraGreet" class="msg-lara">Merhaba! Ben Lara. Size sadece diyet, yemek ve spor konularında yardımcı olabilirim. Ne sormak istersiniz?</div>
         </div>
         <div style="display:flex; gap:5px;">
             <input type="text" id="laraInput" placeholder="..." style="margin-bottom:0;">
@@ -119,7 +116,7 @@
 
 <div id="detailModal" class="modal">
     <div class="modal-content">
-        <h3 id="modalTitle" style="color:var(--primary); margin-bottom:15px; text-align:center;">Detaylı Analiz</h3>
+        <h3 id="modalTitle" style="color:var(--primary); margin-bottom:15px; text-align:center;">Analiz Detayı</h3>
         <div id="modalBody" class="report-txt" style="max-height: 400px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px;"></div>
         <button class="btn btn-sub" style="margin-top:15px;" onclick="document.getElementById('detailModal').style.display='none'">Kapat</button>
     </div>
@@ -128,8 +125,8 @@
 <div class="app-card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
         <div style="display: flex; align-items: center;">
-            <span onclick="changeLang('tr')" style="font-size: 1.8rem; cursor: pointer; margin-right: 15px;">🇹🇷</span>
-            <span onclick="changeLang('en')" style="font-size: 1.8rem; cursor: pointer;">🇺🇸</span>
+            <span onclick="changeLang('tr')" style="font-size: 1.8rem; cursor: pointer; margin-right: 15px;" title="Türkçe">🇹🇷</span>
+            <span onclick="changeLang('en')" style="font-size: 1.8rem; cursor: pointer;" title="English">🇺🇸</span>
         </div>
         <div id="streakBadge" class="streak-badge">
             🔥 <span id="streakCount">0</span> <span id="txtSeri">Seri</span>
@@ -162,6 +159,7 @@
         <input type="email" id="lEmail" placeholder="E-posta">
         <input type="password" id="lPass" placeholder="Şifre">
         <button class="btn btn-main" onclick="doLogin()">GİRİŞ YAP</button>
+        <button class="btn btn-outline" style="border:none; margin-top:5px; font-size:0.75rem;" onclick="doReset()">Şifremi Unuttum?</button>
         <button class="btn btn-outline" onclick="toggleView('regView')">Kayıt Ol</button>
     </div>
 
@@ -179,20 +177,22 @@
     </div>
 
     <div id="dieticianView" style="display:none;">
-        <h2 id="txtDietPortal" style="color:var(--primary); text-align:center;">Diyetisyen Portalı</h2>
-        <div id="dMail" class="user-tag" style="text-align:center;"></div>
-        <div style="margin-top:15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
-            <p id="txtSetCode" style="font-size:0.8rem; color:#94a3b8; text-align:center;">Özel Kodunuzu Belirleyin:</p>
-            <input type="text" id="myDietCodeInput" maxlength="8" placeholder="DIET9900" style="background:#000;">
-            <button class="btn btn-main" onclick="saveDieticianCode()">KODU KAYDET</button>
-            <div id="currentCodeDisplay" style="margin-top:10px; text-align:center; font-weight:bold; color:var(--premium);"></div>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h2 id="txtDietPortal" style="color:var(--primary);">Diyetisyen Portalı</h2>
+            <div id="dMail" class="user-tag"></div>
+            <div style="margin-top:15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
+                <p id="txtSetCode" style="font-size:0.8rem; color:#94a3b8; text-align:center;">Özel Kodunuzu Belirleyin:</p>
+                <input type="text" id="myDietCodeInput" maxlength="8" placeholder="Örn: DIET9900" style="background:#000;">
+                <button class="btn btn-main" onclick="saveDieticianCode()">KODU KAYDET</button>
+                <div id="currentCodeDisplay" style="margin-top:10px; text-align:center; font-weight:bold; color:var(--premium);"></div>
+            </div>
         </div>
-        <div class="broadcast-box" style="margin-top:20px;">
-            <h4 id="txtBroadcast" style="color:var(--accent); margin-bottom:10px; font-size:0.9rem;">📢 Toplu Ödev Gönder</h4>
+        <div class="broadcast-box">
+            <h4 id="txtBroadcast" style="color:var(--accent); margin-bottom:10px; font-size:0.9rem;">📢 Toplu Duyuru / Günlük Ödev</h4>
             <textarea id="broadcastMsg" placeholder="..." style="height:60px;"></textarea>
-            <button class="btn btn-sub" onclick="sendBroadcast()" style="padding:10px; font-size:0.7rem;">GÖNDER</button>
+            <button id="btnBroadcast" class="btn btn-sub" onclick="sendBroadcast()" style="padding:10px; font-size:0.7rem; background:var(--accent);">HERKESE GÖNDER</button>
         </div>
-        <h3 id="txtMyPatients" style="margin-top:20px; border-bottom:1px solid #2d3748; padding-bottom:5px;">Bağlı Hastalarım</h3>
+        <h3 id="txtMyPatients" style="margin-bottom:15px; border-bottom:1px solid #2d3748; padding-bottom:5px;">Bağlı Hastalarım</h3>
         <div id="patientList"></div>
         <button class="btn btn-outline" onclick="auth.signOut(); location.reload();" style="margin-top:20px;">GÜVENLİ ÇIKIŞ</button>
     </div>
@@ -228,12 +228,11 @@
 
         <button id="btnFriendToggle" class="btn btn-outline" style="border-color: var(--neutral); color: var(--text); background: var(--neutral);" onclick="togglePartner()">👫 DİYET DOSTU</button>
         <div id="partnerPanel" class="partner-box" style="display:none;">
-            <input type="text" id="partnerUser" placeholder="Kullanıcı Adı">
-            <div class="side-by-side-btns">
-                <button class="btn btn-main" onclick="sendFriendRequest()">EKLE</button>
-                <button class="btn btn-sub" style="background:var(--primary);" onclick="checkPartner()">SORGULA</button>
-            </div>
-            <div id="partnerResult" style="margin-top:15px;"></div>
+            <input type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin" style="background: rgba(0,0,0,0.5);">
+            <button id="btnAddFriend" class="btn btn-sub" onclick="sendFriendRequest()">➕ TAKİP İSTEĞİ AT</button>
+            <button id="btnCheckFriend" class="btn btn-sub" style="background:var(--primary);" onclick="checkPartner()">🔍 DURUMUNU SORGULA</button>
+            <div id="partnerResult" style="margin-top:15px; font-weight:bold; white-space:pre-line;"></div>
+            <div id="partnerHistoryList" style="margin-top:10px; text-align:left;"></div>
         </div>
 
         <div class="split-btns">
@@ -241,7 +240,14 @@
             <button id="btnLara" class="btn btn-neutral" onclick="document.getElementById('laraModal').style.display='block'">🤖 YZ DİYETİSYEN</button>
         </div>
 
-        <button class="btn btn-outline" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
+        <div id="dietConnectArea" class="partner-box" style="border-color: var(--primary); background: rgba(16,185,129,0.05); margin-top:10px;">
+            <h3 id="txtDietConn" style="color:var(--primary); font-size:1rem;">Diyetisyene Bağlan</h3>
+            <input type="text" id="dietCodeInput" placeholder="Diyetisyen Kodunu Gir" maxlength="8" style="background: rgba(0,0,0,0.5);">
+            <button id="btnDietConnSub" class="btn btn-sub" style="background: var(--primary); margin-top:0;" onclick="connectToDietician()">KODLA BAĞLAN</button>
+            <p id="dietStatus" style="font-size:0.7rem; margin-top:5px; color:#94a3b8;"></p>
+        </div>
+
+        <button id="btnOut" class="btn btn-outline" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
     </div>
 </div>
 
@@ -256,12 +262,14 @@
         tr: {
             headers: ["YEMEK ADI 🍽️","BESİN DEĞERLERİ 📊","NET TAVSİYE 💡","ÜRÜN ÖZETİ 🔍","SKOR 🎯"],
             notif: "Bildirimler", followers: "Takip Ettiklerin", hist: "GEÇMİŞ ANALİZLERİM", detail: "Detay Gör 🔍",
-            ana: "📸 ANALİZ ET", retry: "🔄 YENİDEN ANALİZ ET", out: "GÜVENLİ ÇIKIŞ", seri: "Seri", h1: "BIO-CHEF", login: "GİRİŞ YAP", reg: "Kayıt Ol"
+            ana: "📸 ANALİZ ET", retry: "🔄 YENİDEN ANALİZ ET", out: "GÜVENLİ ÇIKIŞ", friend: "👫 DİYET DOSTU", lara: "🤖 LARA", spor: "🏃‍♂️ SPOR",
+            seri: "Seri", loading: "🔍 İNCELENİYOR...", spLoading: "PLANINIZ OLUŞTURULUYOR...", h1: "BIO-CHEF", login: "GİRİŞ YAP", reg: "Kayıt Ol", regTitle: "KAYIT OL"
         },
         en: {
             headers: ["MEAL NAME 🍽️","NUTRITION 📊","ADVICE 💡","SUMMARY 🔍","SCORE 🎯"],
             notif: "Notifications", followers: "Following", hist: "ANALYSIS HISTORY", detail: "View Detail 🔍",
-            ana: "📸 ANALYZE", retry: "🔄 RE-ANALYZE", out: "LOGOUT", seri: "Streak", h1: "BIO-CHEF", login: "LOGIN", reg: "Sign Up"
+            ana: "📸 ANALYZE", retry: "🔄 RE-ANALYZE", out: "LOGOUT", friend: "👫 DIET PARTNER", lara: "🤖 LARA", spor: "🏃‍♂️ SPORT",
+            seri: "Streak", loading: "🔍 ANALYZING...", spLoading: "CREATING PLAN...", h1: "BIO-CHEF", login: "LOGIN", reg: "Sign Up", regTitle: "SIGN UP"
         }
     };
 
@@ -284,7 +292,7 @@
                     toggleView('dieticianView'); document.getElementById('dMail').innerText = "@" + user.displayName; handleDieticianPortal(user.displayName.toLowerCase());
                 } else {
                     toggleView('mainView'); document.getElementById('uMail').innerText = "@" + user.displayName;
-                    setupUser(user); startCamera(); listenNotifications(); listenFriends(); showStreak();
+                    setupUser(user); startCamera(); listenNotifications(); listenFriends(); showStreak(); checkDieticianLink();
                 }
             });
         } else { toggleView('loginView'); }
@@ -459,6 +467,7 @@
     function resetCamera() { document.getElementById('video').play(); document.getElementById('freezeLayer').style.display = 'none'; document.getElementById('results').style.display = 'none'; document.getElementById('btnAna').style.display = 'block'; document.getElementById('btnRetry').style.display = 'none'; }
     function toggleView(id) { document.querySelectorAll('.auth-container, #mainView, #dieticianView').forEach(v => v.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
     async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert("Giriş Hatası"); } }
+    async function doReset() { const email = document.getElementById('lEmail').value; if(!email) return alert("Lütfen e-posta adresinizi yazın."); auth.sendPasswordResetEmail(email).then(() => alert("Şifre sıfırlama e-postası gönderildi.")).catch(e => alert("Hata: " + e.message)); }
     async function doRegister() { const u = document.getElementById('rUser').value.trim(); const cred = await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); await cred.user.updateProfile({ displayName: u }); await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase(), role: userRole }, { merge: true }); location.reload(); }
     function toggleNotifications() { const d = document.getElementById('notifDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
     function toggleFriends() { const d = document.getElementById('friendsDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
@@ -470,6 +479,10 @@
     function resetSportModal() { document.getElementById('sportInputArea').style.display = 'block'; document.getElementById('sportLoadingArea').style.display = 'none'; document.getElementById('sportResultArea').style.display = 'none'; }
     function downloadSportPDF() { html2pdf().from(document.getElementById('sportPlanContent')).save('Spor_Programi.pdf'); }
     function downloadPDF() { html2pdf().from(document.getElementById('results')).save('BioChef_Analiz.pdf'); }
+    function sendFriendRequest() { const u = document.getElementById('partnerUser').value.trim().toLowerCase(); db.collection('notifications').add({ toUser: u, fromUser: auth.currentUser.displayName.toLowerCase(), message: "@"+auth.currentUser.displayName+" takip isteği attı.", timestamp: Date.now() }); alert("Gönderildi."); }
+    function showStreak() { let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}'); if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; } }
+    function checkDieticianLink() { db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).get().then(doc => { if(doc.exists && doc.data().linkedDietician) { document.getElementById('dietStatus').innerText = "Bağlı: @" + doc.data().linkedDietician; document.getElementById('dietConnectArea').style.display = 'none'; } }); }
+    async function connectToDietician() { const c = document.getElementById('dietCodeInput').value.trim().toUpperCase(); const me = auth.currentUser.displayName.toLowerCase(); const q = await db.collection('dieticians').where('code', '==', c).get(); if(q.empty) return alert("Hatalı."); const dID = q.docs[0].id; await db.collection('dieticians').doc(dID).update({ patients: firebase.firestore.FieldValue.arrayUnion(me) }); await db.collection('partner_data').doc(me).update({ linkedDietician: dID }); alert("Bağlandınız."); checkDieticianLink(); }
     setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 </script>
 </body>
