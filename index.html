@@ -69,6 +69,7 @@
         .side-by-side-btns { display: flex; gap: 10px; margin-top: 10px; }
         .side-by-side-btns .btn { flex: 1; margin: 0; }
 
+        /* GÜNLÜK MAKRO LİMİT ŞABLONU */
         .macro-tracker { background: rgba(255,255,255,0.03); border-radius: 20px; padding: 15px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .macro-item { background: #0b0f1a; padding: 10px; border-radius: 15px; text-align: center; }
         .macro-label { font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; font-weight: 800; margin-bottom: 5px; display: block; }
@@ -134,17 +135,27 @@
 <div class="app-card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
         <div style="display: flex; align-items: center;">
-            <span onclick="changeLang('tr')" style="font-size: 1.8rem; cursor: pointer; margin-right: 15px;">🇹🇷</span>
-            <span onclick="changeLang('en')" style="font-size: 1.8rem; cursor: pointer;">🇺🇸</span>
+            <span onclick="changeLang('tr')" style="font-size: 1.8rem; cursor: pointer; margin-right: 15px;" title="Türkçe">🇹🇷</span>
+            <span onclick="changeLang('en')" style="font-size: 1.8rem; cursor: pointer;" title="English">🇺🇸</span>
         </div>
-        <div id="streakBadge" class="streak-badge">🔥 <span id="streakCount">0</span> <span id="txtSeri">Seri</span></div>
+        <div id="streakBadge" class="streak-badge">
+            🔥 <span id="streakCount">0</span> <span id="txtSeri">Seri</span>
+        </div>
         <div style="display: flex; gap:10px;">
             <div class="bell-container" onclick="toggleNotifications()" id="bellIcon" style="display:none;">
-                <span class="bell-icon">🔔</span><span class="notif-badge" id="notifBadge" style="display:none;">0</span>
-                <div class="notif-dropdown" id="notifDropdown"><h4 id="txtNotHead" style="color:white; margin-bottom:10px; text-align:center; font-size: 0.9rem;">Bildirimler</h4><div id="notifList"></div></div>
+                <span class="bell-icon">🔔</span>
+                <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                <div class="notif-dropdown" id="notifDropdown">
+                    <h4 id="txtNotHead" style="color:white; margin-bottom:10px; text-align:center; font-size: 0.9rem;">Bildirimler</h4>
+                    <div id="notifList"></div>
+                </div>
             </div>
             <div class="friends-btn" id="friendListBtn" onclick="toggleFriends()" style="display:none;">
-                👤<div class="friends-dropdown" id="friendsDropdown"><h4 id="txtFriendsHead" style="color:white; margin-bottom:10px; text-align:center; font-size: 0.9rem;">Takip Ettiklerin</h4><div id="friendsListContainer"></div></div>
+                👤
+                <div class="friends-dropdown" id="friendsDropdown">
+                    <h4 id="txtFriendsHead" style="color:white; margin-bottom:10px; text-align:center; font-size: 0.9rem;">Takip Ettiklerin</h4>
+                    <div id="friendsListContainer"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -177,8 +188,8 @@
 
     <div id="dieticianView" style="display:none;">
         <div style="text-align: center; margin-bottom: 20px;">
-            <h2 id="txtDietPortal" style="color:var(--primary); text-align:center;">Diyetisyen Portalı</h2>
-            <div id="dMail" class="user-tag" style="text-align:center;"></div>
+            <h2 id="txtDietPortal" style="color:var(--primary);">Diyetisyen Portalı</h2>
+            <div id="dMail" class="user-tag"></div>
             <div style="margin-top:15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
                 <p id="txtSetCode" style="font-size:0.8rem; color:#94a3b8; text-align:center;">Özel Kodunuzu Belirleyin:</p>
                 <input type="text" id="myDietCodeInput" maxlength="8" placeholder="Örn: DIET9900" style="background:#000;">
@@ -189,7 +200,7 @@
         <div class="broadcast-box">
             <h4 id="txtBroadcast" style="color:var(--accent); margin-bottom:10px; font-size:0.9rem;">📢 Toplu Duyuru / Günlük Ödev</h4>
             <textarea id="broadcastMsg" placeholder="..." style="height:60px;"></textarea>
-            <button class="btn btn-sub" onclick="sendBroadcast()" style="padding:10px; font-size:0.7rem; background:var(--accent);">GÖNDER</button>
+            <button id="btnBroadcast" class="btn btn-sub" onclick="sendBroadcast()" style="padding:10px; font-size:0.7rem; background:var(--accent);">HERKESE GÖNDER</button>
         </div>
         <h3 id="txtMyPatients" style="margin-bottom:15px; border-bottom:1px solid #2d3748; padding-bottom:5px;">Bağlı Hastalarım</h3>
         <div id="patientList"></div>
@@ -210,15 +221,38 @@
             <option value="Kilo Almak">Kilo Almak (+)</option>
             <option value="Kiloyu Korumak">Kiloyu Korumak (=)</option>
         </select>
-        <div class="cam-box"><video id="video" autoplay playsinline></video><div id="freezeLayer" class="freeze-overlay">🔍 İNCELENİYOR...</div></div>
+        
+        <div class="cam-box">
+            <video id="video" autoplay playsinline></video>
+            <div id="freezeLayer" class="freeze-overlay">🔍 İNCELENİYOR...</div>
+        </div>
+
         <button id="btnAna" class="btn btn-main" onclick="runAI('yemek')">📸 ANALİZ ET</button>
         <button id="btnRetry" class="btn btn-sub" style="display:none; background: var(--premium); color:black;" onclick="resetCamera()">🔄 YENİDEN ANALİZ ET</button>
 
         <div id="macroDashboard" class="macro-tracker">
-            <div class="macro-item"><span class="macro-label">PROTEİN</span><div class="macro-progress"><div id="barProtein" class="macro-bar" style="width:0%; background:var(--accent);"></div></div><span id="valProtein" class="macro-val">0/150g</span></div>
-            <div class="macro-item"><span class="macro-label">KARB</span><div class="macro-progress"><div id="barCarb" class="macro-bar" style="width:0%; background:var(--premium);"></div></div><span id="valCarb" class="macro-val">0/200g</span></div>
-            <div class="macro-item"><span class="macro-label">YAĞ</span><div class="macro-progress"><div id="barFat" class="macro-bar" style="width:0%; background:var(--danger);"></div></div><span id="valFat" class="macro-val">0/70g</span></div>
-            <div class="macro-item"><span class="macro-label">KALORİ</span><div class="macro-progress"><div id="barCal" class="macro-bar" style="width:0%; background:var(--primary);"></div></div><span id="valCal" class="macro-val">0/2000</span></div>
+            <div class="macro-item">
+                <span class="macro-label">PROTEİN</span>
+                <div class="macro-progress"><div id="barProtein" class="macro-bar" style="width: 0%; background: var(--accent);"></div></div>
+                <span id="valProtein" class="macro-val">0 / 150g</span>
+            </div>
+            <div class="macro-item">
+                <span class="macro-label">KARB</span>
+                <div class="macro-progress"><div id="barCarb" class="macro-bar" style="width: 0%; background: var(--premium);"></div></div>
+                <span id="valCarb" class="macro-val">0 / 200g</span>
+            </div>
+            <div class="macro-item">
+                <span class="macro-label">YAĞ</span>
+                <div class="macro-item-inner">
+                    <div class="macro-progress"><div id="barFat" class="macro-bar" style="width: 0%; background: var(--danger);"></div></div>
+                    <span id="valFat" class="macro-val">0 / 70g</span>
+                </div>
+            </div>
+            <div class="macro-item">
+                <span class="macro-label">KALORİ</span>
+                <div class="macro-progress"><div id="barCal" class="macro-bar" style="width: 0%; background: var(--primary);"></div></div>
+                <span id="valCal" class="macro-val">0 / 2000</span>
+            </div>
         </div>
 
         <div id="results"></div>
@@ -229,12 +263,13 @@
 
         <button id="btnFriendToggle" class="btn btn-outline" style="border-color: var(--neutral); color: var(--text); background: var(--neutral);" onclick="togglePartner()">👫 DİYET DOSTU</button>
         <div id="partnerPanel" class="partner-box" style="display:none;">
-            <input type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin">
+            <input type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin" style="background: rgba(0,0,0,0.5);">
             <div class="side-by-side-btns">
                 <button class="btn btn-main" onclick="sendFriendRequest()">EKLE</button>
                 <button class="btn btn-sub" style="background:var(--primary);" onclick="checkPartner()">SORGULA</button>
             </div>
             <div id="partnerResult" style="margin-top:15px; font-weight:bold; white-space:pre-line;"></div>
+            <div id="partnerHistoryList" style="margin-top:10px; text-align:left;"></div>
         </div>
 
         <div class="split-btns">
@@ -245,7 +280,7 @@
         <div id="dietConnectArea" class="partner-box" style="border-color: var(--primary); background: rgba(16,185,129,0.05); margin-top:10px;">
             <div id="dietSearchMode">
                 <h3 id="txtDietConn" style="color:var(--primary); font-size:1rem;">Diyetisyene Bağlan</h3>
-                <input type="text" id="dietCodeInput" placeholder="Diyetisyen Kodunu Gir" maxlength="8">
+                <input type="text" id="dietCodeInput" placeholder="Diyetisyen Kodunu Gir" maxlength="8" style="background: rgba(0,0,0,0.5);">
                 <button id="btnDietConnSub" class="btn btn-sub" style="background: var(--primary); margin-top:0;" onclick="connectToDietician()">KODLA BAĞLAN</button>
             </div>
             <div id="dietInfoMode" style="display:none; padding:10px;">
@@ -263,70 +298,67 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth(); const db = firebase.firestore();
 
-    let currentLang = 'tr'; let userRole = 'user';
+    let currentLang = 'tr';
+    let userRole = 'user';
     let dailyTotals = { protein: 0, carb: 0, fat: 0, cal: 0 };
     const dailyLimits = { protein: 150, carb: 200, fat: 70, cal: 2000 };
 
     const langData = {
-        tr: { headers: ["YEMEK ADI 🍽️","BESİN DEĞERLERİ 📊","NET TAVSİYE 💡","ÜRÜN ÖZETİ 🔍","SKOR 🎯"], notif: "Bildirimler", followers: "Takip Ettiklerin", ana: "📸 ANALİZ ET", retry: "🔄 YENİDEN ANALİZ ET" },
-        en: { headers: ["MEAL NAME 🍽️","NUTRITION 📊","ADVICE 💡","SUMMARY 🔍","SCORE 🎯"], notif: "Notifications", followers: "Following", ana: "📸 ANALYZE", retry: "🔄 RE-ANALYZE" }
+        tr: {
+            headers: ["YEMEK ADI 🍽️","BESİN DEĞERLERİ 📊","NET TAVSİYE 💡","ÜRÜN ÖZETİ 🔍","SKOR 🎯"],
+            notif: "Bildirimler", followers: "Takip Ettiklerin", hist: "GEÇMİŞ ANALİZLERİM", detail: "Detay Gör 🔍",
+            ana: "📸 ANALİZ ET", retry: "🔄 YENİDEN ANALİZ ET", out: "LOGOUT", friend: "👫 DİYET DOSTU", lara: "🤖 LARA", spor: "🏃‍♂️ SPOR",
+            seri: "Seri", loading: "🔍 İNCELENİYOR...", h1: "BIO-CHEF", login: "GİRİŞ YAP", reg: "Kayıt Ol", regTitle: "KAYIT OL"
+        },
+        en: {
+            headers: ["MEAL NAME 🍽️","NUTRITION 📊","ADVICE 💡","SUMMARY 🔍","SCORE 🎯"],
+            notif: "Notifications", followers: "Following", hist: "ANALYSIS HISTORY", detail: "View Detail 🔍",
+            ana: "📸 ANALYZE", retry: "🔄 RE-ANALYZE", out: "LOGOUT", friend: "👫 DIET PARTNER", lara: "🤖 LARA", spor: "🏃‍♂️ SPORT",
+            seri: "Streak", loading: "🔍 ANALYZING...", h1: "BIO-CHEF", login: "LOGIN", reg: "Sign Up", regTitle: "SIGN UP"
+        }
     };
+
+    function updateMacroUI() {
+        const p = (dailyTotals.protein / dailyLimits.protein) * 100;
+        const c = (dailyTotals.carb / dailyLimits.carb) * 100;
+        const f = (dailyTotals.fat / dailyLimits.fat) * 100;
+        const cal = (dailyTotals.cal / dailyLimits.cal) * 100;
+
+        document.getElementById('barProtein').style.width = Math.min(p, 100) + '%';
+        document.getElementById('barCarb').style.width = Math.min(c, 100) + '%';
+        document.getElementById('barFat').style.width = Math.min(f, 100) + '%';
+        document.getElementById('barCal').style.width = Math.min(cal, 100) + '%';
+
+        document.getElementById('valProtein').innerText = `${Math.round(dailyTotals.protein)} / ${dailyLimits.protein}g`;
+        document.getElementById('valCarb').innerText = `${Math.round(dailyTotals.carb)} / ${dailyLimits.carb}g`;
+        document.getElementById('valFat').innerText = `${Math.round(dailyTotals.fat)} / ${dailyLimits.fat}g`;
+        document.getElementById('valCal').innerText = `${Math.round(dailyTotals.cal)} / ${dailyLimits.cal}`;
+    }
+
+    function changeLang(l) {
+        currentLang = l; const d = langData[l];
+        document.getElementById('txtNotHead').innerText = d.notif;
+        document.getElementById('txtFriendsHead').innerText = d.followers;
+        document.getElementById('btnHistToggle').innerText = d.hist;
+        document.getElementById('btnAna').innerText = d.ana;
+        if(document.getElementById('btnRetry')) document.getElementById('btnRetry').innerText = d.retry;
+        document.getElementById('txtSeri').innerText = d.seri;
+        document.getElementById('txtAppName').innerText = d.h1;
+    }
 
     auth.onAuthStateChanged(user => {
         if (user) {
             db.collection('partner_data').doc(user.displayName.toLowerCase()).get().then(doc => {
-                if(doc.exists) {
-                    const data = doc.data();
-                    if(data.role === 'dietician') {
-                        toggleView('dieticianView'); document.getElementById('dMail').innerText = "@" + user.displayName; handleDieticianPortal(user.displayName.toLowerCase());
-                    } else {
-                        toggleView('mainView'); document.getElementById('uMail').innerText = "@" + user.displayName;
-                        setupUser(user); startCamera(); listenNotifications(); listenFriends(); showStreak(); checkDieticianLink(); calculateDailyMacros();
-                    }
+                const data = doc.data() || {};
+                if(data.role === 'dietician') {
+                    toggleView('dieticianView'); document.getElementById('dMail').innerText = "@" + user.displayName; handleDieticianPortal(user.displayName.toLowerCase());
                 } else {
-                    toggleView('mainView'); setupUser(user); startCamera();
+                    toggleView('mainView'); document.getElementById('uMail').innerText = "@" + user.displayName;
+                    setupUser(user); startCamera(); listenNotifications(); listenFriends(); showStreak(); checkDieticianLink(); calculateDailyMacros();
                 }
             });
         } else { toggleView('loginView'); }
     });
-
-    async function doLogin() {
-        const email = document.getElementById('lEmail').value;
-        const pass = document.getElementById('lPass').value;
-        try {
-            await auth.signInWithEmailAndPassword(email, pass);
-            // Auth change will trigger the redirection automatically via onAuthStateChanged
-        } catch(e) { alert("E-posta veya şifre hatalı."); }
-    }
-
-    async function runAI(mode) {
-        const resDiv = document.getElementById('results'); const vid = document.getElementById('video');
-        vid.pause(); document.getElementById('freezeLayer').style.display = 'flex'; document.getElementById('btnAna').style.display = 'none';
-        const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
-        canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
-        let img = canv.toDataURL('image/jpeg', 0.7);
-        try {
-            const r = await fetch('/api/analyze', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode, image: img, user_data: `Hedef:${document.getElementById('uGoal').value}`, lang: currentLang }) });
-            const d = await r.json();
-            resDiv.innerHTML = ''; resDiv.style.display = 'flex';
-            const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 2);
-            let finalScore = 5; let mealName = "Yemek";
-            sections.forEach((txt, i) => {
-                const card = document.createElement('div'); card.className = 'report-card';
-                let content = txt.trim(); if (i === 0) mealName = content.substring(0,30);
-                if (content.includes('[SKOR:')) {
-                    const match = content.match(/\[SKOR:\s*(\d+)\]/);
-                    if(match) {
-                        finalScore = parseInt(match[1]); let left = (finalScore/10)*100;
-                        card.innerHTML = `<div class="report-tag">SKOR 🎯</div><div class="report-txt">${content.replace(match[0], '')}</div><div class="score-container"><div class="score-bar-bg"><div class="score-pointer" style="left:${left}%"></div></div><div style="text-align:center; margin-top:5px; font-weight:900;">${finalScore}/10</div></div>`;
-                    }
-                } else { card.innerHTML = `<div class="report-tag">DETAY</div><div class="report-txt">${content}</div>`; }
-                resDiv.appendChild(card);
-            });
-            document.getElementById('btnRetry').style.display = 'block'; document.getElementById('freezeLayer').style.display = 'none';
-            saveHistory(finalScore, d.analysis, mealName); calculateDailyMacros(); resDiv.scrollIntoView({ behavior: 'smooth' });
-        } catch(e) { alert("Hata"); resetCamera(); }
-    }
 
     function calculateDailyMacros() {
         let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
@@ -334,28 +366,79 @@
         dailyTotals = { protein: 0, carb: 0, fat: 0, cal: 0 };
         arr.forEach(h => {
             if(new Date(h.unix).toLocaleDateString() === today) {
-                const prot = h.detail.match(/Protein:\s*(\d+)/i);
-                const carb = h.detail.match(/Karbonhidrat:\s*(\d+)/i);
-                const fat = h.detail.match(/Yağ:\s*(\d+)/i);
+                const p = h.detail.match(/Protein:\s*(\d+)/i);
+                const c = h.detail.match(/Karbonhidrat:\s*(\d+)/i);
+                const f = h.detail.match(/Yağ:\s*(\d+)/i);
                 const cal = h.detail.match(/Kalori:\s*(\d+)/i);
-                if(prot) dailyTotals.protein += parseInt(prot[1]);
-                if(carb) dailyTotals.carb += parseInt(carb[1]);
-                if(fat) dailyTotals.fat += parseInt(fat[1]);
+                if(p) dailyTotals.protein += parseInt(p[1]);
+                if(c) dailyTotals.carb += parseInt(c[1]);
+                if(f) dailyTotals.fat += parseInt(f[1]);
                 if(cal) dailyTotals.cal += parseInt(cal[1]);
             }
         });
         updateMacroUI();
     }
 
-    function updateMacroUI() {
-        document.getElementById('barProtein').style.width = Math.min((dailyTotals.protein/dailyLimits.protein)*100, 100) + '%';
-        document.getElementById('barCarb').style.width = Math.min((dailyTotals.carb/dailyLimits.carb)*100, 100) + '%';
-        document.getElementById('barFat').style.width = Math.min((dailyTotals.fat/dailyLimits.fat)*100, 100) + '%';
-        document.getElementById('barCal').style.width = Math.min((dailyTotals.cal/dailyLimits.cal)*100, 100) + '%';
-        document.getElementById('valProtein').innerText = `${Math.round(dailyTotals.protein)}/${dailyLimits.protein}g`;
-        document.getElementById('valCarb').innerText = `${Math.round(dailyTotals.carb)}/${dailyLimits.carb}g`;
-        document.getElementById('valFat').innerText = `${Math.round(dailyTotals.fat)}/${dailyLimits.fat}g`;
-        document.getElementById('valCal').innerText = `${Math.round(dailyTotals.cal)}/${dailyLimits.cal}`;
+    function setupUser(user) {
+        const saved = JSON.parse(localStorage.getItem('userData_' + user.uid) || '{}');
+        if(saved.age) document.getElementById('uAge').value = saved.age;
+        if(saved.weight) document.getElementById('uWeight').value = saved.weight;
+        if(saved.goal) document.getElementById('uGoal').value = saved.goal;
+        document.getElementById('bellIcon').style.display = 'flex';
+        document.getElementById('friendListBtn').style.display = 'flex';
+    }
+
+    function saveUserData() {
+        if(!auth.currentUser) return;
+        const d = { age: document.getElementById('uAge').value, weight: document.getElementById('uWeight').value, goal: document.getElementById('uGoal').value };
+        localStorage.setItem('userData_'+auth.currentUser.uid, JSON.stringify(d));
+        db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).set(d, {merge:true});
+    }
+
+    function startCamera() {
+        const vid = document.getElementById('video');
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            .then(s => { vid.srcObject = s; vid.play(); })
+            .catch(e => { alert("Kamera Hatası: " + e.message); });
+    }
+
+    async function runAI(mode) {
+        const resDiv = document.getElementById('results'); const vid = document.getElementById('video');
+        vid.pause(); document.getElementById('freezeLayer').style.display = 'flex';
+        document.getElementById('btnAna').style.display = 'none';
+        const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
+        canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
+        let img = canv.toDataURL('image/jpeg', 0.7);
+
+        try {
+            const r = await fetch('/api/analyze', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ mode, image: img, user_data: `Hedef:${document.getElementById('uGoal').value}`, lang: currentLang })
+            });
+            const d = await r.json();
+            resDiv.innerHTML = ''; resDiv.style.display = 'flex';
+            const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 2);
+            const headers = langData[currentLang].headers;
+            let finalScore = 5; let mealName = "Yemek";
+
+            sections.forEach((txt, i) => {
+                const card = document.createElement('div'); card.className = 'report-card';
+                let content = txt.trim(); if (i === 0) mealName = content.substring(0,30);
+                if (content.includes('[SKOR:')) {
+                    const match = content.match(/\[SKOR:\s*(\d+)\]/);
+                    if(match) {
+                        finalScore = parseInt(match[1]); let left = (finalScore/10)*100;
+                        card.innerHTML = `<div class="report-tag">${headers[i]}</div><div class="report-txt">${content.replace(match[0], '')}</div>
+                        <div class="score-container"><div class="score-bar-bg"><div class="score-pointer" style="left:${left}%"></div></div><div style="text-align:center; margin-top:5px; font-weight:900; color:var(--primary);">${finalScore}/10</div></div>`;
+                    }
+                } else { card.innerHTML = `<div class="report-tag">${headers[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`; }
+                resDiv.appendChild(card);
+            });
+            document.getElementById('btnRetry').style.display = 'block'; document.getElementById('freezeLayer').style.display = 'none';
+            saveHistory(finalScore, d.analysis, mealName);
+            calculateDailyMacros();
+            resDiv.scrollIntoView({ behavior: 'smooth' });
+        } catch(e) { alert("Analiz Hatası"); resetCamera(); }
     }
 
     function saveHistory(s, r, m) {
@@ -372,19 +455,41 @@
         if(p.style.display === 'block') {
             let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
             const now = Date.now(); const last24 = arr.filter(h => (now - h.unix) < 86400000);
-            document.getElementById('historyList').innerHTML = last24.map(h => `<div class="history-box" onclick="openDetail(\`${h.detail.replace(/`/g, "'")}\`)"><div class="history-meta">🕒 ${h.date} | ⭐ Puan: ${h.summary}/10</div><div class="history-meal">🍽️ ${h.meal}</div></div>`).join('');
+            document.getElementById('historyList').innerHTML = last24.map(h => `
+                <div class="history-box" onclick="openDetail(\`${h.detail.replace(/`/g, "'")}\`)">
+                    <div class="history-meta">🕒 ${h.date} | ⭐ Puan: ${h.summary}/10</div>
+                    <div class="history-meal">🍽️ ${h.meal}</div>
+                </div>`).join('');
         }
+    }
+
+    function checkPartner() {
+        const u = document.getElementById('partnerUser').value.trim().toLowerCase();
+        db.collection('partner_data').doc(u).collection('history').orderBy('unix', 'desc').limit(1).get().then(snap => {
+            const res = document.getElementById('partnerResult');
+            if(!snap.empty) {
+                const d = snap.docs[0].data();
+                res.innerHTML = `<div class="history-box" style="margin-top:0;" onclick="openDetail(\`${d.fullText.replace(/`/g, "'")}\`)">
+                    <div class="history-meta">🕒 ${d.date} | ⭐ Puan: ${d.score}/10</div>
+                    <div class="history-meal">🍽️ ${d.mealName}</div>
+                    <div style="font-size:0.6rem; color:var(--accent); text-align:right;">${langData[currentLang].detail}</div>
+                </div>`;
+            } else { res.innerText = "Veri bulunamadı."; }
+        });
     }
 
     function listenNotifications() {
         db.collection('notifications').where('toUser', '==', auth.currentUser.displayName.toLowerCase()).onSnapshot(snap => {
             const list = document.getElementById('notifList'); document.getElementById('notifBadge').innerText = snap.size;
             document.getElementById('notifBadge').style.display = snap.size > 0 ? 'flex' : 'none'; list.innerHTML = '';
-            snap.forEach(doc => { const d = doc.data(); list.innerHTML += `<div class="notif-item"><span>${d.message}</span><button class="notif-btn" onclick="deleteNotif('${doc.id}')">SİL</button></div>`; });
+            snap.forEach(doc => {
+                const d = doc.data();
+                list.innerHTML += `<div class="notif-item"><span>${d.message}</span><button class="notif-btn-del" style="background:var(--danger); color:white; border:none; padding:4px; border-radius:5px; font-size:0.6rem; cursor:pointer;" onclick="deleteNotif('${doc.id}')">SİL</button></div>`;
+            });
         });
     }
 
-    function handleDieticianPortal(u) {
+    async function handleDieticianPortal(u) {
         db.collection('dieticians').doc(u).onSnapshot(doc => {
             if(doc.exists && doc.data().code) document.getElementById('currentCodeDisplay').innerText = "KOD: " + doc.data().code;
             listenPatients(u);
@@ -397,10 +502,10 @@
             if(doc.exists && doc.data().patients) {
                 doc.data().patients.forEach(p => {
                     const card = document.createElement('div'); card.className = 'patient-card';
-                    card.innerHTML = `<div><div style="font-weight:900;">@${p}</div><div id="pL_${p}" style="font-size:0.7rem; color:var(--accent);">Analizler yükleniyor...</div></div><span>➔</span>`;
+                    card.innerHTML = `<div><div style="font-weight:900;">@${p}</div><div id="pLast_${p}" style="font-size:0.7rem; color:var(--accent);">Yükleniyor...</div></div><span>➔</span>`;
                     card.onclick = () => showPatientHistory(p); list.appendChild(card);
                     db.collection('partner_data').doc(p).collection('history').orderBy('unix', 'desc').limit(1).get().then(s => {
-                        if(!s.empty) document.getElementById('pL_'+p).innerText = "Son: " + s.docs[0].data().mealName;
+                        if(!s.empty) document.getElementById('pLast_'+p).innerText = "Son: " + s.docs[0].data().mealName;
                     });
                 });
             }
@@ -410,7 +515,10 @@
     function showPatientHistory(p) {
         db.collection('partner_data').doc(p).collection('history').orderBy('unix', 'desc').limit(10).get().then(snap => {
             let html = `<div style="text-align:center; border-bottom:1px solid var(--primary); padding-bottom:10px; margin-bottom:10px;"><h3>@${p} Son Raporları</h3></div>`;
-            snap.forEach(doc => { const d = doc.data(); html += `<div class="history-box" onclick="openDetail(\`${d.fullText.replace(/`/g, "'")}\`)">🕒 ${d.date}<br>🍽️ ${d.mealName} (Skor: ${d.score})</div>`; });
+            snap.forEach(doc => {
+                const d = doc.data();
+                html += `<div class="history-box" onclick="openDetail(\`${d.fullText.replace(/`/g, "'")}\`)">🕒 ${d.date}<br>🍽️ ${d.mealName} (Puan: ${d.score})</div>`;
+            });
             document.getElementById('modalBody').innerHTML = html; document.getElementById('detailModal').style.display = 'block';
         });
     }
@@ -421,23 +529,24 @@
         try {
             const r = await fetch('/api/analyze', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode: 'lara', user_data: q, lang: currentLang }) });
             const d = await r.json(); disp.innerHTML += `<div class="msg-lara">${d.analysis}</div>`; disp.scrollTop = disp.scrollHeight;
-        } catch(e) { disp.innerHTML += `<div class="msg-lara">Hata.</div>`; }
+        } catch(e) { disp.innerHTML += `<div class="msg-lara">Hata oluştu.</div>`; }
     }
 
     async function generateSportProgram() {
-        const info = `Yaş:${document.getElementById('sqAge').value}, Kilo:${document.getElementById('sqWeight').value}, Gün:${document.getElementById('sqDays').value}`;
+        const info = `Yaş:${document.getElementById('sqAge').value}, Kilo:${document.getElementById('sqWeight').value}, Gün:${document.getElementById('sqDays').value}, Hedef:${document.getElementById('sqGoal').value}`;
         document.getElementById('sportInputArea').style.display = 'none'; document.getElementById('sportLoadingArea').style.display = 'block';
         try {
             const r = await fetch('/api/analyze', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode: 'spor', user_data: info, lang: currentLang }) });
             const d = await r.json();
             document.getElementById('sportLoadingArea').style.display = 'none'; document.getElementById('sportResultArea').style.display = 'block'; document.getElementById('sportPlanContent').innerText = d.analysis;
-        } catch(e) { resetSportModal(); }
+        } catch(e) { alert("Hata"); resetSportModal(); }
     }
 
     async function connectToDietician() {
-        const c = document.getElementById('dietCodeInput').value.trim().toUpperCase(); const me = auth.currentUser.displayName.toLowerCase();
+        const c = document.getElementById('dietCodeInput').value.trim().toUpperCase();
+        const me = auth.currentUser.displayName.toLowerCase();
         const q = await db.collection('dieticians').where('code', '==', c).get();
-        if(q.empty) return alert("Kod Hatalı.");
+        if(q.empty) return alert("Hatalı Kod.");
         const dID = q.docs[0].id;
         await db.collection('dieticians').doc(dID).update({ patients: firebase.firestore.FieldValue.arrayUnion(me) });
         await db.collection('partner_data').doc(me).update({ linkedDietician: dID });
@@ -445,7 +554,7 @@
     }
 
     async function disconnectDietician() {
-        if(!confirm("Diyetisyenden ayrılmak istediğinize emin misiniz?")) return;
+        if(!confirm("Diyetisyeninizden ayrılmak istediğinize emin misiniz?")) return;
         const me = auth.currentUser.displayName.toLowerCase();
         const doc = await db.collection('partner_data').doc(me).get();
         const dID = doc.data().linkedDietician;
@@ -460,52 +569,34 @@
         db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).get().then(doc => {
             if(doc.exists && doc.data().linkedDietician) {
                 document.getElementById('dietStatus').innerText = "Diyetisyenim: @" + doc.data().linkedDietician;
-                document.getElementById('dietSearchMode').style.display = 'none'; document.getElementById('dietInfoMode').style.display = 'block';
+                document.getElementById('dietSearchMode').style.display = 'none';
+                document.getElementById('dietInfoMode').style.display = 'block';
             } else {
-                document.getElementById('dietSearchMode').style.display = 'block'; document.getElementById('dietInfoMode').style.display = 'none';
+                document.getElementById('dietSearchMode').style.display = 'block';
+                document.getElementById('dietInfoMode').style.display = 'none';
             }
         });
     }
 
-    function setupUser(user) {
-        const saved = JSON.parse(localStorage.getItem('userData_' + user.uid) || '{}');
-        if(saved.age) document.getElementById('uAge').value = saved.age;
-        if(saved.weight) document.getElementById('uWeight').value = saved.weight;
-        if(saved.goal) document.getElementById('uGoal').value = saved.goal;
-        document.getElementById('bellIcon').style.display = 'flex'; document.getElementById('friendListBtn').style.display = 'flex';
-    }
-
-    function saveUserData() { 
-        if(!auth.currentUser) return;
-        const d = { age: document.getElementById('uAge').value, weight: document.getElementById('uWeight').value, goal: document.getElementById('uGoal').value };
-        localStorage.setItem('userData_'+auth.currentUser.uid, JSON.stringify(d));
-        db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).set(d, {merge:true});
-    }
-
-    function startCamera() {
-        const vid = document.getElementById('video');
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => { vid.srcObject = s; vid.play(); }).catch(e => { console.log("Cam error"); });
-    }
-
-    async function doReset() { const email = document.getElementById('lEmail').value; if(!email) return alert("E-posta yazın."); auth.sendPasswordResetEmail(email).then(() => alert("Sıfırlama gönderildi.")).catch(e => alert("Hata.")); }
+    function checkSpecific(u) { document.getElementById('partnerUser').value = u; checkPartner(); toggleFriends(); document.getElementById('partnerPanel').style.display = 'block'; document.getElementById('partnerPanel').scrollIntoView({ behavior: 'smooth' }); }
     function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
     function openDetail(txt) { document.getElementById('modalBody').innerHTML = `<div style="white-space:pre-line;">${txt}</div>`; document.getElementById('detailModal').style.display = 'block'; }
     function resetCamera() { document.getElementById('video').play(); document.getElementById('freezeLayer').style.display = 'none'; document.getElementById('results').style.display = 'none'; document.getElementById('btnAna').style.display = 'block'; document.getElementById('btnRetry').style.display = 'none'; }
     function toggleView(id) { document.querySelectorAll('.auth-container, #mainView, #dieticianView').forEach(v => v.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
+    async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert("Giriş Hatası"); } }
+    async function doReset() { const email = document.getElementById('lEmail').value; if(!email) return alert("Lütfen e-posta adresinizi yazın."); auth.sendPasswordResetEmail(email).then(() => alert("Şifre sıfırlama e-postası gönderildi.")).catch(e => alert("Hata: " + e.message)); }
+    async function doRegister() { const u = document.getElementById('rUser').value.trim(); const cred = await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); await cred.user.updateProfile({ displayName: u }); await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase(), role: userRole }, { merge: true }); location.reload(); }
     function toggleNotifications() { const d = document.getElementById('notifDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
     function toggleFriends() { const d = document.getElementById('friendsDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
     function togglePartner() { const p = document.getElementById('partnerPanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
     function listenFriends() { db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).onSnapshot(doc => { if(doc.exists && doc.data().friends) { document.getElementById('friendsListContainer').innerHTML = doc.data().friends.map(f => `<div class="friend-pill" onclick="checkSpecific('${f}')">@${f}</div>`).join(''); } }); }
-    function checkSpecific(u) { document.getElementById('partnerUser').value = u; checkPartner(); toggleFriends(); document.getElementById('partnerPanel').style.display = 'block'; document.getElementById('partnerPanel').scrollIntoView({ behavior: 'smooth' }); }
-    async function saveDieticianCode() { const u = auth.currentUser.displayName.toLowerCase(); const c = document.getElementById('myDietCodeInput').value.trim().toUpperCase(); await db.collection('dieticians').doc(u).set({ code: c }, { merge: true }); alert("Kod Kaydedildi."); }
+    async function saveDieticianCode() { const u = auth.currentUser.displayName.toLowerCase(); const c = document.getElementById('myDietCodeInput').value.trim().toUpperCase(); await db.collection('dieticians').doc(u).set({ code: c }, { merge: true }); alert("Kaydedildi."); }
     async function sendBroadcast() { const d = auth.currentUser.displayName.toLowerCase(); const m = document.getElementById('broadcastMsg').value.trim(); const doc = await db.collection('dieticians').doc(d).get(); doc.data().patients.forEach(p => { db.collection('notifications').add({ toUser: p, fromUser: d, message: "👨‍⚕️ Ödev: " + m, timestamp: Date.now() }); }); document.getElementById('broadcastMsg').value = ''; alert("Gönderildi."); }
     function setRole(r, b) { userRole = r; document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active')); b.classList.add('active'); }
-    function showStreak() { let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}'); if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; } }
     function resetSportModal() { document.getElementById('sportInputArea').style.display = 'block'; document.getElementById('sportLoadingArea').style.display = 'none'; document.getElementById('sportResultArea').style.display = 'none'; }
-    function downloadSportPDF() { html2pdf().from(document.getElementById('sportPlanContent')).save('BioChef_Spor.pdf'); }
+    function downloadSportPDF() { html2pdf().from(document.getElementById('sportPlanContent')).save('Spor_Programi.pdf'); }
     function downloadPDF() { html2pdf().from(document.getElementById('results')).save('BioChef_Analiz.pdf'); }
-    function sendFriendRequest() { const u = document.getElementById('partnerUser').value.trim().toLowerCase(); db.collection('notifications').add({ toUser: u, fromUser: auth.currentUser.displayName.toLowerCase(), message: "@"+auth.currentUser.displayName+" takip isteği attı.", timestamp: Date.now() }); alert("Gönderildi."); }
-    function changeLang(l) { currentLang = l; }
+    function showStreak() { let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}'); if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; } }
     setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 </script>
 </body>
