@@ -56,7 +56,6 @@
         .patient-card { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--primary); padding: 15px; border-radius: 20px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); }
         .broadcast-box { background: rgba(14, 165, 233, 0.1); border: 1px solid var(--accent); padding: 15px; border-radius: 20px; margin-bottom: 20px; }
         
-        /* Buton Rengi Güncellemesi */
         .split-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .btn-neutral { background: var(--neutral) !important; color: white !important; font-size: 0.75rem; padding: 12px; border: 1px solid #2d3748 !important; }
         
@@ -241,10 +240,15 @@
         </div>
 
         <div id="dietConnectArea" class="partner-box" style="border-color: var(--primary); background: rgba(16,185,129,0.05); margin-top:10px;">
-            <h3 id="txtDietConn" style="color:var(--primary); font-size:1rem;">Diyetisyene Bağlan</h3>
-            <input type="text" id="dietCodeInput" placeholder="Diyetisyen Kodunu Gir" maxlength="8" style="background: rgba(0,0,0,0.5);">
-            <button id="btnDietConnSub" class="btn btn-sub" style="background: var(--primary); margin-top:0;" onclick="connectToDietician()">KODLA BAĞLAN</button>
-            <p id="dietStatus" style="font-size:0.7rem; margin-top:5px; color:#94a3b8;"></p>
+            <div id="dietSearchMode">
+                <h3 id="txtDietConn" style="color:var(--primary); font-size:1rem;">Diyetisyene Bağlan</h3>
+                <input type="text" id="dietCodeInput" placeholder="Diyetisyen Kodunu Gir" maxlength="8" style="background: rgba(0,0,0,0.5);">
+                <button id="btnDietConnSub" class="btn btn-sub" style="background: var(--primary); margin-top:0;" onclick="connectToDietician()">KODLA BAĞLAN</button>
+            </div>
+            <div id="dietInfoMode" style="display:none; padding:10px;">
+                <p id="dietStatus" style="font-weight:bold; color:var(--primary); font-size:0.9rem;"></p>
+                <button class="btn" style="background:var(--danger); padding:8px; font-size:0.7rem; margin-top:10px; width:auto;" onclick="disconnectDietician()">DİYETİSYENDEN AYRIL</button>
+            </div>
         </div>
 
         <button id="btnOut" class="btn btn-outline" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
@@ -282,6 +286,9 @@
         if(document.getElementById('btnRetry')) document.getElementById('btnRetry').innerText = d.retry;
         document.getElementById('txtSeri').innerText = d.seri;
         document.getElementById('txtAppName').innerText = d.h1;
+        document.getElementById('btnIn').innerText = d.login;
+        document.getElementById('btnGoReg').innerText = d.reg;
+        document.getElementById('txtRegTitle').innerText = d.regTitle;
     }
 
     auth.onAuthStateChanged(user => {
@@ -461,6 +468,42 @@
         } catch(e) { alert("Hata"); resetSportModal(); }
     }
 
+    async function connectToDietician() {
+        const c = document.getElementById('dietCodeInput').value.trim().toUpperCase();
+        const me = auth.currentUser.displayName.toLowerCase();
+        const q = await db.collection('dieticians').where('code', '==', c).get();
+        if(q.empty) return alert("Hatalı Kod.");
+        const dID = q.docs[0].id;
+        await db.collection('dieticians').doc(dID).update({ patients: firebase.firestore.FieldValue.arrayUnion(me) });
+        await db.collection('partner_data').doc(me).update({ linkedDietician: dID });
+        alert("Bağlandınız."); checkDieticianLink();
+    }
+
+    async function disconnectDietician() {
+        if(!confirm("Diyetisyeninizden ayrılmak istediğinize emin misiniz?")) return;
+        const me = auth.currentUser.displayName.toLowerCase();
+        const doc = await db.collection('partner_data').doc(me).get();
+        const dID = doc.data().linkedDietician;
+        if(dID) {
+            await db.collection('dieticians').doc(dID).update({ patients: firebase.firestore.FieldValue.arrayRemove(me) });
+            await db.collection('partner_data').doc(me).update({ linkedDietician: firebase.firestore.FieldValue.delete() });
+        }
+        alert("Bağlantı kesildi."); checkDieticianLink();
+    }
+
+    function checkDieticianLink() {
+        db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).get().then(doc => {
+            if(doc.exists && doc.data().linkedDietician) {
+                document.getElementById('dietStatus').innerText = "Diyetisyenim: @" + doc.data().linkedDietician;
+                document.getElementById('dietSearchMode').style.display = 'none';
+                document.getElementById('dietInfoMode').style.display = 'block';
+            } else {
+                document.getElementById('dietSearchMode').style.display = 'block';
+                document.getElementById('dietInfoMode').style.display = 'none';
+            }
+        });
+    }
+
     function checkSpecific(u) { document.getElementById('partnerUser').value = u; checkPartner(); toggleFriends(); document.getElementById('partnerPanel').style.display = 'block'; document.getElementById('partnerPanel').scrollIntoView({ behavior: 'smooth' }); }
     function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
     function openDetail(txt) { document.getElementById('modalBody').innerHTML = `<div style="white-space:pre-line;">${txt}</div>`; document.getElementById('detailModal').style.display = 'block'; }
@@ -479,10 +522,7 @@
     function resetSportModal() { document.getElementById('sportInputArea').style.display = 'block'; document.getElementById('sportLoadingArea').style.display = 'none'; document.getElementById('sportResultArea').style.display = 'none'; }
     function downloadSportPDF() { html2pdf().from(document.getElementById('sportPlanContent')).save('Spor_Programi.pdf'); }
     function downloadPDF() { html2pdf().from(document.getElementById('results')).save('BioChef_Analiz.pdf'); }
-    function sendFriendRequest() { const u = document.getElementById('partnerUser').value.trim().toLowerCase(); db.collection('notifications').add({ toUser: u, fromUser: auth.currentUser.displayName.toLowerCase(), message: "@"+auth.currentUser.displayName+" takip isteği attı.", timestamp: Date.now() }); alert("Gönderildi."); }
     function showStreak() { let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}'); if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; } }
-    function checkDieticianLink() { db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).get().then(doc => { if(doc.exists && doc.data().linkedDietician) { document.getElementById('dietStatus').innerText = "Bağlı: @" + doc.data().linkedDietician; document.getElementById('dietConnectArea').style.display = 'none'; } }); }
-    async function connectToDietician() { const c = document.getElementById('dietCodeInput').value.trim().toUpperCase(); const me = auth.currentUser.displayName.toLowerCase(); const q = await db.collection('dieticians').where('code', '==', c).get(); if(q.empty) return alert("Hatalı."); const dID = q.docs[0].id; await db.collection('dieticians').doc(dID).update({ patients: firebase.firestore.FieldValue.arrayUnion(me) }); await db.collection('partner_data').doc(me).update({ linkedDietician: dID }); alert("Bağlandınız."); checkDieticianLink(); }
     setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 </script>
 </body>
