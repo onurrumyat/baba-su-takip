@@ -42,7 +42,7 @@
         
         .bell-container, .friends-btn { cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; position: relative; }
         .notif-badge { position: absolute; top: 0; right: 0; background: var(--danger); color: white; font-size: 0.6rem; font-weight: 900; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .notif-dropdown, .friends-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 280px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 15px; z-index: 100; max-height: 350px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        .notif-dropdown, .friends-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 280px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 15px; z-index: 100; max-height: 300px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         .notif-item { background: #0b0f1a; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 0.8rem; border-left: 3px solid var(--accent); color: #cbd5e1; }
         .notif-btn { background: var(--primary); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; margin-top: 5px; font-weight:bold; }
         
@@ -55,8 +55,11 @@
         .partner-box { background: rgba(255,255,255,0.05); border: 1px dashed var(--neutral); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
         .patient-card { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--primary); padding: 20px; border-radius: 20px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); }
         .broadcast-box { background: rgba(14, 165, 233, 0.1); border: 1px solid var(--accent); padding: 15px; border-radius: 20px; margin-bottom: 20px; }
+        
+        /* Buton Rengi Güncellemesi */
         .split-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .btn-neutral { background: var(--neutral); color: white; font-size: 0.75rem; padding: 12px; }
+        .btn-neutral { background: var(--neutral) !important; color: white !important; font-size: 0.75rem; padding: 12px; border: 1px solid #2d3748 !important; }
+        
         .chat-box { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 15px; }
         .msg-lara { align-self: flex-start; background: var(--accent); color: white; padding: 10px; border-radius: 15px 15px 15px 0; font-size: 0.8rem; max-width: 85%; }
         .msg-user { align-self: flex-end; background: var(--primary); color: white; padding: 10px; border-radius: 15px 15px 0 15px; font-size: 0.8rem; max-width: 85%; }
@@ -99,7 +102,7 @@
             <button class="btn btn-main" style="background:var(--premium); color:black;" onclick="generateSportProgram()">PROGRAMI OLUŞTUR</button>
         </div>
         <div id="sportLoadingArea" style="display:none;">
-            <div class="loading-text">PLANINIZ OLUŞTURULUYOR... <br> Lütfen Bekleyin.</div>
+            <div id="txtSpLoading" class="loading-text">PLANINIZ OLUŞTURULUYOR... <br> Lütfen Bekleyin.</div>
         </div>
         <div id="sportResultArea" style="display:none;">
             <h3 style="color:var(--primary); text-align:center; margin-bottom:15px;">Size Özel Spor Planı</h3>
@@ -126,21 +129,21 @@
             <span onclick="changeLang('en')" style="font-size: 1.8rem; cursor: pointer;">🇺🇸</span>
         </div>
         <div id="streakBadge" class="streak-badge">
-            🔥 <span id="streakCount">0</span> <span id="txtStreak">Seri</span>
+            🔥 <span id="streakCount">0</span> <span id="txtSeri">Seri</span>
         </div>
         <div style="display: flex; gap:10px;">
             <div class="bell-container" onclick="toggleNotifications()" id="bellIcon" style="display:none;">
                 <span class="bell-icon">🔔</span>
                 <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
                 <div class="notif-dropdown" id="notifDropdown">
-                    <h4 id="txtNotifTitle" style="color:white; margin-bottom:10px; text-align:center; font-size: 0.9rem;">Bildirimler</h4>
+                    <h4 id="txtNotHead" style="color:white; margin-bottom:10px; text-align:center; font-size: 0.9rem;">Bildirimler</h4>
                     <div id="notifList"></div>
                 </div>
             </div>
             <div class="friends-btn" id="friendListBtn" onclick="toggleFriends()" style="display:none;">
                 👤
                 <div class="friends-dropdown" id="friendsDropdown">
-                    <h4 id="txtFriendsTitle" style="color:white; margin-bottom:10px; text-align:center; font-size: 0.9rem;">Takip Ettiklerin</h4>
+                    <h4 id="txtFriendsHead" style="color:white; margin-bottom:10px; text-align:center; font-size: 0.9rem;">Takip Ettiklerin</h4>
                     <div id="friendsListContainer"></div>
                 </div>
             </div>
@@ -155,8 +158,8 @@
         </div>
         <input type="email" id="lEmail" placeholder="E-posta">
         <input type="password" id="lPass" placeholder="Şifre">
-        <button class="btn btn-main" id="btnIn" onclick="doLogin()">GİRİŞ YAP</button>
-        <button class="btn btn-outline" id="btnGoReg" onclick="toggleView('regView')">Kayıt Ol</button>
+        <button id="btnIn" class="btn btn-main" onclick="doLogin()">GİRİŞ YAP</button>
+        <button id="btnGoReg" class="btn btn-outline" onclick="toggleView('regView')">Kayıt Ol</button>
     </div>
 
     <div id="regView" class="auth-container" style="display:none;">
@@ -168,8 +171,8 @@
         <input type="email" id="rEmail" placeholder="E-posta">
         <input type="text" id="rUser" placeholder="Kullanıcı Adı">
         <input type="password" id="rPass" placeholder="Şifre">
-        <button class="btn btn-sub" id="btnRegSub" onclick="doRegister()">HESABI OLUŞTUR</button>
-        <button class="btn btn-outline" id="btnRegBack" onclick="toggleView('loginView')">Geri Dön</button>
+        <button id="btnRegSub" class="btn btn-sub" onclick="doRegister()">HESABI OLUŞTUR</button>
+        <button id="btnRegBack" class="btn btn-outline" onclick="toggleView('loginView')">Geri Dön</button>
     </div>
 
     <div id="dieticianView" style="display:none;">
@@ -177,18 +180,18 @@
             <h2 id="txtDietPortal" style="color:var(--primary);">Diyetisyen Portalı</h2>
             <div id="dMail" class="user-tag"></div>
             <div style="margin-top:15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
-                <p id="txtSetCode" style="font-size:0.8rem; color:#94a3b8;">Özel Kodunuzu Belirleyin:</p>
-                <input type="text" id="myDietCodeInput" maxlength="8" placeholder="Örn: DIET9900" style="margin-top:10px; background: #000;">
+                <p id="txtSetCode" style="font-size:0.8rem; color:#94a3b8; text-align:center;">Özel Kodunuzu Belirleyin:</p>
+                <input type="text" id="myDietCodeInput" maxlength="8" placeholder="DIET9900" style="background:#000;">
                 <button id="btnSaveCode" class="btn btn-main" onclick="saveDieticianCode()">KODU KAYDET</button>
-                <div id="currentCodeDisplay" style="margin-top:10px; font-weight:bold; color:var(--premium); font-size: 1.1rem;"></div>
+                <div id="currentCodeDisplay" style="margin-top:10px; text-align:center; font-weight:bold; color:var(--premium);"></div>
             </div>
         </div>
         <div class="broadcast-box">
-            <h4 id="txtBroadcast" style="color:var(--accent); margin-bottom:10px; font-size:0.9rem;">📢 Toplu Duyuru / Günlük Ödev</h4>
-            <textarea id="broadcastMsg" placeholder="..." style="width:100%; padding:10px; border-radius:10px; background:#0b0f1a; color:white; border:1px solid var(--accent); font-size:0.8rem; resize:none; height:60px;"></textarea>
-            <button id="btnBroadcast" class="btn btn-sub" onclick="sendBroadcast()" style="padding:10px; font-size:0.7rem; background:var(--accent);">HERKESE GÖNDER</button>
+            <h4 id="txtBroadcast" style="color:var(--accent); margin-bottom:10px; font-size:0.9rem;">📢 Toplu Ödev Gönder</h4>
+            <textarea id="broadcastMsg" placeholder="..." style="height:60px;"></textarea>
+            <button id="btnBroadcast" class="btn btn-sub" onclick="sendBroadcast()" style="padding:10px; font-size:0.7rem;">GÖNDER</button>
         </div>
-        <h3 id="txtMyPatients" style="margin-bottom:15px; border-bottom:1px solid #2d3748; padding-bottom:5px;">Bağlı Hastalarım</h3>
+        <h3 id="txtMyPatients" style="margin-top:20px; border-bottom:1px solid #2d3748; padding-bottom:5px;">Bağlı Hastalarım</h3>
         <div id="patientList"></div>
         <button id="btnDietOut" class="btn btn-outline" onclick="auth.signOut(); location.reload();" style="margin-top:20px;">GÜVENLİ ÇIKIŞ</button>
     </div>
@@ -217,19 +220,17 @@
         <button id="btnRetry" class="btn btn-sub" style="display:none; background: var(--premium); color:black;" onclick="resetCamera()">🔄 YENİDEN ANALİZ ET</button>
 
         <div id="results"></div>
-        <button id="btnPdf" class="btn btn-main" style="display:none; background: #ef4444; margin-top:15px;" onclick="downloadPDF()">📄 PDF OLARAK KAYDET</button>
+        <button class="btn btn-main" id="btnPdf" style="display:none; background: #ef4444; margin-top:15px;" onclick="downloadPDF()">📄 PDF KAYDET</button>
 
         <button id="btnHistToggle" class="btn btn-outline" onclick="toggleHistory()" style="margin-top:25px;">📚 GEÇMİŞ ANALİZLERİM</button>
         <div id="historyPanel" style="display:none; margin-top:10px;"><div id="historyList"></div></div>
 
         <button id="btnFriendToggle" class="btn btn-outline" style="border-color: var(--neutral); color: var(--text); background: var(--neutral);" onclick="togglePartner()">👫 DİYET DOSTU</button>
-        
         <div id="partnerPanel" class="partner-box" style="display:none;">
-            <input type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin" style="background: rgba(0,0,0,0.5);">
-            <button id="btnAddFriend" class="btn btn-sub" onclick="sendFriendRequest()">➕ TAKİP İSTEĞİ AT</button>
-            <button id="btnCheckFriend" class="btn btn-sub" style="background:var(--primary);" onclick="checkPartner()">🔍 DURUMUNU SORGULA</button>
+            <input type="text" id="partnerUser" placeholder="Kullanıcı Adı">
+            <button id="btnFriendAdd" class="btn btn-sub" onclick="sendFriendRequest()">➕ TAKİP İSTEĞİ AT</button>
+            <button id="btnFriendCheck" class="btn btn-sub" style="background:var(--primary);" onclick="checkPartner()">🔍 DURUMUNU SORGULA</button>
             <div id="partnerResult" style="margin-top:15px; font-weight:bold; white-space:pre-line;"></div>
-            <div id="partnerHistoryList" style="margin-top:10px; text-align:left;"></div>
         </div>
 
         <div class="split-btns">
@@ -237,10 +238,10 @@
             <button id="btnLara" class="btn btn-neutral" onclick="document.getElementById('laraModal').style.display='block'">🤖 YZ DİYETİSYEN</button>
         </div>
 
-        <div id="dietConnect" class="partner-box" style="border-color: var(--primary); background: rgba(16,185,129,0.05); margin-top:10px;">
-            <h3 id="txtDietConn" style="color:var(--primary); margin-bottom:10px; font-size:1rem;">Diyetisyene Bağlan</h3>
-            <input type="text" id="dietCodeInput" placeholder="Diyetisyen Kodunu Gir" maxlength="8" style="background: rgba(0,0,0,0.5);">
-            <button id="btnDietConnSub" class="btn btn-sub" style="background: var(--primary); margin-top:0;" onclick="connectToDietician()">KODLA BAĞLAN</button>
+        <div id="dietConnect" class="partner-box" style="border-color: var(--primary); background: rgba(16,185,129,0.05);">
+            <h3 id="txtDietConn" style="color:var(--primary); font-size:1rem;">Diyetisyene Bağlan</h3>
+            <input type="text" id="dietCodeInput" placeholder="Diyetisyen Kodu" maxlength="8">
+            <button id="btnDietConnSub" class="btn btn-sub" style="background:var(--primary); margin-top:0;" onclick="connectToDietician()">KODLA BAĞLAN</button>
             <p id="dietStatus" style="font-size:0.7rem; margin-top:5px; color:#94a3b8;"></p>
         </div>
 
@@ -258,13 +259,13 @@
     const langData = {
         tr: {
             headers: ["YEMEK ADI 🍽️","BESİN DEĞERLERİ 📊","NET TAVSİYE 💡","ÜRÜN ÖZETİ 🔍","SKOR 🎯"],
-            notif: "Bildirimler", friends: "Takip Ettiklerin", hist: "📚 GEÇMİŞ ANALİZLERİM", detail: "Detay Gör 🔍",
+            notif: "Bildirimler", followers: "Takip Ettiklerin", hist: "GEÇMİŞ ANALİZLERİM", detail: "Detay Gör 🔍",
             ana: "📸 ANALİZ ET", retry: "🔄 YENİDEN ANALİZ ET", out: "GÜVENLİ ÇIKIŞ", friend: "👫 DİYET DOSTU", lara: "🤖 LARA", spor: "🏃‍♂️ SPOR",
             seri: "Seri", loading: "🔍 İNCELENİYOR...", spLoading: "PLANINIZ OLUŞTURULUYOR...", h1: "BIO-CHEF", login: "GİRİŞ YAP", reg: "Kayıt Ol", regTitle: "KAYIT OL"
         },
         en: {
             headers: ["MEAL NAME 🍽️","NUTRITION 📊","ADVICE 💡","SUMMARY 🔍","SCORE 🎯"],
-            notif: "Notifications", friends: "Following", hist: "ANALYSIS HISTORY", detail: "View Detail 🔍",
+            notif: "Notifications", followers: "Following", hist: "ANALYSIS HISTORY", detail: "View Detail 🔍",
             ana: "📸 ANALYZE", retry: "🔄 RE-ANALYZE", out: "SECURE LOGOUT", friend: "👫 DIET PARTNER", lara: "🤖 LARA", spor: "🏃‍♂️ SPORT",
             seri: "Streak", loading: "🔍 ANALYZING...", spLoading: "PLAN CREATING...", h1: "BIO-CHEF", login: "LOGIN", reg: "Sign Up", regTitle: "SIGN UP"
         }
@@ -272,20 +273,21 @@
 
     function changeLang(l) {
         currentLang = l; const d = langData[l];
-        document.getElementById('txtNotifTitle').innerText = d.notif;
-        document.getElementById('txtFriendsTitle').innerText = d.friends;
+        document.getElementById('txtNotHead').innerText = d.notif;
+        document.getElementById('txtFriendsHead').innerText = d.followers;
         document.getElementById('btnHistToggle').innerText = d.hist;
         document.getElementById('btnAna').innerText = d.ana;
         if(document.getElementById('btnRetry')) document.getElementById('btnRetry').innerText = d.retry;
         document.getElementById('btnOut').innerText = d.out;
         document.getElementById('btnFriendToggle').innerText = d.friend;
+        document.getElementById('btnLara').innerText = d.lara;
+        document.getElementById('btnSp').innerText = d.spor;
         document.getElementById('txtSeri').innerText = d.seri;
         document.getElementById('freezeLayer').innerText = d.loading;
         document.getElementById('txtAppName').innerText = d.h1;
         document.getElementById('btnIn').innerText = d.login;
         document.getElementById('btnGoReg').innerText = d.reg;
         document.getElementById('txtRegTitle').innerText = d.regTitle;
-        alert("Dil: " + l);
     }
 
     auth.onAuthStateChanged(user => {
@@ -293,12 +295,9 @@
             db.collection('partner_data').doc(user.displayName.toLowerCase()).get().then(doc => {
                 const data = doc.data() || {};
                 if(data.role === 'dietician') {
-                    toggleView('dieticianView');
-                    document.getElementById('dMail').innerText = "@" + user.displayName;
-                    handleDieticianPortal(user.displayName.toLowerCase());
+                    toggleView('dieticianView'); document.getElementById('dMail').innerText = "@" + user.displayName; handleDieticianPortal(user.displayName.toLowerCase());
                 } else {
-                    toggleView('mainView');
-                    document.getElementById('uMail').innerText = "@" + user.displayName;
+                    toggleView('mainView'); document.getElementById('uMail').innerText = "@" + user.displayName;
                     setupUser(user); startCamera(); listenNotifications(); listenFriends(); showStreak(); checkDieticianLink();
                 }
             });
@@ -340,8 +339,7 @@
                 if (content.includes('[SKOR:')) {
                     const match = content.match(/\[SKOR:\s*(\d+)\]/);
                     if(match) {
-                        finalScore = parseInt(match[1]);
-                        let left = (finalScore/10)*100;
+                        finalScore = parseInt(match[1]); let left = (finalScore/10)*100;
                         card.innerHTML = `<div class="report-tag">${headers[i]}</div><div class="report-txt">${content.replace(match[0], '')}</div>
                         <div class="score-container"><div class="score-bar-bg"><div class="score-pointer" style="left:${left}%"></div></div><div style="text-align:center; margin-top:5px; font-weight:900; color:var(--primary);">${finalScore}/10</div></div>`;
                     }
@@ -355,11 +353,11 @@
     }
 
     function saveHistory(s, r, m) {
-        const me = auth.currentUser.displayName.toLowerCase(); const now = Date.now(); const dateStr = new Date().toLocaleString();
+        const me = auth.currentUser.displayName.toLowerCase(); const dateStr = new Date().toLocaleString(); const unix = Date.now();
         db.collection('partner_data').doc(me).set({ score: s, lastMealName: m }, { merge: true });
-        db.collection('partner_data').doc(me).collection('history').add({ score: s, fullText: r, date: dateStr, unix: now, mealName: m });
+        db.collection('partner_data').doc(me).collection('history').add({ score: s, fullText: r, date: dateStr, unix: unix, mealName: m });
         let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-        arr.unshift({ summary: s, date: dateStr, detail: r, meal: m, unix: now });
+        arr.unshift({ summary: s, date: dateStr, detail: r, meal: m, unix: unix });
         localStorage.setItem('history_' + auth.currentUser.uid, JSON.stringify(arr.slice(0, 50)));
     }
 
@@ -392,21 +390,22 @@
     async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert("Hata"); } }
     async function doRegister() { const u = document.getElementById('rUser').value.trim(); const cred = await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); await cred.user.updateProfile({ displayName: u }); await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase(), role: userRole }, { merge: true }); location.reload(); }
     function saveUserData() { if(auth.currentUser) localStorage.setItem('userData_'+auth.currentUser.uid, JSON.stringify({age:document.getElementById('uAge').value, weight:document.getElementById('uWeight').value, goal:document.getElementById('uGoal').value})); }
-    function downloadPDF() { html2pdf().from(document.getElementById('results')).save('BioChef_Analiz.pdf'); }
+    function downloadPDF() { html2pdf().from(document.getElementById('results')).save('Analiz.pdf'); }
     function toggleNotifications() { const d = document.getElementById('notifDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
     function toggleFriends() { const d = document.getElementById('friendsDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
     function togglePartner() { const p = document.getElementById('partnerPanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
+    function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
     function listenNotifications() { db.collection('notifications').where('toUser', '==', auth.currentUser.displayName.toLowerCase()).onSnapshot(snap => { document.getElementById('notifBadge').innerText = snap.size; document.getElementById('notifBadge').style.display = snap.size > 0 ? 'flex' : 'none'; const list = document.getElementById('notifList'); list.innerHTML = ''; snap.forEach(doc => { list.innerHTML += `<div class="notif-item">${doc.data().message}<br><button class="notif-btn" onclick="deleteNotif('${doc.id}')">Sil</button></div>`; }); }); }
     function listenFriends() { db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).onSnapshot(doc => { if(doc.exists && doc.data().friends) { document.getElementById('friendsListContainer').innerHTML = doc.data().friends.map(f => `<div class="friend-pill" onclick="checkSpecific('${f}')">@${f}</div>`).join(''); } }); }
     function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
     function sendFriendRequest() { const u = document.getElementById('partnerUser').value.trim().toLowerCase(); db.collection('notifications').add({ toUser: u, fromUser: auth.currentUser.displayName.toLowerCase(), message: "@"+auth.currentUser.displayName+" takip isteği attı.", timestamp: Date.now() }); alert("Gönderildi."); }
-    function checkPartner() { const u = document.getElementById('partnerUser').value.trim().toLowerCase(); db.collection('partner_data').doc(u).get().then(doc => { if(doc.exists) { const d = doc.data(); document.getElementById('partnerResult').innerText = "Skor: " + (d.score || 0) + "/10\nYemek: " + (d.lastMealName || "Bilinmiyor"); } }); }
-    function resetSportModal() { document.getElementById('sportInputArea').style.display = 'block'; document.getElementById('sportLoadingArea').style.display = 'none'; document.getElementById('sportResultArea').style.display = 'none'; }
-    function downloadSportPDF() { html2pdf().from(document.getElementById('sportPlanContent')).save('Spor_Programi.pdf'); }
-    async function saveDieticianCode() { const u = auth.currentUser.displayName.toLowerCase(); const c = document.getElementById('myDietCodeInput').value.trim().toUpperCase(); await db.collection('dieticians').doc(u).set({ code: c }, { merge: true }); alert("Kaydedildi."); }
-    async function sendBroadcast() { const d = auth.currentUser.displayName.toLowerCase(); const m = document.getElementById('broadcastMsg').value.trim(); const doc = await db.collection('dieticians').doc(d).get(); doc.data().patients.forEach(p => { db.collection('notifications').add({ toUser: p, fromUser: d, message: "👨‍⚕️ Ödev: " + m, timestamp: Date.now() }); }); document.getElementById('broadcastMsg').value = ''; alert("Gönderildi."); }
+    function checkPartner() { const u = document.getElementById('partnerUser').value.trim().toLowerCase(); db.collection('partner_data').doc(u).get().then(doc => { if(doc.exists) { const d = doc.data(); document.getElementById('partnerResult').innerText = "Son Skor: " + (d.score || 0) + "/10\nSon Yemek: " + (d.lastMealName || "Bilinmiyor"); } }); }
     function showStreak() { let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}'); if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; } }
     function setRole(r, b) { userRole = r; document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active')); b.classList.add('active'); }
+    function resetSportModal() { document.getElementById('sportInputArea').style.display = 'block'; document.getElementById('sportLoadingArea').style.display = 'none'; document.getElementById('sportResultArea').style.display = 'none'; }
+    function downloadSportPDF() { html2pdf().from(document.getElementById('sportPlanContent')).save('BioChef_Spor_Programi.pdf'); }
+    async function saveDieticianCode() { const u = auth.currentUser.displayName.toLowerCase(); const c = document.getElementById('myDietCodeInput').value.trim().toUpperCase(); await db.collection('dieticians').doc(u).set({ code: c }, { merge: true }); alert("Kod Kaydedildi."); }
+    async function sendBroadcast() { const d = auth.currentUser.displayName.toLowerCase(); const m = document.getElementById('broadcastMsg').value.trim(); const doc = await db.collection('dieticians').doc(d).get(); doc.data().patients.forEach(p => { db.collection('notifications').add({ toUser: p, fromUser: d, message: "👨‍⚕️ Ödev: " + m, timestamp: Date.now() }); }); document.getElementById('broadcastMsg').value = ''; alert("Gönderildi."); }
     setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 </script>
 </body>
