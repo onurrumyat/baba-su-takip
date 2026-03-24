@@ -44,7 +44,7 @@
         .notif-badge { position: absolute; top: 0; right: 0; background: var(--danger); color: white; font-size: 0.6rem; font-weight: 900; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .notif-dropdown, .friends-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 280px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 15px; z-index: 100; max-height: 300px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         .notif-item { background: #0b0f1a; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 0.8rem; border-left: 3px solid var(--accent); color: #cbd5e1; }
-        .notif-btn { background: var(--primary); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; margin-top: 5px; font-weight:bold; }
+        .notif-btn-del { background: var(--danger); color: white; border: none; padding: 4px 8px; border-radius: 5px; cursor: pointer; font-size: 0.6rem; font-weight:bold; }
         
         .user-tag { font-size: 1.1rem; font-weight: 900; color: var(--primary); margin-top: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         .role-selector { display: flex; background: #0b0f1a; border-radius: 15px; margin-bottom: 15px; padding: 5px; border: 1px solid #2d3748; }
@@ -56,18 +56,18 @@
         .patient-card { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--primary); padding: 15px; border-radius: 20px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); }
         .broadcast-box { background: rgba(14, 165, 233, 0.1); border: 1px solid var(--accent); padding: 15px; border-radius: 20px; margin-bottom: 20px; }
         
-        /* Buton Düzeni */
         .split-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .btn-neutral { background: var(--neutral) !important; color: white !important; font-size: 0.75rem; padding: 12px; border: 1px solid #2d3748 !important; }
-        .side-by-side-btns { display: flex; gap: 10px; margin-top: 10px; }
-        .side-by-side-btns .btn { flex: 1; margin: 0; }
-
+        
         .chat-box { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 15px; }
         .msg-lara { align-self: flex-start; background: var(--accent); color: white; padding: 10px; border-radius: 15px 15px 15px 0; font-size: 0.8rem; max-width: 85%; }
         .msg-user { align-self: flex-end; background: var(--primary); color: white; padding: 10px; border-radius: 15px 15px 0 15px; font-size: 0.8rem; max-width: 85%; }
         .loading-text { font-size: 1rem; color: var(--premium); font-weight: 900; text-align: center; padding: 20px; animation: blink 1s infinite; }
         @keyframes blink { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
         .friend-pill { display: block; padding: 10px; background: #0b0f1a; border-radius: 10px; margin-bottom: 5px; color: var(--primary); cursor: pointer; font-size: 0.8rem; text-align: left; }
+        
+        .side-by-side-btns { display: flex; gap: 10px; margin-top: 10px; }
+        .side-by-side-btns .btn { flex: 1; margin: 0; }
 
         /* GÜNLÜK MAKRO LİMİT ŞABLONU */
         .macro-tracker { background: rgba(255,255,255,0.03); border-radius: 20px; padding: 15px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -188,8 +188,8 @@
 
     <div id="dieticianView" style="display:none;">
         <div style="text-align: center; margin-bottom: 20px;">
-            <h2 id="txtDietPortal" style="color:var(--primary);">Diyetisyen Portalı</h2>
-            <div id="dMail" class="user-tag"></div>
+            <h2 id="txtDietPortal" style="color:var(--primary); text-align:center;">Diyetisyen Portalı</h2>
+            <div id="dMail" class="user-tag" style="text-align:center;"></div>
             <div style="margin-top:15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
                 <p id="txtSetCode" style="font-size:0.8rem; color:#94a3b8; text-align:center;">Özel Kodunuzu Belirleyin:</p>
                 <input type="text" id="myDietCodeInput" maxlength="8" placeholder="Örn: DIET9900" style="background:#000;">
@@ -252,6 +252,8 @@
                 <span id="valCal" class="macro-val">0 / 2000</span>
             </div>
         </div>
+
+        <button id="btnFridge" class="btn btn-sub" style="background:var(--premium); color:black; font-weight:900; margin-top:15px;" onclick="runFridgeGuru()">🧊 BUZDOLABI GURMESİ</button>
 
         <div id="results"></div>
         <button class="btn btn-main" id="btnPdf" style="display:none; background: #ef4444; margin-top:15px;" onclick="downloadPDF()">📄 PDF KAYDET</button>
@@ -435,6 +437,20 @@
         } catch(e) { alert("Analiz Hatası"); resetCamera(); }
     }
 
+    // YENİ: BUZDOLABI GURMESİ MODÜLÜ
+    async function runFridgeGuru() {
+        const vid = document.getElementById('video'); document.getElementById('freezeLayer').innerText = "BUZDOLABI ANALİZ EDİLİYOR...";
+        document.getElementById('freezeLayer').style.display = 'flex'; vid.pause();
+        const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
+        canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
+        let img = canv.toDataURL('image/jpeg', 0.7);
+        try {
+            const r = await fetch('/api/analyze', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode: 'yemek', image: img, user_data: "Görseldeki malzemeleri tanı ve bana 3 adet sağlıklı tarif öner.", lang: currentLang }) });
+            const d = await r.json(); openDetail(d.analysis); resetCamera();
+            document.getElementById('freezeLayer').innerText = "🔍 İNCELENİYOR...";
+        } catch(e) { alert("Hata"); resetCamera(); }
+    }
+
     function saveHistory(s, r, m) {
         const me = auth.currentUser.displayName.toLowerCase(); const dateStr = new Date().toLocaleString(); const unix = Date.now();
         db.collection('partner_data').doc(me).set({ score: s, lastMealName: m }, { merge: true });
@@ -466,7 +482,7 @@
                 res.innerHTML = `<div class="history-box" style="margin-top:0;" onclick="openDetail(\`${d.fullText.replace(/`/g, "'")}\`)">
                     <div class="history-meta">🕒 ${d.date} | ⭐ Puan: ${d.score}/10</div>
                     <div class="history-meal">🍽️ ${d.mealName}</div>
-                    <div style="font-size:0.6rem; color:var(--accent); text-align:right;">${langData[currentLang].detail}</div>
+                    <div style="font-size:0.6rem; color:var(--accent); text-align:right;">Detay Gör 🔍</div>
                 </div>`;
             } else { res.innerText = "Veri bulunamadı."; }
         });
@@ -496,10 +512,10 @@
             if(doc.exists && doc.data().patients) {
                 doc.data().patients.forEach(p => {
                     const card = document.createElement('div'); card.className = 'patient-card';
-                    card.innerHTML = `<div><div style="font-weight:900;">@${p}</div><div id="pLast_${p}" style="font-size:0.7rem; color:var(--accent);">Yükleniyor...</div></div><span>➔</span>`;
+                    card.innerHTML = `<div><div style="font-weight:900;">@${p}</div><div id="pSum_${p}" style="font-size:0.7rem; color:var(--accent);">Analizler yükleniyor...</div></div><span>➔</span>`;
                     card.onclick = () => showPatientHistory(p); list.appendChild(card);
                     db.collection('partner_data').doc(p).collection('history').orderBy('unix', 'desc').limit(1).get().then(s => {
-                        if(!s.empty) document.getElementById('pLast_'+p).innerText = "Son: " + s.docs[0].data().mealName;
+                        if(!s.empty) document.getElementById('pSum_'+p).innerText = "Son Yemek: " + s.docs[0].data().mealName;
                     });
                 });
             }
@@ -511,7 +527,7 @@
             let html = `<div style="text-align:center; border-bottom:1px solid var(--primary); padding-bottom:10px; margin-bottom:10px;"><h3>@${p} Son Raporları</h3></div>`;
             snap.forEach(doc => {
                 const d = doc.data();
-                html += `<div class="history-box" onclick="openDetail(\`${d.fullText.replace(/`/g, "'")}\`)">🕒 ${d.date}<br>🍽️ ${d.mealName} (Puan: ${d.score})</div>`;
+                html += `<div class="history-box" onclick="openDetail(\`${d.fullText.replace(/`/g, "'")}\`)">🕒 ${d.date}<br>🍽️ ${d.mealName} (Skor: ${d.score})</div>`;
             });
             document.getElementById('modalBody').innerHTML = html; document.getElementById('detailModal').style.display = 'block';
         });
@@ -572,40 +588,26 @@
         });
     }
 
-    function checkSpecific(u) { document.getElementById('partnerUser').value = u; checkPartner(); toggleFriends(); document.getElementById('partnerPanel').style.display = 'block'; document.getElementById('partnerPanel').scrollIntoView({ behavior: 'smooth' }); }
+    async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert("Giriş Hatası"); } }
+    async function doReset() { const email = document.getElementById('lEmail').value; if(!email) return alert("E-posta yazın."); auth.sendPasswordResetEmail(email).then(() => alert("Sıfırlama gönderildi.")).catch(e => alert("Hata.")); }
+    async function doRegister() { const u = document.getElementById('rUser').value.trim(); const cred = await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); await cred.user.updateProfile({ displayName: u }); await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase(), role: userRole }, { merge: true }); location.reload(); }
     function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
+    function checkSpecific(u) { document.getElementById('partnerUser').value = u; checkPartner(); toggleFriends(); document.getElementById('partnerPanel').style.display = 'block'; document.getElementById('partnerPanel').scrollIntoView({ behavior: 'smooth' }); }
     function openDetail(txt) { document.getElementById('modalBody').innerHTML = `<div style="white-space:pre-line;">${txt}</div>`; document.getElementById('detailModal').style.display = 'block'; }
     function resetCamera() { document.getElementById('video').play(); document.getElementById('freezeLayer').style.display = 'none'; document.getElementById('results').style.display = 'none'; document.getElementById('btnAna').style.display = 'block'; document.getElementById('btnRetry').style.display = 'none'; }
     function toggleView(id) { document.querySelectorAll('.auth-container, #mainView, #dieticianView').forEach(v => v.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
-    async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert("Giriş Hatası"); } }
-    async function doReset() { const email = document.getElementById('lEmail').value; if(!email) return alert("Lütfen e-posta adresinizi yazın."); auth.sendPasswordResetEmail(email).then(() => alert("Şifre sıfırlama e-postası gönderildi.")).catch(e => alert("Hata: " + e.message)); }
-    async function doRegister() { const u = document.getElementById('rUser').value.trim(); const cred = await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); await cred.user.updateProfile({ displayName: u }); await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase(), role: userRole }, { merge: true }); location.reload(); }
     function toggleNotifications() { const d = document.getElementById('notifDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
     function toggleFriends() { const d = document.getElementById('friendsDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
     function togglePartner() { const p = document.getElementById('partnerPanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
     function listenFriends() { db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).onSnapshot(doc => { if(doc.exists && doc.data().friends) { document.getElementById('friendsListContainer').innerHTML = doc.data().friends.map(f => `<div class="friend-pill" onclick="checkSpecific('${f}')">@${f}</div>`).join(''); } }); }
-    async function saveDieticianCode() { const u = auth.currentUser.displayName.toLowerCase(); const c = document.getElementById('myDietCodeInput').value.trim().toUpperCase(); await db.collection('dieticians').doc(u).set({ code: c }, { merge: true }); alert("Kaydedildi."); }
+    async function saveDieticianCode() { const u = auth.currentUser.displayName.toLowerCase(); const c = document.getElementById('myDietCodeInput').value.trim().toUpperCase(); await db.collection('dieticians').doc(u).set({ code: c }, { merge: true }); alert("Kod Kaydedildi."); }
     async function sendBroadcast() { const d = auth.currentUser.displayName.toLowerCase(); const m = document.getElementById('broadcastMsg').value.trim(); const doc = await db.collection('dieticians').doc(d).get(); doc.data().patients.forEach(p => { db.collection('notifications').add({ toUser: p, fromUser: d, message: "👨‍⚕️ Ödev: " + m, timestamp: Date.now() }); }); document.getElementById('broadcastMsg').value = ''; alert("Gönderildi."); }
     function setRole(r, b) { userRole = r; document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active')); b.classList.add('active'); }
-    function resetSportModal() { document.getElementById('sportInputArea').style.display = 'block'; document.getElementById('sportLoadingArea').style.display = 'none'; document.getElementById('sportResultArea').style.display = 'none'; }
-    function downloadSportPDF() { html2pdf().from(document.getElementById('sportPlanContent')).save('Spor_Programi.pdf'); }
-    function downloadPDF() { html2pdf().from(document.getElementById('results')).save('BioChef_Analiz.pdf'); }
     function showStreak() { let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}'); if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; } }
-    
-    // AI BUZDOLABI GURMESİ MODÜLÜ (EKLEME)
-    async function runFridgeGuru() {
-        const vid = document.getElementById('video'); document.getElementById('freezeLayer').innerText = "İÇERİK ANALİZ EDİLİYOR...";
-        document.getElementById('freezeLayer').style.display = 'flex'; vid.pause();
-        const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
-        canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
-        let img = canv.toDataURL('image/jpeg', 0.7);
-        try {
-            const r = await fetch('/api/analyze', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode: 'yemek', image: img, user_data: "Bu malzemelerle bana 3 farklı sağlıklı tarif öner.", lang: currentLang }) });
-            const d = await r.json();
-            openDetail(d.analysis); resetCamera();
-        } catch(e) { alert("Hata"); resetCamera(); }
-    }
-
+    function resetSportModal() { document.getElementById('sportInputArea').style.display = 'block'; document.getElementById('sportLoadingArea').style.display = 'none'; document.getElementById('sportResultArea').style.display = 'none'; }
+    function downloadSportPDF() { html2pdf().from(document.getElementById('sportPlanContent')).save('BioChef_Spor_Programi.pdf'); }
+    function downloadPDF() { html2pdf().from(document.getElementById('results')).save('BioChef_Analiz.pdf'); }
+    function sendFriendRequest() { const u = document.getElementById('partnerUser').value.trim().toLowerCase(); db.collection('notifications').add({ toUser: u, fromUser: auth.currentUser.displayName.toLowerCase(), message: "@"+auth.currentUser.displayName+" takip isteği attı.", timestamp: Date.now() }); alert("Gönderildi."); }
     setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 </script>
 </body>
