@@ -65,6 +65,17 @@
         .loading-text { font-size: 1rem; color: var(--premium); font-weight: 900; text-align: center; padding: 20px; animation: blink 1s infinite; }
         @keyframes blink { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
         .friend-pill { display: block; padding: 10px; background: #0b0f1a; border-radius: 10px; margin-bottom: 5px; color: var(--primary); cursor: pointer; font-size: 0.8rem; text-align: left; }
+        
+        .side-by-side-btns { display: flex; gap: 10px; margin-top: 10px; }
+        .side-by-side-btns .btn { flex: 1; margin: 0; }
+
+        /* GÜNLÜK MAKRO LİMİT ŞABLONU */
+        .macro-tracker { background: rgba(255,255,255,0.03); border-radius: 20px; padding: 15px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .macro-item { background: #0b0f1a; padding: 10px; border-radius: 15px; text-align: center; }
+        .macro-label { font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; font-weight: 800; margin-bottom: 5px; display: block; }
+        .macro-progress { height: 6px; background: #1e293b; border-radius: 3px; overflow: hidden; margin: 5px 0; }
+        .macro-bar { height: 100%; transition: width 0.5s ease-in-out; }
+        .macro-val { font-size: 0.75rem; font-weight: 900; color: var(--text); }
     </style>
 </head>
 <body>
@@ -219,6 +230,31 @@
         <button id="btnAna" class="btn btn-main" onclick="runAI('yemek')">📸 ANALİZ ET</button>
         <button id="btnRetry" class="btn btn-sub" style="display:none; background: var(--premium); color:black;" onclick="resetCamera()">🔄 YENİDEN ANALİZ ET</button>
 
+        <div id="macroDashboard" class="macro-tracker">
+            <div class="macro-item">
+                <span class="macro-label">PROTEİN</span>
+                <div class="macro-progress"><div id="barProtein" class="macro-bar" style="width: 0%; background: var(--accent);"></div></div>
+                <span id="valProtein" class="macro-val">0 / 150g</span>
+            </div>
+            <div class="macro-item">
+                <span class="macro-label">KARB</span>
+                <div class="macro-progress"><div id="barCarb" class="macro-bar" style="width: 0%; background: var(--premium);"></div></div>
+                <span id="valCarb" class="macro-val">0 / 200g</span>
+            </div>
+            <div class="macro-item">
+                <span class="macro-label">YAĞ</span>
+                <div class="macro-item-inner">
+                    <div class="macro-progress"><div id="barFat" class="macro-bar" style="width: 0%; background: var(--danger);"></div></div>
+                    <span id="valFat" class="macro-val">0 / 70g</span>
+                </div>
+            </div>
+            <div class="macro-item">
+                <span class="macro-label">KALORİ</span>
+                <div class="macro-progress"><div id="barCal" class="macro-bar" style="width: 0%; background: var(--primary);"></div></div>
+                <span id="valCal" class="macro-val">0 / 2000</span>
+            </div>
+        </div>
+
         <div id="results"></div>
         <button class="btn btn-main" id="btnPdf" style="display:none; background: #ef4444; margin-top:15px;" onclick="downloadPDF()">📄 PDF KAYDET</button>
 
@@ -228,8 +264,10 @@
         <button id="btnFriendToggle" class="btn btn-outline" style="border-color: var(--neutral); color: var(--text); background: var(--neutral);" onclick="togglePartner()">👫 DİYET DOSTU</button>
         <div id="partnerPanel" class="partner-box" style="display:none;">
             <input type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin" style="background: rgba(0,0,0,0.5);">
-            <button id="btnAddFriend" class="btn btn-sub" onclick="sendFriendRequest()">➕ TAKİP İSTEĞİ AT</button>
-            <button id="btnCheckFriend" class="btn btn-sub" style="background:var(--primary);" onclick="checkPartner()">🔍 DURUMUNU SORGULA</button>
+            <div class="side-by-side-btns">
+                <button class="btn btn-main" onclick="sendFriendRequest()">EKLE</button>
+                <button class="btn btn-sub" style="background:var(--primary);" onclick="checkPartner()">SORGULA</button>
+            </div>
             <div id="partnerResult" style="margin-top:15px; font-weight:bold; white-space:pre-line;"></div>
             <div id="partnerHistoryList" style="margin-top:10px; text-align:left;"></div>
         </div>
@@ -262,20 +300,40 @@
 
     let currentLang = 'tr';
     let userRole = 'user';
+    let dailyTotals = { protein: 0, carb: 0, fat: 0, cal: 0 };
+    const dailyLimits = { protein: 150, carb: 200, fat: 70, cal: 2000 };
+
     const langData = {
         tr: {
             headers: ["YEMEK ADI 🍽️","BESİN DEĞERLERİ 📊","NET TAVSİYE 💡","ÜRÜN ÖZETİ 🔍","SKOR 🎯"],
             notif: "Bildirimler", followers: "Takip Ettiklerin", hist: "GEÇMİŞ ANALİZLERİM", detail: "Detay Gör 🔍",
-            ana: "📸 ANALİZ ET", retry: "🔄 YENİDEN ANALİZ ET", out: "GÜVENLİ ÇIKIŞ", friend: "👫 DİYET DOSTU", lara: "🤖 LARA", spor: "🏃‍♂️ SPOR",
-            seri: "Seri", loading: "🔍 İNCELENİYOR...", spLoading: "PLANINIZ OLUŞTURULUYOR...", h1: "BIO-CHEF", login: "GİRİŞ YAP", reg: "Kayıt Ol", regTitle: "KAYIT OL"
+            ana: "📸 ANALİZ ET", retry: "🔄 YENİDEN ANALİZ ET", out: "LOGOUT", friend: "👫 DİYET DOSTU", lara: "🤖 LARA", spor: "🏃‍♂️ SPOR",
+            seri: "Seri", loading: "🔍 İNCELENİYOR...", h1: "BIO-CHEF", login: "GİRİŞ YAP", reg: "Kayıt Ol", regTitle: "KAYIT OL"
         },
         en: {
             headers: ["MEAL NAME 🍽️","NUTRITION 📊","ADVICE 💡","SUMMARY 🔍","SCORE 🎯"],
             notif: "Notifications", followers: "Following", hist: "ANALYSIS HISTORY", detail: "View Detail 🔍",
             ana: "📸 ANALYZE", retry: "🔄 RE-ANALYZE", out: "LOGOUT", friend: "👫 DIET PARTNER", lara: "🤖 LARA", spor: "🏃‍♂️ SPORT",
-            seri: "Streak", loading: "🔍 ANALYZING...", spLoading: "CREATING PLAN...", h1: "BIO-CHEF", login: "LOGIN", reg: "Sign Up", regTitle: "SIGN UP"
+            seri: "Streak", loading: "🔍 ANALYZING...", h1: "BIO-CHEF", login: "LOGIN", reg: "Sign Up", regTitle: "SIGN UP"
         }
     };
+
+    function updateMacroUI() {
+        const p = (dailyTotals.protein / dailyLimits.protein) * 100;
+        const c = (dailyTotals.carb / dailyLimits.carb) * 100;
+        const f = (dailyTotals.fat / dailyLimits.fat) * 100;
+        const cal = (dailyTotals.cal / dailyLimits.cal) * 100;
+
+        document.getElementById('barProtein').style.width = Math.min(p, 100) + '%';
+        document.getElementById('barCarb').style.width = Math.min(c, 100) + '%';
+        document.getElementById('barFat').style.width = Math.min(f, 100) + '%';
+        document.getElementById('barCal').style.width = Math.min(cal, 100) + '%';
+
+        document.getElementById('valProtein').innerText = `${Math.round(dailyTotals.protein)} / ${dailyLimits.protein}g`;
+        document.getElementById('valCarb').innerText = `${Math.round(dailyTotals.carb)} / ${dailyLimits.carb}g`;
+        document.getElementById('valFat').innerText = `${Math.round(dailyTotals.fat)} / ${dailyLimits.fat}g`;
+        document.getElementById('valCal').innerText = `${Math.round(dailyTotals.cal)} / ${dailyLimits.cal}`;
+    }
 
     function changeLang(l) {
         currentLang = l; const d = langData[l];
@@ -286,9 +344,6 @@
         if(document.getElementById('btnRetry')) document.getElementById('btnRetry').innerText = d.retry;
         document.getElementById('txtSeri').innerText = d.seri;
         document.getElementById('txtAppName').innerText = d.h1;
-        document.getElementById('btnIn').innerText = d.login;
-        document.getElementById('btnGoReg').innerText = d.reg;
-        document.getElementById('txtRegTitle').innerText = d.regTitle;
     }
 
     auth.onAuthStateChanged(user => {
@@ -299,11 +354,30 @@
                     toggleView('dieticianView'); document.getElementById('dMail').innerText = "@" + user.displayName; handleDieticianPortal(user.displayName.toLowerCase());
                 } else {
                     toggleView('mainView'); document.getElementById('uMail').innerText = "@" + user.displayName;
-                    setupUser(user); startCamera(); listenNotifications(); listenFriends(); showStreak(); checkDieticianLink();
+                    setupUser(user); startCamera(); listenNotifications(); listenFriends(); showStreak(); checkDieticianLink(); calculateDailyMacros();
                 }
             });
         } else { toggleView('loginView'); }
     });
+
+    function calculateDailyMacros() {
+        let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
+        const today = new Date().toLocaleDateString();
+        dailyTotals = { protein: 0, carb: 0, fat: 0, cal: 0 };
+        arr.forEach(h => {
+            if(new Date(h.unix).toLocaleDateString() === today) {
+                const p = h.detail.match(/Protein:\s*(\d+)/i);
+                const c = h.detail.match(/Karbonhidrat:\s*(\d+)/i);
+                const f = h.detail.match(/Yağ:\s*(\d+)/i);
+                const cal = h.detail.match(/Kalori:\s*(\d+)/i);
+                if(p) dailyTotals.protein += parseInt(p[1]);
+                if(c) dailyTotals.carb += parseInt(c[1]);
+                if(f) dailyTotals.fat += parseInt(f[1]);
+                if(cal) dailyTotals.cal += parseInt(cal[1]);
+            }
+        });
+        updateMacroUI();
+    }
 
     function setupUser(user) {
         const saved = JSON.parse(localStorage.getItem('userData_' + user.uid) || '{}');
@@ -362,6 +436,7 @@
             });
             document.getElementById('btnRetry').style.display = 'block'; document.getElementById('freezeLayer').style.display = 'none';
             saveHistory(finalScore, d.analysis, mealName);
+            calculateDailyMacros();
             resDiv.scrollIntoView({ behavior: 'smooth' });
         } catch(e) { alert("Analiz Hatası"); resetCamera(); }
     }
@@ -394,8 +469,7 @@
             const res = document.getElementById('partnerResult');
             if(!snap.empty) {
                 const d = snap.docs[0].data();
-                res.innerHTML = `
-                <div class="history-box" style="margin-top:0;" onclick="openDetail(\`${d.fullText.replace(/`/g, "'")}\`)">
+                res.innerHTML = `<div class="history-box" style="margin-top:0;" onclick="openDetail(\`${d.fullText.replace(/`/g, "'")}\`)">
                     <div class="history-meta">🕒 ${d.date} | ⭐ Puan: ${d.score}/10</div>
                     <div class="history-meal">🍽️ ${d.mealName}</div>
                     <div style="font-size:0.6rem; color:var(--accent); text-align:right;">${langData[currentLang].detail}</div>
