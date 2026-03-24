@@ -26,7 +26,7 @@
         #results { display: none; flex-direction: column; gap: 12px; margin-top: 25px; padding: 15px; background: var(--bg); border-radius: 20px; }
         .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); position: relative; }
         .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
-        .report-txt { font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
+        .report-txt { font-size: 0.9rem; line-height: 1.8; color: #cbd5e1; white-space: pre-line; }
         
         /* Görsel Puan Çubuğu */
         .score-container { margin-top: 15px; }
@@ -40,11 +40,14 @@
         .history-meal { color: var(--text); font-weight: 800; }
         .streak-badge { display:none; background:rgba(249, 115, 22, 0.15); color:#f97316; padding:8px 15px; border-radius:20px; font-weight:900; font-size:0.9rem; border:1px solid #f97316; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        
+        /* BİLDİRİM VE ARKADAŞ dropdown */
         .bell-container, .friends-btn { cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; position: relative; }
         .notif-badge { position: absolute; top: 0; right: 0; background: var(--danger); color: white; font-size: 0.6rem; font-weight: 900; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .notif-dropdown, .friends-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 280px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 10px; z-index: 100; max-height: 300px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        .notif-item { background: #0b0f1a; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 0.8rem; border-left: 3px solid var(--accent); }
+        .notif-dropdown, .friends-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 280px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 15px; z-index: 100; max-height: 300px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        .notif-item { background: #0b0f1a; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 0.8rem; border-left: 3px solid var(--accent); color: #cbd5e1; }
         .notif-btn { background: var(--primary); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; margin-top: 5px; font-weight:bold; }
+        
         .user-tag { font-size: 1.1rem; font-weight: 900; color: var(--primary); margin-top: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         .role-selector { display: flex; background: #0b0f1a; border-radius: 15px; margin-bottom: 15px; padding: 5px; border: 1px solid #2d3748; }
         .role-btn { flex: 1; padding: 10px; border-radius: 10px; border: none; background: transparent; color: #94a3b8; cursor: pointer; font-weight: bold; transition: 0.3s; }
@@ -61,6 +64,7 @@
         .msg-user { align-self: flex-end; background: var(--primary); color: white; padding: 10px; border-radius: 15px 15px 0 15px; font-size: 0.8rem; max-width: 85%; }
         .loading-text { font-size: 1rem; color: var(--premium); font-weight: 900; text-align: center; padding: 20px; animation: blink 1s infinite; }
         @keyframes blink { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+        .friend-pill { display: block; padding: 10px; background: #0b0f1a; border-radius: 10px; margin-bottom: 5px; color: var(--primary); cursor: pointer; font-size: 0.8rem; text-align: left; }
     </style>
 </head>
 <body>
@@ -131,14 +135,14 @@
                 <span class="bell-icon">🔔</span>
                 <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
                 <div class="notif-dropdown" id="notifDropdown">
-                    <h4 id="txtNotifTitle" style="color:white; margin-bottom:10px; text-align:center;">Bildirimler</h4>
+                    <h4 id="txtNotifTitle" style="color:white; margin-bottom:10px; text-align:center; font-size: 0.9rem;">Bildirimler</h4>
                     <div id="notifList"></div>
                 </div>
             </div>
             <div class="friends-btn" id="friendListBtn" onclick="toggleFriends()" style="display:none;">
                 👤
                 <div class="friends-dropdown" id="friendsDropdown">
-                    <h4 id="txtFriendsTitle" style="color:white; margin-bottom:10px; text-align:center;">Takip Ettiklerin</h4>
+                    <h4 id="txtFriendsTitle" style="color:white; margin-bottom:10px; text-align:center; font-size: 0.9rem;">Takip Ettiklerin</h4>
                     <div id="friendsListContainer"></div>
                 </div>
             </div>
@@ -220,17 +224,12 @@
 
         <button class="btn btn-outline" id="btnHistToggle" onclick="toggleHistory()" style="margin-top:25px;">📚 GEÇMİŞ ANALİZLERİM</button>
         <div id="historyPanel" style="display:none; margin-top:15px; padding:15px; border-radius:15px; border: 1px solid #2d3748;">
-            <h3 id="txtHistTitle" style="text-align:center; color:var(--primary); margin-bottom:10px;">Son 24 Saat</h3>
+            <h3 id="txtHistTitle" style="text-align:center; color:var(--primary); margin-bottom:10px; font-size: 0.9rem;">Son 24 Saat</h3>
             <div id="historyList"></div>
         </div>
 
         <button class="btn btn-outline" style="border-color: var(--neutral); color: var(--text); background: var(--neutral);" onclick="togglePartner()">👫 DİYET DOSTU</button>
         
-        <div class="split-btns">
-            <button class="btn btn-neutral" onclick="document.getElementById('sportQuestionsModal').style.display='block'">🏃‍♂️ SPOR</button>
-            <button class="btn btn-neutral" onclick="document.getElementById('laraModal').style.display='block'">🤖 YZ DİYETİSYEN</button>
-        </div>
-
         <div id="partnerPanel" class="partner-box" style="display:none;">
             <h3 id="txtPartTitle" style="color:var(--primary); margin-bottom:10px;">Diyet Arkadaşım 👫</h3>
             <input type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin" style="background: rgba(0,0,0,0.5);">
@@ -238,6 +237,11 @@
             <button class="btn btn-sub" id="btnCheckPart" style="background: var(--primary);" onclick="checkPartner()">🔍 DURUMUNU SORGULA</button>
             <div id="partnerResult" style="margin-top:15px; font-weight:bold; white-space:pre-line;"></div>
             <div id="partnerHistoryList" style="margin-top:10px; text-align:left;"></div>
+        </div>
+
+        <div class="split-btns">
+            <button class="btn btn-neutral" onclick="document.getElementById('sportQuestionsModal').style.display='block'">🏃‍♂️ SPOR</button>
+            <button class="btn btn-neutral" onclick="document.getElementById('laraModal').style.display='block'">🤖 YZ DİYETİSYEN</button>
         </div>
 
         <div id="dieticianConnectArea" class="partner-box" style="border-color: var(--primary); background: rgba(16,185,129,0.05); margin-top:10px;">
@@ -252,53 +256,6 @@
 </div>
 
 <script>
-    let currentLang = 'tr';
-    let userRole = 'user';
-
-    const langData = {
-        tr: {
-            appTitle: "BIO-CHEF", login: "GİRİŞ YAP", forgot: "Şifremi Unuttum?", reg: "Kayıt Ol", create: "HESABI OLUŞTUR", back: "Geri Dön",
-            age: "YAŞ", weight: "KİLO", g1: "Kilo Vermek (-)", g2: "Kilo Almak (+)", g3: "Kiloyu Korumak (=)", btnAna: "📸 ANALİZ ET", 
-            streak: "Seri", loading: "🔍 İNCELENİYOR...", retry: "🔄 YENİDEN ANALİZ ET", histTitle: "Son 24 Saat", partTitle: "Diyet Arkadaşım 👫",
-            partAdd: "➕ TAKİP İSTEĞİ AT", partCheck: "🔍 DURUMUNU SORGULA", plan: "📅 HAFTALIK PLANINIZI ÇIKARIN", 
-            out: "GÜVENLİ ÇIKIŞ", headers: ["YEMEK ADI 🍽️","BESİN DEĞERLERİ 📊","NET TAVSİYE 💡","ÜRÜN ÖZETİ 🔍","SKOR 🎯"]
-        },
-        en: {
-            appTitle: "BIO-CHEF", login: "LOGIN", forgot: "Forgot Password?", reg: "Sign Up", create: "CREATE ACCOUNT", back: "Back",
-            age: "AGE", weight: "WEIGHT", g1: "Lose Weight (-)", g2: "Gain Weight (+)", g3: "Maintain Weight (=)", btnAna: "📸 ANALYZE", 
-            streak: "Streak", loading: "🔍 ANALYZING...", retry: "🔄 RE-ANALYZE", histTitle: "Last 24 Hours", partTitle: "Diet Partner 👫",
-            partAdd: "➕ SEND FOLLOW REQUEST", partCheck: "🔍 CHECK STATUS", plan: "📅 GET WEEKLY PLAN", 
-            out: "SECURE LOGOUT", headers: ["MEAL NAME 🍽️","NUTRITION 📊","ADVICE 💡","SUMMARY 🔍","SCORE 🎯"]
-        }
-    };
-
-    function changeLang(l) {
-        currentLang = l;
-        const d = langData[l];
-        document.getElementById('txtL1').innerText = d.appTitle;
-        document.getElementById('txtL4').innerText = d.login;
-        document.getElementById('txtL5').innerText = d.forgot;
-        document.getElementById('txtL6').innerText = d.reg;
-        document.getElementById('txtR7').innerText = d.reg.toUpperCase();
-        document.getElementById('txtR8').innerText = d.create;
-        document.getElementById('txtR9').innerText = d.back;
-        if(document.getElementById('uAge')){
-            document.getElementById('uAge').placeholder = d.age;
-            document.getElementById('uWeight').placeholder = d.weight;
-            document.getElementById('opt1').innerText = d.g1;
-            document.getElementById('opt2').innerText = d.g2;
-            document.getElementById('opt3').innerText = d.g3;
-            document.getElementById('btnAnalyzeText').innerText = d.btnAna;
-            document.getElementById('txtStreak').innerText = d.streak;
-            document.getElementById('freezeLayer').innerText = d.loading;
-            document.getElementById('btnRetry').innerText = d.retry;
-            document.getElementById('txtHistTitle').innerText = d.histTitle;
-            document.getElementById('txtPartTitle').innerText = d.partTitle;
-            document.getElementById('btnAddFriend').innerText = d.partAdd;
-            document.getElementById('btnCheckPart').innerText = d.partCheck;
-        }
-    }
-
     const firebaseConfig = {
         apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
         authDomain: "voice2post-9e8ca.firebaseapp.com",
@@ -311,157 +268,109 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    function startCamera() {
-        const vid = document.getElementById('video');
-        if(!vid) return;
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-            .then(s => { vid.srcObject = s; vid.play(); })
-            .catch(e => { console.log("Kamera pasif."); });
-    }
+    let currentLang = 'tr';
+    let userRole = 'user';
+    const langData = {
+        tr: { 
+            headers: ["YEMEK ADI 🍽️","BESİN DEĞERLERİ 📊","NET TAVSİYE 💡","ÜRÜN ÖZETİ 🔍","SKOR 🎯"],
+            notif: "Bildirimler", friends: "Takip Ettiklerin", hist: "Son 24 Saat"
+        },
+        en: { 
+            headers: ["MEAL NAME 🍽️","NUTRITION 📊","ADVICE 💡","SUMMARY 🔍","SCORE 🎯"],
+            notif: "Notifications", friends: "Following", hist: "Last 24 Hours"
+        }
+    };
 
-    function resetCamera() {
-        const vid = document.getElementById('video');
-        vid.play();
-        document.getElementById('freezeLayer').style.display = 'none';
-        document.getElementById('results').style.display = 'none';
-        document.getElementById('btnAnalyzeText').style.display = 'block';
-        document.getElementById('btnRetry').style.display = 'none';
-        document.getElementById('btnPdf').style.display = 'none';
+    function changeLang(l) {
+        currentLang = l;
+        const d = langData[l];
+        document.getElementById('txtNotifTitle').innerText = d.notif;
+        document.getElementById('txtFriendsTitle').innerText = d.friends;
+        if(document.getElementById('txtHistTitle')) document.getElementById('txtHistTitle').innerText = d.hist;
     }
 
     auth.onAuthStateChanged(user => {
         if (user) {
             db.collection('partner_data').doc(user.displayName.toLowerCase()).get().then(doc => {
-                const data = doc.data();
-                if(data && data.role === 'dietician') {
+                const data = doc.data() || {};
+                if(data.role === 'dietician') {
                     toggleView('dieticianView');
                     document.getElementById('dMail').innerText = "@" + user.displayName;
                     handleDieticianPortal(user.displayName.toLowerCase());
                 } else {
                     toggleView('mainView');
                     document.getElementById('uMail').innerText = "@" + user.displayName;
-                    setupUserPanel(user);
-                    startCamera();
+                    setupUser(user); startCamera(); listenNotifications(); listenFriends(); showStreak(); checkDieticianLink();
                 }
             });
         } else { toggleView('loginView'); }
     });
 
-    function setupUserPanel(user) {
+    function setupUser(user) {
         const saved = JSON.parse(localStorage.getItem('userData_' + user.uid) || '{}');
         if(saved.age) document.getElementById('uAge').value = saved.age;
         if(saved.weight) document.getElementById('uWeight').value = saved.weight;
         if(saved.goal) document.getElementById('uGoal').value = saved.goal;
-        listenNotifications(); listenFriends(); showStreak(); checkDieticianLink();
+        document.getElementById('bellIcon').style.display = 'flex';
+        document.getElementById('friendListBtn').style.display = 'flex';
     }
 
-    async function handleDieticianPortal(username) {
-        db.collection('dieticians').doc(username).onSnapshot(doc => {
-            if(doc.exists && doc.data().code) {
-                document.getElementById('currentCodeDisplay').innerText = "AKTİF KODUNUZ: " + doc.data().code;
-                document.getElementById('myDietCodeInput').value = doc.data().code;
-            }
-            listenPatients(username);
-        });
-    }
+    async function runAI(mode) {
+        const resDiv = document.getElementById('results');
+        const vid = document.getElementById('video');
+        vid.pause(); document.getElementById('freezeLayer').style.display = 'flex';
+        document.getElementById('btnAnalyzeText').style.display = 'none';
+        const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
+        canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
+        let img = canv.toDataURL('image/jpeg', 0.7);
 
-    async function saveDieticianCode() {
-        const username = auth.currentUser.displayName.toLowerCase();
-        const code = document.getElementById('myDietCodeInput').value.trim().toUpperCase();
-        if(code.length < 4) return alert("Kod en az 4 haneli olmalıdır.");
-        try {
-            await db.collection('dieticians').doc(username).set({ code: code, dieticianName: username }, { merge: true });
-            alert("TEBRİKLER! Kodunuz sisteme kaydedildi.");
-        } catch(e) { alert("Hata: " + e.message); }
-    }
-
-    async function sendBroadcast() {
-        const dieticianName = auth.currentUser.displayName.toLowerCase();
-        const msg = document.getElementById('broadcastMsg').value.trim();
-        if(!msg) return alert("Lütfen bir mesaj yazın.");
-        const doc = await db.collection('dieticians').doc(dieticianName).get();
-        if(!doc.exists || !doc.data().patients || doc.data().patients.length === 0) {
-            return alert("Mesaj gönderilecek bağlı danışan bulunamadı.");
-        }
-        const patients = doc.data().patients;
-        const batch = db.batch();
-        patients.forEach(patientName => {
-            const notifRef = db.collection('notifications').doc();
-            batch.set(notifRef, {
-                toUser: patientName, fromUser: dieticianName, type: 'dietician_message', message: "👨‍⚕️ Mesaj: " + msg, timestamp: Date.now()
-            });
-        });
-        await batch.commit();
-        document.getElementById('broadcastMsg').value = '';
-        alert("Toplu mesaj başarıyla gönderildi!");
-    }
-
-    function listenPatients(dietUsername) {
-        db.collection('dieticians').doc(dietUsername).onSnapshot(doc => {
-            const list = document.getElementById('patientList');
-            list.innerHTML = '';
-            if(doc.exists && doc.data().patients) {
-                doc.data().patients.forEach(p => {
-                    const card = document.createElement('div');
-                    card.className = 'patient-card';
-                    card.onclick = () => showPatientHistory(p);
-                    card.innerHTML = `<div class="patient-info"><span class="patient-name">@${p}</span><span class="patient-last">Verileri Gör 📊</span></div><span class="patient-arrow">➔</span>`;
-                    list.appendChild(card);
-                });
-            } else { list.innerHTML = '<p style="font-size:0.8rem; color:#94a3b8;">Bağlı hasta bulunmuyor.</p>'; }
-        });
-    }
-
-    function showPatientHistory(pUsername) {
-        db.collection('partner_data').doc(pUsername).collection('history').orderBy('unix', 'desc').get().then(snap => {
-            let html = `<h2 style="color:var(--primary); text-align:center;">@${pUsername}</h2>`;
-            if(snap.empty) html += "<p>Veri yok.</p>";
-            snap.forEach(doc => {
-                const d = doc.data();
-                html += `<div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px;"><div style="font-size:0.7rem; color:var(--accent); font-weight:bold;">🕒 ${d.date}</div><div style="font-size:1rem; font-weight:900; color:#fff;">🍽️ ${d.mealName}</div><div style="font-size:0.85rem; color:#cbd5e1; white-space:pre-line;">${d.fullText}</div></div>`;
-            });
-            document.getElementById('modalTitle').innerText = "Hasta Raporu";
-            document.getElementById('modalBody').innerHTML = html;
-            document.getElementById('detailModal').style.display = 'block';
-        });
-    }
-
-    async function askLara() {
-        const inp = document.getElementById('laraInput');
-        const display = document.getElementById('laraChatDisplay');
-        const q = inp.value.trim();
-        if(!q) return;
-        display.innerHTML += `<div class="msg-user">${q}</div>`;
-        inp.value = '';
-        display.scrollTop = display.scrollHeight;
         try {
             const r = await fetch('/api/analyze', {
-                method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode: 'lara', user_data: q, lang: currentLang })
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ mode, image: img, user_data: `Hedef:${document.getElementById('uGoal').value}`, lang: currentLang })
             });
             const d = await r.json();
-            display.innerHTML += `<div class="msg-lara">${d.analysis}</div>`;
-            display.scrollTop = display.scrollHeight;
-        } catch(e) { display.innerHTML += `<div class="msg-lara">Şu an yanıt veremiyorum.</div>`; }
+            resDiv.innerHTML = ''; resDiv.style.display = 'flex';
+            const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 2);
+            const headers = langData[currentLang].headers;
+            let finalScore = 5; let mealName = "Yemek";
+
+            sections.forEach((txt, i) => {
+                const card = document.createElement('div'); card.className = 'report-card';
+                let content = txt.trim();
+                if (i === 0) mealName = content.substring(0,30);
+                if (content.includes('[SKOR:')) {
+                    const match = content.match(/\[SKOR:\s*(\d+)\]/);
+                    if(match) {
+                        finalScore = parseInt(match[1]);
+                        let left = (finalScore/10)*100;
+                        card.innerHTML = `<div class="report-tag">${headers[i]}</div><div class="report-txt">${content.replace(match[0], '')}</div>
+                        <div class="score-container"><div class="score-bar-bg"><div class="score-pointer" style="left:${left}%"></div></div><div style="text-align:center; margin-top:5px; font-weight:900; color:var(--primary);">${finalScore}/10</div></div>`;
+                    }
+                } else {
+                    card.innerHTML = `<div class="report-tag">${headers[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`;
+                }
+                resDiv.appendChild(card);
+            });
+            document.getElementById('btnPdf').style.display = 'block';
+            document.getElementById('btnRetry').style.display = 'block';
+            document.getElementById('freezeLayer').style.display = 'none';
+            saveHistory(finalScore, d.analysis, mealName);
+        } catch(e) { alert("Hata oluştu."); resetCamera(); }
     }
 
     async function generateSportProgram() {
-        const age = document.getElementById('sqAge').value;
-        const weight = document.getElementById('sqWeight').value;
-        const days = document.getElementById('sqDays').value;
-        const goal = document.getElementById('sqGoal').value;
-        if(!days || !age || !weight) return alert("Lütfen yaş, kilo ve gün sayısını girin.");
+        const info = `Yaş:${document.getElementById('sqAge').value}, Kilo:${document.getElementById('sqWeight').value}, Gün:${document.getElementById('sqDays').value}, Hedef:${document.getElementById('sqGoal').value}, Ekipman:${document.getElementById('sqEquipment').value}, Sakatlık:${document.getElementById('sqInjury').value}`;
         document.getElementById('sportInputArea').style.display = 'none';
         document.getElementById('sportLoadingArea').style.display = 'block';
-        const info = `Yaş:${age}, Kilo:${weight}, Gün:${days}, Hedef:${goal}`;
         try {
-            const r = await fetch('/api/analyze', {
-                method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode: 'spor', user_data: info, lang: currentLang })
-            });
+            const r = await fetch('/api/analyze', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode: 'spor', user_data: info, lang: currentLang }) });
             const d = await r.json();
             document.getElementById('sportLoadingArea').style.display = 'none';
             document.getElementById('sportResultArea').style.display = 'block';
             document.getElementById('sportPlanContent').innerText = d.analysis;
-        } catch(e) { alert("Hata oluştu."); resetSportModal(); }
+        } catch(e) { alert("Hata"); resetSportModal(); }
     }
 
     function resetSportModal() {
@@ -475,179 +384,42 @@
         html2pdf().from(element).save('BioChef_Spor_Programi.pdf');
     }
 
-    async function runAI(mode, extra = "") {
-        const resDiv = document.getElementById('results');
-        const vid = document.getElementById('video');
-        const age = document.getElementById('uAge').value;
-        const weight = document.getElementById('uWeight').value;
-        const goal = document.getElementById('uGoal').value;
-        if(mode === 'yemek' && (!age || !weight)) return alert("Bilgileri girin.");
-        if(mode === 'yemek') { vid.pause(); document.getElementById('freezeLayer').style.display = 'flex'; document.getElementById('btnAnalyzeText').style.display = 'none'; }
-        const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
-        if(mode === 'yemek') canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
-        let imgBase64 = mode === 'yemek' ? canv.toDataURL('image/jpeg', 0.7) : null;
+    async function askLara() {
+        const inp = document.getElementById('laraInput'); const disp = document.getElementById('laraChatDisplay'); const q = inp.value.trim(); if(!q) return;
+        disp.innerHTML += `<div class="msg-user">${q}</div>`; inp.value = ''; disp.scrollTop = disp.scrollHeight;
         try {
-            const r = await fetch('/api/analyze', {
-                method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode, image: imgBase64, user_data: `Kullanıcı Hedefi:${goal}`, lang: currentLang })
-            });
-            const d = await r.json();
-            if(!r.ok) throw new Error("Hata");
-            
-            resDiv.innerHTML = ''; resDiv.style.display = 'flex';
-            const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 5);
-            const headers = langData[currentLang].headers;
-            
-            // Sıralama Mantığı: 1.Yemek Adı, 2.Besin Değerleri, 3.Tavsiye, 4.Özet, 5.Skor (En altta)
-            // Backend'den gelen verinin bu sırada olması için api/analyze.js güncellenmelidir.
-            
-            let finalScore = 5;
-            let mealNameForHistory = "Yemek";
-
-            sections.forEach((txt, i) => {
-                const card = document.createElement('div'); card.className = 'report-card';
-                let content = txt.trim();
-                
-                if (i === 0) mealNameForHistory = content.substring(0, 30);
-
-                if (content.includes('[SKOR:')) {
-                    const match = content.match(/\[SKOR:\s*(\d+)\]/i);
-                    if(match) { 
-                        finalScore = parseInt(match[1]); 
-                        content = content.replace(match[0], '').trim();
-                        updateStreak(finalScore);
-                        let leftPos = (finalScore / 10) * 100;
-                        card.innerHTML = `<div class="report-tag">${headers[i]}</div><div class="report-txt">${content}</div>
-                            <div class="score-container">
-                                <div class="score-label"><span>Sağlıksız</span><span>Mükemmel</span></div>
-                                <div class="score-bar-bg"><div class="score-pointer" style="left:${leftPos}%"></div></div>
-                                <div style="text-align:center; margin-top:10px; font-weight:900; color:var(--primary); font-size:1.2rem;">${finalScore} / 10</div>
-                            </div>`;
-                    }
-                } else {
-                    card.innerHTML = `<div class="report-tag">${headers[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`;
-                }
-                resDiv.appendChild(card);
-            });
-
-            document.getElementById('btnPdf').style.display = 'block';
-            document.getElementById('btnRetry').style.display = 'block';
-            document.getElementById('freezeLayer').style.display = 'none';
-            if(mode === 'yemek') saveHistory(finalScore, d.analysis, mealNameForHistory);
-            resDiv.scrollIntoView();
-        } catch(e) { 
-            document.getElementById('freezeLayer').style.display = 'none'; 
-            document.getElementById('btnAnalyzeText').style.display = 'block';
-            if(vid) vid.play(); alert("Hata oluştu.");
-        }
+            const r = await fetch('/api/analyze', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode: 'lara', user_data: q, lang: currentLang }) });
+            const d = await r.json(); disp.innerHTML += `<div class="msg-lara">${d.analysis}</div>`; disp.scrollTop = disp.scrollHeight;
+        } catch(e) { disp.innerHTML += `<div class="msg-lara">Şu an yanıt veremiyorum.</div>`; }
     }
 
-    async function connectToDietician() {
-        const code = document.getElementById('dietCodeInput').value.trim().toUpperCase();
-        if(!code) return alert("Kod girin.");
-        const me = auth.currentUser.displayName.toLowerCase();
-        const q = await db.collection('dieticians').where('code', '==', code).get();
-        if(q.empty) return alert("Kod bulunamadı.");
-        const dietDoc = q.docs[0];
-        await db.collection('dieticians').doc(dietDoc.id).update({ patients: firebase.firestore.FieldValue.arrayUnion(me) });
-        await db.collection('partner_data').doc(me).update({ linkedDietician: dietDoc.id });
-        alert("Başarıyla bağlandınız!");
-        checkDieticianLink();
-    }
-
-    function checkDieticianLink() {
-        const me = auth.currentUser.displayName.toLowerCase();
-        db.collection('partner_data').doc(me).get().then(doc => {
-            if(doc.exists && doc.data().linkedDietician) {
-                document.getElementById('dietStatus').innerText = "DURUM: @" + doc.data().linkedDietician + " bağlısınız.";
-                document.getElementById('dietCodeInput').style.display = 'none';
-            }
-        });
-    }
-
-    function listenNotifications() {
-        let me = auth.currentUser.displayName.toLowerCase();
-        db.collection('notifications').where('toUser', '==', me).onSnapshot(snap => {
-            const list = document.getElementById('notifList'); const badge = document.getElementById('notifBadge');
-            list.innerHTML = ''; let c = 0;
-            snap.forEach(doc => { c++; list.innerHTML += `<div class="notif-item">${doc.data().message}<br><button class="notif-btn" onclick="deleteNotif('${doc.id}')">Sil</button></div>`; });
-            badge.style.display = c > 0 ? 'flex' : 'none'; badge.innerText = c;
-        });
-    }
-
-    function listenFriends() {
-        let me = auth.currentUser.displayName.toLowerCase();
-        db.collection('partner_data').doc(me).onSnapshot(doc => {
-            const container = document.getElementById('friendsListContainer');
-            if(container && doc.exists && doc.data().friends) {
-                container.innerHTML = ''; doc.data().friends.forEach(f => { container.innerHTML += `<div class="friend-pill" onclick="checkSpecific('${f}')">@${f}</div>`; });
-            }
-        });
-    }
-
-    function sendFriendRequest() {
-        const u = document.getElementById('partnerUser').value.trim().toLowerCase();
-        let me = auth.currentUser.displayName.toLowerCase();
-        if(!u || u === me) return;
-        db.collection('notifications').add({ toUser: u, fromUser: me, type: 'friend_request', message: `@${me} seni takip etmek istiyor.`, timestamp: Date.now() });
-        alert("İstek atıldı.");
-    }
-
-    function saveHistory(score, raw, meal) {
-        const me = auth.currentUser.displayName.toLowerCase();
-        const now = Date.now();
-        db.collection('partner_data').doc(me).set({ score, time: new Date().toLocaleString(), lastMealName: meal }, { merge: true });
-        db.collection('partner_data').doc(me).collection('history').add({ score, fullText: raw, date: new Date().toLocaleString(), unix: now, mealName: meal });
-        let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-        arr.unshift({ summary: `Skor: ${score}/10`, date: new Date().toLocaleString(), detail: raw, meal: meal, unix: now });
-        localStorage.setItem('history_' + auth.currentUser.uid, JSON.stringify(arr.slice(0, 50)));
-    }
-
-    function toggleHistory() {
-        const p = document.getElementById('historyPanel');
-        p.style.display = p.style.display === 'none' ? 'block' : 'none';
-        if(p.style.display === 'block') {
-            const list = document.getElementById('historyList'); let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-            const last24h = arr.filter(item => (Date.now() - item.unix) < 86400000);
-            if(last24h.length === 0) { list.innerHTML = "<p>Son 24 saatte veri yok.</p>"; return; }
-            list.innerHTML = last24h.map(h => `<div class="history-box" onclick="openDetail(\`${h.detail.replace(/`/g, "'")}\`)"><div>🕒 ${h.date} | ⭐ ${h.summary}</div><div>🍽️ ${h.meal}</div></div>`).join('');
-        }
-    }
-
-    function checkPartner() {
-        const u = document.getElementById('partnerUser').value.trim().toLowerCase();
-        const res = document.getElementById('partnerResult');
-        db.collection('partner_data').doc(u).get().then(doc => {
-            if(doc.exists) {
-                db.collection('partner_data').doc(u).collection('history').orderBy('unix', 'desc').limit(1).get().then(snap => {
-                    if(snap.empty) return;
-                    const d = snap.docs[0].data();
-                    res.innerHTML = `<div class="friend-report-pill" style="border: 2px solid var(--primary); background: rgba(16, 185, 129, 0.1);">📅 ${d.date}<br>🍽️ ${d.mealName}<br>⭐ Skor: ${d.score}/10<br>${d.fullText}</div>`;
-                });
-            } else { res.innerText = "Kullanıcı bulunamadı."; }
-        });
-    }
-
-    function checkSpecific(u) { document.getElementById('partnerUser').value = u; document.getElementById('partnerPanel').style.display = 'block'; checkPartner(); }
-    function showStreak() { let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}'); if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; } }
-    function updateStreak(s) { let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0, "last":""}'); let t = new Date().toLocaleDateString(); if(s >= 7) { if(d.last !== t) d.count++; d.last = t; } else { d.count = 0; } localStorage.setItem('streak_' + auth.currentUser.uid, JSON.stringify(d)); showStreak(); }
-    function setRole(role, btn) { userRole = role; document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+    async function handleDieticianPortal(u) { db.collection('dieticians').doc(u).onSnapshot(doc => { if(doc.exists && doc.data().code) { document.getElementById('currentCodeDisplay').innerText = "AKTİF KOD: " + doc.data().code; document.getElementById('myDietCodeInput').value = doc.data().code; } listenPatients(u); }); }
+    async function saveDieticianCode() { const u = auth.currentUser.displayName.toLowerCase(); const c = document.getElementById('myDietCodeInput').value.trim().toUpperCase(); await db.collection('dieticians').doc(u).set({ code: c }, { merge: true }); alert("Kod Kaydedildi."); }
+    async function sendBroadcast() { const d = auth.currentUser.displayName.toLowerCase(); const m = document.getElementById('broadcastMsg').value.trim(); const doc = await db.collection('dieticians').doc(d).get(); doc.data().patients.forEach(p => { db.collection('notifications').add({ toUser: p, fromUser: d, message: "👨‍⚕️ Ödev: " + m, timestamp: Date.now() }); }); document.getElementById('broadcastMsg').value = ''; alert("Gönderildi."); }
+    function listenPatients(d) { db.collection('dieticians').doc(d).onSnapshot(doc => { const list = document.getElementById('patientList'); list.innerHTML = ''; if(doc.exists && doc.data().patients) { doc.data().patients.forEach(p => { const card = document.createElement('div'); card.className = 'patient-card'; card.innerText = "@"+p; card.onclick = () => showPatientHistory(p); list.appendChild(card); }); } }); }
+    function showPatientHistory(p) { db.collection('partner_data').doc(p).collection('history').orderBy('unix', 'desc').limit(5).get().then(snap => { let html = ""; snap.forEach(doc => { const d = doc.data(); html += `<div class="history-box">🕒 ${d.date}<br>🍽️ ${d.mealName}</div>`; }); document.getElementById('modalBody').innerHTML = html; document.getElementById('modalTitle').innerText = "@"+p+" Raporu"; document.getElementById('detailModal').style.display = 'block'; }); }
+    function startCamera() { navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => { document.getElementById('video').srcObject = s; }); }
+    function resetCamera() { document.getElementById('video').play(); document.getElementById('freezeLayer').style.display = 'none'; document.getElementById('results').style.display = 'none'; document.getElementById('btnAnalyzeText').style.display = 'block'; document.getElementById('btnRetry').style.display = 'none'; }
     function toggleView(id) { document.querySelectorAll('.auth-container, #mainView, #dieticianView').forEach(v => v.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
     async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert("Hata"); } }
-    async function doRegister() { 
-        const u = document.getElementById('rUser').value.trim(); const e = document.getElementById('rEmail').value; const p = document.getElementById('rPass').value;
-        try { 
-            const cred = await auth.createUserWithEmailAndPassword(e, p); await cred.user.updateProfile({ displayName: u });
-            await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase(), role: userRole }, { merge: true });
-            location.reload(); 
-        } catch(err) { alert(err.message); } 
-    }
-    function saveUserData() { if(!auth.currentUser) return; const data = { age: document.getElementById('uAge').value, weight: document.getElementById('uWeight').value, goal: document.getElementById('uGoal').value }; localStorage.setItem('userData_' + auth.currentUser.uid, JSON.stringify(data)); db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).set(data, { merge: true }); }
-    function openDetail(txt) { document.getElementById('modalTitle').innerText = "Detay"; document.getElementById('modalBody').innerText = txt; document.getElementById('detailModal').style.display = 'block'; }
-    function downloadPDF() { html2pdf().from(document.getElementById('results')).save(); }
+    async function doRegister() { const u = document.getElementById('rUser').value.trim(); const cred = await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); await cred.user.updateProfile({ displayName: u }); await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase(), role: userRole }, { merge: true }); location.reload(); }
+    function saveUserData() { if(auth.currentUser) localStorage.setItem('userData_'+auth.currentUser.uid, JSON.stringify({age:document.getElementById('uAge').value, weight:document.getElementById('uWeight').value, goal:document.getElementById('uGoal').value})); }
+    function downloadPDF() { html2pdf().from(document.getElementById('results')).save('BioChef_Analiz.pdf'); }
     function toggleNotifications() { const d = document.getElementById('notifDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
     function toggleFriends() { const d = document.getElementById('friendsDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
-    function togglePartner() { const p = document.getElementById('partnerPanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
     function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
+    function sendFriendRequest() { const u = document.getElementById('partnerUser').value.trim().toLowerCase(); db.collection('notifications').add({ toUser: u, fromUser: auth.currentUser.displayName.toLowerCase(), message: "@"+auth.currentUser.displayName+" takip isteği attı.", timestamp: Date.now() }); alert("Gönderildi."); }
+    function checkPartner() { const u = document.getElementById('partnerUser').value.trim().toLowerCase(); db.collection('partner_data').doc(u).get().then(doc => { if(doc.exists) { const d = doc.data(); document.getElementById('partnerResult').innerText = "Son Skor: " + (d.score || 0) + "/10\nSon Yemek: " + (d.lastMealName || "Bilinmiyor"); } }); }
+    function checkSpecific(u) { document.getElementById('partnerUser').value = u; checkPartner(); }
+    function saveHistory(s, r, m) { const me = auth.currentUser.displayName.toLowerCase(); db.collection('partner_data').doc(me).set({ score: s, lastMealName: m }, { merge: true }); db.collection('partner_data').doc(me).collection('history').add({ score: s, fullText: r, date: new Date().toLocaleString(), unix: Date.now(), mealName: m }); }
+    function toggleHistory() { const p = document.getElementById('historyPanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; if(p.style.display === 'block') { let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]'); document.getElementById('historyList').innerHTML = arr.map(h => `<div class="history-box">🕒 ${h.date}<br>🍽️ ${h.meal}</div>`).join(''); } }
+    function showStreak() { let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}'); if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; } }
+    function setRole(r, b) { userRole = r; document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active')); b.classList.add('active'); }
+    function togglePartner() { const p = document.getElementById('partnerPanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
+    function checkDieticianLink() { db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).get().then(doc => { if(doc.exists && doc.data().linkedDietician) { document.getElementById('dietStatus').innerText = "Bağlı: @" + doc.data().linkedDietician; document.getElementById('dietCodeInput').style.display = 'none'; } }); }
+    async function connectToDietician() { const c = document.getElementById('dietCodeInput').value.trim().toUpperCase(); const me = auth.currentUser.displayName.toLowerCase(); const q = await db.collection('dieticians').where('code', '==', c).get(); if(q.empty) return alert("Hatalı."); const dID = q.docs[0].id; await db.collection('dieticians').doc(dID).update({ patients: firebase.firestore.FieldValue.arrayUnion(me) }); await db.collection('partner_data').doc(me).update({ linkedDietician: dID }); alert("Bağlandınız."); checkDieticianLink(); }
+    function listenNotifications() { db.collection('notifications').where('toUser', '==', auth.currentUser.displayName.toLowerCase()).onSnapshot(snap => { document.getElementById('notifBadge').innerText = snap.size; document.getElementById('notifBadge').style.display = snap.size > 0 ? 'flex' : 'none'; const list = document.getElementById('notifList'); list.innerHTML = ''; snap.forEach(doc => { list.innerHTML += `<div class="notif-item">${doc.data().message}<br><button class="notif-btn" onclick="deleteNotif('${doc.id}')">Sil</button></div>`; }); }); }
+    function listenFriends() { db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).onSnapshot(doc => { if(doc.exists && doc.data().friends) { document.getElementById('friendsListContainer').innerHTML = doc.data().friends.map(f => `<div class="friend-pill" onclick="checkSpecific('${f}')">@${f}</div>`).join(''); } }); }
     setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 </script>
 </body>
