@@ -35,7 +35,7 @@ const buildPrompt = (mode, user_data, lang) => {
         };
     }
 
-    // GÜNCELLENMİŞ YEMEK ANALİZ MODU (İstediğin Yeni Sıralama)
+    // GÜNCELLENMİŞ YEMEK ANALİZ MODU
     return {
         system: `Sen kıdemli bir gıda bilimcisi ve klinik diyetisyensin.
         Kullanıcı profili: ${user_data}.
@@ -96,7 +96,7 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 model: 'gpt-4o',
                 max_tokens: 1000,
-                temperature: 0.3, // Daha tutarlı yanıtlar için sıcaklık düşürüldü
+                temperature: 0.3,
                 messages: [
                     { role: 'system', content: prompt.system },
                     { role: 'user', content: userContent },
