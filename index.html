@@ -1,604 +1,1132 @@
 <!DOCTYPE html>
+
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bio-Chef Pro | VIP Analiz</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <style>
-        :root { --bg: #0b0f1a; --card: #161b2a; --primary: #10b981; --accent: #0ea5e9; --premium: #f59e0b; --text: #f1f5f9; --danger: #ef4444; --neutral: #334155; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
-        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
-        .app-card { width: 100%; max-width: 420px; background: var(--card); border-radius: 35px; padding: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); height: fit-content; position: relative; }
-        .auth-container h1 { font-size: 2.2rem; text-align: center; margin-bottom: 20px; color: var(--primary); font-weight: 900; }
-        input, select, textarea { width: 100%; padding: 15px; border-radius: 15px; background: #0b0f1a; border: 1px solid #2d3748; color: white; margin-bottom: 12px; text-align: center; }
-        .btn { width: 100%; padding: 18px; border-radius: 18px; border: none; font-weight: 700; cursor: pointer; color: white; transition: 0.3s; }
-        .btn-main { background: var(--primary); }
-        .btn-sub { background: var(--accent); margin-top: 10px; }
-        .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #2d3748; margin-top: 10px; font-size: 0.8rem; }
-        .cam-box { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 25px; overflow: hidden; border: 2px solid #1e293b; margin-bottom: 20px; position: relative; }
-        video { width: 100%; height: 100%; object-fit: cover; }
-        .freeze-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(16, 185, 129, 0.2); backdrop-filter: blur(4px); z-index: 5; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 1.2rem; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        #results { display: none; flex-direction: column; gap: 12px; margin-top: 25px; padding: 15px; background: var(--bg); border-radius: 20px; }
-        .report-card { background: #1a202c; border-radius: 15px; padding: 18px; border-top: 4px solid var(--accent); position: relative; }
-        .report-tag { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
-        .report-txt { font-size: 0.9rem; line-height: 1.8; color: #cbd5e1; white-space: pre-line; font-weight: 500; }
-        
-        .score-container { margin-top: 15px; }
-        .score-label { display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 5px; color: #94a3b8; font-weight: bold; }
-        .score-bar-bg { height: 12px; width: 100%; background: linear-gradient(to right, #ef4444, #f59e0b, #10b981); border-radius: 6px; position: relative; }
-        .score-pointer { position: absolute; top: -5px; width: 22px; height: 22px; background: #fff; border: 3px solid var(--card); border-radius: 50%; transform: translateX(-50%); transition: left 1s ease-in-out; box-shadow: 0 0 10px rgba(255,255,255,0.5); z-index: 10; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bio-Chef Pro — Yapay Zeka ile Beslenme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════ */
+:root {
+  --ink:     #0a0a0b;
+  --ink-2:   #1a1a1c;
+  --ink-3:   #2a2a2e;
+  --paper:   #f5f4f0;
+  --paper-2: #eeede8;
+  --paper-3: #e5e4de;
+  --lime:    #b8f549;
+  --lime-d:  #9fe030;
+  --mint:    #d4f7e8;
+  --sage:    #6b8f71;
+  --rust:    #e85d3a;
+  --gold:    #d4a853;
+  --text-1:  #0a0a0b;
+  --text-2:  #4a4a52;
+  --text-3:  #8a8a96;
+  --border:  rgba(10,10,11,0.1);
+  --border-m:rgba(10,10,11,0.07);
+  --r-sm: 12px;
+  --r-md: 20px;
+  --r-lg: 32px;
+  --r-xl: 48px;
+}
 
-        .history-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary); cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; gap: 4px; }
-        .history-box:hover { background: rgba(255,255,255,0.1); }
-        .history-meta { font-size: 0.7rem; color: #94a3b8; font-weight: bold; }
-        .history-meal { color: var(--text); font-weight: 800; }
-        .streak-badge { display:none; background:rgba(249, 115, 22, 0.15); color:#f97316; padding:8px 15px; border-radius:20px; font-weight:900; font-size:0.9rem; border:1px solid #f97316; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        
-        .bell-container, .friends-btn { cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; position: relative; }
-        .notif-badge { position: absolute; top: 0; right: 0; background: var(--danger); color: white; font-size: 0.6rem; font-weight: 900; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .notif-dropdown, .friends-dropdown { display: none; position: absolute; top: 50px; right: 0; width: 280px; background: #1e293b; border: 1px solid #334155; border-radius: 15px; padding: 15px; z-index: 100; max-height: 300px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        .notif-item { background: #0b0f1a; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 0.8rem; border-left: 3px solid var(--accent); color: #cbd5e1; }
-        .notif-btn { background: var(--primary); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; margin-top: 5px; font-weight:bold; }
-        
-        .user-tag { font-size: 1.1rem; font-weight: 900; color: var(--primary); margin-top: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        .role-selector { display: flex; background: #0b0f1a; border-radius: 15px; margin-bottom: 15px; padding: 5px; border: 1px solid #2d3748; }
-        .role-btn { flex: 1; padding: 10px; border-radius: 10px; border: none; background: transparent; color: #94a3b8; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .role-btn.active { background: var(--primary); color: white; }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); padding: 20px; overflow-y: auto; }
-        .modal-content { background: var(--card); margin: auto; padding: 20px; border-radius: 25px; max-width: 400px; border: 1px solid var(--primary); }
-        .partner-box { background: rgba(255,255,255,0.05); border: 1px dashed var(--neutral); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: center; }
-        .patient-card { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--primary); padding: 15px; border-radius: 20px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); }
-        .broadcast-box { background: rgba(14, 165, 233, 0.1); border: 1px solid var(--accent); padding: 15px; border-radius: 20px; margin-bottom: 20px; }
-        
-        /* Buton Rengi Güncellemesi */
-        .split-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .btn-neutral { background: var(--neutral) !important; color: white !important; font-size: 0.75rem; padding: 12px; border: 1px solid #2d3748 !important; }
-        
-        .chat-box { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 15px; }
-        .msg-lara { align-self: flex-start; background: var(--accent); color: white; padding: 10px; border-radius: 15px 15px 15px 0; font-size: 0.8rem; max-width: 85%; }
-        .msg-user { align-self: flex-end; background: var(--primary); color: white; padding: 10px; border-radius: 15px 15px 0 15px; font-size: 0.8rem; max-width: 85%; }
-        .loading-text { font-size: 1rem; color: var(--premium); font-weight: 900; text-align: center; padding: 20px; animation: blink 1s infinite; }
-        @keyframes blink { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
-        .friend-pill { display: block; padding: 10px; background: #0b0f1a; border-radius: 10px; margin-bottom: 5px; color: var(--primary); cursor: pointer; font-size: 0.8rem; text-align: left; }
+/* ═══════════════════════════════════════
+RESET & BASE
+═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+font-family: ‘Geist’, -apple-system, sans-serif;
+background: var(–paper);
+color: var(–text-1);
+overflow-x: hidden;
+-webkit-font-smoothing: antialiased;
+}
+img, svg { display: block; }
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; cursor: pointer; border: none; outline: none; }
 
-        .side-by-side-btns { display: flex; gap: 10px; margin-top: 10px; }
-        .side-by-side-btns .btn { flex: 1; margin: 0; }
+/* ═══════════════════════════════════════
+CUSTOM CURSOR
+═══════════════════════════════════════ */
 
-        /* GÜNLÜK MAKRO LİMİT ŞABLONU */
-        .macro-tracker { background: rgba(255,255,255,0.03); border-radius: 20px; padding: 15px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .macro-item { background: #0b0f1a; padding: 10px; border-radius: 15px; text-align: center; }
-        .macro-label { font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; font-weight: 800; margin-bottom: 5px; display: block; }
-        .macro-progress { height: 6px; background: #1e293b; border-radius: 3px; overflow: hidden; margin: 5px 0; }
-        .macro-bar { height: 100%; transition: width 0.5s ease-in-out; }
-        .macro-val { font-size: 0.75rem; font-weight: 900; color: var(--text); }
-    </style>
+- { cursor: none !important; }
+  #cursor {
+  position: fixed; z-index: 9999; pointer-events: none;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(–ink); transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, background 0.2s;
+  mix-blend-mode: multiply;
+  }
+  #cursor-ring {
+  position: fixed; z-index: 9998; pointer-events: none;
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1.5px solid rgba(10,10,11,0.25);
+  transform: translate(-50%, -50%);
+  transition: all 0.12s ease-out;
+  }
+  body:has(a:hover) #cursor, body:has(button:hover) #cursor { width: 40px; height: 40px; background: var(–lime); mix-blend-mode: normal; }
+  body:has(a:hover) #cursor-ring, body:has(button:hover) #cursor-ring { opacity: 0; }
+
+/* ═══════════════════════════════════════
+NAV
+═══════════════════════════════════════ */
+nav {
+position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+height: 68px; padding: 0 48px;
+display: flex; align-items: center; justify-content: space-between;
+background: rgba(245,244,240,0.85);
+backdrop-filter: blur(24px) saturate(1.8);
+border-bottom: 1px solid var(–border);
+}
+.nav-logo {
+display: flex; align-items: center; gap: 10px;
+font-family: ‘Geist’, sans-serif; font-weight: 700;
+font-size: 1.05rem; letter-spacing: -0.03em;
+}
+.logo-mark {
+width: 32px; height: 32px; border-radius: 9px;
+background: var(–ink); display: flex; align-items: center;
+justify-content: center; font-size: 0.85rem;
+}
+.nav-center { display: flex; gap: 2px; }
+.nav-link {
+padding: 7px 16px; border-radius: 100px;
+font-size: 0.85rem; font-weight: 500; color: var(–text-2);
+transition: all 0.2s; background: transparent;
+}
+.nav-link:hover { background: var(–paper-2); color: var(–text-1); }
+.nav-right { display: flex; align-items: center; gap: 10px; }
+.btn-nav-ghost {
+padding: 9px 20px; border-radius: 100px;
+font-size: 0.85rem; font-weight: 500; color: var(–text-2);
+background: transparent; border: 1px solid var(–border);
+transition: all 0.2s;
+}
+.btn-nav-ghost:hover { border-color: rgba(10,10,11,0.25); color: var(–text-1); }
+.btn-nav-primary {
+padding: 9px 22px; border-radius: 100px;
+font-size: 0.85rem; font-weight: 600; color: var(–ink);
+background: var(–lime); transition: all 0.2s;
+box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.btn-nav-primary:hover { background: var(–lime-d); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+
+/* ═══════════════════════════════════════
+HERO
+═══════════════════════════════════════ */
+.hero {
+min-height: 100vh;
+padding: 148px 48px 100px;
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 60px; align-items: center;
+max-width: 1280px; margin: 0 auto;
+}
+.hero-left {}
+.hero-eyebrow {
+display: inline-flex; align-items: center; gap: 8px;
+padding: 5px 14px; border-radius: 100px;
+background: var(–ink); color: var(–lime);
+font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+text-transform: uppercase; margin-bottom: 32px;
+}
+.hero-eyebrow-dot { width: 5px; height: 5px; border-radius: 50%; background: var(–lime); animation: blink 1.8s ease infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.hero h1 {
+font-family: ‘Instrument Serif’, Georgia, serif;
+font-size: clamp(3.2rem, 5.5vw, 5.8rem);
+line-height: 1.0; letter-spacing: -0.02em;
+color: var(–text-1); margin-bottom: 28px; font-weight: 400;
+}
+.hero h1 i { font-style: italic; color: var(–sage); }
+.hero h1 .underline-word {
+position: relative; display: inline-block;
+white-space: nowrap;
+}
+.hero h1 .underline-word::after {
+content: ‘’;
+position: absolute; bottom: 4px; left: 0; right: 0; height: 3px;
+background: var(–lime); border-radius: 2px;
+}
+.hero-sub {
+font-size: 1.1rem; font-weight: 300; color: var(–text-2);
+line-height: 1.75; max-width: 480px; margin-bottom: 44px;
+}
+.hero-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.btn-hero {
+padding: 15px 32px; border-radius: 100px;
+font-size: 0.95rem; font-weight: 600;
+background: var(–ink); color: var(–paper);
+transition: all 0.25s; display: inline-flex; align-items: center; gap: 8px;
+box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.btn-hero:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.25); background: var(–ink-2); }
+.btn-hero-outline {
+padding: 15px 32px; border-radius: 100px;
+font-size: 0.95rem; font-weight: 500;
+background: transparent; color: var(–text-2);
+border: 1px solid var(–border); transition: all 0.25s;
+display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-hero-outline:hover { border-color: rgba(10,10,11,0.3); color: var(–text-1); background: var(–paper-2); }
+.hero-trust {
+margin-top: 48px; display: flex; align-items: center; gap: 16px;
+}
+.trust-avatars { display: flex; }
+.trust-avatar {
+width: 34px; height: 34px; border-radius: 50%;
+border: 2.5px solid var(–paper);
+background: var(–paper-3); margin-left: -10px;
+font-size: 0.9rem; display: flex; align-items: center; justify-content: center;
+}
+.trust-avatar:first-child { margin-left: 0; }
+.trust-text { font-size: 0.82rem; color: var(–text-2); line-height: 1.4; }
+.trust-text strong { color: var(–text-1); font-weight: 600; }
+
+/* ─── HERO RIGHT: APP PREVIEW ─── */
+.hero-right { position: relative; }
+.app-window {
+background: var(–ink-2);
+border-radius: 28px;
+overflow: hidden;
+box-shadow: 0 30px 80px rgba(0,0,0,0.22), 0 0 0 1px rgba(255,255,255,0.05);
+transform: perspective(1400px) rotateY(-4deg) rotateX(2deg);
+transition: transform 0.6s ease;
+}
+.app-window:hover { transform: perspective(1400px) rotateY(-1deg) rotateX(1deg); }
+
+.window-bar {
+background: rgba(255,255,255,0.04); padding: 14px 20px;
+display: flex; align-items: center; gap: 8px;
+border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.w-dot { width: 11px; height: 11px; border-radius: 50%; }
+.window-title { font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-left: auto; margin-right: auto; font-weight: 500; }
+
+.app-body { padding: 24px; }
+.app-cam {
+background: #111318; border-radius: 18px;
+aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center;
+position: relative; overflow: hidden; margin-bottom: 18px;
+border: 1px solid rgba(255,255,255,0.06);
+}
+.cam-grid {
+position: absolute; inset: 0;
+background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+background-size: 40px 40px;
+}
+.cam-scanner {
+position: absolute; left: 15%; right: 15%; height: 2px;
+background: linear-gradient(90deg, transparent, #b8f549, transparent);
+animation: scanv 2.8s ease-in-out infinite;
+box-shadow: 0 0 16px #b8f549, 0 0 40px rgba(184,245,73,0.3);
+}
+@keyframes scanv { 0%{top:15%;opacity:0} 15%{opacity:1} 85%{opacity:1} 100%{top:85%;opacity:0} }
+.cam-corners { position: absolute; inset: 18px; }
+.cam-corner {
+position: absolute; width: 22px; height: 22px;
+border-color: rgba(184,245,73,0.6); border-style: solid;
+}
+.cam-corner.tl { top:0;left:0; border-width:2px 0 0 2px; border-radius: 4px 0 0 0; }
+.cam-corner.tr { top:0;right:0; border-width:2px 2px 0 0; border-radius: 0 4px 0 0; }
+.cam-corner.bl { bottom:0;left:0; border-width:0 0 2px 2px; border-radius: 0 0 0 4px; }
+.cam-corner.br { bottom:0;right:0; border-width:0 2px 2px 0; border-radius: 0 0 4px 0; }
+.cam-food-emoji { font-size: 3.5rem; position: relative; z-index: 1; filter: drop-shadow(0 8px 20px rgba(0,0,0,0.5)); }
+
+/* analysis chips */
+.analysis-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.chip {
+padding: 6px 14px; border-radius: 100px;
+font-size: 0.72rem; font-weight: 600;
+display: inline-flex; align-items: center; gap: 5px;
+}
+.chip-green { background: rgba(184,245,73,0.15); color: #b8f549; border: 1px solid rgba(184,245,73,0.2); }
+.chip-white { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.08); }
+
+.result-card {
+background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+border-radius: 16px; padding: 18px;
+}
+.result-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+.result-meal { font-size: 1.1rem; font-weight: 600; color: #fff; letter-spacing: -0.02em; }
+.result-cal { font-size: 0.78rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
+.score-pill {
+padding: 5px 14px; border-radius: 100px;
+background: rgba(184,245,73,0.18); color: #b8f549;
+font-size: 0.78rem; font-weight: 700; border: 1px solid rgba(184,245,73,0.25);
+white-space: nowrap;
+}
+.macro-bars { display: flex; flex-direction: column; gap: 8px; }
+.bar-row { display: flex; align-items: center; gap: 12px; }
+.bar-name { font-size: 0.68rem; font-weight: 600; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.08em; width: 60px; flex-shrink: 0; }
+.bar-track { flex: 1; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 2px; transition: width 1.2s cubic-bezier(0.23,1,0.32,1); }
+.bar-val { font-size: 0.7rem; font-weight: 600; color: rgba(255,255,255,0.5); width: 32px; text-align: right; flex-shrink: 0; }
+
+/* floating tag */
+.float-tag {
+position: absolute;
+background: var(–paper); border-radius: var(–r-sm);
+padding: 12px 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.12), 0 0 0 1px var(–border);
+font-size: 0.78rem; font-weight: 500; color: var(–text-1);
+display: flex; align-items: center; gap: 8px;
+animation: floatup 3s ease-in-out infinite alternate;
+}
+.float-tag-1 { bottom: -20px; left: -30px; }
+.float-tag-2 { top: 40px; right: -30px; animation-delay: -1.5s; }
+@keyframes floatup { from{transform:translateY(0)} to{transform:translateY(-8px)} }
+.float-dot { width: 8px; height: 8px; border-radius: 50%; background: var(–lime); flex-shrink: 0; }
+
+/* ═══════════════════════════════════════
+LOGOS / SOCIAL PROOF BAND
+═══════════════════════════════════════ */
+.proof-band {
+background: var(–ink); padding: 28px 48px;
+display: flex; align-items: center; gap: 48px; justify-content: center; flex-wrap: wrap;
+}
+.proof-label { font-size: 0.75rem; font-weight: 500; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; text-transform: uppercase; }
+.proof-logo {
+font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.25);
+letter-spacing: -0.01em; transition: color 0.2s;
+}
+.proof-logo:hover { color: rgba(255,255,255,0.6); }
+
+/* ═══════════════════════════════════════
+BENTO FEATURES
+═══════════════════════════════════════ */
+.bento-section {
+padding: 120px 48px; max-width: 1280px; margin: 0 auto;
+}
+.section-header { text-align: center; margin-bottom: 64px; }
+.section-kicker {
+display: inline-flex; align-items: center; gap: 8px;
+font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em;
+text-transform: uppercase; color: var(–text-3);
+margin-bottom: 20px;
+}
+.section-kicker::before, .section-kicker::after { content: ‘’; flex: 1; height: 1px; background: var(–border); width: 40px; }
+.section-h2 {
+font-family: ‘Instrument Serif’, Georgia, serif;
+font-size: clamp(2.5rem, 4vw, 4rem); font-weight: 400;
+letter-spacing: -0.025em; line-height: 1.1; color: var(–text-1);
+}
+.section-h2 i { font-style: italic; color: var(–sage); }
+.section-p { font-size: 1.05rem; color: var(–text-2); font-weight: 300; line-height: 1.7; max-width: 480px; margin: 16px auto 0; }
+
+.bento-grid {
+display: grid;
+grid-template-columns: repeat(12, 1fr);
+grid-template-rows: auto;
+gap: 16px;
+}
+.bento-card {
+background: var(–paper-2); border: 1px solid var(–border);
+border-radius: var(–r-lg); padding: 36px;
+transition: all 0.4s cubic-bezier(0.23,1,0.32,1);
+position: relative; overflow: hidden;
+}
+.bento-card:hover { transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,0.1); border-color: rgba(10,10,11,0.18); }
+
+.bento-card.c-1  { grid-column: span 7; }
+.bento-card.c-5  { grid-column: span 5; }
+.bento-card.c-4  { grid-column: span 4; }
+.bento-card.c-8  { grid-column: span 8; }
+.bento-card.c-6  { grid-column: span 6; }
+
+.bento-icon {
+width: 48px; height: 48px; border-radius: var(–r-sm);
+background: var(–ink); color: var(–lime);
+display: flex; align-items: center; justify-content: center;
+font-size: 1.2rem; margin-bottom: 24px;
+box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.bento-tag {
+font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
+text-transform: uppercase; color: var(–text-3); margin-bottom: 10px;
+}
+.bento-title {
+font-family: ‘Instrument Serif’, Georgia, serif;
+font-size: 1.6rem; font-weight: 400; line-height: 1.25;
+letter-spacing: -0.02em; margin-bottom: 12px;
+}
+.bento-desc { font-size: 0.88rem; color: var(–text-2); font-weight: 300; line-height: 1.7; }
+
+/* bento visual elements */
+.scan-demo {
+margin-top: 24px;
+background: var(–ink); border-radius: 16px;
+padding: 20px; position: relative; overflow: hidden;
+}
+.scan-demo-food {
+font-size: 2.5rem; text-align: center; margin-bottom: 12px;
+filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+}
+.scan-progress {
+height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; margin-bottom: 10px;
+}
+.scan-progress-fill {
+height: 100%; width: 0%; background: linear-gradient(90deg, var(–lime), #7ee846);
+border-radius: 2px; animation: fillprog 2.5s ease-in-out infinite;
+}
+@keyframes fillprog { 0%{width:0%} 60%{width:100%} 100%{width:100%;opacity:0} }
+.scan-result-row { display: flex; justify-content: space-between; margin-top: 6px; }
+.scan-result-item { text-align: center; }
+.sri-val { font-size: 1rem; font-weight: 700; color: var(–lime); font-family:‘Geist’,sans-serif; }
+.sri-label { font-size: 0.6rem; color: rgba(255,255,255,0.3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+
+.lara-chat {
+margin-top: 20px; display: flex; flex-direction: column; gap: 8px;
+}
+.lara-msg, .user-msg {
+padding: 10px 14px; border-radius: 14px;
+font-size: 0.8rem; line-height: 1.5; max-width: 90%;
+}
+.lara-msg { background: var(–ink); color: rgba(255,255,255,0.8); align-self: flex-start; border-radius: 4px 14px 14px 14px; }
+.user-msg { background: var(–lime); color: var(–ink); align-self: flex-end; font-weight: 500; border-radius: 14px 4px 14px 14px; }
+
+.calendar-dots {
+display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 20px;
+}
+.cal-dot {
+aspect-ratio: 1; border-radius: 8px;
+display: flex; align-items: center; justify-content: center;
+font-size: 0.65rem; font-weight: 600; color: var(–text-3);
+background: var(–paper-3);
+}
+.cal-dot.active { background: var(–ink); color: var(–lime); }
+.cal-dot.done { background: var(–lime); color: var(–ink); }
+
+/* ═══════════════════════════════════════
+INTERACTIVE DEMO SECTION
+═══════════════════════════════════════ */
+.demo-section {
+background: var(–ink); padding: 100px 48px;
+position: relative; overflow: hidden;
+}
+.demo-section::before {
+content: ‘’;
+position: absolute; top: -300px; left: 50%; transform: translateX(-50%);
+width: 800px; height: 800px; border-radius: 50%;
+background: radial-gradient(circle, rgba(184,245,73,0.06) 0%, transparent 65%);
+pointer-events: none;
+}
+.demo-inner { max-width: 1280px; margin: 0 auto; }
+.demo-header { text-align: center; margin-bottom: 64px; }
+.demo-kicker { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 20px; }
+.demo-h2 {
+font-family: ‘Instrument Serif’, Georgia, serif;
+font-size: clamp(2.5rem, 4vw, 3.8rem); font-weight: 400;
+color: var(–paper); letter-spacing: -0.025em; line-height: 1.1;
+}
+.demo-h2 em { font-style: italic; color: var(–lime); }
+
+.demo-foods { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 48px; }
+.food-btn {
+padding: 12px 22px; border-radius: 100px;
+background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+color: rgba(255,255,255,0.6); font-size: 0.88rem; font-weight: 500;
+transition: all 0.25s; display: flex; align-items: center; gap: 8px;
+}
+.food-btn:hover, .food-btn.active {
+background: var(–lime); color: var(–ink); border-color: var(–lime);
+font-weight: 600; transform: translateY(-2px);
+box-shadow: 0 8px 24px rgba(184,245,73,0.25);
+}
+
+.demo-result {
+background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+border-radius: var(–r-lg); padding: 40px;
+display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px;
+transition: all 0.4s;
+}
+.dr-section-title { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 16px; }
+.dr-meal-name { font-family: ‘Instrument Serif’, serif; font-size: 1.8rem; font-weight: 400; color: var(–paper); letter-spacing: -0.02em; margin-bottom: 8px; }
+.dr-cal { font-size: 0.9rem; color: rgba(255,255,255,0.45); font-weight: 300; margin-bottom: 16px; }
+.dr-advice {
+font-size: 0.85rem; color: rgba(255,255,255,0.6); line-height: 1.65;
+background: rgba(184,245,73,0.08); border: 1px solid rgba(184,245,73,0.15);
+border-radius: var(–r-sm); padding: 14px; font-weight: 300;
+}
+.dr-macro { display: flex; flex-direction: column; gap: 14px; }
+.drm-item {}
+.drm-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.drm-name { font-size: 0.75rem; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.06em; }
+.drm-val { font-size: 0.78rem; font-weight: 600; color: rgba(255,255,255,0.7); }
+.drm-track { height: 5px; background: rgba(255,255,255,0.07); border-radius: 3px; overflow: hidden; }
+.drm-fill { height: 100%; border-radius: 3px; transition: width 0.7s cubic-bezier(0.23,1,0.32,1); }
+.dr-score-area { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.dr-score-ring {
+width: 110px; height: 110px; border-radius: 50%;
+border: 8px solid rgba(255,255,255,0.07);
+display: flex; align-items: center; justify-content: center;
+position: relative; margin-bottom: 16px;
+}
+.dr-score-ring::before {
+content: ‘’; position: absolute; inset: -8px;
+border-radius: 50%;
+background: conic-gradient(var(–lime) 0deg, var(–lime) var(–deg, 0deg), transparent var(–deg, 0deg));
+transition: all 0.8s;
+}
+.dr-score-ring::after { content: ‘’; position: absolute; inset: 0; background: #111318; border-radius: 50%; z-index: 1; }
+.dr-score-num {
+font-family: ‘Instrument Serif’, serif;
+font-size: 2.2rem; font-weight: 400; color: var(–lime);
+position: relative; z-index: 2;
+}
+.dr-score-label { font-size: 0.75rem; color: rgba(255,255,255,0.35); font-weight: 500; text-align: center; text-transform: uppercase; letter-spacing: 0.08em; }
+.dr-verdict { margin-top: 14px; padding: 8px 20px; border-radius: 100px; font-size: 0.78rem; font-weight: 700; }
+.verdict-good { background: rgba(184,245,73,0.15); color: var(–lime); border: 1px solid rgba(184,245,73,0.2); }
+.verdict-warn { background: rgba(212,168,83,0.15); color: var(–gold); border: 1px solid rgba(212,168,83,0.2); }
+.verdict-bad { background: rgba(232,93,58,0.15); color: var(–rust); border: 1px solid rgba(232,93,58,0.2); }
+
+/* ═══════════════════════════════════════
+PRICING
+═══════════════════════════════════════ */
+.pricing-section { padding: 120px 48px; max-width: 1280px; margin: 0 auto; }
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 64px; }
+.price-card {
+border: 1px solid var(–border); border-radius: var(–r-lg);
+padding: 40px 36px; transition: all 0.4s; position: relative;
+background: var(–paper-2);
+}
+.price-card:hover { border-color: rgba(10,10,11,0.2); transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
+.price-card.featured {
+background: var(–ink); border-color: var(–ink-3);
+box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.pc-top { margin-bottom: 32px; }
+.pc-badge {
+display: inline-block; padding: 4px 12px; border-radius: 100px;
+background: var(–lime); color: var(–ink);
+font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;
+margin-bottom: 20px;
+}
+.pc-name { font-family: ‘Instrument Serif’, serif; font-size: 1.5rem; font-weight: 400; margin-bottom: 6px; }
+.price-card.featured .pc-name { color: var(–paper); }
+.pc-desc { font-size: 0.82rem; color: var(–text-2); font-weight: 300; line-height: 1.5; }
+.price-card.featured .pc-desc { color: rgba(255,255,255,0.45); }
+.pc-price {
+font-family: ‘Geist’, sans-serif; font-size: 3.5rem; font-weight: 700;
+letter-spacing: -0.04em; line-height: 1; margin: 24px 0 4px; display: flex; align-items: flex-start; gap: 4px;
+}
+.price-card.featured .pc-price { color: var(–paper); }
+.pc-price sup { font-size: 1.2rem; font-weight: 500; margin-top: 10px; color: var(–text-2); }
+.price-card.featured .pc-price sup { color: rgba(255,255,255,0.5); }
+.pc-period { font-size: 0.8rem; color: var(–text-3); margin-bottom: 28px; font-weight: 400; }
+.price-card.featured .pc-period { color: rgba(255,255,255,0.3); }
+.pc-divider { height: 1px; background: var(–border); margin-bottom: 28px; }
+.price-card.featured .pc-divider { background: rgba(255,255,255,0.08); }
+.pc-features { list-style: none; margin-bottom: 36px; display: flex; flex-direction: column; gap: 12px; }
+.pc-features li {
+display: flex; align-items: flex-start; gap: 10px;
+font-size: 0.85rem; color: var(–text-2); font-weight: 300; line-height: 1.4;
+}
+.price-card.featured .pc-features li { color: rgba(255,255,255,0.65); }
+.pc-features li::before { content: ‘✓’; color: var(–sage); font-weight: 700; font-size: 0.78rem; flex-shrink: 0; margin-top: 1px; }
+.price-card.featured .pc-features li::before { color: var(–lime); }
+.pc-features li.off { color: var(–text-3); }
+.price-card.featured .pc-features li.off { color: rgba(255,255,255,0.2); }
+.pc-features li.off::before { content: ‘–’; color: var(–text-3); }
+.pc-btn {
+width: 100%; padding: 14px; border-radius: 100px;
+font-size: 0.9rem; font-weight: 600; transition: all 0.25s;
+background: var(–paper-3); color: var(–text-1);
+border: 1px solid var(–border);
+}
+.pc-btn:hover { background: var(–ink); color: var(–paper); border-color: var(–ink); }
+.pc-btn.primary { background: var(–lime); color: var(–ink); border-color: var(–lime); box-shadow: 0 4px 16px rgba(184,245,73,0.3); }
+.pc-btn.primary:hover { background: var(–lime-d); box-shadow: 0 8px 24px rgba(184,245,73,0.4); transform: translateY(-1px); }
+
+/* ═══════════════════════════════════════
+TESTIMONIALS
+═══════════════════════════════════════ */
+.testi-section {
+background: var(–paper-3); padding: 100px 48px;
+}
+.testi-inner { max-width: 1280px; margin: 0 auto; }
+.testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 64px; }
+.testi-card {
+background: var(–paper); border: 1px solid var(–border);
+border-radius: var(–r-md); padding: 32px;
+transition: all 0.4s;
+}
+.testi-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.08); }
+.testi-stars { display: flex; gap: 3px; margin-bottom: 18px; }
+.star { width: 14px; height: 14px; background: var(–gold); clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+.testi-quote {
+font-family: ‘Instrument Serif’, serif; font-size: 1.05rem;
+line-height: 1.65; color: var(–text-1); margin-bottom: 24px;
+font-weight: 400; letter-spacing: -0.01em;
+}
+.testi-author { display: flex; align-items: center; gap: 12px; padding-top: 20px; border-top: 1px solid var(–border); }
+.testi-av {
+width: 40px; height: 40px; border-radius: 50%;
+background: var(–ink); display: flex; align-items: center; justify-content: center;
+font-size: 1.1rem;
+}
+.testi-name { font-weight: 600; font-size: 0.88rem; }
+.testi-role { font-size: 0.78rem; color: var(–text-3); margin-top: 1px; font-weight: 300; }
+
+/* ═══════════════════════════════════════
+CTA FINAL
+═══════════════════════════════════════ */
+.cta-final {
+padding: 140px 48px; text-align: center; position: relative;
+background: var(–paper); overflow: hidden;
+}
+.cta-bg-text {
+position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+font-family: ‘Instrument Serif’, serif; font-size: 18vw; font-weight: 400;
+color: var(–border); pointer-events: none; white-space: nowrap; overflow: hidden;
+user-select: none; letter-spacing: -0.04em;
+}
+.cta-content { position: relative; z-index: 1; }
+.cta-h2 {
+font-family: ‘Instrument Serif’, serif;
+font-size: clamp(3rem, 5vw, 5rem); font-weight: 400;
+letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 24px;
+}
+.cta-h2 em { font-style: italic; color: var(–sage); }
+.cta-sub { font-size: 1.05rem; color: var(–text-2); font-weight: 300; margin-bottom: 48px; max-width: 440px; margin-left: auto; margin-right: auto; line-height: 1.7; }
+.cta-perks { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; margin-top: 40px; }
+.cta-perk { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(–text-2); font-weight: 300; }
+.cta-perk-dot { width: 6px; height: 6px; border-radius: 50%; background: var(–sage); flex-shrink: 0; }
+
+/* ═══════════════════════════════════════
+FOOTER
+═══════════════════════════════════════ */
+footer {
+background: var(–ink); padding: 60px 48px 40px;
+}
+.footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 60px; margin-bottom: 60px; }
+.footer-brand {}
+.footer-logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1rem; letter-spacing: -0.03em; color: var(–paper); margin-bottom: 16px; }
+.footer-tagline { font-size: 0.85rem; color: rgba(255,255,255,0.3); font-weight: 300; line-height: 1.6; max-width: 220px; }
+.footer-col-title { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.25); margin-bottom: 16px; }
+.footer-links-col { display: flex; flex-direction: column; gap: 10px; }
+.footer-links-col a { font-size: 0.85rem; color: rgba(255,255,255,0.45); font-weight: 300; transition: color 0.2s; }
+.footer-links-col a:hover { color: rgba(255,255,255,0.8); }
+.footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.07); flex-wrap: wrap; gap: 12px; }
+.footer-copy { font-size: 0.78rem; color: rgba(255,255,255,0.2); font-weight: 300; }
+
+/* ═══════════════════════════════════════
+SCROLL ANIMATIONS
+═══════════════════════════════════════ */
+.fade-in { opacity: 0; transform: translateY(28px); transition: opacity 0.7s cubic-bezier(0.23,1,0.32,1), transform 0.7s cubic-bezier(0.23,1,0.32,1); }
+.fade-in.show { opacity: 1; transform: translateY(0); }
+
+/* ═══════════════════════════════════════
+RESPONSIVE
+═══════════════════════════════════════ */
+@media (max-width: 1024px) {
+.hero { grid-template-columns: 1fr; padding: 120px 24px 60px; }
+.hero-right { display: none; }
+.bento-card.c-1, .bento-card.c-5, .bento-card.c-4, .bento-card.c-8, .bento-card.c-6 { grid-column: span 12; }
+.demo-result { grid-template-columns: 1fr; }
+.pricing-grid, .testi-grid, .footer-top { grid-template-columns: 1fr; }
+nav { padding: 0 20px; }
+.nav-center { display: none; }
+.bento-section, .pricing-section, .testi-section, .cta-final, footer { padding-left: 24px; padding-right: 24px; }
+.proof-band { padding: 20px 24px; }
+}
+</style>
+
 </head>
 <body>
 
-<div id="laraModal" class="modal">
-    <div class="modal-content" style="max-width: 400px;">
-        <h3 id="txtLaraTitle" style="color:var(--accent); text-align:center; margin-bottom:15px;">🤖 YZ Diyetisyen: LARA</h3>
-        <div id="laraChatDisplay" class="chat-box">
-            <div id="txtLaraGreet" class="msg-lara">Merhaba! Ben Lara. Size sadece diyet, yemek ve spor konularında yardımcı olabilirim. Ne sormak istersiniz?</div>
+<!-- CURSOR -->
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NAV -->
+
+<nav>
+  <div class="nav-logo">
+    <div class="logo-mark">🥗</div>
+    Bio-Chef Pro
+  </div>
+  <div class="nav-center">
+    <a href="#features" class="nav-link">Özellikler</a>
+    <a href="#demo" class="nav-link">Demo</a>
+    <a href="#pricing" class="nav-link">Fiyatlar</a>
+  </div>
+  <div class="nav-right">
+    <button class="btn-nav-ghost">Giriş Yap</button>
+    <button class="btn-nav-primary">Ücretsiz Başla →</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+
+<section style="background: var(--paper);">
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>GPT-4o Destekli Platform</div>
+      <h1>
+        Yemeğinizi<br>
+        <i>anlayan</i><br>
+        <span class="underline-word">asistan.</span>
+      </h1>
+      <p class="hero-sub">
+        Kameranızı yemeğe tutun — yapay zeka saniyeler içinde besin değerlerini, hedef uyumunuzu ve kişisel önerisini sunar.
+      </p>
+      <div class="hero-actions">
+        <a href="#" class="btn-hero">Ücretsiz Başla <span>→</span></a>
+        <a href="#demo" class="btn-hero-outline">Canlı Demo İzle ▶</a>
+      </div>
+      <div class="hero-trust">
+        <div class="trust-avatars">
+          <div class="trust-avatar">👩</div>
+          <div class="trust-avatar">👨‍⚕️</div>
+          <div class="trust-avatar">🧑</div>
+          <div class="trust-avatar">👩‍💼</div>
+          <div class="trust-avatar">+</div>
         </div>
-        <div style="display:flex; gap:5px;">
-            <input type="text" id="laraInput" placeholder="..." style="margin-bottom:0;">
-            <button class="btn btn-main" onclick="askLara()" style="width:60px; padding:0;">🚀</button>
-        </div>
-        <button class="btn btn-outline" onclick="document.getElementById('laraModal').style.display='none'">Kapat</button>
+        <div class="trust-text"><strong>12,000+</strong> kullanıcı tarafından<br>güvenilir sağlık platformu</div>
+      </div>
     </div>
+
+```
+<div class="hero-right">
+  <div class="float-tag float-tag-1"><div class="float-dot"></div>Gerçek zamanlı analiz</div>
+  <div class="float-tag float-tag-2"><div class="float-dot"></div>9.2 / 10 uyum skoru</div>
+
+  <div class="app-window">
+    <div class="window-bar">
+      <div class="w-dot" style="background:#ff5f57"></div>
+      <div class="w-dot" style="background:#febc2e"></div>
+      <div class="w-dot" style="background:#28c840"></div>
+      <span class="window-title">Bio-Chef Pro — Analiz</span>
+    </div>
+    <div class="app-body">
+      <div class="app-cam">
+        <div class="cam-grid"></div>
+        <div class="cam-corners">
+          <div class="cam-corner tl"></div><div class="cam-corner tr"></div>
+          <div class="cam-corner bl"></div><div class="cam-corner br"></div>
+        </div>
+        <div class="cam-scanner"></div>
+        <div class="cam-food-emoji">🥗</div>
+      </div>
+      <div class="analysis-chips">
+        <span class="chip chip-green">✓ Tanındı</span>
+        <span class="chip chip-white">Tavuklu Salata</span>
+        <span class="chip chip-white">~320 kcal</span>
+      </div>
+      <div class="result-card">
+        <div class="result-top">
+          <div>
+            <div class="result-meal">Tavuklu Salata</div>
+            <div class="result-cal">Tahmini 320 kcal · 1 porsiyon</div>
+          </div>
+          <div class="score-pill">9.2 / 10</div>
+        </div>
+        <div class="macro-bars">
+          <div class="bar-row">
+            <span class="bar-name">Protein</span>
+            <div class="bar-track"><div class="bar-fill" style="width:78%;background:#b8f549"></div></div>
+            <span class="bar-val">38g</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-name">Karb</span>
+            <div class="bar-track"><div class="bar-fill" style="width:32%;background:#d4a853"></div></div>
+            <span class="bar-val">14g</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-name">Yağ</span>
+            <div class="bar-track"><div class="bar-fill" style="width:22%;background:#e85d3a"></div></div>
+            <span class="bar-val">9g</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+</section>
+
+<!-- PROOF BAND -->
+
+<div class="proof-band">
+  <span class="proof-label">Güvendiği platformlar</span>
+  <span class="proof-logo">TechCrunch</span>
+  <span class="proof-logo">Product Hunt</span>
+  <span class="proof-logo">Sağlık Bakanlığı</span>
+  <span class="proof-logo">DiyetisyenDer</span>
+  <span class="proof-logo">StartupIstanbul</span>
 </div>
 
-<div id="sportQuestionsModal" class="modal">
-    <div class="modal-content">
-        <div id="sportInputArea">
-            <h3 id="txtSpTitle" style="color:var(--premium); text-align:center; margin-bottom:15px;">🏋️ Spor Programı Hazırlığı</h3>
-            <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:10px;">Size en uygun programı hazırlamam için:</p>
-            <input type="number" id="sqAge" placeholder="Yaşınız">
-            <input type="number" id="sqWeight" placeholder="Kilonuz (kg)">
-            <input type="number" id="sqDays" placeholder="Haftada kaç gün spor yapabilirsiniz?">
-            <select id="sqGoal" style="text-align-last: center;">
-                <option value="Yağ Yakımı">Yağ Yakımı</option>
-                <option value="Kas Kütlesi">Kas Kütlesi</option>
-                <option value="Form Koruma">Form Koruma</option>
-            </select>
-            <input type="text" id="sqEquipment" placeholder="Mekan (Ev/Salon) ve Ekipman Durumu">
-            <input type="text" id="sqInjury" placeholder="Sakatlık veya engel var mı?">
-            <button class="btn btn-main" style="background:var(--premium); color:black;" onclick="generateSportProgram()">PROGRAMI OLUŞTUR</button>
-        </div>
-        <div id="sportLoadingArea" style="display:none;">
-            <div class="loading-text">PLANINIZ OLUŞTURULUYOR... <br> Lütfen Bekleyin.</div>
-        </div>
-        <div id="sportResultArea" style="display:none;">
-            <h3 style="color:var(--primary); text-align:center; margin-bottom:15px;">Size Özel Spor Planı</h3>
-            <div id="sportPlanContent" class="report-txt" style="max-height: 350px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px;"></div>
-            <button class="btn btn-sub" style="background:var(--danger); margin-top:15px;" onclick="downloadSportPDF()">📄 PDF OLARAK İNDİR</button>
-            <button class="btn btn-outline" style="margin-top:10px;" onclick="resetSportModal()">YENİDEN DÜZENLE</button>
-        </div>
-        <button class="btn btn-outline" id="sportModalCloseBtn" onclick="document.getElementById('sportQuestionsModal').style.display='none'; resetSportModal();">Kapat</button>
+<!-- BENTO FEATURES -->
+
+<section id="features">
+  <div class="bento-section">
+    <div class="section-header fade-in">
+      <div class="section-kicker">Özellikler</div>
+      <h2 class="section-h2">Her şeyi <i>doğru yapıyor</i></h2>
+      <p class="section-p">Beslenmenizi anlamak, takip etmek ve geliştirmek için ihtiyacınız olan her şey tek bir uygulamada.</p>
     </div>
+
+```
+<div class="bento-grid">
+
+  <div class="bento-card c-7 fade-in">
+    <div class="bento-icon">🔬</div>
+    <div class="bento-tag">Core Feature</div>
+    <div class="bento-title">5 bölümlü anında AI analizi</div>
+    <div class="bento-desc">GPT-4o görüntü motoru ile yemek adı, tam besin değerleri, net tavsiye, içerik özeti ve hedef uyum skoru — 15 saniyede.</div>
+    <div class="scan-demo">
+      <div class="scan-demo-food">🍝</div>
+      <div class="scan-progress"><div class="scan-progress-fill"></div></div>
+      <div class="scan-result-row">
+        <div class="scan-result-item"><div class="sri-val">520</div><div class="sri-label">kcal</div></div>
+        <div class="scan-result-item"><div class="sri-val">28g</div><div class="sri-label">Protein</div></div>
+        <div class="scan-result-item"><div class="sri-val">62g</div><div class="sri-label">Karb</div></div>
+        <div class="scan-result-item"><div class="sri-val">14g</div><div class="sri-label">Yağ</div></div>
+        <div class="scan-result-item"><div class="sri-val">6.8</div><div class="sri-label">Skor</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bento-card c-5 fade-in">
+    <div class="bento-icon" style="background:rgba(107,143,113,0.2);color:var(--sage);">🤖</div>
+    <div class="bento-tag">AI Asistan</div>
+    <div class="bento-title">LARA: YZ Diyetisyen</div>
+    <div class="bento-desc">7/24 yanınızda. Tarif, besin, spor ve diyet hakkında anında uzman yanıtı.</div>
+    <div class="lara-chat">
+      <div class="lara-msg">Akşam ne yemeliyim? Kilo vermek istiyorum 🎯</div>
+      <div class="user-msg">Izgara balık + ıspanak salatası ideal. 350 kcal, yüksek protein. ✓</div>
+    </div>
+  </div>
+
+  <div class="bento-card c-4 fade-in">
+    <div class="bento-icon" style="background:rgba(212,168,83,0.15);color:var(--gold);">📊</div>
+    <div class="bento-tag">Takip</div>
+    <div class="bento-title">Günlük Makro Paneli</div>
+    <div class="bento-desc">Gerçek zamanlı Protein · Karb · Yağ · Kalori takibi.</div>
+    <div class="calendar-dots" style="margin-top:20px;">
+      <div class="cal-dot done">P</div><div class="cal-dot done">S</div><div class="cal-dot done">Ç</div>
+      <div class="cal-dot done">P</div><div class="cal-dot active">C</div><div class="cal-dot">C</div>
+      <div class="cal-dot">P</div>
+    </div>
+    <div style="margin-top:14px; display:flex; gap:8px; align-items:center;">
+      <span style="font-size:1.6rem; font-weight:700; letter-spacing:-0.04em;">🔥 4</span>
+      <span style="font-size:0.78rem; color:var(--text-2); font-weight:300; line-height:1.4;">Günlük seri<br>devam ediyor</span>
+    </div>
+  </div>
+
+  <div class="bento-card c-8 fade-in">
+    <div class="bento-icon" style="background:rgba(232,93,58,0.12);color:var(--rust);">🏋️</div>
+    <div class="bento-tag">Fitness</div>
+    <div class="bento-title">Kişiselleştirilmiş Spor Programı</div>
+    <div class="bento-desc">Yaş, kilo, hedef ve müsait gün bilgilerinize göre PDF olarak indirilebilir haftalık plan. Yaralı bölgeleriniz de dikkate alınır.</div>
+    <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+      <span style="padding:6px 14px; background:var(--ink); color:var(--lime); border-radius:100px; font-size:0.72rem; font-weight:600;">Pazartesi: Göğüs</span>
+      <span style="padding:6px 14px; background:var(--ink); color:rgba(255,255,255,0.6); border-radius:100px; font-size:0.72rem; font-weight:500;">Salı: Sırt</span>
+      <span style="padding:6px 14px; background:var(--ink); color:rgba(255,255,255,0.6); border-radius:100px; font-size:0.72rem; font-weight:500;">Perşembe: Bacak</span>
+      <span style="padding:6px 14px; background:var(--paper-3); border:1px solid var(--border); color:var(--text-2); border-radius:100px; font-size:0.72rem; font-weight:500;">📄 PDF İndir</span>
+    </div>
+  </div>
+
+  <div class="bento-card c-6 fade-in">
+    <div class="bento-icon" style="background:rgba(0,150,255,0.1);color:#4d9fff;">👨‍⚕️</div>
+    <div class="bento-tag">Pro Özellik</div>
+    <div class="bento-title">Diyetisyen Bağlantısı</div>
+    <div class="bento-desc">Özel kod ile diyetisyeninize bağlanın. Analizleriniz otomatik paylaşılır, toplu görev ve duyurular alın.</div>
+  </div>
+
+  <div class="bento-card c-6 fade-in">
+    <div class="bento-icon" style="background:rgba(184,245,73,0.15);color:var(--sage);">👫</div>
+    <div class="bento-tag">Sosyal</div>
+    <div class="bento-title">Diyet Dostu Sistemi</div>
+    <div class="bento-desc">Arkadaşlarınızın son öğün analizlerini görün, takip edin ve birlikte motive olun. Bildirim sistemi ile anlık güncellemeler.</div>
+  </div>
+
+</div>
+```
+
+  </div>
+</section>
+
+<!-- INTERACTIVE DEMO -->
+
+<section id="demo" class="demo-section">
+  <div class="demo-inner">
+    <div class="demo-header fade-in">
+      <div class="demo-kicker">Canlı Demo</div>
+      <h2 class="demo-h2">Bir yemek seç,<br><em>analizi gör.</em></h2>
+    </div>
+    <div class="demo-foods fade-in" id="demoFoods">
+      <button class="food-btn active" data-food="salata" onclick="setDemo(this, 'salata')">🥗 Tavuklu Salata</button>
+      <button class="food-btn" data-food="pizza" onclick="setDemo(this, 'pizza')">🍕 Margherita Pizza</button>
+      <button class="food-btn" data-food="somon" onclick="setDemo(this, 'somon')">🐟 Izgara Somon</button>
+      <button class="food-btn" data-food="burger" onclick="setDemo(this, 'burger')">🍔 Cheeseburger</button>
+      <button class="food-btn" data-food="yulaf" onclick="setDemo(this, 'yulaf')">🥣 Meyveli Yulaf</button>
+    </div>
+    <div class="demo-result fade-in" id="demoResult">
+      <div>
+        <div class="dr-section-title">Analiz Sonucu</div>
+        <div class="dr-meal-name" id="drName">Tavuklu Salata</div>
+        <div class="dr-cal" id="drCal">~320 kcal · 1 porsiyon</div>
+        <div class="dr-advice" id="drAdvice">Mükemmel seçim. Yüksek protein, düşük karbonhidrat içeriği ile kilo verme hedefinize tam uyumlu. Öğle öğünü için ideal.</div>
+      </div>
+      <div>
+        <div class="dr-section-title">Makro Dağılımı</div>
+        <div class="dr-macro" id="drMacro">
+          <div class="drm-item">
+            <div class="drm-header"><span class="drm-name">Protein</span><span class="drm-val">38g</span></div>
+            <div class="drm-track"><div class="drm-fill" id="dmP" style="width:78%;background:#b8f549"></div></div>
+          </div>
+          <div class="drm-item">
+            <div class="drm-header"><span class="drm-name">Karbonhidrat</span><span class="drm-val">14g</span></div>
+            <div class="drm-track"><div class="drm-fill" id="dmC" style="width:28%;background:#d4a853"></div></div>
+          </div>
+          <div class="drm-item">
+            <div class="drm-header"><span class="drm-name">Yağ</span><span class="drm-val">9g</span></div>
+            <div class="drm-track"><div class="drm-fill" id="dmF" style="width:18%;background:#e85d3a"></div></div>
+          </div>
+          <div class="drm-item">
+            <div class="drm-header"><span class="drm-name">Lif</span><span class="drm-val">5g</span></div>
+            <div class="drm-track"><div class="drm-fill" id="dmFi" style="width:45%;background:#4d9fff"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="dr-score-area">
+        <div class="dr-section-title">Hedef Uyum Skoru</div>
+        <div class="dr-score-ring" id="scoreRing" style="--deg:295deg">
+          <span class="dr-score-num" id="scoreNum">9.2</span>
+        </div>
+        <div class="dr-score-label">Kilo Verme Hedefi</div>
+        <div class="dr-verdict verdict-good" id="scoreVerdict">✓ Onaylandı</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+
+<section id="pricing">
+  <div class="pricing-section">
+    <div class="section-header fade-in">
+      <div class="section-kicker">Fiyatlandırma</div>
+      <h2 class="section-h2">Hedefinize uygun <i>plan</i></h2>
+      <p class="section-p">Ücretsiz başlayın, büyüdükçe yükseltin. Gizli ücret yok.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card fade-in">
+        <div class="pc-top">
+          <div class="pc-name">Başlangıç</div>
+          <div class="pc-desc">Temel özelliklerle sağlıklı başlangıç yapın.</div>
+        </div>
+        <div class="pc-price"><sup>₺</sup>0</div>
+        <div class="pc-period">Sonsuza kadar ücretsiz</div>
+        <div class="pc-divider"></div>
+        <ul class="pc-features">
+          <li>Günlük 3 AI yemek analizi</li>
+          <li>Temel makro takibi</li>
+          <li>7 günlük analiz geçmişi</li>
+          <li class="off">Diyetisyen bağlantısı</li>
+          <li class="off">LARA AI diyetisyen</li>
+          <li class="off">Spor programı PDF</li>
+          <li class="off">Diyet dostu sistemi</li>
+        </ul>
+        <button class="pc-btn">Ücretsiz Başla</button>
+      </div>
+
+```
+  <div class="price-card featured fade-in">
+    <div class="pc-badge">En Popüler</div>
+    <div class="pc-top">
+      <div class="pc-name">Pro</div>
+      <div class="pc-desc">Sağlıklı yaşamı ciddiye alanlar için.</div>
+    </div>
+    <div class="pc-price"><sup>₺</sup>149</div>
+    <div class="pc-period">aylık · yıllık ödemede ₺99/ay</div>
+    <div class="pc-divider"></div>
+    <ul class="pc-features">
+      <li>Sınırsız AI analizi</li>
+      <li>Tam 5 bölümlü detaylı rapor</li>
+      <li>Gerçek zamanlı makro paneli</li>
+      <li>Diyetisyen bağlantısı (1 uzman)</li>
+      <li>LARA AI — sınırsız soru</li>
+      <li>Kişisel spor programı PDF</li>
+      <li>Diyet dostu sistemi</li>
+    </ul>
+    <button class="pc-btn primary">Pro'ya Geç →</button>
+  </div>
+
+  <div class="price-card fade-in">
+    <div class="pc-top">
+      <div class="pc-name">Klinik</div>
+      <div class="pc-desc">Diyetisyenler ve sağlık klinikleri için.</div>
+    </div>
+    <div class="pc-price"><sup>₺</sup>499</div>
+    <div class="pc-period">aylık · sınırsız hasta</div>
+    <div class="pc-divider"></div>
+    <ul class="pc-features">
+      <li>Sınırsız hasta yönetimi</li>
+      <li>Diyetisyen portalı & dashboard</li>
+      <li>Toplu duyuru & görev sistemi</li>
+      <li>Gelişmiş hasta analitikleri</li>
+      <li>Öncelikli teknik destek</li>
+      <li>Özel marka (white-label)</li>
+      <li>API erişimi</li>
+    </ul>
+    <button class="pc-btn">Demo Talep Et</button>
+  </div>
+</div>
+```
+
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+
+<div class="testi-section">
+  <div class="testi-inner">
+    <div class="section-header fade-in">
+      <div class="section-kicker">Kullanıcı Yorumları</div>
+      <h2 class="section-h2">Gerçek insanlar,<br><i>gerçek sonuçlar</i></h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card fade-in">
+        <div class="testi-stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div></div>
+        <div class="testi-quote">"3 ayda 8 kilo verdim. Kameraya tutup analiz ettirmek bu kadar kolay ve bağımlı edici olacağını düşünmezdim. LARA'nın tavsiyeleri gerçekten işe yarıyor."</div>
+        <div class="testi-author">
+          <div class="testi-av">👩</div>
+          <div><div class="testi-name">Elif Kaya</div><div class="testi-role">Yazılım Mühendisi · İstanbul</div></div>
+        </div>
+      </div>
+      <div class="testi-card fade-in">
+        <div class="testi-stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div></div>
+        <div class="testi-quote">"Hastalarımın analizlerini anında görebilmek ve toplu ödev gönderebilmek müthiş kolaylık sağladı. Klinik süreçlerim tamamen değişti."</div>
+        <div class="testi-author">
+          <div class="testi-av">👨‍⚕️</div>
+          <div><div class="testi-name">Dr. Mert Aydın</div><div class="testi-role">Klinik Diyetisyen · Ankara</div></div>
+        </div>
+      </div>
+      <div class="testi-card fade-in">
+        <div class="testi-stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div></div>
+        <div class="testi-quote">"Spor programı özelliği inanılmaz. Yaralanmamı bile dikkate alarak plan oluşturdu. PDF'i çıktı aldım, spor salonunda tam da kullandım."</div>
+        <div class="testi-author">
+          <div class="testi-av">🧑‍💼</div>
+          <div><div class="testi-name">Can Demir</div><div class="testi-role">Fitness Koçu · İzmir</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div id="detailModal" class="modal">
-    <div class="modal-content">
-        <h3 id="modalTitle" style="color:var(--primary); margin-bottom:15px; text-align:center;">Analiz Detayı</h3>
-        <div id="modalBody" class="report-txt" style="max-height: 400px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px;"></div>
-        <button class="btn btn-sub" style="margin-top:15px;" onclick="document.getElementById('detailModal').style.display='none'">Kapat</button>
+<!-- CTA FINAL -->
+
+<div class="cta-final">
+  <div class="cta-bg-text">Sağlıklı</div>
+  <div class="cta-content fade-in">
+    <h2 class="cta-h2">Bir fotoğrafla<br><em>her şey başlar.</em></h2>
+    <p class="cta-sub">Bugün ücretsiz hesap oluşturun. Kredi kartı gerekmez, kurulum yok.</p>
+    <a href="#" class="btn-hero" style="display:inline-flex; padding:18px 44px; font-size:1rem;">Ücretsiz Başla <span>→</span></a>
+    <div class="cta-perks">
+      <div class="cta-perk"><div class="cta-perk-dot"></div>Kurulum gerektirmez</div>
+      <div class="cta-perk"><div class="cta-perk-dot"></div>7/24 AI desteği</div>
+      <div class="cta-perk"><div class="cta-perk-dot"></div>KVKK uyumlu</div>
+      <div class="cta-perk"><div class="cta-perk-dot"></div>İstediğiniz zaman iptal</div>
     </div>
+  </div>
 </div>
 
-<div class="app-card">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-        <div style="display: flex; align-items: center;">
-            <span onclick="changeLang('tr')" style="font-size: 1.8rem; cursor: pointer; margin-right: 15px;" title="Türkçe">🇹🇷</span>
-            <span onclick="changeLang('en')" style="font-size: 1.8rem; cursor: pointer;" title="English">🇺🇸</span>
-        </div>
-        <div id="streakBadge" class="streak-badge">
-            🔥 <span id="streakCount">0</span> <span id="txtSeri">Seri</span>
-        </div>
-        <div style="display: flex; gap:10px;">
-            <div class="bell-container" onclick="toggleNotifications()" id="bellIcon" style="display:none;">
-                <span class="bell-icon">🔔</span>
-                <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
-                <div class="notif-dropdown" id="notifDropdown">
-                    <h4 id="txtNotHead" style="color:white; margin-bottom:10px; text-align:center; font-size: 0.9rem;">Bildirimler</h4>
-                    <div id="notifList"></div>
-                </div>
-            </div>
-            <div class="friends-btn" id="friendListBtn" onclick="toggleFriends()" style="display:none;">
-                👤
-                <div class="friends-dropdown" id="friendsDropdown">
-                    <h4 id="txtFriendsHead" style="color:white; margin-bottom:10px; text-align:center; font-size: 0.9rem;">Takip Ettiklerin</h4>
-                    <div id="friendsListContainer"></div>
-                </div>
-            </div>
-        </div>
+<!-- FOOTER -->
+
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="footer-logo"><div class="logo-mark">🥗</div> Bio-Chef Pro</div>
+      <div class="footer-tagline">Yapay zeka destekli beslenme platformu. Sağlıklı yaşam artık cebinizde.</div>
     </div>
-
-    <div id="loginView" class="auth-container">
-        <h1 id="txtAppName">BIO-CHEF</h1>
-        <div class="role-selector">
-            <button class="role-btn active" id="btnRoleUser" onclick="setRole('user', this)">DANIŞAN</button>
-            <button class="role-btn" id="btnRoleDietician" onclick="setRole('dietician', this)">DİYETİSYEN</button>
-        </div>
-        <input type="email" id="lEmail" placeholder="E-posta">
-        <input type="password" id="lPass" placeholder="Şifre">
-        <button class="btn btn-main" onclick="doLogin()">GİRİŞ YAP</button>
-        <button class="btn btn-outline" style="border:none; margin-top:5px; font-size:0.75rem;" onclick="doReset()">Şifremi Unuttum?</button>
-        <button class="btn btn-outline" onclick="toggleView('regView')">Kayıt Ol</button>
+    <div>
+      <div class="footer-col-title">Ürün</div>
+      <div class="footer-links-col">
+        <a href="#">Özellikler</a><a href="#">Fiyatlar</a><a href="#">Demo</a><a href="#">API</a>
+      </div>
     </div>
-
-    <div id="regView" class="auth-container" style="display:none;">
-        <h1 id="txtRegTitle">KAYIT OL</h1>
-        <div class="role-selector">
-            <button class="role-btn active" onclick="setRole('user', this)">DANIŞAN</button>
-            <button class="role-btn" onclick="setRole('dietician', this)">DİYETİSYEN</button>
-        </div>
-        <input type="email" id="rEmail" placeholder="E-posta">
-        <input type="text" id="rUser" placeholder="Kullanıcı Adı">
-        <input type="password" id="rPass" placeholder="Şifre">
-        <button class="btn btn-sub" onclick="doRegister()">HESABI OLUŞTUR</button>
-        <button class="btn btn-outline" onclick="toggleView('loginView')">Geri Dön</button>
+    <div>
+      <div class="footer-col-title">Şirket</div>
+      <div class="footer-links-col">
+        <a href="#">Hakkımızda</a><a href="#">Blog</a><a href="#">Kariyer</a><a href="#">İletişim</a>
+      </div>
     </div>
-
-    <div id="dieticianView" style="display:none;">
-        <div style="text-align: center; margin-bottom: 20px;">
-            <h2 id="txtDietPortal" style="color:var(--primary);">Diyetisyen Portalı</h2>
-            <div id="dMail" class="user-tag"></div>
-            <div style="margin-top:15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
-                <p id="txtSetCode" style="font-size:0.8rem; color:#94a3b8; text-align:center;">Özel Kodunuzu Belirleyin:</p>
-                <input type="text" id="myDietCodeInput" maxlength="8" placeholder="Örn: DIET9900" style="background:#000;">
-                <button class="btn btn-main" onclick="saveDieticianCode()">KODU KAYDET</button>
-                <div id="currentCodeDisplay" style="margin-top:10px; text-align:center; font-weight:bold; color:var(--premium);"></div>
-            </div>
-        </div>
-        <div class="broadcast-box">
-            <h4 id="txtBroadcast" style="color:var(--accent); margin-bottom:10px; font-size:0.9rem;">📢 Toplu Duyuru / Günlük Ödev</h4>
-            <textarea id="broadcastMsg" placeholder="..." style="height:60px;"></textarea>
-            <button id="btnBroadcast" class="btn btn-sub" onclick="sendBroadcast()" style="padding:10px; font-size:0.7rem; background:var(--accent);">HERKESE GÖNDER</button>
-        </div>
-        <h3 id="txtMyPatients" style="margin-bottom:15px; border-bottom:1px solid #2d3748; padding-bottom:5px;">Bağlı Hastalarım</h3>
-        <div id="patientList"></div>
-        <button class="btn btn-outline" onclick="auth.signOut(); location.reload();" style="margin-top:20px;">GÜVENLİ ÇIKIŞ</button>
+    <div>
+      <div class="footer-col-title">Hukuki</div>
+      <div class="footer-links-col">
+        <a href="#">Gizlilik Politikası</a><a href="#">Kullanım Şartları</a><a href="#">KVKK</a>
+      </div>
     </div>
-
-    <div id="mainView" style="display:none;">
-        <div style="text-align: center; margin-bottom: 20px;">
-            <div id="clock" style="font-size: 2.2rem; font-weight: 800; color: var(--accent);">00:00:00</div>
-            <div id="uMail" class="user-tag"></div> 
-        </div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <input type="number" id="uAge" placeholder="YAŞ" onchange="saveUserData()">
-            <input type="number" id="uWeight" placeholder="KİLO" onchange="saveUserData()">
-        </div>
-        <select id="uGoal" onchange="saveUserData()">
-            <option value="Kilo Vermek">Kilo Vermek (-)</option>
-            <option value="Kilo Almak">Kilo Almak (+)</option>
-            <option value="Kiloyu Korumak">Kiloyu Korumak (=)</option>
-        </select>
-        
-        <div class="cam-box">
-            <video id="video" autoplay playsinline></video>
-            <div id="freezeLayer" class="freeze-overlay">🔍 İNCELENİYOR...</div>
-        </div>
-
-        <button id="btnAna" class="btn btn-main" onclick="runAI('yemek')">📸 ANALİZ ET</button>
-        <button id="btnRetry" class="btn btn-sub" style="display:none; background: var(--premium); color:black;" onclick="resetCamera()">🔄 YENİDEN ANALİZ ET</button>
-
-        <div id="macroDashboard" class="macro-tracker">
-            <div class="macro-item">
-                <span class="macro-label">PROTEİN</span>
-                <div class="macro-progress"><div id="barProtein" class="macro-bar" style="width: 0%; background: var(--accent);"></div></div>
-                <span id="valProtein" class="macro-val">0 / 150g</span>
-            </div>
-            <div class="macro-item">
-                <span class="macro-label">KARB</span>
-                <div class="macro-progress"><div id="barCarb" class="macro-bar" style="width: 0%; background: var(--premium);"></div></div>
-                <span id="valCarb" class="macro-val">0 / 200g</span>
-            </div>
-            <div class="macro-item">
-                <span class="macro-label">YAĞ</span>
-                <div class="macro-progress"><div id="barFat" class="macro-bar" style="width: 0%; background: var(--danger);"></div></div>
-                <span id="valFat" class="macro-val">0 / 70g</span>
-            </div>
-            <div class="macro-item">
-                <span class="macro-label">KALORİ</span>
-                <div class="macro-progress"><div id="barCal" class="macro-bar" style="width: 0%; background: var(--primary);"></div></div>
-                <span id="valCal" class="macro-val">0 / 2000</span>
-            </div>
-        </div>
-
-        <div id="results"></div>
-        <button class="btn btn-main" id="btnPdf" style="display:none; background: #ef4444; margin-top:15px;" onclick="downloadPDF()">📄 PDF KAYDET</button>
-
-        <button id="btnHistToggle" class="btn btn-outline" onclick="toggleHistory()" style="margin-top:25px;">📚 GEÇMİŞ ANALİZLERİM</button>
-        <div id="historyPanel" style="display:none; margin-top:10px;"><div id="historyList"></div></div>
-
-        <button id="btnFriendToggle" class="btn btn-outline" style="border-color: var(--neutral); color: var(--text); background: var(--neutral);" onclick="togglePartner()">👫 DİYET DOSTU</button>
-        <div id="partnerPanel" class="partner-box" style="display:none;">
-            <input type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin" style="background: rgba(0,0,0,0.5);">
-            <div class="side-by-side-btns">
-                <button class="btn btn-main" onclick="sendFriendRequest()">EKLE</button>
-                <button class="btn btn-sub" style="background:var(--primary);" onclick="checkPartner()">SORGULA</button>
-            </div>
-            <div id="partnerResult" style="margin-top:15px; font-weight:bold; white-space:pre-line;"></div>
-            <div id="partnerHistoryList" style="margin-top:10px; text-align:left;"></div>
-        </div>
-
-        <div class="split-btns">
-            <button id="btnSp" class="btn btn-neutral" onclick="document.getElementById('sportQuestionsModal').style.display='block'">🏃‍♂️ SPOR</button>
-            <button id="btnLara" class="btn btn-neutral" onclick="document.getElementById('laraModal').style.display='block'">🤖 YZ DİYETİSYEN</button>
-        </div>
-
-        <div id="dietConnectArea" class="partner-box" style="border-color: var(--primary); background: rgba(16,185,129,0.05); margin-top:10px;">
-            <div id="dietSearchMode">
-                <h3 id="txtDietConn" style="color:var(--primary); font-size:1rem;">Diyetisyene Bağlan</h3>
-                <input type="text" id="dietCodeInput" placeholder="Diyetisyen Kodunu Gir" maxlength="8" style="background: rgba(0,0,0,0.5);">
-                <button id="btnDietConnSub" class="btn btn-sub" style="background: var(--primary); margin-top:0;" onclick="connectToDietician()">KODLA BAĞLAN</button>
-            </div>
-            <div id="dietInfoMode" style="display:none; padding:10px;">
-                <p id="dietStatus" style="font-weight:bold; color:var(--primary); font-size:0.9rem;"></p>
-                <button class="btn" style="background:var(--danger); padding:8px; font-size:0.7rem; margin-top:10px; width:auto;" onclick="disconnectDietician()">DİYETİSYENDEN AYRIL</button>
-            </div>
-        </div>
-
-        <button id="btnOut" class="btn btn-outline" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
-    </div>
-</div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2025 Bio-Chef Pro. Tüm hakları saklıdır.</div>
+    <div class="footer-copy">GPT-4o altyapısı ile güçlendirilmiştir.</div>
+  </div>
+</footer>
 
 <script>
-    const firebaseConfig = { apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA", authDomain: "voice2post-9e8ca.firebaseapp.com", projectId: "voice2post-9e8ca", storageBucket: "voice2post-9e8ca.firebasestorage.app", messagingSenderId: "511446656614", appId: "1:511446656614:web:32101ee70299543c716fa7" };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth(); const db = firebase.firestore();
+/* ── CURSOR ── */
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cur.style.left = mx+'px'; cur.style.top = my+'px'; });
+function animRing() { rx += (mx-rx)*0.12; ry += (my-ry)*0.12; ring.style.left = rx+'px'; ring.style.top = ry+'px'; requestAnimationFrame(animRing); }
+animRing();
 
-    let currentLang = 'tr';
-    let userRole = 'user';
-    let dailyTotals = { protein: 0, carb: 0, fat: 0, cal: 0 };
-    const dailyLimits = { protein: 150, carb: 200, fat: 70, cal: 2000 };
+/* ── SCROLL REVEAL ── */
+const ro = new IntersectionObserver(entries => {
+  entries.forEach((e,i) => { if(e.isIntersecting) { setTimeout(()=>e.target.classList.add('show'), i*80); } });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.fade-in').forEach(el => ro.observe(el));
 
-    const langData = {
-        tr: {
-            headers: ["YEMEK ADI 🍽️","BESİN DEĞERLERİ 📊","NET TAVSİYE 💡","ÜRÜN ÖZETİ 🔍","SKOR 🎯"],
-            notif: "Bildirimler", followers: "Takip Ettiklerin", hist: "GEÇMİŞ ANALİZLERİM", detail: "Detay Gör 🔍",
-            ana: "📸 ANALİZ ET", retry: "🔄 YENİDEN ANALİZ ET", out: "GÜVENLİ ÇIKIŞ", friend: "👫 DİYET DOSTU", lara: "🤖 LARA", spor: "🏃‍♂️ SPOR",
-            seri: "Seri", loading: "🔍 İNCELENİYOR...", h1: "BIO-CHEF", login: "GİRİŞ YAP", reg: "Kayıt Ol", regTitle: "KAYIT OL"
-        },
-        en: {
-            headers: ["MEAL NAME 🍽️","NUTRITION 📊","ADVICE 💡","SUMMARY 🔍","SCORE 🎯"],
-            notif: "Notifications", followers: "Following", hist: "ANALYSIS HISTORY", detail: "View Detail 🔍",
-            ana: "📸 ANALYZE", retry: "🔄 RE-ANALYZE", out: "LOGOUT", friend: "👫 DIET PARTNER", lara: "🤖 LARA", spor: "🏃‍♂️ SPORT",
-            seri: "Streak", loading: "🔍 ANALYZING...", spLoading: "CREATING PLAN...", h1: "BIO-CHEF", login: "LOGIN", reg: "Sign Up", regTitle: "SIGN UP"
-        }
-    };
+/* ── DEMO DATA ── */
+const foods = {
+  salata: { name:'Tavuklu Salata', cal:'~320 kcal · 1 porsiyon', advice:'Mükemmel seçim. Yüksek protein, düşük karbonhidrat ile kilo verme hedefinize tam uyumlu. Öğle öğünü için ideal.', p:'38g',pw:78, c:'14g',cw:28, f:'9g',fw:18, fi:'5g',fiw:45, score:'9.2', deg:295, verdict:'✓ Onaylandı', vc:'verdict-good' },
+  pizza:  { name:'Margherita Pizza', cal:'~560 kcal · 2 dilim', advice:'Orta öneri. Yüksek karbonhidrat ve yağ içeriği nedeniyle kilo verme sürecinde porsiyon kontrolü kritik. Haftada 1 kez makul.', p:'18g',pw:35, c:'72g',cw:85, f:'22g',fw:55, fi:'3g',fiw:20, score:'5.4', deg:174, verdict:'⚠ Dikkatli Tüket', vc:'verdict-warn' },
+  somon:  { name:'Izgara Somon', cal:'~280 kcal · 150g', advice:'Omega-3 açısından son derece zengin. Kilo verme ve kas gelişimi hedeflerine eş zamanlı destek sağlar. Kesinlikle onaylı.', p:'34g',pw:85, c:'0g',cw:0, f:'12g',fw:30, fi:'0g',fiw:0, score:'9.8', deg:317, verdict:'✓ Mükemmel', vc:'verdict-good' },
+  burger: { name:'Cheeseburger', cal:'~680 kcal · 1 adet', advice:'Doymuş yağ ve sodyum içeriği yüksek. Kilo verme hedefiyle uyumsuz. Ayda 1-2 kez tüketilebilir, aktif günlerde tercih edilmeli.', p:'32g',pw:50, c:'45g',cw:68, f:'38g',fw:92, fi:'2g',fiw:12, score:'3.1', deg:100, verdict:'✗ Önerilmez', vc:'verdict-bad' },
+  yulaf:  { name:'Meyveli Yulaf', cal:'~380 kcal · 1 kase', advice:'Lif ve kompleks karbonhidrat açısından ideal sabah öğünü. Kan şekerini dengeler, uzun süre tokluk hissi sağlar. Kahvaltı için mükemmel.', p:'12g',pw:28, c:'64g',cw:75, f:'8g',fw:22, fi:'9g',fiw:82, score:'8.7', deg:280, verdict:'✓ Onaylandı', vc:'verdict-good' }
+};
 
-    function updateMacroUI() {
-        const p = (dailyTotals.protein / dailyLimits.protein) * 100;
-        const c = (dailyTotals.carb / dailyLimits.carb) * 100;
-        const f = (dailyTotals.fat / dailyLimits.fat) * 100;
-        const cal = (dailyTotals.cal / dailyLimits.cal) * 100;
+function setDemo(btn, key) {
+  document.querySelectorAll('.food-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const d = foods[key];
+  document.getElementById('drName').textContent = d.name;
+  document.getElementById('drCal').textContent = d.cal;
+  document.getElementById('drAdvice').textContent = d.advice;
+  document.getElementById('scoreNum').textContent = d.score;
+  document.getElementById('scoreRing').style.setProperty('--deg', d.deg+'deg');
+  const sv = document.getElementById('scoreVerdict');
+  sv.textContent = d.verdict; sv.className = 'dr-verdict ' + d.vc;
 
-        document.getElementById('barProtein').style.width = Math.min(p, 100) + '%';
-        document.getElementById('barCarb').style.width = Math.min(c, 100) + '%';
-        document.getElementById('barFat').style.width = Math.min(f, 100) + '%';
-        document.getElementById('barCal').style.width = Math.min(cal, 100) + '%';
-
-        document.getElementById('valProtein').innerText = `${Math.round(dailyTotals.protein)} / ${dailyLimits.protein}g`;
-        document.getElementById('valCarb').innerText = `${Math.round(dailyTotals.carb)} / ${dailyLimits.carb}g`;
-        document.getElementById('valFat').innerText = `${Math.round(dailyTotals.fat)} / ${dailyLimits.fat}g`;
-        document.getElementById('valCal').innerText = `${Math.round(dailyTotals.cal)} / ${dailyLimits.cal}`;
-    }
-
-    function calculateDailyMacros() {
-        let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-        const today = new Date().toLocaleDateString();
-        dailyTotals = { protein: 0, carb: 0, fat: 0, cal: 0 };
-        arr.forEach(h => {
-            if(new Date(h.unix).toLocaleDateString() === today) {
-                // Regex ile metin içindeki rakamları ayıkla
-                const p = h.detail.match(/Protein:\s*(\d+)/i);
-                const c = h.detail.match(/Karbonhidrat:\s*(\d+)/i);
-                const f = h.detail.match(/Yağ:\s*(\d+)/i);
-                const cal = h.detail.match(/Kalori:\s*(\d+)/i);
-                if(p) dailyTotals.protein += parseInt(p[1]);
-                if(c) dailyTotals.carb += parseInt(c[1]);
-                if(f) dailyTotals.fat += parseInt(f[1]);
-                if(cal) dailyTotals.cal += parseInt(cal[1]);
-            }
-        });
-        updateMacroUI();
-    }
-
-    function changeLang(l) {
-        currentLang = l; const d = langData[l];
-        document.getElementById('txtNotHead').innerText = d.notif;
-        document.getElementById('txtFriendsHead').innerText = d.followers;
-        document.getElementById('btnHistToggle').innerText = d.hist;
-        document.getElementById('btnAna').innerText = d.ana;
-        if(document.getElementById('btnRetry')) document.getElementById('btnRetry').innerText = d.retry;
-        document.getElementById('txtSeri').innerText = d.seri;
-        document.getElementById('txtAppName').innerText = d.h1;
-    }
-
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            db.collection('partner_data').doc(user.displayName.toLowerCase()).get().then(doc => {
-                const data = doc.data() || {};
-                if(data.role === 'dietician') {
-                    toggleView('dieticianView'); document.getElementById('dMail').innerText = "@" + user.displayName; handleDieticianPortal(user.displayName.toLowerCase());
-                } else {
-                    toggleView('mainView'); document.getElementById('uMail').innerText = "@" + user.displayName;
-                    setupUser(user); startCamera(); listenNotifications(); listenFriends(); showStreak(); checkDieticianLink(); calculateDailyMacros();
-                }
-            });
-        } else { toggleView('loginView'); }
-    });
-
-    function setupUser(user) {
-        const saved = JSON.parse(localStorage.getItem('userData_' + user.uid) || '{}');
-        if(saved.age) document.getElementById('uAge').value = saved.age;
-        if(saved.weight) document.getElementById('uWeight').value = saved.weight;
-        if(saved.goal) document.getElementById('uGoal').value = saved.goal;
-        document.getElementById('bellIcon').style.display = 'flex';
-        document.getElementById('friendListBtn').style.display = 'flex';
-    }
-
-    function saveUserData() {
-        if(!auth.currentUser) return;
-        const d = { age: document.getElementById('uAge').value, weight: document.getElementById('uWeight').value, goal: document.getElementById('uGoal').value };
-        localStorage.setItem('userData_'+auth.currentUser.uid, JSON.stringify(d));
-        db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).set(d, {merge:true});
-    }
-
-    function startCamera() {
-        const vid = document.getElementById('video');
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-            .then(s => { vid.srcObject = s; vid.play(); })
-            .catch(e => { alert("Kamera Hatası: " + e.message); });
-    }
-
-    async function runAI(mode) {
-        const resDiv = document.getElementById('results'); const vid = document.getElementById('video');
-        vid.pause(); document.getElementById('freezeLayer').style.display = 'flex';
-        document.getElementById('btnAna').style.display = 'none';
-        const canv = document.createElement('canvas'); canv.width = 640; canv.height = 480;
-        canv.getContext('2d').drawImage(vid, 0, 0, 640, 480);
-        let img = canv.toDataURL('image/jpeg', 0.7);
-
-        try {
-            const r = await fetch('/api/analyze', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mode, image: img, user_data: `Hedef:${document.getElementById('uGoal').value}`, lang: currentLang })
-            });
-            const d = await r.json();
-            resDiv.innerHTML = ''; resDiv.style.display = 'flex';
-            const sections = d.analysis.split(/\d\./).filter(s => s.trim().length > 2);
-            const headers = langData[currentLang].headers;
-            let finalScore = 5; let mealName = "Yemek";
-
-            sections.forEach((txt, i) => {
-                const card = document.createElement('div'); card.className = 'report-card';
-                let content = txt.trim(); if (i === 0) mealName = content.substring(0,30);
-                if (content.includes('[SKOR:')) {
-                    const match = content.match(/\[SKOR:\s*(\d+)\]/);
-                    if(match) {
-                        finalScore = parseInt(match[1]); let left = (finalScore/10)*100;
-                        card.innerHTML = `<div class="report-tag">${headers[i]}</div><div class="report-txt">${content.replace(match[0], '')}</div>
-                        <div class="score-container"><div class="score-bar-bg"><div class="score-pointer" style="left:${left}%"></div></div><div style="text-align:center; margin-top:5px; font-weight:900; color:var(--primary);">${finalScore}/10</div></div>`;
-                    }
-                } else { card.innerHTML = `<div class="report-tag">${headers[i] || 'DETAY'}</div><div class="report-txt">${content}</div>`; }
-                resDiv.appendChild(card);
-            });
-            document.getElementById('btnRetry').style.display = 'block'; document.getElementById('freezeLayer').style.display = 'none';
-            saveHistory(finalScore, d.analysis, mealName);
-            calculateDailyMacros();
-            resDiv.scrollIntoView({ behavior: 'smooth' });
-        } catch(e) { alert("Analiz Hatası"); resetCamera(); }
-    }
-
-    function saveHistory(s, r, m) {
-        const me = auth.currentUser.displayName.toLowerCase(); const dateStr = new Date().toLocaleString(); const unix = Date.now();
-        db.collection('partner_data').doc(me).set({ score: s, lastMealName: m }, { merge: true });
-        db.collection('partner_data').doc(me).collection('history').add({ score: s, fullText: r, date: dateStr, unix: unix, mealName: m });
-        let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-        arr.unshift({ summary: s, date: dateStr, detail: r, meal: m, unix: unix });
-        localStorage.setItem('history_' + auth.currentUser.uid, JSON.stringify(arr.slice(0, 50)));
-    }
-
-    function toggleHistory() {
-        const p = document.getElementById('historyPanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none';
-        if(p.style.display === 'block') {
-            let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
-            const now = Date.now(); const last24 = arr.filter(h => (now - h.unix) < 86400000);
-            document.getElementById('historyList').innerHTML = last24.map(h => `
-                <div class="history-box" onclick="openDetail(\`${h.detail.replace(/`/g, "'")}\`)">
-                    <div class="history-meta">🕒 ${h.date} | ⭐ Puan: ${h.summary}/10</div>
-                    <div class="history-meal">🍽️ ${h.meal}</div>
-                </div>`).join('');
-        }
-    }
-
-    function checkPartner() {
-        const u = document.getElementById('partnerUser').value.trim().toLowerCase();
-        db.collection('partner_data').doc(u).collection('history').orderBy('unix', 'desc').limit(1).get().then(snap => {
-            const res = document.getElementById('partnerResult');
-            if(!snap.empty) {
-                const d = snap.docs[0].data();
-                res.innerHTML = `<div class="history-box" style="margin-top:0;" onclick="openDetail(\`${d.fullText.replace(/`/g, "'")}\`)">
-                    <div class="history-meta">🕒 ${d.date} | ⭐ Puan: ${d.score}/10</div>
-                    <div class="history-meal">🍽️ ${d.mealName}</div>
-                    <div style="font-size:0.6rem; color:var(--accent); text-align:right;">${langData[currentLang].detail}</div>
-                </div>`;
-            } else { res.innerText = "Veri bulunamadı."; }
-        });
-    }
-
-    function listenNotifications() {
-        db.collection('notifications').where('toUser', '==', auth.currentUser.displayName.toLowerCase()).onSnapshot(snap => {
-            const list = document.getElementById('notifList'); document.getElementById('notifBadge').innerText = snap.size;
-            document.getElementById('notifBadge').style.display = snap.size > 0 ? 'flex' : 'none'; list.innerHTML = '';
-            snap.forEach(doc => {
-                const d = doc.data();
-                list.innerHTML += `<div class="notif-item"><span>${d.message}</span><button class="notif-btn-del" style="background:var(--danger); color:white; border:none; padding:4px; border-radius:5px; font-size:0.6rem; cursor:pointer;" onclick="deleteNotif('${doc.id}')">SİL</button></div>`;
-            });
-        });
-    }
-
-    async function handleDieticianPortal(u) {
-        db.collection('dieticians').doc(u).onSnapshot(doc => {
-            if(doc.exists && doc.data().code) document.getElementById('currentCodeDisplay').innerText = "KOD: " + doc.data().code;
-            listenPatients(u);
-        });
-    }
-
-    function listenPatients(d) {
-        db.collection('dieticians').doc(d).onSnapshot(doc => {
-            const list = document.getElementById('patientList'); list.innerHTML = '';
-            if(doc.exists && doc.data().patients) {
-                doc.data().patients.forEach(p => {
-                    const card = document.createElement('div'); card.className = 'patient-card';
-                    card.innerHTML = `<div><div style="font-weight:900;">@${p}</div><div id="pLast_${p}" style="font-size:0.7rem; color:var(--accent);">Yükleniyor...</div></div><span>➔</span>`;
-                    card.onclick = () => showPatientHistory(p); list.appendChild(card);
-                    db.collection('partner_data').doc(p).collection('history').orderBy('unix', 'desc').limit(1).get().then(s => {
-                        if(!s.empty) document.getElementById('pLast_'+p).innerText = "Son: " + s.docs[0].data().mealName;
-                    });
-                });
-            }
-        });
-    }
-
-    function showPatientHistory(p) {
-        db.collection('partner_data').doc(p).collection('history').orderBy('unix', 'desc').limit(10).get().then(snap => {
-            let html = `<div style="text-align:center; border-bottom:1px solid var(--primary); padding-bottom:10px; margin-bottom:10px;"><h3>@${p} Son Raporları</h3></div>`;
-            snap.forEach(doc => {
-                const d = doc.data();
-                html += `<div class="history-box" onclick="openDetail(\`${d.fullText.replace(/`/g, "'")}\`)">🕒 ${d.date}<br>🍽️ ${d.mealName} (Puan: ${d.score})</div>`;
-            });
-            document.getElementById('modalBody').innerHTML = html; document.getElementById('detailModal').style.display = 'block';
-        });
-    }
-
-    async function askLara() {
-        const inp = document.getElementById('laraInput'); const disp = document.getElementById('laraChatDisplay'); const q = inp.value.trim(); if(!q) return;
-        disp.innerHTML += `<div class="msg-user">${q}</div>`; inp.value = ''; disp.scrollTop = disp.scrollHeight;
-        try {
-            const r = await fetch('/api/analyze', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode: 'lara', user_data: q, lang: currentLang }) });
-            const d = await r.json(); disp.innerHTML += `<div class="msg-lara">${d.analysis}</div>`; disp.scrollTop = disp.scrollHeight;
-        } catch(e) { disp.innerHTML += `<div class="msg-lara">Hata oluştu.</div>`; }
-    }
-
-    async function generateSportProgram() {
-        const info = `Yaş:${document.getElementById('sqAge').value}, Kilo:${document.getElementById('sqWeight').value}, Gün:${document.getElementById('sqDays').value}, Hedef:${document.getElementById('sqGoal').value}`;
-        document.getElementById('sportInputArea').style.display = 'none'; document.getElementById('sportLoadingArea').style.display = 'block';
-        try {
-            const r = await fetch('/api/analyze', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mode: 'spor', user_data: info, lang: currentLang }) });
-            const d = await r.json();
-            document.getElementById('sportLoadingArea').style.display = 'none'; document.getElementById('sportResultArea').style.display = 'block'; document.getElementById('sportPlanContent').innerText = d.analysis;
-        } catch(e) { alert("Hata"); resetSportModal(); }
-    }
-
-    async function connectToDietician() {
-        const c = document.getElementById('dietCodeInput').value.trim().toUpperCase();
-        const me = auth.currentUser.displayName.toLowerCase();
-        const q = await db.collection('dieticians').where('code', '==', c).get();
-        if(q.empty) return alert("Hatalı Kod.");
-        const dID = q.docs[0].id;
-        await db.collection('dieticians').doc(dID).update({ patients: firebase.firestore.FieldValue.arrayUnion(me) });
-        await db.collection('partner_data').doc(me).update({ linkedDietician: dID });
-        alert("Bağlandınız."); checkDieticianLink();
-    }
-
-    async function disconnectDietician() {
-        if(!confirm("Diyetisyeninizden ayrılmak istediğinize emin misiniz?")) return;
-        const me = auth.currentUser.displayName.toLowerCase();
-        const doc = await db.collection('partner_data').doc(me).get();
-        const dID = doc.data().linkedDietician;
-        if(dID) {
-            await db.collection('dieticians').doc(dID).update({ patients: firebase.firestore.FieldValue.arrayRemove(me) });
-            await db.collection('partner_data').doc(me).update({ linkedDietician: firebase.firestore.FieldValue.delete() });
-        }
-        alert("Bağlantı kesildi."); checkDieticianLink();
-    }
-
-    function checkDieticianLink() {
-        db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).get().then(doc => {
-            if(doc.exists && doc.data().linkedDietician) {
-                document.getElementById('dietStatus').innerText = "Diyetisyenim: @" + doc.data().linkedDietician;
-                document.getElementById('dietSearchMode').style.display = 'none';
-                document.getElementById('dietInfoMode').style.display = 'block';
-            } else {
-                document.getElementById('dietSearchMode').style.display = 'block';
-                document.getElementById('dietInfoMode').style.display = 'none';
-            }
-        });
-    }
-
-    function checkSpecific(u) { document.getElementById('partnerUser').value = u; checkPartner(); toggleFriends(); document.getElementById('partnerPanel').style.display = 'block'; document.getElementById('partnerPanel').scrollIntoView({ behavior: 'smooth' }); }
-    function deleteNotif(id) { db.collection('notifications').doc(id).delete(); }
-    function openDetail(txt) { document.getElementById('modalTitle').innerText = "Öğün Detayı"; document.getElementById('modalBody').innerHTML = `<div style="white-space:pre-line;">${txt}</div>`; document.getElementById('detailModal').style.display = 'block'; }
-    function resetCamera() { document.getElementById('video').play(); document.getElementById('freezeLayer').style.display = 'none'; document.getElementById('results').style.display = 'none'; document.getElementById('btnAna').style.display = 'block'; document.getElementById('btnRetry').style.display = 'none'; }
-    function toggleView(id) { document.querySelectorAll('.auth-container, #mainView, #dieticianView').forEach(v => v.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
-    async function doLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); } catch(e) { alert("Giriş Hatası"); } }
-    async function doReset() { const email = document.getElementById('lEmail').value; if(!email) return alert("Lütfen e-posta adresinizi yazın."); auth.sendPasswordResetEmail(email).then(() => alert("Şifre sıfırlama e-postası gönderildi.")).catch(e => alert("Hata: " + e.message)); }
-    async function doRegister() { const u = document.getElementById('rUser').value.trim(); const cred = await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); await cred.user.updateProfile({ displayName: u }); await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase(), role: userRole }, { merge: true }); location.reload(); }
-    function toggleNotifications() { const d = document.getElementById('notifDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
-    function toggleFriends() { const d = document.getElementById('friendsDropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
-    function togglePartner() { const p = document.getElementById('partnerPanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
-    function listenFriends() { db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).onSnapshot(doc => { if(doc.exists && doc.data().friends) { document.getElementById('friendsListContainer').innerHTML = doc.data().friends.map(f => `<div class="friend-pill" onclick="checkSpecific('${f}')">@${f}</div>`).join(''); } }); }
-    async function saveDieticianCode() { const u = auth.currentUser.displayName.toLowerCase(); const c = document.getElementById('myDietCodeInput').value.trim().toUpperCase(); await db.collection('dieticians').doc(u).set({ code: c }, { merge: true }); alert("Kaydedildi."); }
-    async function sendBroadcast() { const d = auth.currentUser.displayName.toLowerCase(); const m = document.getElementById('broadcastMsg').value.trim(); const doc = await db.collection('dieticians').doc(d).get(); doc.data().patients.forEach(p => { db.collection('notifications').add({ toUser: p, fromUser: d, message: "👨‍⚕️ Ödev: " + m, timestamp: Date.now() }); }); document.getElementById('broadcastMsg').value = ''; alert("Gönderildi."); }
-    function setRole(r, b) { userRole = r; document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active')); b.classList.add('active'); }
-    function resetSportModal() { document.getElementById('sportInputArea').style.display = 'block'; document.getElementById('sportLoadingArea').style.display = 'none'; document.getElementById('sportResultArea').style.display = 'none'; }
-    function downloadSportPDF() { html2pdf().from(document.getElementById('sportPlanContent')).save('Spor_Programi.pdf'); }
-    function downloadPDF() { html2pdf().from(document.getElementById('results')).save('BioChef_Analiz.pdf'); }
-    function sendFriendRequest() { const u = document.getElementById('partnerUser').value.trim().toLowerCase(); db.collection('notifications').add({ toUser: u, fromUser: auth.currentUser.displayName.toLowerCase(), message: "@"+auth.currentUser.displayName+" takip isteği attı.", timestamp: Date.now() }); alert("Gönderildi."); }
-    function showStreak() { let d = JSON.parse(localStorage.getItem('streak_' + auth.currentUser.uid) || '{"count":0}'); if(d.count > 0) { document.getElementById('streakBadge').style.display = 'block'; document.getElementById('streakCount').innerText = d.count; } }
-    setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+  // macro bars - reset then animate
+  const bars = [{id:'dmP',w:d.pw,v:d.p,c:'#b8f549'},{id:'dmC',w:d.cw,v:d.c,c:'#d4a853'},{id:'dmF',w:d.fw,v:d.f,c:'#e85d3a'},{id:'dmFi',w:d.fiw,v:d.fi,c:'#4d9fff'}];
+  const names = ['Protein','Karbonhidrat','Yağ','Lif'];
+  const macro = document.getElementById('drMacro');
+  macro.innerHTML = bars.map((b,i) => `
+    <div class="drm-item">
+      <div class="drm-header"><span class="drm-name">${names[i]}</span><span class="drm-val">${b.v}</span></div>
+      <div class="drm-track"><div class="drm-fill" id="${b.id}" style="width:0%;background:${b.c}"></div></div>
+    </div>`).join('');
+  requestAnimationFrame(() => {
+    bars.forEach(b => { const el = document.getElementById(b.id); if(el) el.style.width = b.w+'%'; });
+  });
+}
 </script>
+
 </body>
 </html>
