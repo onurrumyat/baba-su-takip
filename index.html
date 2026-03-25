@@ -352,15 +352,25 @@
 
     <div id="regView" class="auth-container" style="display:none;">
         <h1 id="txtRegTitle">KAYIT OL</h1>
-        <div class="role-selector">
-            <button class="role-btn active" onclick="setRole('user', this)">DANIŞAN</button>
-            <button class="role-btn" onclick="setRole('dietician', this)">DİYETİSYEN</button>
+        
+        <div id="regFields">
+            <div class="role-selector">
+                <button class="role-btn active" onclick="setRole('user', this)">DANIŞAN</button>
+                <button class="role-btn" onclick="setRole('dietician', this)">DİYETİSYEN</button>
+            </div>
+            <input type="email" id="rEmail" placeholder="E-posta Adresi">
+            <input type="text" id="rUser" placeholder="Kullanıcı Adı">
+            <input type="password" id="rPass" placeholder="Şifre">
+            <button class="btn btn-sub" onclick="doRegister()">HESABI OLUŞTUR</button>
+            <button class="btn btn-outline" onclick="toggleView('loginView')">Geri Dön</button>
         </div>
-        <input type="email" id="rEmail" placeholder="E-posta Adresi">
-        <input type="text" id="rUser" placeholder="Kullanıcı Adı">
-        <input type="password" id="rPass" placeholder="Şifre">
-        <button class="btn btn-sub" onclick="doRegister()">HESABI OLUŞTUR</button>
-        <button class="btn btn-outline" onclick="toggleView('loginView')">Geri Dön</button>
+        
+        <div id="verifyFields" style="display:none;">
+            <p style="color:var(--text-muted); text-align:center; font-size:0.85rem; margin-bottom:15px;">E-posta adresinize gönderilen 6 haneli kodu giriniz.</p>
+            <input type="text" id="vCode" placeholder="6 Haneli Kod" maxlength="6" style="letter-spacing: 5px; font-weight: bold; font-size: 1.2rem; text-align: center;">
+            <button class="btn btn-main" onclick="verifyAndRegister()">KODU DOĞRULA</button>
+            <button class="btn btn-outline" onclick="cancelVerify()">İptal Et</button>
+        </div>
     </div>
 
     <div id="dieticianView" style="display:none;">
@@ -488,6 +498,10 @@
     let userRole = 'user';
     let dailyTotals = { protein: 0, carb: 0, fat: 0, cal: 0 };
     const dailyLimits = { protein: 150, carb: 200, fat: 70, cal: 2000 };
+    
+    // YENİ ONAY SİSTEMİ İÇİN GEÇİCİ DEĞİŞKENLER
+    let generatedCode = null;
+    let pendingReg = null;
 
     const langData = {
         tr: {
@@ -556,7 +570,6 @@
     // AUTH İŞLEMLERİ
     auth.onAuthStateChanged(user => {
         if (user) {
-            if (!user.emailVerified) { auth.signOut(); return; } // E-posta doğrulama kontrolü
             db.collection('partner_data').doc(user.displayName.toLowerCase()).get().then(doc => {
                 const data = doc.data() || {};
                 if(data.role === 'dietician') {
@@ -883,7 +896,7 @@
         });
     }
 
-    // YARDIMCI KÜÇÜK FONKSİYONLAR (Temiz Formatlı)
+    // YARDIMCI KÜÇÜK FONKSİYONLAR
     function checkSpecific(u) { 
         document.getElementById('partnerUser').value = u; 
         checkPartner(); 
@@ -916,7 +929,13 @@
         document.getElementById(id).style.display = 'block'; 
     }
     
-    async function doLogin() { try { const cred = await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); if(!cred.user.emailVerified) { auth.signOut(); alert("Hesabınıza giriş yapabilmek için lütfen e-posta adresinize gönderilen doğrulama linkine tıklayın."); return; } } catch(e) { alert("Giriş Hatası: Lütfen bilgilerinizi kontrol edin."); } }
+    async function doLogin() { 
+        try { 
+            await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); 
+        } catch(e) { 
+            alert("Giriş Hatası: Lütfen bilgilerinizi kontrol edin."); 
+        } 
+    }
     
     async function doReset() { 
         const email = document.getElementById('lEmail').value; 
@@ -924,8 +943,51 @@
         auth.sendPasswordResetEmail(email).then(() => alert("Şifre sıfırlama e-postası gönderildi.")).catch(e => alert("Hata: " + e.message)); 
     }
     
-    async function doRegister() { const u = document.getElementById('rUser').value.trim(); const cred = await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); await cred.user.updateProfile({ displayName: u }); await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase(), role: userRole }, { merge: true }); await cred.user.sendEmailVerification(); auth.signOut(); alert("Kayıt başarılı! Sisteme giriş yapabilmek için lütfen e-postanıza gönderilen doğrulama linkini onaylayın."); location.reload(); }
+    // ==== YENİ 6 HANELİ KAYIT MANTIĞI ====
+    async function doRegister() { 
+        const email = document.getElementById('rEmail').value.trim();
+        const pass = document.getElementById('rPass').value;
+        const u = document.getElementById('rUser').value.trim();
+        
+        if(!email || !pass || !u) return alert("Lütfen tüm alanları doldurun.");
+        
+        // Simülasyon: 6 haneli rastgele kod üretilir.
+        generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+        pendingReg = { email, pass, u, role: userRole };
+        
+        document.getElementById('regFields').style.display = 'none';
+        document.getElementById('verifyFields').style.display = 'block';
+        
+        // TEST İÇİN KOD EKRANA BASTIRILIYOR (Gerçek hayatta backend servisine istek atıp mail attırırsın)
+        alert("TEST BİLGİSİ (Maile gidecek kod): " + generatedCode);
+    }
     
+    async function verifyAndRegister() {
+        const code = document.getElementById('vCode').value.trim();
+        if(code !== generatedCode) return alert("Hatalı kod girdiniz.");
+        
+        try {
+            const cred = await auth.createUserWithEmailAndPassword(pendingReg.email, pendingReg.pass);
+            await cred.user.updateProfile({ displayName: pendingReg.u });
+            await db.collection('partner_data').doc(pendingReg.u.toLowerCase()).set({ username: pendingReg.u.toLowerCase(), role: pendingReg.role }, { merge: true });
+            
+            alert("Hesabınız başarıyla oluşturuldu! Sisteme yönlendiriliyorsunuz...");
+            location.reload();
+        } catch(e) {
+            alert("Kayıt Hatası: " + e.message);
+            cancelVerify();
+        }
+    }
+    
+    function cancelVerify() {
+        document.getElementById('verifyFields').style.display = 'none';
+        document.getElementById('regFields').style.display = 'block';
+        generatedCode = null;
+        pendingReg = null;
+        document.getElementById('vCode').value = '';
+    }
+    // ======================================
+
     function toggleNotifications() { 
         const d = document.getElementById('notifDropdown'); 
         d.style.display = d.style.display === 'none' ? 'block' : 'none'; 
