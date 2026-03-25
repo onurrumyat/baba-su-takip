@@ -556,6 +556,7 @@
     // AUTH İŞLEMLERİ
     auth.onAuthStateChanged(user => {
         if (user) {
+            if (!user.emailVerified) { auth.signOut(); return; } // E-posta doğrulama kontrolü
             db.collection('partner_data').doc(user.displayName.toLowerCase()).get().then(doc => {
                 const data = doc.data() || {};
                 if(data.role === 'dietician') {
@@ -915,13 +916,7 @@
         document.getElementById(id).style.display = 'block'; 
     }
     
-    async function doLogin() { 
-        try { 
-            await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); 
-        } catch(e) { 
-            alert("Giriş Hatası: Lütfen bilgilerinizi kontrol edin."); 
-        } 
-    }
+    async function doLogin() { try { const cred = await auth.signInWithEmailAndPassword(document.getElementById('lEmail').value, document.getElementById('lPass').value); if(!cred.user.emailVerified) { auth.signOut(); alert("Hesabınıza giriş yapabilmek için lütfen e-posta adresinize gönderilen doğrulama linkine tıklayın."); return; } } catch(e) { alert("Giriş Hatası: Lütfen bilgilerinizi kontrol edin."); } }
     
     async function doReset() { 
         const email = document.getElementById('lEmail').value; 
@@ -929,13 +924,7 @@
         auth.sendPasswordResetEmail(email).then(() => alert("Şifre sıfırlama e-postası gönderildi.")).catch(e => alert("Hata: " + e.message)); 
     }
     
-    async function doRegister() { 
-        const u = document.getElementById('rUser').value.trim(); 
-        const cred = await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); 
-        await cred.user.updateProfile({ displayName: u }); 
-        await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase(), role: userRole }, { merge: true }); 
-        location.reload(); 
-    }
+    async function doRegister() { const u = document.getElementById('rUser').value.trim(); const cred = await auth.createUserWithEmailAndPassword(document.getElementById('rEmail').value, document.getElementById('rPass').value); await cred.user.updateProfile({ displayName: u }); await db.collection('partner_data').doc(u.toLowerCase()).set({ username: u.toLowerCase(), role: userRole }, { merge: true }); await cred.user.sendEmailVerification(); auth.signOut(); alert("Kayıt başarılı! Sisteme giriş yapabilmek için lütfen e-postanıza gönderilen doğrulama linkini onaylayın."); location.reload(); }
     
     function toggleNotifications() { 
         const d = document.getElementById('notifDropdown'); 
