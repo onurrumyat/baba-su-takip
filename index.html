@@ -13,6 +13,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
+        /* --- KÖK DEĞİŞKENLER VE TEMEL AYARLAR --- */
         :root { 
             --bg: #050b14; 
             --card-bg: rgba(22, 27, 42, 0.65); 
@@ -40,7 +41,7 @@
             background-attachment: fixed;
         }
 
-        /* Startup Style Glassmorphism Card */
+        /* --- ANA KART TASARIMI --- */
         .app-card { 
             width: 100%; 
             max-width: 440px; 
@@ -67,7 +68,7 @@
             letter-spacing: -0.5px;
         }
 
-        /* Enhanced Inputs */
+        /* --- INPUT VE BUTONLAR --- */
         input, select, textarea { 
             width: 100%; 
             padding: 16px; 
@@ -87,7 +88,6 @@
             background: rgba(11, 15, 26, 0.8);
         }
 
-        /* Premium Buttons */
         .btn { 
             width: 100%; 
             padding: 16px; 
@@ -111,7 +111,7 @@
         .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--glass-border); margin-top: 10px; font-size: 0.85rem; }
         .btn-outline:hover { background: rgba(255,255,255,0.05); color: white; }
 
-        /* Camera Box */
+        /* --- KAMERA VE SONUÇ EKRANI --- */
         .cam-box { 
             width: 100%; 
             aspect-ratio: 1/1; 
@@ -133,7 +133,6 @@
             animation: pulse-overlay 2s infinite;
         }
 
-        /* Results & Reports */
         #results { display: none; flex-direction: column; gap: 15px; margin-top: 25px; padding: 0; background: transparent; }
         .report-card { 
             background: rgba(11, 15, 26, 0.7); 
@@ -149,7 +148,6 @@
         .report-tag { font-size: 0.75rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
         .report-txt { font-size: 0.95rem; line-height: 1.7; color: #e2e8f0; white-space: pre-line; font-weight: 500; }
         
-        /* Progress & Scores */
         .score-container { margin-top: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; }
         .score-label { display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 8px; color: var(--text-muted); font-weight: bold; }
         .score-bar-bg { height: 10px; width: 100%; background: linear-gradient(to right, #ef4444, #f59e0b, #10b981); border-radius: 10px; position: relative; }
@@ -160,7 +158,7 @@
             box-shadow: 0 0 15px rgba(255,255,255,0.6); z-index: 10; 
         }
 
-        /* Lists & History */
+        /* --- GEÇMİŞ VE LİSTELER --- */
         .history-box { 
             background: rgba(255,255,255,0.03); padding: 18px; border-radius: 18px; 
             margin-top: 12px; font-size: 0.9rem; border-left: 4px solid var(--primary); 
@@ -171,7 +169,6 @@
         .history-meta { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; }
         .history-meal { color: var(--text); font-weight: 800; font-size: 1rem; }
         
-        /* Badges & Notifications */
         .streak-badge { 
             display:none; background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(249, 115, 22, 0.05)); 
             color:#f97316; padding:8px 16px; border-radius:20px; font-weight:900; font-size:0.9rem; 
@@ -204,11 +201,11 @@
         
         .user-tag { font-size: 1.15rem; font-weight: 900; color: var(--primary); margin-top: 5px; letter-spacing: 0.5px; }
         
-        /* Custom Selectors & Modals */
         .role-selector { display: flex; background: rgba(0,0,0,0.3); border-radius: 16px; margin-bottom: 20px; padding: 6px; border: 1px solid var(--glass-border); }
         .role-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; background: transparent; color: var(--text-muted); cursor: pointer; font-weight: 700; transition: 0.3s; font-size: 0.9rem; }
         .role-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
         
+        /* --- MODAL TASARIMLARI --- */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); padding: 20px; overflow-y: auto; }
         .modal-content { 
             background: var(--card-bg); margin: 10vh auto auto auto; padding: 30px; 
@@ -227,7 +224,6 @@
         .btn-neutral { background: rgba(255,255,255,0.05) !important; color: white !important; font-size: 0.8rem; padding: 14px; border: 1px solid var(--glass-border) !important; }
         .btn-neutral:hover { background: rgba(255,255,255,0.1) !important; }
         
-        /* Chat UI (Lara) */
         .chat-box { display: flex; flex-direction: column; gap: 12px; max-height: 350px; overflow-y: auto; margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 20px; border: 1px solid var(--glass-border); scrollbar-width: thin; }
         .msg-lara { align-self: flex-start; background: linear-gradient(135deg, var(--neutral), #2d3748); color: white; padding: 12px 16px; border-radius: 20px 20px 20px 4px; font-size: 0.9rem; max-width: 85%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); line-height: 1.5; }
         .msg-user { align-self: flex-end; background: linear-gradient(135deg, var(--primary), var(--primary-hover)); color: white; padding: 12px 16px; border-radius: 20px 20px 4px 20px; font-size: 0.9rem; max-width: 85%; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
@@ -241,7 +237,6 @@
         .side-by-side-btns { display: flex; gap: 12px; margin-top: 15px; }
         .side-by-side-btns .btn { flex: 1; margin: 0; }
 
-        /* GÜNLÜK MAKRO LİMİT ŞABLONU */
         .macro-tracker { background: rgba(0,0,0,0.2); border-radius: 24px; padding: 20px; margin-top: 20px; border: 1px solid var(--glass-border); display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .macro-item { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.02); }
         .macro-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; margin-bottom: 8px; display: block; letter-spacing: 1px; }
@@ -249,13 +244,12 @@
         .macro-bar { height: 100%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 4px; }
         .macro-val { font-size: 0.85rem; font-weight: 900; color: var(--text); }
         
-        /* Custom Scrollbar for a polished look */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
 
-        /* EKLENEN YENİ CSS: SEKME SİSTEMİ VE ALT NAVİGASYON BARI */
+        /* --- ALT NAVİGASYON BARI VE SEKMELER --- */
         .bottom-nav { 
             position: fixed; bottom: 0; left: 0; width: 100%; height: 75px; 
             background: rgba(10, 15, 28, 0.95); backdrop-filter: blur(15px); 
@@ -325,7 +319,11 @@
     <div class="modal-content">
         <h3 id="modalTitle" style="color:var(--primary); margin-bottom:20px; text-align:center; font-weight: 900;">Analiz Detayı</h3>
         <div id="modalBody" class="report-txt" style="max-height: 400px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 20px; border: 1px solid var(--glass-border);"></div>
-        <button class="btn btn-sub" style="margin-top:20px;" onclick="document.getElementById('detailModal').style.display='none'">Kapat</button>
+        
+        <div class="side-by-side-btns" style="margin-top:20px;">
+            <button id="btnModalBack" class="btn btn-neutral" style="display:none;" onclick="goBackToPatientHistory()">🔙 GERİ GİT</button>
+            <button class="btn btn-sub" onclick="document.getElementById('detailModal').style.display='none'">KAPAT</button>
+        </div>
     </div>
 </div>
 
@@ -511,11 +509,11 @@
             </div>
 
             <h3 style="margin-top:30px; margin-bottom:15px; border-bottom:1px solid var(--glass-border); padding-bottom:10px; font-weight: 800;">📅 Son 7 Günlük Özet</h3>
-            <div id="profileHistoryList" style="max-height: 250px; overflow-y: auto; padding-right: 5px; scrollbar-width: thin;"></div>
+            <div id="profileHistoryList" style="max-height: 300px; overflow-y: auto; padding-right: 5px; scrollbar-width: thin;"></div>
 
             <button id="btnHistToggle" class="btn btn-outline" onclick="toggleHistory()" style="margin-top:15px; display:none;">TÜM GEÇMİŞ</button>
             <div id="historyPanel" style="display:none; margin-top:15px;">
-                <div id="historyList" style="max-height: 250px; overflow-y: auto; padding-right: 5px; scrollbar-width: thin;"></div>
+                <div id="historyList" style="max-height: 300px; overflow-y: auto; padding-right: 5px; scrollbar-width: thin;"></div>
             </div>
 
             <button id="btnOut" class="btn btn-outline" style="margin-top: 35px; border-color:var(--danger); color:var(--danger);" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
@@ -540,7 +538,7 @@
 </nav>
 
 <script>
-    // FİREBASE YAPILANDIRMASI
+    // --- FİREBASE YAPILANDIRMASI (Sabit Bırakıldı) ---
     const firebaseConfig = { 
         apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA", 
         authDomain: "voice2post-9e8ca.firebaseapp.com", 
@@ -553,13 +551,16 @@
     const auth = firebase.auth(); 
     const db = firebase.firestore();
 
-    // DEĞİŞKENLER & SABİTLER
+    // --- DEĞİŞKENLER & SABİTLER ---
     let currentLang = 'tr';
     let userRole = 'user';
     let dailyTotals = { protein: 0, carb: 0, fat: 0, cal: 0 };
     const dailyLimits = { protein: 150, carb: 200, fat: 70, cal: 2000 };
     let generatedCode = null;
     let pendingReg = null;
+    
+    // GÜNCELLENDİ: Geri butonu için güncel hastayı aklında tutacak değişken
+    let currentPatientForBack = null;
 
     const langData = {
         tr: {
@@ -576,7 +577,7 @@
         }
     };
 
-    // --- YENİ EKLENEN SEKME GEÇİŞ FONKSİYONU ---
+    // --- SEKME GEÇİŞ FONKSİYONU ---
     function switchTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -584,12 +585,11 @@
         document.getElementById(tabId).classList.add('active');
         document.querySelector(`.nav-item[onclick="switchTab('${tabId}')"]`).classList.add('active');
         
-        // Ana sayfaya gelirse kamerayı tetikle, profile gelirse geçmişi yükle
         if(tabId === 'tab-home') startCamera();
         if(tabId === 'tab-profile') loadProfileHistory7Days();
     }
 
-    // --- YENİ EKLENEN 7 GÜNLÜK PROFİL GEÇMİŞİ FONKSİYONU ---
+    // --- 7 GÜNLÜK PROFİL GEÇMİŞİ FONKSİYONU ---
     function loadProfileHistory7Days() {
         let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
         const now = Date.now(); 
@@ -608,7 +608,7 @@
         }
     }
 
-    // UI GÜNCELLEMELERİ
+    // --- UI GÜNCELLEMELERİ VE MAKRO HESAPLARI ---
     function updateMacroUI() {
         const p = (dailyTotals.protein / dailyLimits.protein) * 100;
         const c = (dailyTotals.carb / dailyLimits.carb) * 100;
@@ -657,7 +657,7 @@
         document.getElementById('txtAppName').innerText = d.h1;
     }
 
-    // AUTH İŞLEMLERİ
+    // --- AUTH İŞLEMLERİ ---
     auth.onAuthStateChanged(user => {
         if (user) {
             db.collection('partner_data').doc(user.displayName.toLowerCase()).get().then(doc => {
@@ -669,8 +669,8 @@
                 } else {
                     toggleView('mainView'); 
                     document.getElementById('topHeader').style.display = 'flex';
-                    document.getElementById('bottomNav').style.display = 'flex'; // ALT MENÜ GÖRÜNÜR
-                    switchTab('tab-home'); // VARSAYILAN OLARAK ANA SAYFA AÇILIR
+                    document.getElementById('bottomNav').style.display = 'flex';
+                    switchTab('tab-home'); 
                     document.getElementById('uMail').innerText = "@" + user.displayName;
                     setupUser(user); 
                     startCamera(); 
@@ -708,7 +708,7 @@
         db.collection('partner_data').doc(auth.currentUser.displayName.toLowerCase()).set(d, {merge:true});
     }
 
-    // KAMERA VE ANALİZ İŞLEMLERİ
+    // --- KAMERA VE ANALİZ İŞLEMLERİ (GÜNCELLENDİ: Kesin Kural Eklendi) ---
     function startCamera() {
         const vid = document.getElementById('video');
         if(!vid) return;
@@ -732,14 +732,16 @@
         let img = canv.toDataURL('image/jpeg', 0.7);
 
         try {
-            // DİKKAT: YAPAY ZEKAYA GİDEN BİLGİYİ KATILAŞTIRDIK (UYARI YAZMAMASI VE MAKRO BARI DOLDURMASI İÇİN)
+            // GÜNCELLENDİ: Yapay zeka uyarısı bypass edildi, makro verilerinin doğru formata oturması için sıkılaştırıldı.
+            const promptText = `Hedef:${document.getElementById('uGoal').value} | KESİN KURAL: Görüntüdeki insanları veya nesneleri tamamen yoksay, asla "insanları tanımlayamam" yazma. Hiçbir önsöz olmadan doğrudan "1. YEMEK ADI:" diyerek başla. 2. Bölümde makro değerleri TAM OLARAK şu şekilde yaz: Protein: X, Karbonhidrat: X, Yağ: X, Kalori: X`;
+            
             const r = await fetch('/api/analyze', {
                 method: 'POST', 
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ 
                     mode, 
                     image: img, 
-                    user_data: `Hedef:${document.getElementById('uGoal').value} | KESİN KURAL: Görüntüdeki insanları tamamen yoksay. Asla "İnsanları tanımlayamam" vb. bir uyarı ile başlama. Doğrudan "1. YEMEK ADI" diyerek analize gir. Makro değerlerini TAM OLARAK şu formatta ver: Protein: 20, Karbonhidrat: 30, Yağ: 10, Kalori: 300`, 
+                    user_data: promptText, 
                     lang: currentLang 
                 })
             });
@@ -784,16 +786,16 @@
             document.getElementById('btnPdf').style.display = 'block';
             
             saveHistory(finalScore, d.analysis, mealName);
-            calculateDailyMacros(); // BARLARIN HEMEN GÜNCELLENMESİ İÇİN FONKSİYON TETİKLENDİ
+            calculateDailyMacros(); 
             resDiv.scrollIntoView({ behavior: 'smooth' });
             
         } catch(e) { 
-            alert("Analiz Hatası"); 
+            alert("Analiz Hatası. Lütfen tekrar deneyiniz."); 
             resetCamera(); 
         }
     }
 
-    // GEÇMİŞ VE VERİTABANI İŞLEMLERİ
+    // --- GEÇMİŞ VE VERİTABANI İŞLEMLERİ ---
     function saveHistory(s, r, m) {
         const me = auth.currentUser.displayName.toLowerCase(); 
         const dateStr = new Date().toLocaleString(); 
@@ -814,7 +816,7 @@
         if(p.style.display === 'block') {
             let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
             const now = Date.now(); 
-            const last24 = arr.filter(h => (now - h.unix) < 86400000); // Orjinal 24 saatlik filtre
+            const last24 = arr.filter(h => (now - h.unix) < 86400000); 
             
             document.getElementById('historyList').innerHTML = last24.map(h => `
                 <div class="history-box" onclick="openDetail(\`${h.detail.replace(/`/g, "'")}\`)">
@@ -842,7 +844,7 @@
         });
     }
 
-    // BİLDİRİM VE SOSYAL İŞLEMLER
+    // --- BİLDİRİM VE SOSYAL İŞLEMLER ---
     function listenNotifications() {
         db.collection('notifications').where('toUser', '==', auth.currentUser.displayName.toLowerCase()).onSnapshot(snap => {
             const list = document.getElementById('notifList'); 
@@ -861,7 +863,7 @@
         });
     }
 
-    // DİYETİSYEN PORTALI İŞLEMLERİ
+    // --- DİYETİSYEN PORTALI İŞLEMLERİ (GÜNCELLENDİ: ÖZEL MESAJ SİSTEMİ EKLENDİ) ---
     async function handleDieticianPortal(u) {
         db.collection('dieticians').doc(u).onSnapshot(doc => {
             if(doc.exists && doc.data().code) {
@@ -892,18 +894,60 @@
     }
 
     function showPatientHistory(p) {
+        currentPatientForBack = p; // Geri dönmek için hastayı kaydet
+        document.getElementById('btnModalBack').style.display = 'none'; // Listede geri butonuna gerek yok
+        
         db.collection('partner_data').doc(p).collection('history').orderBy('unix', 'desc').limit(10).get().then(snap => {
-            let html = `<div style="text-align:center; border-bottom:1px solid var(--glass-border); padding-bottom:15px; margin-bottom:15px;"><h3 style="color:var(--primary);">@${p} Son Raporları</h3></div>`;
-            snap.forEach(doc => {
-                const d = doc.data();
-                html += `<div class="history-box" onclick="openDetail(\`${d.fullText.replace(/`/g, "'")}\`)">🕒 ${d.date}<br><span style="color:white; font-weight:bold;">🍽️ ${d.mealName}</span> (Puan: ${d.score})</div>`;
-            });
+            // GÜNCELLENDİ: Özel Mesaj Gönderme Alanı Eklendi
+            let html = `
+                <div style="text-align:center; border-bottom:1px solid var(--glass-border); padding-bottom:15px; margin-bottom:15px;">
+                    <h3 style="color:var(--primary);">@${p} Profili</h3>
+                </div>
+                <div style="background:rgba(14, 165, 233, 0.05); border: 1px solid rgba(14, 165, 233, 0.2); padding:15px; border-radius:15px; margin-bottom:20px;">
+                    <h4 style="font-size:0.85rem; color:var(--accent); margin-bottom:10px;">💬 Direkt Mesaj Gönder</h4>
+                    <input type="text" id="dmInput_${p}" placeholder="Hastaya özel mesaj yaz..." style="margin-bottom:10px; padding:12px; font-size:0.85rem; background:rgba(0,0,0,0.5);">
+                    <button class="btn btn-sub" style="padding:12px; font-size:0.8rem; margin:0;" onclick="sendDirectMessage('${p}')">MESAJI GÖNDER</button>
+                </div>
+                <h4 style="font-size:0.9rem; margin-bottom:10px; color:var(--text-muted);">Son Raporlar</h4>
+            `;
+            
+            if(snap.empty) {
+                html += `<div style="text-align:center; color:white;">Hastanın henüz analiz verisi yok.</div>`;
+            } else {
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    // isFromDietician = true flag'ı gönderiliyor ki Geri Git butonu gözüksün
+                    html += `<div class="history-box" onclick="openDetail(\`${d.fullText.replace(/`/g, "'")}\`, true)">🕒 ${d.date}<br><span style="color:white; font-weight:bold;">🍽️ ${d.mealName}</span> (Puan: ${d.score})</div>`;
+                });
+            }
+            
+            document.getElementById('modalTitle').innerText = "Danışan Detayı";
             document.getElementById('modalBody').innerHTML = html; 
             document.getElementById('detailModal').style.display = 'block';
         });
     }
 
-    // LARA (YAPAY ZEKA DİYETİSYEN) VE SPOR
+    // YENİ EKLENDİ: Direkt Mesaj Fonksiyonu
+    async function sendDirectMessage(patientName) {
+        const inputField = document.getElementById('dmInput_' + patientName);
+        const msg = inputField.value.trim();
+        if(!msg) return alert("Lütfen bir mesaj yazın.");
+        
+        try {
+            await db.collection('notifications').add({ 
+                toUser: patientName, 
+                fromUser: auth.currentUser.displayName.toLowerCase(), 
+                message: "👨‍⚕️ Diyetisyeniniz: " + msg, 
+                timestamp: Date.now() 
+            });
+            inputField.value = '';
+            alert("Mesaj hastaya başarıyla iletildi!");
+        } catch(error) {
+            alert("Mesaj gönderilemedi: " + error.message);
+        }
+    }
+
+    // --- LARA VE SPOR PLANLAMA ---
     async function askLara() {
         const inp = document.getElementById('laraInput'); 
         const disp = document.getElementById('laraChatDisplay'); 
@@ -950,7 +994,7 @@
         }
     }
 
-    // DİYETİSYEN BAĞLANTILARI
+    // --- DİYETİSYEN BAĞLANTILARI ---
     async function connectToDietician() {
         const c = document.getElementById('dietCodeInput').value.trim().toUpperCase();
         const me = auth.currentUser.displayName.toLowerCase();
@@ -993,7 +1037,7 @@
         });
     }
 
-    // YARDIMCI KÜÇÜK FONKSİYONLAR
+    // --- YARDIMCI KÜÇÜK FONKSİYONLAR ---
     function checkSpecific(u) { 
         document.getElementById('partnerUser').value = u; 
         checkPartner(); 
@@ -1006,10 +1050,25 @@
         db.collection('notifications').doc(id).delete(); 
     }
     
-    function openDetail(txt) { 
+    // GÜNCELLENDİ: isFromDietician parametresi eklenerek Geri Git butonu yönetimi sağlandı.
+    function openDetail(txt, isFromDietician = false) { 
         document.getElementById('modalTitle').innerText = "Öğün Detayı"; 
         document.getElementById('modalBody').innerHTML = `<div style="white-space:pre-line;">${txt}</div>`; 
+        
+        if(isFromDietician) {
+            document.getElementById('btnModalBack').style.display = 'block';
+        } else {
+            document.getElementById('btnModalBack').style.display = 'none';
+        }
+        
         document.getElementById('detailModal').style.display = 'block'; 
+    }
+    
+    // YENİ EKLENDİ: Hastanın profiline geri dönüş
+    function goBackToPatientHistory() {
+        if(currentPatientForBack) {
+            showPatientHistory(currentPatientForBack);
+        }
     }
     
     function resetCamera() { 
@@ -1040,7 +1099,7 @@
         auth.sendPasswordResetEmail(email).then(() => alert("Şifre sıfırlama e-postası gönderildi.")).catch(e => alert("Hata: " + e.message)); 
     }
     
-    // ==== YENİ 6 HANELİ KAYIT MANTIĞI ====
+    // --- KAYIT MANTIĞI ---
     async function doRegister() { 
         const email = document.getElementById('rEmail').value.trim();
         const pass = document.getElementById('rPass').value;
@@ -1048,7 +1107,6 @@
         
         if(!email || !pass || !u) return alert("Lütfen tüm alanları doldurun.");
         
-        // Simülasyon: 6 haneli rastgele kod üretilir.
         generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
         pendingReg = { email, pass, u, role: userRole };
         
@@ -1082,7 +1140,6 @@
         pendingReg = null;
         document.getElementById('vCode').value = '';
     }
-    // ======================================
 
     function toggleNotifications() { 
         const d = document.getElementById('notifDropdown'); 
