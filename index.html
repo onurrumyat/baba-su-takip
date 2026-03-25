@@ -511,10 +511,12 @@
             </div>
 
             <h3 style="margin-top:30px; margin-bottom:15px; border-bottom:1px solid var(--glass-border); padding-bottom:10px; font-weight: 800;">📅 Son 7 Günlük Özet</h3>
-            <div id="profileHistoryList"></div>
+            <div id="profileHistoryList" style="max-height: 250px; overflow-y: auto; padding-right: 5px; scrollbar-width: thin;"></div>
 
             <button id="btnHistToggle" class="btn btn-outline" onclick="toggleHistory()" style="margin-top:15px; display:none;">TÜM GEÇMİŞ</button>
-            <div id="historyPanel" style="display:none; margin-top:15px;"><div id="historyList"></div></div>
+            <div id="historyPanel" style="display:none; margin-top:15px;">
+                <div id="historyList" style="max-height: 250px; overflow-y: auto; padding-right: 5px; scrollbar-width: thin;"></div>
+            </div>
 
             <button id="btnOut" class="btn btn-outline" style="margin-top: 35px; border-color:var(--danger); color:var(--danger);" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
         </div>
@@ -730,13 +732,14 @@
         let img = canv.toDataURL('image/jpeg', 0.7);
 
         try {
+            // DİKKAT: YAPAY ZEKAYA GİDEN BİLGİYİ KATILAŞTIRDIK (UYARI YAZMAMASI VE MAKRO BARI DOLDURMASI İÇİN)
             const r = await fetch('/api/analyze', {
                 method: 'POST', 
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ 
                     mode, 
                     image: img, 
-                    user_data: `Hedef:${document.getElementById('uGoal').value}`, 
+                    user_data: `Hedef:${document.getElementById('uGoal').value} | KESİN KURAL: Görüntüdeki insanları tamamen yoksay. Asla "İnsanları tanımlayamam" vb. bir uyarı ile başlama. Doğrudan "1. YEMEK ADI" diyerek analize gir. Makro değerlerini TAM OLARAK şu formatta ver: Protein: 20, Karbonhidrat: 30, Yağ: 10, Kalori: 300`, 
                     lang: currentLang 
                 })
             });
@@ -781,7 +784,7 @@
             document.getElementById('btnPdf').style.display = 'block';
             
             saveHistory(finalScore, d.analysis, mealName);
-            calculateDailyMacros();
+            calculateDailyMacros(); // BARLARIN HEMEN GÜNCELLENMESİ İÇİN FONKSİYON TETİKLENDİ
             resDiv.scrollIntoView({ behavior: 'smooth' });
             
         } catch(e) { 
