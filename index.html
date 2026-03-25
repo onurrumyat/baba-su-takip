@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bio-Chef Pro | VIP Analiz</title>
+    <title>CaloXmeal | VIP Analiz</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
@@ -353,7 +353,7 @@
     </div>
 
     <div id="loginView" class="auth-container">
-        <h1 id="txtAppName">BIO-CHEF</h1>
+        <h1 id="txtAppName">CaloXmeal</h1>
         <div class="role-selector">
             <button class="role-btn active" id="btnRoleUser" onclick="setRole('user', this)">DANIŞAN</button>
             <button class="role-btn" id="btnRoleDietician" onclick="setRole('dietician', this)">DİYETİSYEN</button>
@@ -567,13 +567,13 @@
             headers: ["YEMEK ADI 🍽️","BESİN DEĞERLERİ 📊","NET TAVSİYE 💡","ÜRÜN ÖZETİ 🔍","SKOR 🎯"],
             notif: "Bildirimler", followers: "Takip Ettiklerin", hist: "GEÇMİŞ ANALİZLERİM", detail: "Detay Gör 🔍",
             ana: "📸 ANALİZ ET", retry: "🔄 YENİDEN ANALİZ ET", out: "GÜVENLİ ÇIKIŞ", friend: "👫 DİYET DOSTU", lara: "🤖 LARA", spor: "🏃‍♂️ SPOR",
-            seri: "Seri", loading: "🔍 İNCELENİYOR...", h1: "BIO-CHEF", login: "GİRİŞ YAP", reg: "Kayıt Ol", regTitle: "KAYIT OL"
+            seri: "Seri", loading: "🔍 İNCELENİYOR...", h1: "CaloXmeal", login: "GİRİŞ YAP", reg: "Kayıt Ol", regTitle: "KAYIT OL"
         },
         en: {
             headers: ["MEAL NAME 🍽️","NUTRITION 📊","ADVICE 💡","SUMMARY 🔍","SCORE 🎯"],
             notif: "Notifications", followers: "Following", hist: "ANALYSIS HISTORY", detail: "View Detail 🔍",
             ana: "📸 ANALYZE", retry: "🔄 RE-ANALYZE", out: "LOGOUT", friend: "👫 DIET PARTNER", lara: "🤖 LARA", spor: "🏃‍♂️ SPORT",
-            seri: "Streak", loading: "🔍 ANALYZING...", spLoading: "CREATING PLAN...", h1: "BIO-CHEF", login: "LOGIN", reg: "Sign Up", regTitle: "SIGN UP"
+            seri: "Streak", loading: "🔍 ANALYZING...", spLoading: "CREATING PLAN...", h1: "CaloXmeal", login: "LOGIN", reg: "Sign Up", regTitle: "SIGN UP"
         }
     };
 
@@ -795,7 +795,7 @@
         }
     }
 
-    // --- GEÇMİŞ VE VERİTABANI İŞLEMLERİ ---
+    // --- GEÇMİŞ VE VERİTABANI İŞLEMLER ---
     function saveHistory(s, r, m) {
         const me = auth.currentUser.displayName.toLowerCase(); 
         const dateStr = new Date().toLocaleString(); 
@@ -1195,11 +1195,11 @@
     }
     
     function downloadSportPDF() { 
-        html2pdf().from(document.getElementById('sportPlanContent')).save('BioChef_Spor_Programi.pdf'); 
+        html2pdf().from(document.getElementById('sportPlanContent')).save('CaloXmeal_Spor_Programi.pdf'); 
     }
     
     function downloadPDF() { 
-        html2pdf().from(document.getElementById('results')).save('BioChef_Analiz_Raporu.pdf'); 
+        html2pdf().from(document.getElementById('results')).save('CaloXmeal_Analiz_Raporu.pdf'); 
     }
     
     function sendFriendRequest() { 
