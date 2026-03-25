@@ -1,4 +1,7 @@
 // api/analyze.js
+// Bio-Chef Pro — AI Analysis Endpoint (GPT-4o Integrated)
+// ─────────────────────────────────────────────────────────
+
 const ALLOWED_MODES = ['yemek', 'spor', 'lara'];
 
 const buildPrompt = (mode, user_data, lang) => {
@@ -32,6 +35,7 @@ const buildPrompt = (mode, user_data, lang) => {
         };
     }
 
+    // GÜNCELLENMİŞ YEMEK ANALİZ MODU
     return {
         system: `Sen kıdemli bir gıda bilimcisi ve klinik diyetisyensin.
         Kullanıcı profili: ${user_data}.
@@ -74,6 +78,7 @@ export default async function handler(req, res) {
     try {
         const prompt = buildPrompt(mode, user_data, lang);
         
+        // Görseli prompt içine yerleştirme
         const userContent = mode === 'yemek' 
             ? prompt.user.map(b => 
                 b.type === 'image_url' 
@@ -91,7 +96,7 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 model: 'gpt-4o',
                 max_tokens: 1000,
-                temperature: 0.3, 
+                temperature: 0.3,
                 messages: [
                     { role: 'system', content: prompt.system },
                     { role: 'user', content: userContent },
