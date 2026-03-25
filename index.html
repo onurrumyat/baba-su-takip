@@ -36,6 +36,7 @@
             justify-content: center; 
             min-height: 100vh; 
             padding: 20px; 
+            padding-bottom: 100px; /* ALT NAVİGASYON İÇİN BOŞLUK EKLENDİ */
             background-attachment: fixed;
         }
 
@@ -253,19 +254,38 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
+        /* EKLENEN YENİ CSS: SEKME SİSTEMİ VE ALT NAVİGASYON BARI */
+        .bottom-nav { 
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 75px; 
+            background: rgba(10, 15, 28, 0.95); backdrop-filter: blur(15px); 
+            border-top: 1px solid var(--glass-border); display: none; 
+            justify-content: space-around; align-items: center; z-index: 9999; 
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .nav-item { 
+            display: flex; flex-direction: column; align-items: center; 
+            justify-content: center; color: var(--text-muted); width: 33%; 
+            cursor: pointer; transition: 0.3s; font-size: 0.75rem; font-weight: 800; 
+        }
+        .nav-item.active { color: var(--primary); }
+        .nav-icon { font-size: 1.5rem; margin-bottom: 4px; }
+        
+        .tab-content { display: none; width: 100%; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
     </style>
 </head>
 <body>
 
 <div id="laraModal" class="modal">
     <div class="modal-content">
-        <h3 id="txtLaraTitle" style="color:var(--accent); text-align:center; margin-bottom:20px; font-weight: 900;">🤖 YZ Diyetisyen: LARA</h3>
-        <div id="laraChatDisplay" class="chat-box">
-            <div id="txtLaraGreet" class="msg-lara">Merhaba! Ben Lara. Size sadece diyet, yemek ve spor konularında yardımcı olabilirim. Ne sormak istersiniz?</div>
-        </div>
+        <h3 id="txtLaraTitleModal" style="color:var(--accent); text-align:center; margin-bottom:20px; font-weight: 900;">🤖 YZ Diyetisyen: LARA</h3>
+        <div id="laraChatDisplayModal" class="chat-box"></div>
         <div style="display:flex; gap:10px;">
-            <input type="text" id="laraInput" placeholder="Mesajınızı yazın..." style="margin-bottom:0; text-align:left;">
-            <button class="btn btn-main" onclick="askLara()" style="width:70px; padding:0; font-size: 1.2rem;">🚀</button>
+            <input type="text" id="laraInputModal" placeholder="Mesajınızı yazın..." style="margin-bottom:0; text-align:left;">
+            <button class="btn btn-main" style="width:70px; padding:0; font-size: 1.2rem;">🚀</button>
         </div>
         <button class="btn btn-outline" onclick="document.getElementById('laraModal').style.display='none'">Kapat</button>
     </div>
@@ -309,8 +329,9 @@
     </div>
 </div>
 
-<div class="app-card">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 25px;">
+<div class="app-card" id="mainCardContainer">
+    
+    <div id="topHeader" style="display:none; justify-content:space-between; align-items:center; margin-bottom: 25px;">
         <div style="display: flex; align-items: center; gap: 15px;">
             <span onclick="changeLang('tr')" style="font-size: 1.6rem; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" title="Türkçe">🇹🇷</span>
             <span onclick="changeLang('en')" style="font-size: 1.6rem; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" title="English">🇺🇸</span>
@@ -319,13 +340,9 @@
             🔥 <span id="streakCount">0</span> <span id="txtSeri">Seri</span>
         </div>
         <div style="display: flex; gap:12px;">
-            <div class="bell-container" onclick="toggleNotifications()" id="bellIcon" style="display:none;">
+            <div class="bell-container" onclick="switchTab('tab-messages')" id="bellIcon" style="display:none;">
                 <span class="bell-icon" style="font-size: 1.2rem;">🔔</span>
                 <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
-                <div class="notif-dropdown" id="notifDropdown">
-                    <h4 id="txtNotHead" style="color:white; margin-bottom:15px; text-align:center; font-size: 0.95rem; font-weight: 800;">Bildirimler</h4>
-                    <div id="notifList"></div>
-                </div>
             </div>
             <div class="friends-btn" id="friendListBtn" onclick="toggleFriends()" style="display:none;">
                 <span style="font-size: 1.2rem;">👤</span>
@@ -352,7 +369,6 @@
 
     <div id="regView" class="auth-container" style="display:none;">
         <h1 id="txtRegTitle">KAYIT OL</h1>
-        
         <div id="regFields">
             <div class="role-selector">
                 <button class="role-btn active" onclick="setRole('user', this)">DANIŞAN</button>
@@ -364,7 +380,6 @@
             <button class="btn btn-sub" onclick="doRegister()">HESABI OLUŞTUR</button>
             <button class="btn btn-outline" onclick="toggleView('loginView')">Geri Dön</button>
         </div>
-        
         <div id="verifyFields" style="display:none;">
             <p style="color:var(--text-muted); text-align:center; font-size:0.85rem; margin-bottom:15px;">E-posta adresinize gönderilen 6 haneli kodu giriniz.</p>
             <input type="text" id="vCode" placeholder="6 Haneli Kod" maxlength="6" style="letter-spacing: 5px; font-weight: bold; font-size: 1.2rem; text-align: center;">
@@ -395,89 +410,132 @@
     </div>
 
     <div id="mainView" style="display:none;">
-        <div style="text-align: center; margin-bottom: 25px;">
-            <div id="clock" style="font-size: 2.5rem; font-weight: 900; color: var(--accent); letter-spacing: -1px; text-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);">00:00:00</div>
-            <div id="uMail" class="user-tag"></div> 
-        </div>
         
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom: 15px;">
-            <input type="number" id="uAge" placeholder="YAŞ" onchange="saveUserData()" style="margin-bottom:0;">
-            <input type="number" id="uWeight" placeholder="KİLO" onchange="saveUserData()" style="margin-bottom:0;">
-        </div>
-        <select id="uGoal" onchange="saveUserData()" style="font-weight: 600;">
-            <option value="Kilo Vermek">Kilo Vermek (-)</option>
-            <option value="Kilo Almak">Kilo Almak (+)</option>
-            <option value="Kiloyu Korumak">Kiloyu Korumak (=)</option>
-        </select>
-        
-        <div class="cam-box">
-            <video id="video" autoplay playsinline></video>
-            <div id="freezeLayer" class="freeze-overlay">🔍 İNCELENİYOR...</div>
-        </div>
-
-        <button id="btnAna" class="btn btn-main" onclick="runAI('yemek')" style="font-size: 1.1rem; padding: 20px;">📸 ANALİZ ET</button>
-        <button id="btnRetry" class="btn btn-sub" style="display:none; background: linear-gradient(135deg, var(--premium), #d97706); color:black; font-size: 1.1rem; padding: 20px;" onclick="resetCamera()">🔄 YENİDEN ANALİZ ET</button>
-
-        <div id="macroDashboard" class="macro-tracker">
-            <div class="macro-item">
-                <span class="macro-label">PROTEİN</span>
-                <div class="macro-progress"><div id="barProtein" class="macro-bar" style="width: 0%; background: linear-gradient(90deg, #0284c7, var(--accent));"></div></div>
-                <span id="valProtein" class="macro-val">0 / 150g</span>
+        <div id="tab-home" class="tab-content active">
+            <div style="text-align: center; margin-bottom: 25px;">
+                <div id="clock" style="font-size: 2.5rem; font-weight: 900; color: var(--accent); letter-spacing: -1px; text-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);">00:00:00</div>
             </div>
-            <div class="macro-item">
-                <span class="macro-label">KARB</span>
-                <div class="macro-progress"><div id="barCarb" class="macro-bar" style="width: 0%; background: linear-gradient(90deg, #d97706, var(--premium));"></div></div>
-                <span id="valCarb" class="macro-val">0 / 200g</span>
+            
+            <div class="cam-box">
+                <video id="video" autoplay playsinline></video>
+                <div id="freezeLayer" class="freeze-overlay">🔍 İNCELENİYOR...</div>
             </div>
-            <div class="macro-item">
-                <span class="macro-label">YAĞ</span>
-                <div class="macro-progress"><div id="barFat" class="macro-bar" style="width: 0%; background: linear-gradient(90deg, #b91c1c, var(--danger));"></div></div>
-                <span id="valFat" class="macro-val">0 / 70g</span>
-            </div>
-            <div class="macro-item">
-                <span class="macro-label">KALORİ</span>
-                <div class="macro-progress"><div id="barCal" class="macro-bar" style="width: 0%; background: linear-gradient(90deg, #059669, var(--primary));"></div></div>
-                <span id="valCal" class="macro-val">0 / 2000</span>
-            </div>
-        </div>
 
-        <div id="results"></div>
-        <button class="btn btn-main" id="btnPdf" style="display:none; background: linear-gradient(135deg, var(--danger), #b91c1c); margin-top:20px;" onclick="downloadPDF()">📄 PDF KAYDET</button>
+            <button id="btnAna" class="btn btn-main" onclick="runAI('yemek')" style="font-size: 1.1rem; padding: 20px;">📸 ANALİZ ET</button>
+            <button id="btnRetry" class="btn btn-sub" style="display:none; background: linear-gradient(135deg, var(--premium), #d97706); color:black; font-size: 1.1rem; padding: 20px;" onclick="resetCamera()">🔄 YENİDEN ANALİZ ET</button>
 
-        <button id="btnHistToggle" class="btn btn-outline" onclick="toggleHistory()" style="margin-top:30px; padding: 18px;">📚 GEÇMİŞ ANALİZLERİM</button>
-        <div id="historyPanel" style="display:none; margin-top:15px;"><div id="historyList"></div></div>
-
-        <button id="btnFriendToggle" class="btn btn-outline" style="border-color: rgba(255,255,255,0.1); color: var(--text); background: rgba(255,255,255,0.05); padding: 18px;" onclick="togglePartner()">👫 DİYET DOSTU</button>
-        <div id="partnerPanel" class="partner-box" style="display:none;">
-            <input type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin" style="background: rgba(0,0,0,0.5);">
-            <div class="side-by-side-btns">
-                <button class="btn btn-main" onclick="sendFriendRequest()">EKLE</button>
-                <button class="btn btn-sub" style="background: linear-gradient(135deg, var(--primary), var(--primary-hover)); margin-top:0;" onclick="checkPartner()">SORGULA</button>
+            <div id="macroDashboard" class="macro-tracker">
+                <div class="macro-item">
+                    <span class="macro-label">PROTEİN</span>
+                    <div class="macro-progress"><div id="barProtein" class="macro-bar" style="width: 0%; background: linear-gradient(90deg, #0284c7, var(--accent));"></div></div>
+                    <span id="valProtein" class="macro-val">0 / 150g</span>
+                </div>
+                <div class="macro-item">
+                    <span class="macro-label">KARB</span>
+                    <div class="macro-progress"><div id="barCarb" class="macro-bar" style="width: 0%; background: linear-gradient(90deg, #d97706, var(--premium));"></div></div>
+                    <span id="valCarb" class="macro-val">0 / 200g</span>
+                </div>
+                <div class="macro-item">
+                    <span class="macro-label">YAĞ</span>
+                    <div class="macro-progress"><div id="barFat" class="macro-bar" style="width: 0%; background: linear-gradient(90deg, #b91c1c, var(--danger));"></div></div>
+                    <span id="valFat" class="macro-val">0 / 70g</span>
+                </div>
+                <div class="macro-item">
+                    <span class="macro-label">KALORİ</span>
+                    <div class="macro-progress"><div id="barCal" class="macro-bar" style="width: 0%; background: linear-gradient(90deg, #059669, var(--primary));"></div></div>
+                    <span id="valCal" class="macro-val">0 / 2000</span>
+                </div>
             </div>
-            <div id="partnerResult" style="margin-top:20px; font-weight:bold; white-space:pre-line;"></div>
-            <div id="partnerHistoryList" style="margin-top:10px; text-align:left;"></div>
+
+            <div id="results"></div>
+            <button class="btn btn-main" id="btnPdf" style="display:none; background: linear-gradient(135deg, var(--danger), #b91c1c); margin-top:20px;" onclick="downloadPDF()">📄 PDF KAYDET</button>
+
+            <button id="btnSp" class="btn btn-neutral" style="margin-top:25px;" onclick="document.getElementById('sportQuestionsModal').style.display='block'">🏃‍♂️ SPOR PLANLA</button>
         </div>
 
-        <div class="split-btns">
-            <button id="btnSp" class="btn btn-neutral" onclick="document.getElementById('sportQuestionsModal').style.display='block'">🏃‍♂️ SPOR PLANLA</button>
-            <button id="btnLara" class="btn btn-neutral" onclick="document.getElementById('laraModal').style.display='block'">🤖 LARA'YA SOR</button>
-        </div>
-
-        <div id="dietConnectArea" class="partner-box" style="border-color: rgba(16, 185, 129, 0.3); background: rgba(16,185,129,0.05); margin-top:20px;">
-            <div id="dietSearchMode">
-                <h3 id="txtDietConn" style="color:var(--primary); font-size:1.05rem; font-weight: 800; margin-bottom: 15px;">Diyetisyene Bağlan</h3>
-                <input type="text" id="dietCodeInput" placeholder="Diyetisyen Kodunu Gir" maxlength="8" style="background: rgba(0,0,0,0.5); font-weight: bold; letter-spacing: 1px;">
-                <button id="btnDietConnSub" class="btn btn-sub" style="background: linear-gradient(135deg, var(--primary), var(--primary-hover)); margin-top:0;" onclick="connectToDietician()">KODLA BAĞLAN</button>
+        <div id="tab-messages" class="tab-content">
+            <h3 id="txtLaraTitle" style="color:var(--accent); margin-bottom:15px; font-weight: 900;">🤖 YZ Diyetisyen: LARA</h3>
+            <div id="laraChatDisplay" class="chat-box">
+                <div id="txtLaraGreet" class="msg-lara">Merhaba! Ben Lara. Size diyet, yemek ve spor konularında yardımcı olabilirim. Ne sormak istersiniz?</div>
             </div>
-            <div id="dietInfoMode" style="display:none; padding:10px;">
-                <p id="dietStatus" style="font-weight:900; color:var(--primary); font-size:1rem;"></p>
-                <button class="btn" style="background: linear-gradient(135deg, var(--danger), #b91c1c); padding:12px; font-size:0.8rem; margin-top:15px; width:auto;" onclick="disconnectDietician()">DİYETİSYENDEN AYRIL</button>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="laraInput" placeholder="Mesajınızı yazın..." style="margin-bottom:0; text-align:left;">
+                <button class="btn btn-main" onclick="askLara()" style="width:70px; padding:0; font-size: 1.2rem;">🚀</button>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 25px 0;">
+
+            <h3 style="color:white; margin-bottom:15px; font-weight: 800;">🔔 Gelen Bildirimler</h3>
+            <div id="notifList"></div>
+
+            <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 25px 0;">
+
+            <button id="btnFriendToggle" class="btn btn-outline" style="border-color: rgba(255,255,255,0.1); color: var(--text); background: rgba(255,255,255,0.05);" onclick="togglePartner()">👫 DİYET DOSTU ARAMA</button>
+            <div id="partnerPanel" class="partner-box" style="display:none;">
+                <input type="text" id="partnerUser" placeholder="Kullanıcı Adı Girin" style="background: rgba(0,0,0,0.5);">
+                <div class="side-by-side-btns">
+                    <button class="btn btn-main" onclick="sendFriendRequest()">EKLE</button>
+                    <button class="btn btn-sub" style="background: linear-gradient(135deg, var(--primary), var(--primary-hover)); margin-top:0;" onclick="checkPartner()">SORGULA</button>
+                </div>
+                <div id="partnerResult" style="margin-top:20px; font-weight:bold; white-space:pre-line;"></div>
+                <div id="partnerHistoryList" style="margin-top:10px; text-align:left;"></div>
             </div>
         </div>
 
-        <button id="btnOut" class="btn btn-outline" style="margin-top: 25px;" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
+        <div id="tab-profile" class="tab-content">
+            <div style="text-align:center; margin-bottom:20px;">
+                <div id="uMail" class="user-tag" style="font-size: 1.5rem;"></div> 
+                <p style="color:var(--text-muted); font-size:0.85rem; margin-top:5px;">Üye Profil Bilgileri</p>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom: 15px;">
+                <input type="number" id="uAge" placeholder="YAŞ" onchange="saveUserData()" style="margin-bottom:0;">
+                <input type="number" id="uWeight" placeholder="KİLO" onchange="saveUserData()" style="margin-bottom:0;">
+            </div>
+            <select id="uGoal" onchange="saveUserData()" style="font-weight: 600;">
+                <option value="Kilo Vermek">Kilo Vermek (-)</option>
+                <option value="Kilo Almak">Kilo Almak (+)</option>
+                <option value="Kiloyu Korumak">Kiloyu Korumak (=)</option>
+            </select>
+
+            <div id="dietConnectArea" class="partner-box" style="border-color: rgba(16, 185, 129, 0.3); background: rgba(16,185,129,0.05); margin-top:20px;">
+                <div id="dietSearchMode">
+                    <h3 id="txtDietConn" style="color:var(--primary); font-size:1.05rem; font-weight: 800; margin-bottom: 15px;">Diyetisyene Bağlan</h3>
+                    <input type="text" id="dietCodeInput" placeholder="Diyetisyen Kodunu Gir" maxlength="8" style="background: rgba(0,0,0,0.5); font-weight: bold; letter-spacing: 1px;">
+                    <button id="btnDietConnSub" class="btn btn-sub" style="background: linear-gradient(135deg, var(--primary), var(--primary-hover)); margin-top:0;" onclick="connectToDietician()">KODLA BAĞLAN</button>
+                </div>
+                <div id="dietInfoMode" style="display:none; padding:10px;">
+                    <p id="dietStatus" style="font-weight:900; color:var(--primary); font-size:1rem;"></p>
+                    <button class="btn" style="background: linear-gradient(135deg, var(--danger), #b91c1c); padding:12px; font-size:0.8rem; margin-top:15px; width:auto;" onclick="disconnectDietician()">DİYETİSYENDEN AYRIL</button>
+                </div>
+            </div>
+
+            <h3 style="margin-top:30px; margin-bottom:15px; border-bottom:1px solid var(--glass-border); padding-bottom:10px; font-weight: 800;">📅 Son 7 Günlük Özet</h3>
+            <div id="profileHistoryList"></div>
+
+            <button id="btnHistToggle" class="btn btn-outline" onclick="toggleHistory()" style="margin-top:15px; display:none;">TÜM GEÇMİŞ</button>
+            <div id="historyPanel" style="display:none; margin-top:15px;"><div id="historyList"></div></div>
+
+            <button id="btnOut" class="btn btn-outline" style="margin-top: 35px; border-color:var(--danger); color:var(--danger);" onclick="auth.signOut(); location.reload();">GÜVENLİ ÇIKIŞ</button>
+        </div>
+
     </div>
 </div>
+
+<nav class="bottom-nav" id="bottomNav">
+    <div class="nav-item active" onclick="switchTab('tab-home')">
+        <span class="nav-icon">🏠</span>
+        <span>ANA SAYFA</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('tab-messages')">
+        <span class="nav-icon">💬</span>
+        <span>MESAJLAR</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('tab-profile')">
+        <span class="nav-icon">👤</span>
+        <span>PROFİL</span>
+    </div>
+</nav>
 
 <script>
     // FİREBASE YAPILANDIRMASI
@@ -498,8 +556,6 @@
     let userRole = 'user';
     let dailyTotals = { protein: 0, carb: 0, fat: 0, cal: 0 };
     const dailyLimits = { protein: 150, carb: 200, fat: 70, cal: 2000 };
-    
-    // YENİ ONAY SİSTEMİ İÇİN GEÇİCİ DEĞİŞKENLER
     let generatedCode = null;
     let pendingReg = null;
 
@@ -517,6 +573,38 @@
             seri: "Streak", loading: "🔍 ANALYZING...", spLoading: "CREATING PLAN...", h1: "BIO-CHEF", login: "LOGIN", reg: "Sign Up", regTitle: "SIGN UP"
         }
     };
+
+    // --- YENİ EKLENEN SEKME GEÇİŞ FONKSİYONU ---
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        document.querySelector(`.nav-item[onclick="switchTab('${tabId}')"]`).classList.add('active');
+        
+        // Ana sayfaya gelirse kamerayı tetikle, profile gelirse geçmişi yükle
+        if(tabId === 'tab-home') startCamera();
+        if(tabId === 'tab-profile') loadProfileHistory7Days();
+    }
+
+    // --- YENİ EKLENEN 7 GÜNLÜK PROFİL GEÇMİŞİ FONKSİYONU ---
+    function loadProfileHistory7Days() {
+        let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
+        const now = Date.now(); 
+        const sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000;
+        const last7Days = arr.filter(h => (now - h.unix) < sevenDaysInMillis);
+        
+        const listDiv = document.getElementById('profileHistoryList');
+        if (last7Days.length === 0) {
+            listDiv.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:0.9rem;">Son 7 güne ait veri bulunamadı.</p>';
+        } else {
+            listDiv.innerHTML = last7Days.map(h => `
+                <div class="history-box" onclick="openDetail(\`${h.detail.replace(/`/g, "'")}\`)">
+                    <div class="history-meta">🕒 ${h.date} | ⭐ Puan: ${h.summary}/10</div>
+                    <div class="history-meal">🍽️ ${h.meal}</div>
+                </div>`).join('');
+        }
+    }
 
     // UI GÜNCELLEMELERİ
     function updateMacroUI() {
@@ -578,6 +666,9 @@
                     handleDieticianPortal(user.displayName.toLowerCase());
                 } else {
                     toggleView('mainView'); 
+                    document.getElementById('topHeader').style.display = 'flex';
+                    document.getElementById('bottomNav').style.display = 'flex'; // ALT MENÜ GÖRÜNÜR
+                    switchTab('tab-home'); // VARSAYILAN OLARAK ANA SAYFA AÇILIR
                     document.getElementById('uMail').innerText = "@" + user.displayName;
                     setupUser(user); 
                     startCamera(); 
@@ -589,6 +680,8 @@
                 }
             });
         } else { 
+            document.getElementById('topHeader').style.display = 'none';
+            document.getElementById('bottomNav').style.display = 'none';
             toggleView('loginView'); 
         }
     });
@@ -616,9 +709,10 @@
     // KAMERA VE ANALİZ İŞLEMLERİ
     function startCamera() {
         const vid = document.getElementById('video');
+        if(!vid) return;
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
             .then(s => { vid.srcObject = s; vid.play(); })
-            .catch(e => { alert("Kamera Hatası: " + e.message); });
+            .catch(e => { console.log("Kamera Hatası: " + e.message); });
     }
 
     async function runAI(mode) {
@@ -717,7 +811,7 @@
         if(p.style.display === 'block') {
             let arr = JSON.parse(localStorage.getItem('history_' + auth.currentUser.uid) || '[]');
             const now = Date.now(); 
-            const last24 = arr.filter(h => (now - h.unix) < 86400000);
+            const last24 = arr.filter(h => (now - h.unix) < 86400000); // Orjinal 24 saatlik filtre
             
             document.getElementById('historyList').innerHTML = last24.map(h => `
                 <div class="history-box" onclick="openDetail(\`${h.detail.replace(/`/g, "'")}\`)">
@@ -958,7 +1052,6 @@
         document.getElementById('regFields').style.display = 'none';
         document.getElementById('verifyFields').style.display = 'block';
         
-        // TEST İÇİN KOD EKRANA BASTIRILIYOR (Gerçek hayatta backend servisine istek atıp mail attırırsın)
         alert("TEST BİLGİSİ (Maile gidecek kod): " + generatedCode);
     }
     
