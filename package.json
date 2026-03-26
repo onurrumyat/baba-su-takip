@@ -1,5 +1,6 @@
 {
   "name": "vetto-ai",
   "version": "1.0.0",
+  "description": "Vetto AI - Akıllı Ürün İnceleme Sistemi",
   "dependencies": {}
 }
