@@ -12,48 +12,28 @@
             theme: {
                 extend: {
                     fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
-                    colors: {
-                        brand: {
-                            50: '#f0f3ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8',
-                            500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81',
-                        },
-                        accent: '#ff5c00',
-                    }
+                    colors: { brand: { 500: '#6366f1', 600: '#4f46e5' }, accent: '#ff5c00' }
                 }
             }
         }
     </script>
     <style>
         body { background-color: #0a0c10; color: #e0e7ff; overflow-x: hidden; }
-        .bg-gradient-mash {
-            background-image: 
-                radial-gradient(at 10% 10%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-                radial-gradient(at 90% 90%, rgba(255, 92, 0, 0.08) 0px, transparent 50%);
-        }
+        .bg-gradient-mash { background-image: radial-gradient(at 10% 10%, rgba(99, 102, 241, 0.15) 0px, transparent 50%), radial-gradient(at 90% 90%, rgba(255, 92, 0, 0.08) 0px, transparent 50%); }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .score-circle-fill { stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 1s ease-out; }
-        
-        /* Yükleniyor Animasyonu */
-        .loading-shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-        }
-        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        .score-circle-fill { stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
-<body class="bg-gradient-mash font-sans">
+<body class="bg-gradient-mash font-sans min-h-screen">
 
     <header class="sticky top-0 z-50 glass border-b border-white/5">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="bg-brand-600 p-2.5 rounded-xl text-white shadow-lg shadow-brand-500/20">
-                    <i class="fas fa-bolt text-lg"></i>
-                </div>
+                <div class="bg-brand-600 p-2.5 rounded-xl text-white shadow-lg"><i class="fas fa-bolt text-lg"></i></div>
                 <h1 class="text-2xl font-800 text-white tracking-tighter">Vetto<span class="text-brand-400">.ai</span></h1>
             </div>
             <div class="flex items-center gap-2.5 glass px-4 py-2 rounded-full border border-white/10">
-                <img src="https://api.dicebear.com/8.x/notionists/svg?seed=emir" alt="avatar" class="w-9 h-9 rounded-full bg-brand-900 border border-white/20">
+                <img src="https://api.dicebear.com/8.x/notionists/svg?seed=emir" class="w-9 h-9 rounded-full bg-brand-900">
                 <span class="text-sm font-semibold text-brand-100">Emir Y.</span>
             </div>
         </div>
@@ -65,15 +45,15 @@
             <div class="relative max-w-2xl mx-auto">
                 <input type="text" id="productInput" placeholder="Örn: iPhone 15 Pro..." 
                     class="w-full bg-[#11141a] text-white px-8 py-5 rounded-full border border-white/10 outline-none focus:ring-2 focus:ring-brand-500/50">
-                <button onclick="analyzeProduct()" id="analyzeBtn" class="absolute right-2 top-2 bg-brand-600 text-white px-8 py-3 rounded-full font-bold hover:bg-brand-500">
+                <button onclick="analyzeProduct()" id="analyzeBtn" class="absolute right-2 top-2 bg-brand-600 text-white px-8 py-3 rounded-full font-bold hover:bg-brand-500 transition-all">
                     Analiz Et
                 </button>
             </div>
         </div>
 
-        <div id="resultCard" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-8 mb-24 transition-all duration-500">
+        <div id="resultCard" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-8 mb-24 opacity-0 transition-opacity duration-700">
             <div class="lg:col-span-2 glass p-10 rounded-4xl flex flex-col items-center text-center">
-                <h3 id="resTitle" class="text-3xl font-800 text-white mb-8 italic">Yükleniyor...</h3>
+                <h3 id="resTitle" class="text-3xl font-800 text-white mb-8">Ürün Adı</h3>
                 <div class="relative w-48 h-48 flex items-center justify-center mb-10">
                     <svg class="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                         <path class="text-white/5" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="2.5"/>
@@ -97,62 +77,47 @@
     </main>
 
     <script>
-        // ŞİFRELİ KEYİNİZİ BURAYA KOYUN (Proxy üzerinden geçmesi önerilir)
-        const CLAUDE_KEY = "BURAYA_API_KEYINIZI_YAPISTIRIN"; 
-
         async function analyzeProduct() {
             const product = document.getElementById('productInput').value;
-            if (!product) return alert("Lütfen bir ürün girin");
+            if (!product) return alert("Lütfen bir ürün ismi girin.");
 
             const btn = document.getElementById('analyzeBtn');
-            const resultCard = document.getElementById('resultCard');
+            const card = document.getElementById('resultCard');
             
-            // UI Hazırlığı
             btn.innerText = "Analiz Ediliyor...";
             btn.disabled = true;
-            resultCard.classList.remove('hidden');
-            
+
             try {
-                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                // Vercel Serverless Function'a istek atıyoruz
+                const response = await fetch('/api/analyze', {
                     method: 'POST',
-                    headers: {
-                        'x-api-key': CLAUDE_KEY,
-                        'anthropic-version': '2023-06-01',
-                        'content-type': 'application/json',
-                        'dangerously-allow-browser': 'true' // Dikkat: Sadece test için!
-                    },
-                    body: JSON.stringify({
-                        model: "claude-3-5-sonnet-20240620",
-                        max_tokens: 1024,
-                        messages: [{
-                            role: "user",
-                            content: `${product} hakkında internetteki genel yorumları analiz et. 
-                            Bana şunları JSON formatında ver: 
-                            { "title": "Ürün Adı", "score": 10 üzerinden puan, "pros": ["artı1", "artı2"], "cons": ["eksi1", "eksi2"] }
-                            Sadece JSON döndür.`
-                        }]
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product: product })
                 });
 
+                if (!response.ok) throw new Error("API Hatası");
+
                 const data = await response.json();
-                const aiResult = JSON.parse(data.content[0].text);
 
                 // UI Güncelleme
-                document.getElementById('resTitle').innerText = aiResult.title;
-                document.getElementById('resScore').innerText = aiResult.score;
+                document.getElementById('resTitle').innerText = data.title;
+                document.getElementById('resScore').innerText = data.score;
                 
-                // Skor Dairesi Animasyonu
-                const circle = document.getElementById('scoreCircle');
-                const offset = 100 - (aiResult.score * 10);
-                circle.style.strokeDashoffset = offset;
+                // Listeleri Temizle ve Doldur
+                document.getElementById('resPros').innerHTML = data.pros.map(p => `<li>• ${p}</li>`).join('');
+                document.getElementById('resCons').innerHTML = data.cons.map(c => `<li>• ${c}</li>`).join('');
 
-                // Listeleri Doldur
-                document.getElementById('resPros').innerHTML = aiResult.pros.map(p => `<li>• ${p}</li>`).join('');
-                document.getElementById('resCons').innerHTML = aiResult.cons.map(c => `<li>• ${c}</li>`).join('');
+                // Kartı göster
+                card.classList.remove('hidden');
+                setTimeout(() => {
+                    card.style.opacity = "1";
+                    const offset = 100 - (data.score * 10);
+                    document.getElementById('scoreCircle').style.strokeDashoffset = offset;
+                }, 50);
 
             } catch (error) {
                 console.error("Hata:", error);
-                alert("Analiz sırasında bir hata oluştu.");
+                alert("Analiz başarısız oldu. Lütfen Vercel Logs kısmını kontrol edin.");
             } finally {
                 btn.innerText = "Analiz Et";
                 btn.disabled = false;
