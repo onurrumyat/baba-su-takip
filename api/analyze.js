@@ -1,5 +1,5 @@
 // api/analyze.js
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
 res.setHeader(‘Access-Control-Allow-Origin’, ‘*’);
 res.setHeader(‘Access-Control-Allow-Methods’, ‘POST, OPTIONS’);
 res.setHeader(‘Access-Control-Allow-Headers’, ‘Content-Type’);
@@ -58,11 +58,9 @@ Kurallar:
   // Robust JSON extraction
   let jsonStr = rawText;
   
-  // 1) `json ... ` veya `...` varsa içini al
   const fenceMatch = rawText.match(/`(?:json)?\s*([\s\S]*?)`/i);
   if (fenceMatch) jsonStr = fenceMatch[1].trim();
   
-  // 2) İlk { ile son } arasını al
   const braceMatch = jsonStr.match(/{[\s\S]*}/);
   if (braceMatch) jsonStr = braceMatch[0];
   
@@ -94,4 +92,4 @@ Kurallar:
   console.error(‘Beklenmeyen hata:’, err);
   return res.status(500).json({ error: ’Sunucu hatası: ’ + err.message });
   }
-  }
+  };
