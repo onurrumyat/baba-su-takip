@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vetto.ai — Akıllı Ürün Analizi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090e;
+  --surface:#0d1018;
+  --surface2:#111520;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.12);
+  --indigo:#6366f1;
+  --indigo-d:#4f46e5;
+  --indigo-lt:#a5b4fc;
+  --orange:#f97316;
+  --green:#34d399;
+  --red:#f87171;
+  --yellow:#fbbf24;
+  --text:#e2e8f0;
+  --muted:#64748b;
+  --muted2:#94a3b8;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 55% 45% at 12% 18%,rgba(99,102,241,.13) 0,transparent 70%),radial-gradient(ellipse 45% 35% at 88% 82%,rgba(249,115,22,.07) 0,transparent 70%);pointer-events:none}
+
+/* ── HEADER ── */
+header{position:sticky;top:0;z-index:200;background:rgba(7,9,14,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(–border)}
+.hdr{max-width:1200px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:36px;height:36px;border-radius:10px;background:var(–indigo);display:grid;place-items:center;color:#fff;font-size:14px;box-shadow:0 0 20px rgba(99,102,241,.4)}
+.logo-text{font-family:‘Syne’,sans-serif;font-size:21px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.logo-text span{color:var(–indigo-lt)}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.badge{display:flex;align-items:center;gap:6px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.22);color:var(–indigo-lt);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;padding:5px 13px;border-radius:99px}
+.badge i{font-size:8px;animation:pulse 2s infinite}
+.nav-btn{background:rgba(255,255,255,.04);border:1px solid var(–border);color:var(–muted2);font-size:13px;padding:7px 14px;border-radius:10px;cursor:pointer;transition:all .2s;font-family:‘DM Sans’,sans-serif}
+.nav-btn:hover{border-color:var(–border2);color:var(–text)}
+.nav-btn.active{background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.3);color:var(–indigo-lt)}
+
+/* ── TABS ── */
+.tab-bar{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;gap:4px;border-bottom:1px solid var(–border);background:rgba(7,9,14,.6);position:sticky;top:64px;z-index:100;backdrop-filter:blur(10px)}
+.tab{padding:14px 20px;font-size:13px;font-weight:500;color:var(–muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.tab:hover{color:var(–muted2)}
+.tab.active{color:var(–indigo-lt);border-bottom-color:var(–indigo)}
+
+/* ── PAGES ── */
+.page{display:none;position:relative;z-index:1}
+.page.active{display:block}
+
+/* ── HERO ── */
+.hero{max-width:1200px;margin:0 auto;padding:80px 24px 50px;text-align:center}
+.hero-eye{display:inline-flex;align-items:center;gap:7px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);color:var(–indigo-lt);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;padding:6px 16px;border-radius:99px;margin-bottom:24px}
+.hero h1{font-family:‘Syne’,sans-serif;font-size:clamp(34px,5vw,56px);font-weight:800;letter-spacing:-1.5px;color:#fff;line-height:1.08;margin-bottom:14px}
+.hero h1 em{font-style:normal;background:linear-gradient(135deg,var(–indigo-lt),var(–orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:16px;color:var(–muted);max-width:460px;margin:0 auto 40px;line-height:1.7}
+
+/* ── SEARCH ── */
+.search-box{position:relative;max-width:620px;margin:0 auto}
+.search-box input{width:100%;background:var(–surface);border:1px solid var(–border);color:var(–text);font-family:‘DM Sans’,sans-serif;font-size:15px;padding:18px 170px 18px 22px;border-radius:16px;outline:none;transition:border-color .25s,box-shadow .25s}
+.search-box input::placeholder{color:var(–muted)}
+.search-box input:focus{border-color:rgba(99,102,241,.5);box-shadow:0 0 0 3px rgba(99,102,241,.1),0 8px 32px rgba(0,0,0,.4)}
+.search-box button{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(–indigo);color:#fff;border:none;cursor:pointer;font-family:‘Syne’,sans-serif;font-size:13px;font-weight:700;padding:10px 22px;border-radius:10px;display:flex;align-items:center;gap:7px;transition:background .2s,box-shadow .2s,transform .15s;box-shadow:0 4px 18px rgba(99,102,241,.35)}
+.search-box button:hover{background:var(–indigo-d);box-shadow:0 6px 24px rgba(99,102,241,.5);transform:translateY(-50%) scale(1.03)}
+.search-box button:disabled{opacity:.55;cursor:not-allowed;transform:translateY(-50%)}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:16px}
+.chip{background:rgba(255,255,255,.04);border:1px solid var(–border);color:var(–muted);font-size:12px;padding:5px 13px;border-radius:99px;cursor:pointer;transition:all .2s}
+.chip:hover{background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.3);color:var(–indigo-lt)}
+
+/* ── LOADING ── */
+.loading-wrap{max-width:1200px;margin:0 auto;padding:0 24px 60px;display:none}
+.loading-card{background:var(–surface);border:1px solid var(–border);border-radius:20px;padding:48px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,.06);border-top-color:var(–indigo);border-radius:50%;animation:spin .85s linear infinite}
+.loading-card p{color:var(–muted);font-size:14px}
+.load-steps{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.lstep{font-size:12px;color:var(–muted);display:flex;align-items:center;gap:6px}
+.lstep i{color:var(–indigo-lt);font-size:10px}
+
+/* ── RESULT ── */
+.result-wrap{max-width:1200px;margin:0 auto;padding:0 24px 80px;display:none}
+.result-grid{display:grid;grid-template-columns:300px 1fr;gap:18px}
+@media(max-width:768px){.result-grid{grid-template-columns:1fr}}
+
+/* Score Panel */
+.score-panel{background:var(–surface);border:1px solid var(–border);border-radius:22px;padding:32px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;overflow:hidden}
+.score-panel::before{content:’’;position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(249,115,22,.08);border-radius:50%;filter:blur(35px)}
+.prod-name{font-family:‘Syne’,sans-serif;font-size:19px;font-weight:800;color:#fff;margin-bottom:5px;z-index:1}
+.ai-badge{font-size:10px;font-weight:600;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.25);color:var(–indigo-lt);padding:3px 11px;border-radius:99px;margin-bottom:24px;z-index:1}
+.donut-wrap{position:relative;width:160px;height:160px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;z-index:1}
+.donut-wrap svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.d-bg{stroke:rgba(255,255,255,.05)}
+.d-fill{stroke-dasharray:100;stroke-dashoffset:100;transition:stroke-dashoffset 1.6s cubic-bezier(.4,0,.2,1);stroke-linecap:round}
+.d-center{text-align:center;z-index:2}
+.score-num{font-family:‘Syne’,sans-serif;font-size:48px;font-weight:800;color:#fff;line-height:1}
+.score-lbl{font-size:11px;color:var(–muted);margin-top:3px}
+.verdict{font-size:12px;font-weight:600;padding:7px 18px;border-radius:10px;z-index:1}
+.v-great{background:rgba(52,211,153,.1);color:var(–green);border:1px solid rgba(52,211,153,.2)}
+.v-ok{background:rgba(249,115,22,.1);color:var(–orange);border:1px solid rgba(249,115,22,.2)}
+.v-bad{background:rgba(248,113,113,.1);color:var(–red);border:1px solid rgba(248,113,113,.2)}
+
+/* Details */
+.details{display:flex;flex-direction:column;gap:14px}
+.card{background:var(–surface);border:1px solid var(–border);border-radius:20px;padding:22px 24px}
+.card h4{font-family:‘Syne’,sans-serif;font-size:13px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+.card li{font-size:13px;color:var(–muted2);display:flex;align-items:flex-start;gap:9px;line-height:1.5}
+.card li i{margin-top:3px;font-size:9px;flex-shrink:0}
+.pros-cons{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:500px){.pros-cons{grid-template-columns:1fr}}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:480px){.metrics{grid-template-columns:1fr 1fr}}
+.metric{background:var(–surface2);border:1px solid var(–border);border-radius:14px;padding:16px;text-align:center}
+.metric .mv{font-family:‘Syne’,sans-serif;font-size:26px;font-weight:800;color:#fff}
+.metric .ml{font-size:10px;color:var(–muted);margin-top:3px;text-transform:uppercase;letter-spacing:.06em}
+.summary-text{font-size:14px;color:var(–muted2);line-height:1.75}
+
+/* ── COMPARE PAGE ── */
+.cmp-hero{max-width:1200px;margin:0 auto;padding:60px 24px 40px;text-align:center}
+.cmp-hero h2{font-family:‘Syne’,sans-serif;font-size:clamp(28px,4vw,44px);font-weight:800;color:#fff;letter-spacing:-1px;margin-bottom:10px}
+.cmp-hero p{color:var(–muted);font-size:15px}
+.cmp-inputs{max-width:800px;margin:32px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.cmp-inputs{grid-template-columns:1fr}}
+.cmp-input-wrap{position:relative}
+.cmp-input-wrap input{width:100%;background:var(–surface);border:1px solid var(–border);color:var(–text);font-family:‘DM Sans’,sans-serif;font-size:14px;padding:15px 18px;border-radius:14px;outline:none;transition:border-color .25s}
+.cmp-input-wrap input:focus{border-color:rgba(99,102,241,.5)}
+.cmp-input-wrap input::placeholder{color:var(–muted)}
+.cmp-label{font-size:11px;color:var(–muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}
+.cmp-btn{display:block;margin:20px auto 0;background:var(–indigo);color:#fff;border:none;cursor:pointer;font-family:‘Syne’,sans-serif;font-size:14px;font-weight:700;padding:13px 36px;border-radius:12px;transition:background .2s,box-shadow .2s;box-shadow:0 4px 18px rgba(99,102,241,.35)}
+.cmp-btn:hover{background:var(–indigo-d);box-shadow:0 6px 24px rgba(99,102,241,.5)}
+.cmp-btn:disabled{opacity:.55;cursor:not-allowed}
+.cmp-result{max-width:1200px;margin:0 auto;padding:0 24px 80px;display:none}
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:640px){.cmp-grid{grid-template-columns:1fr}}
+.cmp-card{background:var(–surface);border:1px solid var(–border);border-radius:20px;padding:28px 24px}
+.cmp-card.winner{border-color:rgba(52,211,153,.3);box-shadow:0 0 30px rgba(52,211,153,.07)}
+.cmp-score{font-family:‘Syne’,sans-serif;font-size:52px;font-weight:800;margin:12px 0 6px}
+.cmp-name{font-family:‘Syne’,sans-serif;font-size:17px;font-weight:700;color:#fff;margin-bottom:4px}
+.winner-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.25);color:var(–green);font-size:11px;font-weight:700;padding:4px 12px;border-radius:99px;margin-bottom:16px}
+.cmp-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(–border);font-size:13px}
+.cmp-row:last-child{border-bottom:none}
+.cmp-row span:first-child{color:var(–muted)}
+.cmp-row span:last-child{font-weight:600;color:var(–text)}
+
+/* ── HISTORY PAGE ── */
+.hist-hero{max-width:1200px;margin:0 auto;padding:60px 24px 30px}
+.hist-hero h2{font-family:‘Syne’,sans-serif;font-size:32px;font-weight:800;color:#fff;margin-bottom:8px}
+.hist-hero p{color:var(–muted);font-size:14px}
+.hist-actions{display:flex;gap:10px;margin-top:16px}
+.hist-clear{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);color:var(–red);font-size:12px;font-weight:600;padding:7px 16px;border-radius:10px;cursor:pointer;transition:all .2s;font-family:‘DM Sans’,sans-serif}
+.hist-clear:hover{background:rgba(248,113,113,.15)}
+.hist-list{max-width:1200px;margin:0 auto;padding:0 24px 80px;display:flex;flex-direction:column;gap:12px}
+.hist-empty{text-align:center;padding:80px 24px;color:var(–muted);font-size:15px}
+.hist-empty i{font-size:40px;margin-bottom:16px;display:block;opacity:.3}
+.hist-item{background:var(–surface);border:1px solid var(–border);border-radius:16px;padding:18px 22px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:border-color .2s}
+.hist-item:hover{border-color:var(–border2)}
+.hist-score{font-family:‘Syne’,sans-serif;font-size:26px;font-weight:800;min-width:52px;text-align:center}
+.hist-info{flex:1}
+.hist-name{font-weight:600;font-size:15px;color:#fff;margin-bottom:3px}
+.hist-date{font-size:12px;color:var(–muted)}
+.hist-pros{font-size:12px;color:var(–muted2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px}
+.hist-del{background:none;border:none;color:var(–muted);cursor:pointer;font-size:14px;padding:6px;transition:color .2s}
+.hist-del:hover{color:var(–red)}
+
+/* ── FOOTER ── */
+footer{position:relative;z-index:1;border-top:1px solid var(–border);text-align:center;padding:24px;font-size:12px;color:var(–muted)}
+
+/* ── ANIMATIONS ── */
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.anim-fadeup{animation:fadeUp .55s ease forwards}
+</style>
+
+</head>
+<body>
+
+<!-- HEADER -->
+
+<header>
+  <div class="hdr">
+    <a class="logo" href="#">
+      <div class="logo-icon"><i class="fas fa-bolt"></i></div>
+      <span class="logo-text">Vetto<span>.ai</span></span>
+    </a>
+    <div class="badge"><i class="fas fa-circle"></i>DeepSearch Aktif</div>
+    <div class="hdr-right">
+      <button class="nav-btn active" onclick="switchTab('analyze')"><i class="fas fa-search"></i> Analiz</button>
+      <button class="nav-btn" onclick="switchTab('compare')"><i class="fas fa-scale-balanced"></i> Karşılaştır</button>
+      <button class="nav-btn" onclick="switchTab('history')"><i class="fas fa-clock-rotate-left"></i> Geçmiş</button>
+    </div>
+  </div>
+</header>
+
+<!-- ════════════ ANALYZE PAGE ════════════ -->
+
+<div class="page active" id="page-analyze">
+
+  <div class="hero">
+    <div class="hero-eye"><i class="fas fa-sparkles" style="font-size:9px"></i>Yapay Zeka Destekli</div>
+    <h1>Satın almadan önce<br><em>gerçeği öğren.</em></h1>
+    <p>Herhangi bir ürünü analiz et — artıları, eksileri ve Vetto skorunu saniyeler içinde öğren.</p>
+    <div class="search-box">
+      <input type="text" id="productInput" placeholder="Örn: iPhone 16 Pro, Sony WH-1000XM5…" onkeydown="if(event.key==='Enter')analyzeProduct()"/>
+      <button onclick="analyzeProduct()" id="analyzeBtn">Analiz Et <i class="fas fa-arrow-right"></i></button>
+    </div>
+    <div class="chips">
+      <span class="chip" onclick="quickRun(this)">iPhone 16 Pro</span>
+      <span class="chip" onclick="quickRun(this)">Samsung S25 Ultra</span>
+      <span class="chip" onclick="quickRun(this)">Sony WH-1000XM5</span>
+      <span class="chip" onclick="quickRun(this)">MacBook Air M4</span>
+      <span class="chip" onclick="quickRun(this)">Dyson V15</span>
+      <span class="chip" onclick="quickRun(this)">PlayStation 5</span>
+    </div>
+  </div>
+
+  <!-- Loading -->
+
+  <div class="loading-wrap" id="loadingWrap">
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <p id="loadingTxt">Ürün verisi taranıyor…</p>
+      <div class="load-steps">
+        <div class="lstep"><i class="fas fa-database"></i>Veri tabanı</div>
+        <div class="lstep"><i class="fas fa-globe"></i>Web araması</div>
+        <div class="lstep"><i class="fas fa-brain"></i>AI analizi</div>
+        <div class="lstep"><i class="fas fa-chart-bar"></i>Skorlama</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result -->
+
+  <div class="result-wrap" id="resultWrap">
+    <div class="result-grid">
+      <!-- Score -->
+      <div class="score-panel">
+        <div class="prod-name" id="resTitle">—</div>
+        <div class="ai-badge">AI Analiz Sonucu</div>
+        <div class="donut-wrap">
+          <svg viewBox="0 0 36 36">
+            <path class="d-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="2.5"/>
+            <path id="donutFill" class="d-fill" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f97316" stroke-width="2.5"/>
+          </svg>
+          <div class="d-center">
+            <div class="score-num" id="resScore">0</div>
+            <div class="score-lbl">/ 10 Vetto Skoru</div>
+          </div>
+        </div>
+        <div class="verdict" id="resVerdict"></div>
+      </div>
+      <!-- Details -->
+      <div class="details">
+        <div class="pros-cons">
+          <div class="card">
+            <h4 style="color:var(--green)"><i class="fas fa-check-circle"></i>Artılar</h4>
+            <ul id="resPros"></ul>
+          </div>
+          <div class="card">
+            <h4 style="color:var(--red)"><i class="fas fa-times-circle"></i>Eksiler</h4>
+            <ul id="resCons"></ul>
+          </div>
+        </div>
+        <div class="metrics" id="metricsRow"></div>
+        <div class="card">
+          <h4 style="color:var(--muted2)"><i class="fas fa-comment-dots"></i>Genel Değerlendirme</h4>
+          <p class="summary-text" id="resSummary"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-analyze -->
+
+<!-- ════════════ COMPARE PAGE ════════════ -->
+
+<div class="page" id="page-compare">
+  <div class="cmp-hero">
+    <h2>Ürün Karşılaştırma</h2>
+    <p>İki ürünü yan yana analiz et, hangisinin daha iyi olduğunu gör.</p>
+    <div class="cmp-inputs">
+      <div>
+        <div class="cmp-label">1. Ürün</div>
+        <div class="cmp-input-wrap">
+          <input type="text" id="cmpA" placeholder="Örn: iPhone 16 Pro" onkeydown="if(event.key==='Enter')compareProducts()"/>
+        </div>
+      </div>
+      <div>
+        <div class="cmp-label">2. Ürün</div>
+        <div class="cmp-input-wrap">
+          <input type="text" id="cmpB" placeholder="Örn: Samsung S25 Ultra" onkeydown="if(event.key==='Enter')compareProducts()"/>
+        </div>
+      </div>
+    </div>
+    <button class="cmp-btn" onclick="compareProducts()" id="cmpBtn">
+      <i class="fas fa-scale-balanced"></i> Karşılaştır
+    </button>
+  </div>
+
+  <div class="loading-wrap" id="cmpLoadWrap">
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <p>Her iki ürün analiz ediliyor…</p>
+      <div class="load-steps">
+        <div class="lstep"><i class="fas fa-brain"></i>AI analizi</div>
+        <div class="lstep"><i class="fas fa-scale-balanced"></i>Karşılaştırma</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cmp-result" id="cmpResult">
+    <div class="cmp-grid" id="cmpGrid"></div>
+  </div>
+</div>
+
+<!-- ════════════ HISTORY PAGE ════════════ -->
+
+<div class="page" id="page-history">
+  <div class="hist-hero">
+    <h2>Analiz Geçmişi</h2>
+    <p>Daha önce analiz ettiğin ürünler burada saklanır.</p>
+    <div class="hist-actions">
+      <button class="hist-clear" onclick="clearHistory()"><i class="fas fa-trash"></i> Tümünü Temizle</button>
+    </div>
+  </div>
+  <div class="hist-list" id="histList"></div>
+</div>
+
+<footer>&copy; 2026 Vetto Technologies · AI analizleri tamamen tarafsız ve bağımsızdır.</footer>
+
+<script>
+// ── State
+let currentTab = 'analyze';
+const LOAD_MSGS = ['Ürün verisi taranıyor…','Kullanıcı yorumları inceleniyor…','Rakip ürünlerle karşılaştırılıyor…','Vetto skoru hesaplanıyor…'];
+
+// ── Tab switching
+function switchTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.querySelectorAll('.nav-btn')[['analyze','compare','history'].indexOf(tab)].classList.add('active');
+  currentTab = tab;
+  if (tab === 'history') renderHistory();
+}
+
+// ── Helpers
+function quickRun(el) {
+  document.getElementById('productInput').value = el.textContent;
+  analyzeProduct();
+}
+
+function scoreColor(s) {
+  if (s >= 7.5) return 'var(--green)';
+  if (s >= 5)   return 'var(--orange)';
+  return 'var(--red)';
+}
+
+function verdictHTML(score) {
+  if (score >= 8)  return ['v-great','<i class="fas fa-star"></i> Kesinlikle Önerilir'];
+  if (score >= 6.5)return ['v-great','<i class="fas fa-thumbs-up"></i> İyi Tercih'];
+  if (score >= 4.5)return ['v-ok','<i class="fas fa-minus"></i> Alternatif Düşünün'];
+  return ['v-bad','<i class="fas fa-thumbs-down"></i> Tavsiye Edilmez'];
+}
+
+function animCount(el, to, ms) {
+  const start = performance.now();
+  (function step(ts) {
+    const p = Math.min((ts-start)/ms,1), e = 1-Math.pow(1-p,3);
+    el.textContent = (to*e).toFixed(1);
+    if (p<1) requestAnimationFrame(step); else el.textContent = to.toFixed(1);
+  })(performance.now());
+}
+
+function startLoadCycle(elId) {
+  let i=0;
+  const el = document.getElementById(elId);
+  if(!el) return null;
+  el.textContent = LOAD_MSGS[0];
+  return setInterval(()=>{ i=(i+1)%LOAD_MSGS.length; el.textContent=LOAD_MSGS[i]; }, 1800);
+}
+
+// ── API call
+async function callAPI(product) {
+  const res = await fetch('/api/analyze', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({product})
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Sunucu hatası');
+  return data;
+}
+
+// ── Render result
+function renderResult(data) {
+  document.getElementById('resTitle').textContent = data.title || data.product;
+  document.getElementById('resSummary').textContent = data.summary || '';
+
+  const score = Math.min(10, Math.max(0, parseFloat(data.score)||0));
+  animCount(document.getElementById('resScore'), score, 1400);
+
+  const fill = document.getElementById('donutFill');
+  fill.setAttribute('stroke', scoreColor(score));
+  setTimeout(()=>{ fill.style.strokeDashoffset = 100 - (score/10)*100; }, 120);
+
+  const [vcls,vhtml] = verdictHTML(score);
+  const vEl = document.getElementById('resVerdict');
+  vEl.className = 'verdict ' + vcls;
+  vEl.innerHTML = vhtml;
+
+  document.getElementById('resPros').innerHTML = (data.pros||[]).map(p=>`<li><i class="fas fa-caret-right" style="color:var(--green)"></i>${p}</li>`).join('');
+  document.getElementById('resCons').innerHTML = (data.cons||[]).map(c=>`<li><i class="fas fa-caret-right" style="color:var(--red)"></i>${c}</li>`).join('');
+
+  document.getElementById('metricsRow').innerHTML = Object.entries(data.metrics||{}).map(([l,v])=>`
+    <div class="metric">
+      <div class="mv" style="color:${scoreColor(parseFloat(v)||5)}">${v}</div>
+      <div class="ml">${l}</div>
+    </div>`).join('');
+
+  const wrap = document.getElementById('resultWrap');
+  wrap.style.display = 'block';
+  wrap.classList.remove('anim-fadeup');
+  void wrap.offsetWidth;
+  wrap.classList.add('anim-fadeup');
+}
+
+// ── Analyze
+async function analyzeProduct() {
+  const product = document.getElementById('productInput').value.trim();
+  if (!product) { document.getElementById('productInput').focus(); return; }
+
+  const btn = document.getElementById('analyzeBtn');
+  const loadWrap = document.getElementById('loadingWrap');
+  const resultWrap = document.getElementById('resultWrap');
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analiz Ediliyor';
+  resultWrap.style.display = 'none';
+  loadWrap.style.display = 'block';
+
+  const cycle = startLoadCycle('loadingTxt');
+
+  try {
+    const data = await callAPI(product);
+    renderResult(data);
+    saveHistory(data);
+  } catch(err) {
+    alert('Analiz başarısız: ' + err.message);
+  } finally {
+    clearInterval(cycle);
+    loadWrap.style.display = 'none';
+    btn.disabled = false;
+    btn.innerHTML = 'Analiz Et <i class="fas fa-arrow-right"></i>';
+  }
+}
+
+// ── Compare
+async function compareProducts() {
+  const a = document.getElementById('cmpA').value.trim();
+  const b = document.getElementById('cmpB').value.trim();
+  if (!a || !b) { alert('Lütfen iki ürün girin.'); return; }
+
+  const btn = document.getElementById('cmpBtn');
+  const loadWrap = document.getElementById('cmpLoadWrap');
+  const result = document.getElementById('cmpResult');
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analiz Ediliyor';
+  result.style.display = 'none';
+  loadWrap.style.display = 'block';
+
+  try {
+    const [dA, dB] = await Promise.all([callAPI(a), callAPI(b)]);
+    renderCompare(dA, dB);
+    saveHistory(dA); saveHistory(dB);
+  } catch(err) {
+    alert('Karşılaştırma başarısız: ' + err.message);
+  } finally {
+    loadWrap.style.display = 'none';
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-scale-balanced"></i> Karşılaştır';
+  }
+}
+
+function renderCompare(dA, dB) {
+  const sA = parseFloat(dA.score)||0, sB = parseFloat(dB.score)||0;
+  const winnerA = sA >= sB;
+
+  function cmpCard(d, isWinner) {
+    const sc = parseFloat(d.score)||0;
+    const metrics = Object.entries(d.metrics||{});
+    return `
+      <div class="cmp-card${isWinner?' winner':''}">
+        ${isWinner ? '<div class="winner-tag"><i class="fas fa-trophy"></i> Kazanan</div>' : '<div style="height:27px"></div>'}
+        <div class="cmp-name">${d.title||d.product}</div>
+        <div class="cmp-score" style="color:${scoreColor(sc)}">${sc.toFixed(1)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:18px">/ 10 Vetto Skoru</div>
+        ${metrics.map(([l,v])=>`<div class="cmp-row"><span>${l}</span><span>${v}</span></div>`).join('')}
+        <div style="margin-top:16px">
+          <div style="font-size:11px;color:var(--green);font-weight:600;margin-bottom:8px">ARTILAR</div>
+          ${(d.pros||[]).slice(0,3).map(p=>`<div style="font-size:12px;color:var(--muted2);padding:3px 0"><i class="fas fa-check" style="color:var(--green);font-size:9px;margin-right:7px"></i>${p}</div>`).join('')}
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:var(--red);font-weight:600;margin-bottom:8px">EKSİLER</div>
+          ${(d.cons||[]).slice(0,2).map(c=>`<div style="font-size:12px;color:var(--muted2);padding:3px 0"><i class="fas fa-times" style="color:var(--red);font-size:9px;margin-right:7px"></i>${c}</div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  document.getElementById('cmpGrid').innerHTML = cmpCard(dA, winnerA) + cmpCard(dB, !winnerA);
+  const res = document.getElementById('cmpResult');
+  res.style.display = 'block';
+  res.classList.remove('anim-fadeup');
+  void res.offsetWidth;
+  res.classList.add('anim-fadeup');
+}
+
+// ── History
+function saveHistory(data) {
+  let hist = JSON.parse(localStorage.getItem('vetto_history')||'[]');
+  hist = hist.filter(h => h.title !== (data.title||data.product));
+  hist.unshift({
+    title: data.title||data.product,
+    score: parseFloat(data.score)||0,
+    pros: data.pros||[],
+    cons: data.cons||[],
+    summary: data.summary||'',
+    metrics: data.metrics||{},
+    date: new Date().toLocaleDateString('tr-TR',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})
+  });
+  if (hist.length > 30) hist = hist.slice(0,30);
+  localStorage.setItem('vetto_history', JSON.stringify(hist));
+}
+
+function clearHistory() {
+  if (!confirm('Tüm geçmiş silinsin mi?')) return;
+  localStorage.removeItem('vetto_history');
+  renderHistory();
+}
+
+function deleteHistItem(title) {
+  let hist = JSON.parse(localStorage.getItem('vetto_history')||'[]');
+  hist = hist.filter(h => h.title !== title);
+  localStorage.setItem('vetto_history', JSON.stringify(hist));
+  renderHistory();
+}
+
+function loadFromHistory(item) {
+  switchTab('analyze');
+  document.getElementById('productInput').value = item.title;
+  renderResult(item);
+}
+
+function renderHistory() {
+  const hist = JSON.parse(localStorage.getItem('vetto_history')||'[]');
+  const list = document.getElementById('histList');
+  if (!hist.length) {
+    list.innerHTML = '<div class="hist-empty"><i class="fas fa-clock-rotate-left"></i>Henüz analiz geçmişin yok.<br><br>Bir ürün analiz ettiğinde burada görünür.</div>';
+    return;
+  }
+  list.innerHTML = hist.map(item => `
+    <div class="hist-item" onclick="loadFromHistory(${JSON.stringify(item).replace(/"/g,'&quot;')})">
+      <div class="hist-score" style="color:${scoreColor(item.score)}">${item.score.toFixed(1)}</div>
+      <div class="hist-info">
+        <div class="hist-name">${item.title}</div>
+        <div class="hist-date">${item.date}</div>
+        <div class="hist-pros">${(item.pros||[]).slice(0,2).join(' · ')}</div>
+      </div>
+      <button class="hist-del" onclick="event.stopPropagation();deleteHistItem('${item.title.replace(/'/g,"\\'")}')">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>`).join('');
+}
+</script>
+
+</body>
+</html>
