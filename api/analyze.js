@@ -1,56 +1,96 @@
 // api/analyze.js
+// Vercel Serverless Function — POST /api/analyze
+// Ortam değişkeni: CLAUDE_API_KEY (Vercel Dashboard > Settings > Environment Variables)
+
 export default async function handler(req, res) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Sadece POST kabul edilir' });
-    }
+// CORS
+res.setHeader(‘Access-Control-Allow-Origin’, ‘*’);
+res.setHeader(‘Access-Control-Allow-Methods’, ‘POST, OPTIONS’);
+res.setHeader(‘Access-Control-Allow-Headers’, ‘Content-Type’);
+if (req.method === ‘OPTIONS’) return res.status(200).end();
 
-    const { product } = req.body;
-    const apiKey = process.env.CLAUDE_API_KEY;
+if (req.method !== ‘POST’) {
+return res.status(405).json({ error: ‘Method not allowed’ });
+}
 
-    // Güvenlik kontrolü
-    if (!apiKey) {
-        return res.status(500).json({ error: 'API Anahtarı sunucuda eksik (CLAUDE_API_KEY bulunamadı).' });
-    }
+const { product } = req.body || {};
+if (!product || typeof product !== ‘string’ || product.trim().length < 2) {
+return res.status(400).json({ error: ‘Geçerli bir ürün adı girin.’ });
+}
 
-    try {
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'x-api-key': apiKey,
-                'anthropic-version': '2023-06-01',
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: "claude-3-5-sonnet-latest",
-                max_tokens: 1024,
-                messages: [{
-                    role: "user",
-                    content: `${product} hakkında internetteki genel yorumları analiz et. 
-                    Bana sadece şu formatta JSON döndür, format dışına çıkma: 
-                    { "title": "Ürün Adı", "score": 8.5, "pros": ["artı1", "artı2"], "cons": ["eksi1", "eksi2"] }`
-                }]
-            })
-        });
+const apiKey = process.env.CLAUDE_API_KEY;
+if (!apiKey) {
+return res.status(500).json({ error: ‘Sunucu yapılandırma hatası: API anahtarı eksik.’ });
+}
 
-        const data = await response.json();
-        
-        if (!response.ok) {
-            throw new Error(data.error?.message || 'Claude API Hatası');
-        }
+const systemPrompt = `Sen Vetto.ai için çalışan bir uzman ürün analiz asistanısın.
+Kullanıcı bir ürün adı verir; sen o ürünü eksiksiz analiz eder ve YALNIZCA geçerli JSON dönersin.
+Hiçbir şekilde markdown (backtick, başlık vb.) kullanma. Sadece ham JSON.
 
-        const rawText = data.content[0].text;
-        
-        // Claude'un metni içinden garanti olarak JSON'u cımbızla çeken Regex yapısı
-        const match = rawText.match(/\{[\s\S]*\}/);
-        if (!match) {
-            throw new Error('Yapay zeka geçerli bir format döndürmedi.');
-        }
+JSON şeması (tüm alanlar zorunlu):
+{
+“title”: “string — Ürünün tam resmi adı”,
+“score”: number — 0.0 ile 10.0 arası ondalıklı Vetto skoru,
+“pros”: [“string”, …] — 4 ila 6 madde, özlü Türkçe,
+“cons”: [“string”, …] — 3 ila 5 madde, özlü Türkçe,
+“summary”: “string — 2-3 cümle genel değerlendirme, Türkçe”,
+“metrics”: {
+“Performans”: “X/10”,
+“Fiyat/Değer”: “X/10”,
+“Tasarım”: “X/10”
+}
+}`;
 
-        const aiResult = JSON.parse(match[0]);
-        res.status(200).json(aiResult);
-        
-    } catch (error) {
-        console.error("Hata Detayı:", error.message);
-        res.status(500).json({ error: error.message });
-    }
+const userPrompt = `Ürün: ${product.trim()}`;
+
+try {
+const claudeRes = await fetch(‘https://api.anthropic.com/v1/messages’, {
+method: ‘POST’,
+headers: {
+‘Content-Type’: ‘application/json’,
+‘x-api-key’: apiKey,
+‘anthropic-version’: ‘2023-06-01’,
+},
+body: JSON.stringify({
+model: ‘claude-sonnet-4-20250514’,
+max_tokens: 1024,
+system: systemPrompt,
+messages: [{ role: ‘user’, content: userPrompt }],
+}),
+});
+
+```
+if (!claudeRes.ok) {
+  const errBody = await claudeRes.text();
+  console.error('Claude API error:', claudeRes.status, errBody);
+  return res.status(502).json({ error: 'Claude API isteği başarısız oldu.' });
+}
+
+const claudeData = await claudeRes.json();
+const rawText = claudeData?.content?.[0]?.text || '';
+
+// Güvenli JSON parse
+let parsed;
+try {
+  // Eğer model yanlışlıkla backtick sarmalı döndürürse temizle
+  const cleaned = rawText.replace(/```json|```/g, '').trim();
+  parsed = JSON.parse(cleaned);
+} catch (parseErr) {
+  console.error('JSON parse hatası:', rawText);
+  return res.status(500).json({ error: 'Yanıt işlenemedi. Lütfen tekrar deneyin.' });
+}
+
+// Temel doğrulama
+const { title, score, pros, cons, summary, metrics } = parsed;
+if (!title || typeof score !== 'number' || !Array.isArray(pros) || !Array.isArray(cons)) {
+  return res.status(500).json({ error: 'Eksik analiz verisi döndü. Tekrar deneyin.' });
+}
+
+return res.status(200).json({ title, score, pros, cons, summary: summary || '', metrics: metrics || {} });
+```
+
+} catch (err) {
+console.error(‘İşlenmeyen hata:’, err);
+return res.status(500).json({ error: ‘Beklenmeyen sunucu hatası.’ });
+}
 }
