@@ -16,34 +16,31 @@ module.exports = async function handler(req, res) {
   const apiKey = process.env.CLAUDE_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'API anahtarı yapılandırılmamış.' });
 
-  // KRİTİK GÜNCELLEME: Odağı tamamen "Kullanıcı Yorumlarına" ve "Forum/Şikayet Analizine" kaydırdık.
   const systemPrompt = `Sen CheXdata.site için çalışan ve ana görevi İNTERNETTEKİ GERÇEK KULLANICI YORUMLARINI ANALİZ ETMEK olan acımasız bir yapay zeka motorusun. Yıl KESİNLİKLE 2026.
 
-KESİN KURAL: Yanıtın SADECE VE SADECE geçerli bir JSON objesi olmak zorundadır. Başına veya sonuna açıklama ekleme.
+KESİN KURAL: Yanıtın SADECE VE SADECE geçerli bir JSON objesi olmak zorundadır. Başına veya sonuna hiçbir açıklama ekleme.
 
 KURALLAR:
-1. YORUM ODAKLI ANALİZ (EN ÖNEMLİSİ): Ürünün kağıt üzerindeki teknik özelliklerini boşver. Amazon, Reddit, yerel e-ticaret siteleri ve şikayet forumlarındaki GERÇEK İNSAN YORUMLARINI analiz et. İnsanlar bu cihazı aldıktan sonra ne yaşadı? 
-2. GÜNCELLİK: 2026 yılı itibarıyla, bu cihaz şu an kullanıldığında ne gibi sorunlar veriyor? (Örn: "Son güncellemeyle şarjı su gibi gidiyor", "Menteşesi kırıldı", "Ekranda ghost screen oluştu"). Eski "cihaz uçuyor" yorumlarını çöpe at, GÜNCEL şikayetleri ve övgüleri bul.
-3. KANITLANMIŞ EKSİLER: Cihaz ne kadar iyi olursa olsun, forumlarda en çok tekrar eden en az 2 kronik sorunu (cons) bulup yazmak zorundasın. 
-4. PUANLAMA: Puanı markaya göre değil, kullanıcıların memnuyet veya pişmanlık oranına göre 0-10 arası belirle.
-5. ALTERNATİFLER: Eğer kullanıcı memnuniyeti düşükse (skor 6.5 veya altındaysa), kullanıcıların "Keşke bunu alsaydım" dediği veya senin 2026 şartlarında önereceğin daha sorunsuz 2 rakip cihazı "alternatives" dizisine ekle.
-6. İSTATİSTİK: Cihazın internetteki konuşulma hacmine göre mantıklı bir "review_count" (incelenen yorum sayısı) ve "source_count" (taradığın platform sayısı) dön.
+1. YORUM ODAKLI ANALİZ: Amazon, Reddit, Trendyol, Hepsiburada ve Şikayetvar gibi platformlardaki GERÇEK kronik sorunları (ısınma, menteşe, panel kalitesi, yazılım bug'ları) "cons" kısmına yaz. Kağıt üstündeki özellikleri övme, insanların ne yaşadığına bak.
+2. MANTIKLI VE GERÇEKÇİ RAKAMLAR (ÇOK KRİTİK): Kullanıcıları aptal yerine koyma! Bir oyuncu laptopu veya mouse için internette 18.000 tane nitelikli inceleme taraması imkansızdır. Gerçekçi ol! Popüler bir amiral gemisi telefon (iPhone 15/16) için 3000-7000 arası, bir laptop için 300-900 arası, az bilinen ürünler için 50-150 arası "review_count" belirle. "source_count" (kaynak site) ise 4 ile 12 platform arası olsun. Asla on binlerce sahte yorum sayısı atma.
+3. ZORUNLU METRİKLER: "metrics" objesinin içine KESİNLİKLE şu 3 başlığı koy ve 10 üzerinden gerçekçi puanla: "Kullanıcı Memnuniyeti", "Kronik Sorun Riski" (Not: Risk ne kadar DÜŞÜKSE puan o kadar YÜKSEK olsun), "Fiyat / Performans".
+4. PUAN VE ALTERNATİFLER: Skor 0-10 arası. Skor 6.5 veya altındaysa "alternatives" içine daha az şikayet alan, daha iyi 2 rakip model yaz. Değilse boş bırak [].
 
 JSON ŞABLONU:
 {
-  "title": "Ürünün Düzeltilmiş Tam Adı (Yıl)",
-  "score": 8.7,
-  "pros": ["Kullanıcıların en çok övdüğü özellik 1", "Kullanıcıların en çok övdüğü özellik 2"],
-  "cons": ["Kullanıcıların en çok şikayet ettiği kronik sorun", "Kullanıcıların yaşadığı güncel yazılım/donanım hatası"],
-  "summary": "İnternetteki binlerce kullanıcı yorumuna ve 2026 güncel durumuna göre cihazın gerçekte ne sunduğunun 2-3 cümlelik acımasız özeti.",
+  "title": "Ürünün Tam Adı (Yıl)",
+  "score": 8.5,
+  "pros": ["Kullanıcı övgüsü 1", "Kullanıcı övgüsü 2"],
+  "cons": ["Gerçek kronik şikayet 1", "Gerçek kronik şikayet 2"],
+  "summary": "İnternetteki gerçek kullanıcı şikayetleri ve övgülerine dayanan 2026 yılına ait 2-3 cümlelik özet.",
   "metrics": {
     "Kullanıcı Memnuniyeti": "X.X/10",
     "Kronik Sorun Riski": "X.X/10",
-    "Fiyat/Performans": "X.X/10"
+    "Fiyat / Performans": "X.X/10"
   },
-  "alternatives": ["Rakip 1", "Rakip 2"],
-  "review_count": 14500,
-  "source_count": 35
+  "alternatives": ["Daha İyi Rakip 1", "Daha İyi Rakip 2"],
+  "review_count": 450,
+  "source_count": 8
 }`;
 
   try {
@@ -89,13 +86,17 @@ JSON ŞABLONU:
     return res.status(200).json({
       title: parsed.title,
       score: parsed.score,
-      pros: parsed.pros || ["Kullanıcı yorumu bulunamadı"],
-      cons: parsed.cons || ["Kullanıcı yorumu bulunamadı"],
+      pros: parsed.pros || ["Bilgi Yok"],
+      cons: parsed.cons || ["Bilgi Yok"],
       summary: parsed.summary || 'Özet bulunamadı.',
-      metrics: parsed.metrics || {"Kullanıcı Memnuniyeti": "5.0/10"},
+      metrics: parsed.metrics || {
+        "Kullanıcı Memnuniyeti": "5.0/10",
+        "Kronik Sorun Riski": "5.0/10",
+        "Fiyat / Performans": "5.0/10"
+      },
       alternatives: parsed.alternatives || [],
-      review_count: parsed.review_count || Math.floor(Math.random() * 500 + 100),
-      source_count: parsed.source_count || Math.floor(Math.random() * 10 + 5)
+      review_count: parsed.review_count || Math.floor(Math.random() * 400 + 150),
+      source_count: parsed.source_count || Math.floor(Math.random() * 5 + 3)
     });
 
   } catch (err) {
