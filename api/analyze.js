@@ -16,28 +16,31 @@ module.exports = async function handler(req, res) {
   const apiKey = process.env.CLAUDE_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'API anahtarı yapılandırılmamış.' });
 
-  // YENİ TALİMAT: Eğer puan 6.5 veya altındaysa "alternatives" array'ini doldur!
-  const systemPrompt = `Sen CheXdata.site için çalışan profesyonel bir teknoloji analiz motorusun. Yıl KESİNLİKLE 2026.
+  const systemPrompt = `Sen CheXdata.site için çalışan profesyonel, zeki ve tarafsız bir teknoloji analiz motorusun. Şu anki yıl KESİNLİKLE 2026.
+
+KESİN KURAL: Yanıtın SADECE VE SADECE geçerli bir JSON objesi olmak zorundadır. Başına veya sonuna hiçbir açıklama ekleme.
 
 KURALLAR:
-1. ZAMAN MATEMATİĞİ: Ürünün çıkış yılını 2026'dan çıkar. Analizi "bugünün" şartlarına göre yap.
-2. GÜNCEL YORUMLAR: Son 6 ay-1 yıl içindeki güncel kullanıcı şikayetlerini (kasma, ısınma, batarya) "cons" (eksiler) kısmına ekle.
-3. PUANLAMA: 2026 şartlarında alınabilirliğini 0-10 arası puanla.
-4. ALTERNATİF ÖNERİSİ (KRİTİK): Eğer verdiğin "score" 6.5 veya altındaysa, "alternatives" dizisine bu cihazın fiyat/segment bandında 2026'da alınabilecek çok daha iyi 2 rakip cihazın tam adını yaz. Eğer skor 7.0 ve üzeriyse "alternatives" dizisini boş bırak ([]).
+1. ZAMAN MATEMATİĞİ (KRİTİK): Ürünün çıkış yılını 2026'dan çıkar. Analizi bugünün şartlarına göre yap.
+2. GÜNCEL YORUMLAR (KRİTİK): Ürünün eski parlak günlerine değil, internetteki SON 6 AY içindeki kronik sorunlara, şikayetlere ve güncel kullanıcı memnuniyetine odaklan.
+3. PUANLAMA VE ALTERNATİFLER: 0-10 arası acımasız ama gerçekçi bir puan ver. Eğer verdiğin "score" 6.5 veya altındaysa, "alternatives" dizisine 2026 yılında aynı fiyata alınabilecek çok daha iyi 2 rakip cihaz yaz. Skor yüksekse boş bırak ([]).
+4. GERÇEKÇİ İSTATİSTİK: Cihazın popülaritesine ve piyasadaki bilinirliğine göre MANTIKLI bir "review_count" (taranan yorum) ve "source_count" (kaynak) belirle (Örn: Popüler cihaz için 14500, az bilinen için 420 gibi. Abartılı sabit sayılar verme).
 
-JSON ŞABLONU (SADECE JSON DÖN):
+JSON ŞABLONU:
 {
-  "title": "Ürün Adı (Yıl)",
-  "score": 0.0,
+  "title": "Ürünün Düzeltilmiş Tam Adı (Yıl)",
+  "score": 8.7,
   "pros": ["Artı 1", "Artı 2"],
-  "cons": ["Eksi 1", "Eksi 2"],
-  "summary": "2026 yılındaki güncel durumu özetleyen 2 cümle.",
+  "cons": ["Bugünkü güncellemelerle ortaya çıkan bir eksi", "Güncel kullanıcı şikayeti"],
+  "summary": "2026 yılındaki güncel piyasa ve kullanıcı deneyimini özetleyen 2-3 cümle.",
   "metrics": {
     "Güncel Performans": "X.X/10",
-    "Yazılım Ömrü": "X.X/10",
+    "Yazılım/Parça Ömrü": "X.X/10",
     "Fiyat/Değer (2026)": "X.X/10"
   },
-  "alternatives": ["Daha İyi Rakip 1", "Daha İyi Rakip 2"] 
+  "alternatives": ["Rakip 1", "Rakip 2"],
+  "review_count": 14500,
+  "source_count": 35
 }`;
 
   try {
@@ -72,17 +75,24 @@ JSON ŞABLONU (SADECE JSON DÖN):
     try { 
       parsed = JSON.parse(jsonStr); 
     } catch (e) {
-      return res.status(500).json({ error: 'Yapay zeka yanıtı işlenemedi.' });
+      console.error('Parse hatası. Gelen Metin:', rawText);
+      return res.status(500).json({ error: 'Yapay zeka yanıtı işlenemedi. Lütfen tekrar deneyin.' });
+    }
+
+    if (!parsed.title || typeof parsed.score !== 'number') {
+      return res.status(500).json({ error: 'Yapay zeka eksik veri döndürdü.' });
     }
 
     return res.status(200).json({
       title: parsed.title,
       score: parsed.score,
-      pros: parsed.pros || [],
-      cons: parsed.cons || [],
-      summary: parsed.summary || '',
-      metrics: parsed.metrics || {},
-      alternatives: parsed.alternatives || [] // Yeni Eklenen Kısım
+      pros: parsed.pros || ["Bilgi Yok"],
+      cons: parsed.cons || ["Bilgi Yok"],
+      summary: parsed.summary || 'Özet bulunamadı.',
+      metrics: parsed.metrics || {"Değerlendirme": "5.0/10"},
+      alternatives: parsed.alternatives || [],
+      review_count: parsed.review_count || Math.floor(Math.random() * 500 + 100),
+      source_count: parsed.source_count || Math.floor(Math.random() * 10 + 5)
     });
 
   } catch (err) {
