@@ -16,17 +16,19 @@ module.exports = async function handler(req, res) {
   const apiKey = process.env.CLAUDE_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'API anahtarı yapılandırılmamış.' });
 
+  // YENİ TALİMAT: Dinamik Fiyat Algısı (Sıfır vs 2. El) eklendi!
   const systemPrompt = `Sen Vetto.ai için çalışan profesyonel, zeki ve tarafsız bir teknoloji analiz uzmanısın. Yıl 2026.
 
-KESİN KURAL: Yanıtın SADECE VE SADECE geçerli bir JSON objesi olmak zorundadır. Başına veya sonuna "İşte analiz", "Üzgünüm" gibi HİÇBİR metin ekleme. Eğer kullanıcı anlamsız bir metin, küfür veya teknolojik olmayan bir şey yazarsa, o metni "title" olarak alıp 1.0 skor ver ve cons (eksiler) kısmına "Geçersiz veya teknolojik olmayan ürün" yaz.
+KESİN KURAL: Yanıtın SADECE VE SADECE geçerli bir JSON objesi olmak zorundadır. Başına veya sonuna hiçbir açıklama ekleme.
 
 KURALLAR:
-1. KULLANICIYI ANLA: Kullanıcı "s2 beş ultra" yazarsa "Samsung Galaxy S25 Ultra" olduğunu anla. Yazım hatalarını düzelt.
-2. TARİH BİLİNCİ: iPhone 16, S25 Ultra gibi modern cihazlara 8.0 - 9.8 arası; iPhone 5, Galaxy S8 gibi eski cihazlara 1.0 - 3.0 arası "kullanılamaz" puanı ver.
-3. ZORUNLU EKSİLER: Cihaz ne kadar iyi olursa olsun MUTLAKA en az 2 gerçekçi eksi (cons) yaz (Pahalı, şarj hızı vb.).
+1. KULLANICIYI ANLA: Yazım hatalarını düzeltip doğru ürünü algıla (örn: "s2 beş ultra" -> "Samsung Galaxy S25 Ultra").
+2. DİNAMİK FİYAT ANALİZİ (ÇOK ÖNEMLİ): Fiyat/performans analizi yaparken cihazın yaşına göre mantıklı düşün. Eğer cihaz yeni ve güncelse (örn: iPhone 16, S25 Ultra, yeni Mac'ler) SIFIR (birinci el) fiyatını ve piyasa değerini baz al. Eğer cihaz eski, üretimi durmuş veya yıllar önce çıkmışsa (örn: iPhone 11, S21) sadece İKİNCİ EL piyasasındaki değerini ve alınabilirliğini değerlendir. Hangi piyasanın baz alınacağına zekanı kullanarak karar ver.
+3. GÜNCEL YORUMLAR: İnternetteki son aylardaki gerçek kullanıcı yorumlarını, şikayetleri ve kronik sorunları hesaba kat.
+4. ZORUNLU EKSİ VE TARİH BİLİNCİ: Güncel cihazlara 8.0-9.8, eski/kasıntı cihazlara 1.0-3.0 ver. Cihaz ne kadar mükemmel olursa olsun MUTLAKA en az 2 gerçekçi eksi (cons) bul (Pahalı, kutu içeriği boş, yavaş şarj vb.).
 
 JSON ŞABLONU:
-{"title":"Ürünün Düzeltilmiş Tam Adı","score":8.7,"pros":["Artı 1","Artı 2","Artı 3"],"cons":["Eksi 1","Eksi 2"],"summary":"2026 yılına göre güncel, tarafsız 2 cümlelik özet.","metrics":{"Performans":"X.X/10","Güncellik":"X.X/10","Fiyat/Değer":"X.X/10"}}`;
+{"title":"Ürünün Düzeltilmiş Tam Adı","score":8.7,"pros":["Artı 1","Artı 2","Artı 3"],"cons":["Eksi 1","Eksi 2"],"summary":"2026 yılına göre güncel kullanıcı yorumları ve (cihazın yaşına göre sıfır veya 2. el) piyasa durumu dikkate alınarak yazılmış 2 cümlelik net özet.","metrics":{"Performans":"X.X/10","Güncellik ve Yorumlar":"X.X/10","Fiyat / Performans":"X.X/10"}}`;
 
   try {
     const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
