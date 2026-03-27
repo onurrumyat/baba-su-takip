@@ -4,9 +4,9 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <title>Vetto.ai — Akıllı Ürün Analizi</title>
-<link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)"/>
-<link href="[https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap](https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap)" rel="stylesheet"/>
-<link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css)"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -124,6 +124,18 @@ header{position:sticky;top:0;z-index:200;background:rgba(7,8,15,.75);backdrop-fi
 .lstep i{color:var(--indigo-lt);font-size:9px}
 .load-track{width:260px;height:2px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden}
 .load-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--indigo-d),var(--indigo-lt));border-radius:99px;animation:loadbar 3.2s ease forwards}
+
+/* ── ERROR STATE ── */
+.error-wrap { max-width: 600px; margin: 0 auto; padding: 20px 24px 80px; display: none; }
+.error-card { background: var(--s1); border: 1px solid rgba(255, 0, 85, 0.2); border-radius: var(--r-2xl); padding: 48px 32px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 10px 40px rgba(255, 0, 85, 0.05); }
+.error-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--red-lt), transparent); }
+.error-icon-wrap { position: relative; width: 80px; height: 80px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; background: rgba(255, 0, 85, 0.05); border-radius: 50%; border: 1px solid rgba(255, 0, 85, 0.15); }
+.error-icon-wrap i.main-icon { font-size: 32px; color: var(--red-lt); }
+.error-badge { position: absolute; bottom: 0; right: -5px; background: var(--bg); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+.error-badge i { font-size: 14px; color: var(--amber); }
+.error-title { font-family: var(--ff-head); font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 12px; letter-spacing: -0.5px; }
+.error-desc { font-size: 15px; color: var(--text2); line-height: 1.6; margin-bottom: 32px; font-weight: 300; }
+.error-tech { font-family: monospace; font-size: 11px; color: var(--text3); background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 6px; display: inline-block; margin-top: 24px; border: 1px solid var(--border); }
 
 /* ── RESULT ── */
 .result-wrap{max-width:1280px;margin:0 auto;padding:0 24px 100px;display:none}
@@ -368,6 +380,28 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);text-align
     </div>
   </div>
 
+  <div class="error-wrap anim-scale" id="errorWrap">
+    <div class="error-card">
+      <div class="error-icon-wrap">
+        <i class="fas fa-robot main-icon"></i>
+        <div class="error-badge"><i class="fas fa-triangle-exclamation"></i></div>
+      </div>
+      <h3 class="error-title">Sistem Yanıt Vermiyor</h3>
+      <p class="error-desc" id="errorDesc">Üzgünüz, Vetto şu anda yapay zeka sunucularıyla bağlantı kuramıyor. Lütfen biraz bekleyip tekrar deneyin.</p>
+      
+      <div class="action-row" style="justify-content: center;">
+        <button class="act-btn primary" onclick="doAnalyze()" style="min-width: 160px; border-color: rgba(255,0,85,0.3); color: var(--red-lt); background: rgba(255,0,85,0.1);">
+          <i class="fas fa-rotate-right"></i> Tekrar Dene
+        </button>
+        <button class="act-btn" onclick="document.getElementById('productInput').focus(); document.getElementById('errorWrap').style.display='none';">
+          <i class="fas fa-search"></i> Farklı Ürün Ara
+        </button>
+      </div>
+      
+      <div class="error-tech" id="errorTech">Log: Timeout / Bilinmeyen Hata</div>
+    </div>
+  </div>
+
   <div class="result-wrap" id="resultWrap">
     <div class="score-hero anim-scale">
       <div class="sh-bg-orb"></div>
@@ -522,6 +556,11 @@ function switchPage(p){
   document.querySelectorAll('.nav-btn').forEach(function(el){el.classList.remove('active')});
   document.getElementById('page-'+p).classList.add('active');
   document.getElementById('nav-'+p).classList.add('active');
+  
+  // Hata ekranı açıksa sayfa geçişinde kapat
+  var errWrap = document.getElementById('errorWrap');
+  if(errWrap) errWrap.style.display = 'none';
+  
   if(p==='history')renderHistory();
 }
 function quickRun(el){
@@ -623,17 +662,31 @@ function renderResult(data){
 async function doAnalyze(){
   var product=document.getElementById('productInput').value.trim();
   if(!product){document.getElementById('productInput').focus();return;}
+  
   var btn=document.getElementById('analyzeBtn');
   btn.disabled=true;
   btn.innerHTML='<i class="fas fa-spinner fa-spin"></i><span>Analiz Ediliyor</span>';
+  
   document.getElementById('resultWrap').style.display='none';
+  document.getElementById('errorWrap').style.display='none';
+  
   var cycle=startLoad('loadWrap','loadTxt');
-  try{
+  
+  try {
     var data=await callAPI(product);
     renderResult(data);
     saveHistory(data);
-  }catch(err){alert('Analiz başarısız: '+err.message);}
-  finally{
+  } catch(err) {
+    document.getElementById('errorWrap').style.display='block';
+    
+    var isApiError = err.message.includes('Sunucu hatası') || err.message.includes('Yanıt işlenemedi') || err.message.includes('servisi');
+    document.getElementById('errorDesc').textContent = isApiError 
+      ? 'Yapay zeka analiz motorunda geçici bir sorun var veya sunucu meşgul. Lütfen tekrar deneyin.'
+      : 'Bağlantı sırasında bir sorun oluştu. İnternet bağlantınızı kontrol edin.';
+      
+    document.getElementById('errorTech').textContent = 'Hata Logu: ' + err.message;
+  }
+  finally {
     stopLoad('loadWrap',cycle);
     btn.disabled=false;
     btn.innerHTML='<i class="fas fa-search"></i><span>Analiz Et</span>';
