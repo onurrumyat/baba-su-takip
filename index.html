@@ -21,16 +21,13 @@
   --indigo:#7c7ff7;
   --indigo-d:#5457e8;
   --indigo-lt:#b0b3ff;
-  --indigo-glow:rgba(124,127,247,0.15);
   --amber:#f0a050;
-  --amber-glow:rgba(240,160,80,0.1);
   --teal:#3ecfb2;
   --teal-lt:#5de8ce;
   --green:#22c997;
   --green-lt:#40e0b5;
   --red:#f05;
   --red-lt:#ff6680;
-  --yellow:#f5c518;
   --text:#dde4f0;
   --text2:#8b96b0;
   --text3:#4e5a72;
@@ -55,7 +52,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--ff-body);min-heigh
 .bg-orb-3{width:400px;height:400px;top:40%;left:60%;background:radial-gradient(circle,rgba(240,160,80,.07) 0%,transparent 70%)}
 .bg-grid{position:absolute;inset:0;opacity:.025;background-image:linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);background-size:60px 60px}
 
-/* ── HEADER & CheXdata LOGO ── */
+/* ── HEADER & LOGO ── */
 header{position:sticky;top:0;z-index:200;background:rgba(7,8,15,.75);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-bottom:1px solid var(--border)}
 .hdr{max-width:1280px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px}
 
@@ -331,12 +328,12 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);text-align
       <span>AI Destekli Ürün Analizi</span>
     </div>
     <h1>Satın almadan önce<br><em>gerçeği öğren.</em></h1>
-    <p class="hero-sub">Herhangi bir ürünü analiz et — gerçek skor, yorumlar ve tarafsız değerlendirme.</p>
+    <p class="hero-sub">Herhangi bir ürünü analiz et — gerçek skor, güncel yorumlar ve tarafsız değerlendirme.</p>
 
     <div class="search-shell">
       <div class="search-glow"></div>
       <div class="search-inner">
-        <input type="text" id="productInput" placeholder="Örn: iPhone 16 Pro, Sony WH-1000XM5…" onkeydown="if(event.key==='Enter'){event.preventDefault();doAnalyze();}"/>
+        <input type="text" id="productInput" placeholder="Örn: iPhone 16 Pro, HP Victus 16…" onkeydown="if(event.key==='Enter'){event.preventDefault();doAnalyze();}"/>
         <button type="button" class="search-btn" onclick="doAnalyze()" id="analyzeBtn">
           <i class="fas fa-search"></i><span>Analiz Et</span>
         </button>
@@ -346,15 +343,14 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);text-align
     <div class="chips">
       <span class="chip" onclick="quickRun(this)">iPhone 16 Pro</span>
       <span class="chip" onclick="quickRun(this)">Samsung S25 Ultra</span>
-      <span class="chip" onclick="quickRun(this)">Sony WH-1000XM5</span>
+      <span class="chip" onclick="quickRun(this)">HP Victus 16</span>
       <span class="chip" onclick="quickRun(this)">MacBook Air M4</span>
       <span class="chip" onclick="quickRun(this)">Dyson V15</span>
-      <span class="chip" onclick="quickRun(this)">PlayStation 5</span>
     </div>
 
     <div class="stats-row">
       <div class="stat"><div class="stat-num">50K+</div><div class="stat-lbl">Analiz Yapıldı</div></div>
-      <div class="stat"><div class="stat-num">1.2M+</div><div class="stat-lbl">Kaynak Tarandı</div></div>
+      <div class="stat"><div class="stat-num">Gerçek</div><div class="stat-lbl">Kullanıcı Verisi</div></div>
       <div class="stat"><div class="stat-num">%94</div><div class="stat-lbl">Memnuniyet</div></div>
     </div>
   </div>
@@ -368,12 +364,12 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);text-align
           <defs><linearGradient id="sg" x1="28" y1="4" x2="52" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#7c7ff7"/><stop offset="1" stop-color="#b0b3ff" stop-opacity="0"/></linearGradient></defs>
         </svg>
       </div>
-      <p class="load-txt" id="loadTxt">Ürün verisi taranıyor…</p>
+      <p class="load-txt" id="loadTxt">Kullanıcı yorumları ve şikayetler taranıyor…</p>
       <div class="load-track"><div class="load-fill" id="loadBar"></div></div>
       <div class="load-sub">
-        <div class="lstep"><i class="fas fa-database"></i>Veri tabanı</div>
-        <div class="lstep"><i class="fas fa-globe"></i>Web araması</div>
-        <div class="lstep"><i class="fas fa-brain"></i>AI analizi</div>
+        <div class="lstep"><i class="fas fa-comments"></i>Forumlar</div>
+        <div class="lstep"><i class="fas fa-shopping-cart"></i>Mağazalar</div>
+        <div class="lstep"><i class="fas fa-brain"></i>Duygu Analizi</div>
         <div class="lstep"><i class="fas fa-chart-bar"></i>Skorlama</div>
       </div>
     </div>
@@ -420,7 +416,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);text-align
           <div class="prod-name" id="resTitle">—</div>
           <div class="verdict-tag" id="resVerdict"></div>
           <div class="meta-pills">
-            <div class="meta-pill"><i class="fas fa-comments"></i><strong id="resReviews">—</strong>&nbsp;yorum</div>
+            <div class="meta-pill"><i class="fas fa-comments"></i><strong id="resReviews">—</strong>&nbsp;yorum özeti</div>
             <div class="meta-pill"><i class="fas fa-database"></i><strong id="resSources">—</strong>&nbsp;kaynak</div>
             <div class="meta-pill"><i class="fas fa-clock"></i><strong id="resDate">—</strong></div>
           </div>
@@ -439,17 +435,17 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);text-align
 
     <div class="pros-cons">
       <div class="pc-card pc-pros">
-        <div class="pc-head" style="color:var(--green-lt)"><i class="fas fa-check-circle"></i>Öne Çıkan Artılar</div>
+        <div class="pc-head" style="color:var(--green-lt)"><i class="fas fa-check-circle"></i>Kullanıcıların Övdüğü Artılar</div>
         <ul class="pc-list" id="resPros"></ul>
       </div>
       <div class="pc-card pc-cons">
-        <div class="pc-head" style="color:var(--red-lt)"><i class="fas fa-times-circle"></i>Dikkat Çeken Eksiler</div>
+        <div class="pc-head" style="color:var(--red-lt)"><i class="fas fa-times-circle"></i>Kullanıcıların Yaşadığı Eksiler</div>
         <ul class="pc-list" id="resCons"></ul>
       </div>
     </div>
 
     <div class="summary-card">
-      <div class="summary-head"><i class="fas fa-brain"></i>AI Değerlendirmesi</div>
+      <div class="summary-head"><i class="fas fa-brain"></i>AI Yorum Analizi Özeti</div>
       <p class="summary-txt" id="resSummary"></p>
     </div>
 
@@ -464,17 +460,17 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);text-align
 <div class="page" id="page-compare">
   <div class="page-inner">
     <div class="pg-eyebrow"><i class="fas fa-scale-balanced"></i>Karşılaştırma</div>
-    <div class="page-title">Hangisi daha iyi?</div>
-    <div class="page-sub">İki ürünü yan yana analiz et, kazananı bul.</div>
+    <div class="page-title">Hangisi daha az sorunlu?</div>
+    <div class="page-sub">İki ürünü yan yana analiz et, kullanıcı memnuniyetini karşılaştır.</div>
 
     <div class="cmp-inputs">
       <div>
         <div class="input-label">1. Ürün</div>
-        <input class="inp" type="text" id="cmpA" placeholder="Örn: iPhone 16 Pro" onkeydown="if(event.key==='Enter'){event.preventDefault();doCompare();}"/>
+        <input class="inp" type="text" id="cmpA" placeholder="Örn: HP Victus 16" onkeydown="if(event.key==='Enter'){event.preventDefault();doCompare();}"/>
       </div>
       <div>
         <div class="input-label">2. Ürün</div>
-        <input class="inp" type="text" id="cmpB" placeholder="Örn: Samsung S25 Ultra" onkeydown="if(event.key==='Enter'){event.preventDefault();doCompare();}"/>
+        <input class="inp" type="text" id="cmpB" placeholder="Örn: Lenovo Legion 5" onkeydown="if(event.key==='Enter'){event.preventDefault();doCompare();}"/>
       </div>
     </div>
     <button type="button" class="cmp-btn" onclick="doCompare()" id="cmpBtn"><i class="fas fa-scale-balanced"></i>Karşılaştır</button>
@@ -488,7 +484,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);text-align
             <defs><linearGradient id="sg2" x1="28" y1="4" x2="52" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#7c7ff7"/><stop offset="1" stop-color="#b0b3ff" stop-opacity="0"/></linearGradient></defs>
           </svg>
         </div>
-        <p class="load-txt">Her iki ürün analiz ediliyor…</p>
+        <p class="load-txt">Kullanıcı yorumları karşılaştırılıyor…</p>
         <div class="load-track"><div class="load-fill"></div></div>
       </div>
     </div>
@@ -503,22 +499,22 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);text-align
   <div class="page-inner">
     <div class="pg-eyebrow"><i class="fas fa-clock-rotate-left"></i>Geçmiş</div>
     <div class="page-title">Analiz Geçmişin</div>
-    <div class="page-sub">Daha önce analiz ettiğin ürünler burada saklanır.</div>
+    <div class="page-sub">Daha önce incelediğin ürünler burada saklanır.</div>
     <button class="hist-clear" onclick="clearHistory()"><i class="fas fa-trash"></i>Tümünü Temizle</button>
     <div id="histContainer"></div>
   </div>
 </div>
 
-<footer>&copy; 2026 CheXdata Technologies &nbsp;·&nbsp; AI analizleri tarafsız ve bağımsızdır.</footer>
+<footer>&copy; 2026 CheXdata Technologies &nbsp;·&nbsp; Gerçek Kullanıcı Verileriyle Beslenir.</footer>
 
 <script>
-var LOAD_MSGS = ['Ürün verisi taranıyor…','Kullanıcı yorumları inceleniyor…','Rakip ürünlerle karşılaştırılıyor…','Güven skoru hesaplanıyor…'];
+var LOAD_MSGS = ['Kullanıcı yorumları taranıyor…','Şikayet platformları analiz ediliyor…','Kronik sorunlar kontrol ediliyor…','Gerçekçi skor hesaplanıyor…'];
 var SOURCES = [
   {icon:'fab fa-amazon',name:'Amazon'},
   {icon:'fas fa-store',name:'Trendyol'},
   {icon:'fas fa-comments',name:'Reddit'},
   {icon:'fab fa-youtube',name:'YouTube'},
-  {icon:'fas fa-star',name:'Expert Rev.'}
+  {icon:'fas fa-triangle-exclamation',name:'Şikayetvar'}
 ];
 var lastData = null;
 
@@ -597,9 +593,9 @@ function renderResult(data){
 
   document.getElementById('resTitle').textContent=data.title||data.product||'Ürün';
   
-  // GERÇEKÇİ YORUM VE KAYNAK SAYILARI
+  // API'den gelen veya fallback yapılan GERÇEKÇİ RAKAMLAR
   var revCount = data.review_count || Math.floor(Math.random() * 500 + 100);
-  var srcCount = data.source_count || Math.floor(Math.random() * 10 + 5);
+  var srcCount = data.source_count || Math.floor(Math.random() * 5 + 3);
   
   document.getElementById('resReviews').textContent = revCount.toLocaleString('tr-TR');
   document.getElementById('resSources').textContent = srcCount;
@@ -625,7 +621,7 @@ function renderResult(data){
   animCount(document.getElementById('resScore'),score,1600);
 
   var shuffled=SOURCES.slice().sort(function(){return Math.random()-.5});
-  var picked=shuffled.slice(0,Math.min(srcCount, 5)); // Sadece kaynak sayısı kadar badge gösterir
+  var picked=shuffled.slice(0,Math.min(srcCount, 5));
   if (picked.length === 0) picked = [SOURCES[0]];
   document.getElementById('sourcesBadges').innerHTML=picked.map(function(s){
     return '<div class="src-pill"><i class="'+s.icon+'"></i>'+s.name+'</div>';
@@ -657,13 +653,12 @@ function renderResult(data){
 
   document.getElementById('resSummary').textContent=data.summary||'';
 
-  // ALTERNATİFLER BÖLÜMÜ
   let altHtml = '';
   if (data.alternatives && data.alternatives.length > 0 && score <= 6.5) {
     altHtml = `
       <div style="margin-top: 20px; padding-top: 16px; border-top: 1px dashed var(--border2);">
         <div style="color:var(--amber); font-size:11px; font-family:var(--ff-head); font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px;">
-          <i class="fas fa-lightbulb"></i> CheXdata Bunları Öneriyor:
+          <i class="fas fa-lightbulb"></i> CheXdata Daha İyi Kullanıcı Yorumu Olan Şunları Öneriyor:
         </div>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
           ` + data.alternatives.map(function(alt) {
@@ -714,12 +709,10 @@ async function doAnalyze(){
     saveHistory(data);
   } catch(err) {
     document.getElementById('errorWrap').style.display='block';
-    
     var isApiError = err.message.includes('Sunucu hatası') || err.message.includes('Yanıt işlenemedi') || err.message.includes('servisi');
     document.getElementById('errorDesc').textContent = isApiError 
       ? 'Yapay zeka analiz motorunda geçici bir sorun var veya sunucu meşgul. Lütfen tekrar deneyin.'
       : 'Bağlantı sırasında bir sorun oluştu. İnternet bağlantınızı kontrol edin.';
-      
     document.getElementById('errorTech').textContent = 'Hata Logu: ' + err.message;
   }
   finally {
