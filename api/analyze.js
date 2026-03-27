@@ -6,36 +6,38 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const product = req.body?.product;
-  if (!product || product.trim().length < 2) {
+  const body = req.body || {};
+  const product = body.product;
+  
+  if (!product || typeof product !== 'string' || product.trim().length < 2) {
     return res.status(400).json({ error: 'Geçerli bir ürün adı girin.' });
   }
 
   const apiKey = process.env.CLAUDE_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'API anahtarı yapılandırılmamış.' });
 
-  // YENİ TALİMAT: Güncel Kullanıcı Deneyimi ve Zaman Yolculuğu Analizi
+  // YENİ TALİMAT: Eğer puan 6.5 veya altındaysa "alternatives" array'ini doldur!
   const systemPrompt = `Sen CheXdata.site için çalışan profesyonel bir teknoloji analiz motorusun. Yıl KESİNLİKLE 2026.
 
 KURALLAR:
-1. ZAMAN MATEMATİĞİ: Ürünün çıkış yılını 2026'dan çıkar. (Örn: iPhone 13 = 5 yıllık). Analizi "bugünün" şartlarına göre yap.
-2. GÜNCEL KULLANICI YORUMLARI (KRİTİK): Ürünün ilk çıktığı yıllardaki yorumları ASLA baz alma. İnternetteki SON 6 AY ve SON 1 YIL içindeki kullanıcı geri bildirimlerini analiz et. 
-   - Örn: Eskiden "çok hızlı" denilen bir cihaz için bugün kullanıcılar "WhatsApp bile donuyor", "Batarya yarım gün gitmiyor", "Uygulama desteği kesildi" diyorsa, EKSİLER (cons) kısmına bunları yaz.
-3. DİNAMİK PUANLAMA: 2026 yılındaki bir kullanıcının o ürünü eline aldığında yaşayacağı gerçek hayal kırıklığını veya memnuniyetini puanla. 2015'in yıldızı, 2026'nın çöpü olabilir.
-4. İKİNCİ EL NABZI: Kullanıcıların ikinci el alım-satım platformlarındaki güncel şikayetlerini (ekran sararması, ghost screen, kronik anakart arızaları) mutlaka analizine dahil et.
+1. ZAMAN MATEMATİĞİ: Ürünün çıkış yılını 2026'dan çıkar. Analizi "bugünün" şartlarına göre yap.
+2. GÜNCEL YORUMLAR: Son 6 ay-1 yıl içindeki güncel kullanıcı şikayetlerini (kasma, ısınma, batarya) "cons" (eksiler) kısmına ekle.
+3. PUANLAMA: 2026 şartlarında alınabilirliğini 0-10 arası puanla.
+4. ALTERNATİF ÖNERİSİ (KRİTİK): Eğer verdiğin "score" 6.5 veya altındaysa, "alternatives" dizisine bu cihazın fiyat/segment bandında 2026'da alınabilecek çok daha iyi 2 rakip cihazın tam adını yaz. Eğer skor 7.0 ve üzeriyse "alternatives" dizisini boş bırak ([]).
 
 JSON ŞABLONU (SADECE JSON DÖN):
 {
-  "title": "Ürün Adı (Çıkış Yılı)",
+  "title": "Ürün Adı (Yıl)",
   "score": 0.0,
-  "pros": ["2026 itibarıyla hala geçerli olan artı", "Güncel bir kullanıcı avantajı"],
-  "cons": ["Bugünkü güncellemelerle ortaya çıkan yavaşlama", "Güncel batarya/ekran sorunları"],
-  "summary": "2026 yılındaki bir kullanıcı için bu cihazın bugün ne ifade ettiğine dair 2 cümlelik gerçekçi özet.",
+  "pros": ["Artı 1", "Artı 2"],
+  "cons": ["Eksi 1", "Eksi 2"],
+  "summary": "2026 yılındaki güncel durumu özetleyen 2 cümle.",
   "metrics": {
     "Güncel Performans": "X.X/10",
     "Yazılım Ömrü": "X.X/10",
     "Fiyat/Değer (2026)": "X.X/10"
-  }
+  },
+  "alternatives": ["Daha İyi Rakip 1", "Daha İyi Rakip 2"] 
 }`;
 
   try {
@@ -54,12 +56,34 @@ JSON ŞABLONU (SADECE JSON DÖN):
       })
     });
 
-    const claudeData = await claudeRes.json();
-    const rawText = claudeData.content[0].text.trim();
-    const jsonStr = rawText.match(/\{[\s\S]*\}/)[0];
-    const parsed = JSON.parse(jsonStr);
+    if (!claudeRes.ok) {
+      return res.status(502).json({ error: 'Analiz servisi şu an yanıt veremiyor.' });
+    }
 
-    return res.status(200).json(parsed);
+    const claudeData = await claudeRes.json();
+    const items = claudeData && claudeData.content;
+    const rawText = (items && items[0] && items[0].text) ? items[0].text.trim() : '';
+
+    let jsonStr = rawText;
+    const bm = jsonStr.match(/\{[\s\S]*\}/);
+    if (bm) jsonStr = bm[0];
+
+    let parsed;
+    try { 
+      parsed = JSON.parse(jsonStr); 
+    } catch (e) {
+      return res.status(500).json({ error: 'Yapay zeka yanıtı işlenemedi.' });
+    }
+
+    return res.status(200).json({
+      title: parsed.title,
+      score: parsed.score,
+      pros: parsed.pros || [],
+      cons: parsed.cons || [],
+      summary: parsed.summary || '',
+      metrics: parsed.metrics || {},
+      alternatives: parsed.alternatives || [] // Yeni Eklenen Kısım
+    });
 
   } catch (err) {
     return res.status(500).json({ error: 'Sunucu hatası: ' + err.message });
