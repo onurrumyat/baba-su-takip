@@ -16,12 +16,12 @@ module.exports = async function handler(req, res) {
   const apiKey = process.env.CLAUDE_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'API anahtarı yapılandırılmamış.' });
 
-  const systemPrompt = 'Sen Vetto.ai için tarafsız bir ürün analiz uzmanısın. 2025-2026 koşullarına göre analiz yap. SADECE JSON dön, başka hiçbir şey yazma, backtick kullanma. ' +
-    'SKOR REHBERI: 1-3 çok kötü, 3-5 zayıf, 5-6.5 orta, 6.5-7.5 iyi ama kusurlu, 7.5-8.5 çok iyi, 8.5-9.5 mükemmel, 9.5+ neredeyse kusursuz (çok nadir). ' +
-    'Her ürün GERÇEKÇİ ve FARKLI skor almalı. Eski/ucuz ürünler düşük skor alır. ' +
-    'ZAMAN FARKINDASI OL: Eğer ürün eskide iyiydi ama şimdi rakipler geçti, işlemci eskidi, yazılım desteği kesildi veya fiyatı artık değerini karşılamıyorsa bunu yansıt. ' +
-    'Metrikler birbirinden çok farklı olabilir (örn performans 9.0 iken fiyat/değer 4.5). ' +
-    'Beklenen JSON Formatı: {"title":"tam urun adi","score":6.2,"pros":["madde","madde"],"cons":["madde","madde"],"summary":"2-3 cumle guncel degerlendirme","metrics":{"Performans":"X.X/10","Fiyat/Deger":"X.X/10","Tasarim":"X.X/10"}}';
+  // YAPAY ZEKA TALİMATI (PROMPT) GÜNCELLENDİ: ARTIK ÇOK DAHA GERÇEKÇİ VE ACIMASIZ
+  const systemPrompt = 'Sen Vetto.ai için çalışan tarafsız, son derece gerçekçi ve acımasız bir ürün analiz uzmanısın. Şu an yıl 2026. Tüm analizlerini 2026 yılının teknolojik standartlarına, yazılım gereksinimlerine ve güncel pazar şartlarına göre yapacaksın. SADECE JSON dön, başka hiçbir şey yazma, backtick kullanma. ' +
+    'ÇOK ÖNEMLİ KURAL: Teknolojik ömrünü doldurmuş, güncel uygulamaları açmayan, yazılım desteği kesilmiş, kasıp donan eski cihazlara (Örneğin iPhone 5, iPhone 7, Galaxy S8 vb.) KESİNLİKLE acıma. Bu tür cihazların skoru 1.0 ile 2.9 arasında "kullanılamaz/çöp" seviyesinde olmalıdır. ' +
+    'SKOR REHBERİ: 1.0-2.9 (Kullanılamaz/Çöp/Antika), 3.0-4.9 (Çok Zayıf/Alınmaz/Eskimiş), 5.0-6.9 (Orta/Sadece Günü Kurtarır), 7.0-8.5 (İyi/Güncel/Tercih Edilir), 8.6-9.5 (Harika/Amiral Gemisi), 9.6+ (Kusursuz). ' +
+    'Eksiler (cons) kısmında cihazın eski olduğunu, kasacağını veya güncelleme almadığını net bir şekilde belirt. Metriklerde mutlaka "Güncellik ve Ömür" değerini puanla. ' +
+    'Beklenen JSON Formatı: {"title":"tam urun adi","score":1.8,"pros":["madde","madde"],"cons":["madde","madde","madde"],"summary":"2-3 cumle 2026 yilina gore son derece net ve acimasiz degerlendirme","metrics":{"Performans":"X.X/10","Güncellik ve Ömür":"X.X/10","Fiyat/Değer":"X.X/10"}}';
 
   try {
     const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
@@ -32,7 +32,7 @@ module.exports = async function handler(req, res) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-3-haiku-20240307', // 404 hatasını önleyen çalışan model!
+        model: 'claude-3-haiku-20240307', 
         max_tokens: 1200,
         system: systemPrompt,
         messages: [{ role: 'user', content: 'Ürün: ' + product.trim() }]
