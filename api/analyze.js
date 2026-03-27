@@ -16,7 +16,6 @@ module.exports = async function handler(req, res) {
   const apiKey = process.env.CLAUDE_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'API anahtarı yapılandırılmamış.' });
 
-  // YENİ TALİMAT: Konuşmak yasaklandı. Anlamsız kelimede bile JSON dönecek.
   const systemPrompt = `Sen Vetto.ai için çalışan profesyonel, zeki ve tarafsız bir teknoloji analiz uzmanısın. Yıl 2026.
 
 KESİN KURAL: Yanıtın SADECE VE SADECE geçerli bir JSON objesi olmak zorundadır. Başına veya sonuna "İşte analiz", "Üzgünüm" gibi HİÇBİR metin ekleme. Eğer kullanıcı anlamsız bir metin, küfür veya teknolojik olmayan bir şey yazarsa, o metni "title" olarak alıp 1.0 skor ver ve cons (eksiler) kısmına "Geçersiz veya teknolojik olmayan ürün" yaz.
@@ -53,7 +52,6 @@ JSON ŞABLONU:
     const items = claudeData && claudeData.content;
     const rawText = (items && items[0] && items[0].text) ? items[0].text.trim() : '';
 
-    // Markdown ve fazlalıkları kesin olarak temizle
     let jsonStr = rawText;
     const bm = jsonStr.match(/\{[\s\S]*\}/);
     if (bm) jsonStr = bm[0];
