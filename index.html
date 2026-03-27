@@ -337,8 +337,8 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);text-align
     <div class="search-shell">
       <div class="search-glow"></div>
       <div class="search-inner">
-        <input type="text" id="productInput" placeholder="Örn: iPhone 16 Pro, Sony WH-1000XM5…" onkeydown="if(event.key==='Enter')doAnalyze()"/>
-        <button class="search-btn" onclick="doAnalyze()" id="analyzeBtn">
+        <input type="text" id="productInput" placeholder="Örn: iPhone 16 Pro, Sony WH-1000XM5…" onkeydown="if(event.key==='Enter'){event.preventDefault();doAnalyze();}"/>
+        <button type="button" class="search-btn" onclick="doAnalyze()" id="analyzeBtn">
           <i class="fas fa-search"></i><span>Analiz Et</span>
         </button>
       </div>
@@ -471,14 +471,14 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);text-align
     <div class="cmp-inputs">
       <div>
         <div class="input-label">1. Ürün</div>
-        <input class="inp" type="text" id="cmpA" placeholder="Örn: iPhone 16 Pro" onkeydown="if(event.key==='Enter')doCompare()"/>
+        <input class="inp" type="text" id="cmpA" placeholder="Örn: iPhone 16 Pro" onkeydown="if(event.key==='Enter'){event.preventDefault();doCompare();}"/>
       </div>
       <div>
         <div class="input-label">2. Ürün</div>
-        <input class="inp" type="text" id="cmpB" placeholder="Örn: Samsung S25 Ultra" onkeydown="if(event.key==='Enter')doCompare()"/>
+        <input class="inp" type="text" id="cmpB" placeholder="Örn: Samsung S25 Ultra" onkeydown="if(event.key==='Enter'){event.preventDefault();doCompare();}"/>
       </div>
     </div>
-    <button class="cmp-btn" onclick="doCompare()" id="cmpBtn"><i class="fas fa-scale-balanced"></i>Karşılaştır</button>
+    <button type="button" class="cmp-btn" onclick="doCompare()" id="cmpBtn"><i class="fas fa-scale-balanced"></i>Karşılaştır</button>
 
     <div class="load-wrap" id="cmpLoadWrap" style="padding:40px 0 0">
       <div class="load-card">
