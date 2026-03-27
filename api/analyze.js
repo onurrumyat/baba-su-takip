@@ -16,14 +16,18 @@ module.exports = async function handler(req, res) {
   const apiKey = process.env.CLAUDE_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'API anahtarı yapılandırılmamış.' });
 
-  // YENİ, ZEKİ VE DENGELİ PROMPT: Hem eskileri ezer, hem yenileri tanır, hem yazım hatalarını anlar.
-  const systemPrompt = 'Sen Vetto.ai için çalışan profesyonel, zeki ve tarafsız bir teknoloji analiz uzmanısın. Yıl 2026. SADECE JSON dön. ' +
-    'KURALLAR: ' +
-    '1. KULLANICIYI ANLA: Kullanıcı "s2 beş ultra" yazarsa bunun "Samsung Galaxy S25 Ultra" olduğunu anla ve güncel amiral gemisi olarak değerlendir. Yazım hatalarını düzeltip "title" kısmına ürünün tam ve doğru adını yaz. ' +
-    '2. TARİH BİLİNCİ (ESKİ vs YENİ): iPhone 16, S25 Ultra, MacBook M4 gibi 2024-2026 arası çıkmış modern/amiral gemisi cihazlara 8.0 ile 9.8 arası yüksek puanlar ver. Ancak iPhone 5, Galaxy S8 gibi 2020 öncesi eski cihazlara 1.0 ile 3.0 arası "kullanılamaz" puanı ver. ' +
-    '3. ZORUNLU EKSİLER (CONS): HİÇBİR CİHAZ KUSURSUZ DEĞİLDİR. iPhone 16 Pro veya S25 Ultra gibi cihazlara bile MUTLAKA en az 2 mantıklı eksi bul (Örn: "Kutu içeriği fakir", "Rakiplerine göre yavaş şarj", "Fiyatı çok yüksek", "Kamera çıkıntısı fazla" vb.). ' +
-    '4. FORMAT: En az 3 pros (artı), en az 2 cons (eksi) olmak ZORUNDA. Metriklerde 10 üzerinden gerçekçi puanlamalar yap ("Güncellik" veya "Performans" vb.). ' +
-    'Beklenen JSON: {"title":"Ürünün Düzeltilmiş Tam Adı","score":8.7,"pros":["Artı 1","Artı 2","Artı 3"],"cons":["Eksi 1","Eksi 2"],"summary":"2026 yılına göre güncel, tarafsız 2 cümlelik özet.","metrics":{"Performans":"X.X/10","Güncellik":"X.X/10","Fiyat/Değer":"X.X/10"}}';
+  // YENİ TALİMAT: Konuşmak yasaklandı. Anlamsız kelimede bile JSON dönecek.
+  const systemPrompt = `Sen Vetto.ai için çalışan profesyonel, zeki ve tarafsız bir teknoloji analiz uzmanısın. Yıl 2026.
+
+KESİN KURAL: Yanıtın SADECE VE SADECE geçerli bir JSON objesi olmak zorundadır. Başına veya sonuna "İşte analiz", "Üzgünüm" gibi HİÇBİR metin ekleme. Eğer kullanıcı anlamsız bir metin, küfür veya teknolojik olmayan bir şey yazarsa, o metni "title" olarak alıp 1.0 skor ver ve cons (eksiler) kısmına "Geçersiz veya teknolojik olmayan ürün" yaz.
+
+KURALLAR:
+1. KULLANICIYI ANLA: Kullanıcı "s2 beş ultra" yazarsa "Samsung Galaxy S25 Ultra" olduğunu anla. Yazım hatalarını düzelt.
+2. TARİH BİLİNCİ: iPhone 16, S25 Ultra gibi modern cihazlara 8.0 - 9.8 arası; iPhone 5, Galaxy S8 gibi eski cihazlara 1.0 - 3.0 arası "kullanılamaz" puanı ver.
+3. ZORUNLU EKSİLER: Cihaz ne kadar iyi olursa olsun MUTLAKA en az 2 gerçekçi eksi (cons) yaz (Pahalı, şarj hızı vb.).
+
+JSON ŞABLONU:
+{"title":"Ürünün Düzeltilmiş Tam Adı","score":8.7,"pros":["Artı 1","Artı 2","Artı 3"],"cons":["Eksi 1","Eksi 2"],"summary":"2026 yılına göre güncel, tarafsız 2 cümlelik özet.","metrics":{"Performans":"X.X/10","Güncellik":"X.X/10","Fiyat/Değer":"X.X/10"}}`;
 
   try {
     const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
@@ -42,8 +46,6 @@ module.exports = async function handler(req, res) {
     });
 
     if (!claudeRes.ok) {
-      const errBody = await claudeRes.text();
-      console.error('Claude API hatası:', claudeRes.status, errBody);
       return res.status(502).json({ error: 'Analiz servisi şu an yanıt veremiyor.' });
     }
 
@@ -51,6 +53,7 @@ module.exports = async function handler(req, res) {
     const items = claudeData && claudeData.content;
     const rawText = (items && items[0] && items[0].text) ? items[0].text.trim() : '';
 
+    // Markdown ve fazlalıkları kesin olarak temizle
     let jsonStr = rawText;
     const bm = jsonStr.match(/\{[\s\S]*\}/);
     if (bm) jsonStr = bm[0];
@@ -59,25 +62,24 @@ module.exports = async function handler(req, res) {
     try { 
       parsed = JSON.parse(jsonStr); 
     } catch (e) {
-      console.error('Parse hatası:', rawText);
+      console.error('Parse hatası. Gelen Metin:', rawText);
       return res.status(500).json({ error: 'Yapay zeka yanıtı işlenemedi. Lütfen tekrar deneyin.' });
     }
 
-    if (!parsed.title || typeof parsed.score !== 'number' || !Array.isArray(parsed.pros) || !Array.isArray(parsed.cons)) {
-      return res.status(500).json({ error: 'Yapay zeka eksik veri döndürdü. Lütfen tekrar deneyin.' });
+    if (!parsed.title || typeof parsed.score !== 'number') {
+      return res.status(500).json({ error: 'Yapay zeka eksik veri döndürdü.' });
     }
 
     return res.status(200).json({
       title: parsed.title,
       score: parsed.score,
-      pros: parsed.pros,
-      cons: parsed.cons,
-      summary: parsed.summary || '',
-      metrics: parsed.metrics || {}
+      pros: parsed.pros || ["Bilgi Yok"],
+      cons: parsed.cons || ["Bilgi Yok"],
+      summary: parsed.summary || 'Özet bulunamadı.',
+      metrics: parsed.metrics || {"Değerlendirme": "5.0/10"}
     });
 
   } catch (err) {
-    console.error('Sunucu Hatası:', err);
     return res.status(500).json({ error: 'Sunucu hatası: ' + err.message });
   }
 };
