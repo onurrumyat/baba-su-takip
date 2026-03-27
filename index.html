@@ -557,7 +557,6 @@ function switchPage(p){
   document.getElementById('page-'+p).classList.add('active');
   document.getElementById('nav-'+p).classList.add('active');
   
-  // Hata ekranı açıksa sayfa geçişinde kapat
   var errWrap = document.getElementById('errorWrap');
   if(errWrap) errWrap.style.display = 'none';
   
