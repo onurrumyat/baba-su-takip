@@ -3,7 +3,6 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   
-  // Pre-flight request için hızlı yanıt
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -14,7 +13,6 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Geçerli bir ürün adı girin.' });
   }
 
-  // Vercel üzerinden gelecek gizli API anahtarımız
   const apiKey = process.env.CLAUDE_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'API anahtarı yapılandırılmamış.' });
 
@@ -26,7 +24,7 @@ module.exports = async function handler(req, res) {
     'Beklenen JSON Formatı: {"title":"tam urun adi","score":6.2,"pros":["madde","madde"],"cons":["madde","madde"],"summary":"2-3 cumle guncel degerlendirme","metrics":{"Performans":"X.X/10","Fiyat/Deger":"X.X/10","Tasarim":"X.X/10"}}';
 
   try {
-    const claudeRes = await fetch('[https://api.anthropic.com/v1/messages](https://api.anthropic.com/v1/messages)', {
+    const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -34,7 +32,7 @@ module.exports = async function handler(req, res) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-3-haiku-20240307', // Geçerli güncel Claude API Modeli kullanıldı
+        model: 'claude-3-haiku-20240307', // 404 hatasını önleyen çalışan model!
         max_tokens: 1200,
         system: systemPrompt,
         messages: [{ role: 'user', content: 'Ürün: ' + product.trim() }]
