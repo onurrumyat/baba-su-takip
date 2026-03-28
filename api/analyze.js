@@ -1,105 +1,85 @@
-module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+// Gerekli kütüphaneleri dahil ediyoruz
+const express = require('express');
+const cors = require('cors');
+const { OpenAI } = require('openai');
+const Anthropic = require('@anthropic-ai/sdk');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-  const body = req.body || {};
-  const product = body.product;
-  
-  if (!product || typeof product !== 'string' || product.trim().length < 2) {
-    return res.status(400).json({ error: 'Geçerli bir ürün adı girin.' });
-  }
+require('dotenv').config(); // API keyleri .env dosyasından çekmek için
 
-  const apiKey = process.env.CLAUDE_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'API anahtarı yapılandırılmamış.' });
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-  const systemPrompt = `Sen CheXdata.site için çalışan ve ana görevi İNTERNETTEKİ GERÇEK KULLANICI YORUMLARINI ANALİZ ETMEK olan acımasız bir yapay zeka motorusun. Yıl KESİNLİKLE 2026.
+// API İstemcilerini Başlatıyoruz (Kendi API Key'lerini .env dosyasına girmelisin)
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-KESİN KURAL: Yanıtın SADECE VE SADECE geçerli bir JSON objesi olmak zorundadır. Başına veya sonuna hiçbir açıklama ekleme.
+app.post('/api/analyze', async (req, res) => {
+    const { topic } = req.body;
 
-KURALLAR:
-1. YORUM ODAKLI ANALİZ: Amazon, Reddit, Trendyol, Hepsiburada ve Şikayetvar gibi platformlardaki GERÇEK kronik sorunları (ısınma, menteşe, panel kalitesi, yazılım bug'ları) "cons" kısmına yaz. Kağıt üstündeki özellikleri övme, insanların ne yaşadığına bak.
-2. MANTIKLI VE GERÇEKÇİ RAKAMLAR (ÇOK KRİTİK): Kullanıcıları aptal yerine koyma! Bir oyuncu laptopu veya mouse için internette 18.000 tane nitelikli inceleme taraması imkansızdır. Gerçekçi ol! Popüler bir amiral gemisi telefon (iPhone 15/16) için 3000-7000 arası, bir laptop için 300-900 arası, az bilinen ürünler için 50-150 arası "review_count" belirle. "source_count" (kaynak site) ise 4 ile 12 platform arası olsun. Asla on binlerce sahte yorum sayısı atma.
-3. ZORUNLU METRİKLER: "metrics" objesinin içine KESİNLİKLE şu 3 başlığı koy ve 10 üzerinden gerçekçi puanla: "Kullanıcı Memnuniyeti", "Kronik Sorun Riski" (Not: Risk ne kadar DÜŞÜKSE puan o kadar YÜKSEK olsun), "Fiyat / Performans".
-4. PUAN VE ALTERNATİFLER: Skor 0-10 arası. Skor 6.5 veya altındaysa "alternatives" içine daha az şikayet alan, daha iyi 2 rakip model yaz. Değilse boş bırak [].
-
-JSON ŞABLONU:
-{
-  "title": "Ürünün Tam Adı (Yıl)",
-  "score": 8.5,
-  "pros": ["Kullanıcı övgüsü 1", "Kullanıcı övgüsü 2"],
-  "cons": ["Gerçek kronik şikayet 1", "Gerçek kronik şikayet 2"],
-  "summary": "İnternetteki gerçek kullanıcı şikayetleri ve övgülerine dayanan 2026 yılına ait 2-3 cümlelik özet.",
-  "metrics": {
-    "Kullanıcı Memnuniyeti": "X.X/10",
-    "Kronik Sorun Riski": "X.X/10",
-    "Fiyat / Performans": "X.X/10"
-  },
-  "alternatives": ["Daha İyi Rakip 1", "Daha İyi Rakip 2"],
-  "review_count": 450,
-  "source_count": 8
-}`;
-
-  try {
-    const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-3-haiku-20240307', 
-        max_tokens: 1200,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: 'Kullanıcı yorumlarını analiz et: ' + product.trim() }]
-      })
-    });
-
-    if (!claudeRes.ok) {
-      return res.status(502).json({ error: 'Analiz servisi şu an yanıt veremiyor.' });
+    if (!topic) {
+        return res.status(400).json({ error: "Konu (topic) eksik!" });
     }
 
-    const claudeData = await claudeRes.json();
-    const items = claudeData && claudeData.content;
-    const rawText = (items && items[0] && items[0].text) ? items[0].text.trim() : '';
+    try {
+        // 1. AŞAMA: 3 Yapay Zekaya Aynı Anda İstek Atıyoruz (Promise.all ile hız kazanıyoruz)
+        const [openaiResponse, claudeResponse, geminiResponse] = await Promise.all([
+            // OpenAI İstegi (Güvenlik ve Mantık Odaklı)
+            openai.chat.completions.create({
+                model: "gpt-4-turbo",
+                messages: [
+                    { role: "system", content: "Sen yönetim kurulunda güvenlik ve mimari uzmanı bir yapay zekasın. Kısa ve öz konuş." },
+                    { role: "user", content: `Şu konuyu analiz et ve kısa bir öneri sun: ${topic}` }
+                ]
+            }),
+            // Claude İstegi (Etik ve Detay Odaklı)
+            anthropic.messages.create({
+                model: "claude-3-opus-20240229",
+                max_tokens: 300,
+                system: "Sen yönetim kurulunda etik ve sürdürülebilirlik uzmanı bir yapay zekasın. Kısa ve öz konuş.",
+                messages: [
+                    { role: "user", content: `Şu konuyu analiz et ve kısa bir öneri sun: ${topic}` }
+                ]
+            }),
+            // Gemini İstegi (Hız ve Kullanıcı Deneyimi Odaklı)
+            genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" }).generateContent({
+                contents: [{ role: "user", parts: [{ text: `Sen yönetim kurulunda kullanıcı deneyimi ve hız uzmanısın. Şu konuyu analiz et ve kısa, öz bir öneri sun: ${topic}` }] }]
+            })
+        ]);
 
-    let jsonStr = rawText;
-    const bm = jsonStr.match(/\{[\s\S]*\}/);
-    if (bm) jsonStr = bm[0];
+        // Gelen yanıtları temiz metne çeviriyoruz
+        const openaiText = openaiResponse.choices[0].message.content;
+        const claudeText = claudeResponse.content[0].text;
+        const geminiText = geminiResponse.response.text();
 
-    let parsed;
-    try { 
-      parsed = JSON.parse(jsonStr); 
-    } catch (e) {
-      console.error('Parse hatası. Gelen Metin:', rawText);
-      return res.status(500).json({ error: 'Yapay zeka yanıtı işlenemedi. Lütfen tekrar deneyin.' });
+        // 2. AŞAMA: Ortak Karar Sentezi (Bunu OpenAI'a veya Claude'a yaptırabiliriz, burada OpenAI'a yaptırıyoruz)
+        const consensusResponse = await openai.chat.completions.create({
+            model: "gpt-4-turbo",
+            messages: [
+                { role: "system", content: "Sen yönetim kurulu başkanısın. Sana 3 farklı yapay zekanın analizi verilecek. Bunları birleştirip 'Ortak Karar' metni ve bu karar için kısa bir 'Protokol Başlığı' oluştur." },
+                { role: "user", content: `Konu: ${topic}\n\nOpenAI: ${openaiText}\nClaude: ${claudeText}\nGemini: ${geminiText}\n\nLütfen bana şu formatta JSON dön: {"baslik": "...", "ortakKarar": "..."}` }
+            ],
+            response_format: { type: "json_object" } // Sadece JSON dönmesini zorluyoruz
+        });
+
+        const consensusData = JSON.parse(consensusResponse.choices[0].message.content);
+
+        // 3. AŞAMA: Tüm verileri Frontend'e (Kullanıcıya) gönderiyoruz
+        res.json({
+            openai: openaiText,
+            claude: claudeText,
+            gemini: geminiText,
+            masterTitle: consensusData.baslik,
+            masterDecision: consensusData.ortakKarar
+        });
+
+    } catch (error) {
+        console.error("API Hatası:", error);
+        res.status(500).json({ error: "Yapay zekalarla iletişim kurulamadı." });
     }
+});
 
-    if (!parsed.title || typeof parsed.score !== 'number') {
-      return res.status(500).json({ error: 'Yapay zeka eksik veri döndürdü.' });
-    }
-
-    return res.status(200).json({
-      title: parsed.title,
-      score: parsed.score,
-      pros: parsed.pros || ["Bilgi Yok"],
-      cons: parsed.cons || ["Bilgi Yok"],
-      summary: parsed.summary || 'Özet bulunamadı.',
-      metrics: parsed.metrics || {
-        "Kullanıcı Memnuniyeti": "5.0/10",
-        "Kronik Sorun Riski": "5.0/10",
-        "Fiyat / Performans": "5.0/10"
-      },
-      alternatives: parsed.alternatives || [],
-      review_count: parsed.review_count || Math.floor(Math.random() * 400 + 150),
-      source_count: parsed.source_count || Math.floor(Math.random() * 5 + 3)
-    });
-
-  } catch (err) {
-    return res.status(500).json({ error: 'Sunucu hatası: ' + err.message });
-  }
-};
+const PORT = 3000;
+app.listen(PORT, () => console.log(`🚀 Yapay Zeka Komuta Merkezi Backend'i ${PORT} portunda çalışıyor.`));
