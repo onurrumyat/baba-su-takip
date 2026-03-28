@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Komuta Merkezi | Profesyonel Sürüm</title>
+    <title>AI Komuta Merkezi | İcraat Sürümü</title>
     <style>
         :root {
             --bg-main: #05070a;
@@ -30,7 +30,7 @@
             background-size: 100% 100%, 40px 40px, 40px 40px;
             color: var(--text-light);
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            height: 100dvh; /* Ekrana kesin sığma garantisi */
+            height: 100dvh; /* Dinamik ekran yüksekliği, taşmayı kesin önler */
             display: flex; flex-direction: column;
             overflow: hidden; 
         }
@@ -62,7 +62,6 @@
             flex: 1; min-height: 0; 
             display: flex; justify-content: center; align-items: center; position: relative;
             perspective: 1200px;
-            /* Avatarların kenarlardan kesilmemesi için gereken güvenlik boşluğu */
             padding: 45px 50px; 
         }
         
