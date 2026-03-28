@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Komuta Merkezi | Dev Masa</title>
+    <title>AI Komuta Merkezi | Profesyonel Sürüm</title>
     <style>
         :root {
             --bg-main: #05070a;
@@ -62,7 +62,7 @@
             flex: 1; min-height: 0; 
             display: flex; justify-content: center; align-items: center; position: relative;
             perspective: 1200px;
-            /* Avatarların kenarlardan kesilmemesi için gereken MİNİMUM boşluk */
+            /* Avatarların kenarlardan kesilmemesi için gereken güvenlik boşluğu */
             padding: 45px 50px; 
         }
         
@@ -74,12 +74,12 @@
 
         .table-wrapper {
             position: relative; 
-            width: 100%; /* Masa genişliği köklendi */
-            max-width: 850px; /* Çok daha büyük bir tavan sınır */
-            aspect-ratio: 2 / 1; /* Yatayda geniş dev masa */
+            width: 100%; 
+            max-width: 850px; 
+            aspect-ratio: 2 / 1; 
             transform: rotateX(15deg); 
             transform-style: preserve-3d;
-            max-height: 55vh; /* Dikeyde panelleri ezmemesi için sınır */
+            max-height: 55vh; 
         }
         
         .board-table {
@@ -166,10 +166,10 @@
             .info-card { min-width: 100%; }
             .vote-actions { width: 100%; justify-content: space-between; gap: 5px;} .btn { flex: 1; text-align: center;}
             
-            .stage { padding: 30px; } /* Avatarlar için güvenli boşluk */
+            .stage { padding: 30px; } 
             
             .table-wrapper { 
-                width: 90%; /* Mobilde ekranı iyice kaplar */
+                width: 90%; 
                 max-width: 400px;
                 aspect-ratio: 1 / 1.3; 
                 transform: rotateX(8deg); 
@@ -236,10 +236,10 @@
             const fullText = document.getElementById('topic-input').value;
             if (!fullText.trim() || fullText.trim().length < 3) return;
 
-            const words = fullText.split(' ');
-            const summary = words.length > 3 ? words.slice(0, 3).join(' ') + "..." : fullText;
-            document.getElementById('ui-topic').innerText = `"${summary}"`;
-            document.getElementById('ui-vote-title').innerText = "Vercel API'den analiz bekleniyor...";
+            // Arayüz Hazırlığı
+            document.getElementById('ui-topic').innerText = "Yapay zeka özetliyor...";
+            document.getElementById('ui-topic').style.color = "var(--text-muted)";
+            document.getElementById('ui-vote-title').innerText = "Modeller ciddiyetle analiz ediyor...";
             document.getElementById('ui-vote-title').style.color = "var(--text-muted)";
             document.getElementById('topic-input').value = '';
             document.querySelectorAll('.doc, .master-doc').forEach(el => el.classList.remove('visible'));
@@ -247,7 +247,7 @@
             document.getElementById('btn-n').disabled = true;
 
             aiNodes.forEach(id => document.getElementById('ai-' + id).classList.add('thinking'));
-            document.getElementById('ui-status').innerText = "Modeller analiz yapıyor...";
+            document.getElementById('ui-status').innerText = "Modeller konuyu derinlemesine analiz ediyor...";
 
             try {
                 const response = await fetch('/api/analyze', {
@@ -266,13 +266,17 @@
                 database['Claude'] = data.claude;
                 database['Ortak Karar'] = data.masterDecision;
 
+                // Backend'den gelen akıllı özeti ekrana bas
+                document.getElementById('ui-topic').innerText = `"${data.topicSummary}"`;
+                document.getElementById('ui-topic').style.color = "var(--text-light)";
+
                 aiNodes.forEach(id => document.getElementById('ai-' + id).classList.remove('thinking'));
                 ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.add('visible'));
-                document.getElementById('ui-status').innerText = "Raporlar ulaştı. Sentezleniyor...";
+                document.getElementById('ui-status').innerText = "Raporlar ulaştı. Ortak protokol sentezleniyor...";
                 
                 setTimeout(() => {
                     document.getElementById('doc-master').classList.add('visible');
-                    document.getElementById('ui-status').innerText = "Akıllı sentez hazır. Protokolü oylayın.";
+                    document.getElementById('ui-status').innerText = "Sentez hazır. Mantıklı ve net protokolü inceleyin.";
                     
                     document.getElementById('ui-vote-title').innerText = data.masterTitle;
                     document.getElementById('ui-vote-title').style.color = "#fbbf24";
@@ -285,6 +289,7 @@
                 console.error(error);
                 document.getElementById('ui-status').innerText = `HATA: Bağlantı sorunu.`;
                 document.getElementById('ui-vote-title').innerText = "Analiz başarısız.";
+                document.getElementById('ui-topic').innerText = "Hata oluştu.";
                 aiNodes.forEach(id => document.getElementById('ai-' + id).classList.remove('thinking'));
             }
         }
