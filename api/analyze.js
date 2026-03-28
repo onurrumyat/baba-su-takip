@@ -1,86 +1,108 @@
-// api/analyze.js (Vercel Serverless Formatı - Profesyonel Akıllı Demo Modu)
-
-// Yapay zekalar "düşünüyor" hissi vermek için gecikme simülatörü
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+// api/analyze.js (Gerçek API Bağlantılı ve Şifreli Sürüm)
 
 export default async function handler(req, res) {
-    // Sadece POST isteklerini kabul et
     if (req.method !== 'POST') {
-        return res.status(405).json({ error: "Yöntem İzin Verilmedi. Sadece POST kabul edilir." });
+        return res.status(405).json({ error: "Sadece POST metodu kabul edilir." });
     }
 
     const { topic } = req.body;
-
     if (!topic || topic.trim().length < 3) {
-        return res.status(400).json({ error: "Lütfen masaya yatırılacak geçerli bir konu girin (en az 3 karakter)!" });
+        return res.status(400).json({ error: "Lütfen masaya yatırılacak geçerli bir konu girin!" });
     }
 
-    console.log(`[SİSTEM] Profesyonel Analiz Başlatıldı Gündem: "${topic}"`);
+    // VERCEL ÜZERİNDEN ÇEKECEĞİMİZ GİZLİ ŞİFRELER (SEMBOLLER)
+    const OPENAI_KEY = process.env.OPENAI_API_KEY;
+    const CLAUDE_KEY = process.env.CLAUDE_API_KEY;
+
+    if (!OPENAI_KEY || !CLAUDE_KEY) {
+        return res.status(500).json({ error: "Sunucu Hatası: API Anahtarları Vercel'e eklenmemiş!" });
+    }
 
     try {
-        // Ağ gecikmesi simülasyonu (2.5 saniye)
-        await delay(2500);
+        console.log(`[GERÇEK API] Analiz başlatılıyor: "${topic}"`);
 
-        // --- BASİT DOĞAL DİL İŞLEME SİMÜLASYONU (KONUYA ÖZEL CEVAP ÜRETME) ---
-        let category = 'general';
-        const t = topic.toLowerCase();
+        // 1. OPENAI (GPT) İSTEĞİ (Güvenlik ve Mimari Odaklı)
+        const openAiReq = fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${OPENAI_KEY}`
+            },
+            body: JSON.stringify({
+                model: 'gpt-4o-mini', // Hızlı ve uygun maliyetli model
+                messages: [
+                    { role: "system", content: "Sen bir AI komuta merkezinde güvenlik ve mimari uzmanısın. Kısa, çok profesyonel ve sadece 2 cümlelik bir önlem/analiz raporu sun." },
+                    { role: "user", content: `Gündem: ${topic}` }
+                ]
+            })
+        });
 
-        // Konu kategorisini belirle
-        if (/(teknoloji|yapay zeka|robot|kodlama|yazılım|internet|veri|siber)/i.test(t)) {
-            category = 'tech';
-        } else if (/(ekonomi|para|piyasa|maliyet|bütçe|iş|şirket|kar|yatırım)/i.test(t)) {
-            category = 'eco';
-        } else if (/(toplum|insan|etik|kullanıcı|sosyal|sağlık|eğitim|çevre)/i.test(t)) {
-            category = 'society';
-        }
+        // 2. CLAUDE İSTEĞİ (Etik ve Gizlilik Odaklı)
+        const claudeReq = fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': CLAUDE_KEY,
+                'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+                model: 'claude-3-haiku-20240307', // Hızlı Claude modeli
+                max_tokens: 150,
+                system: "Sen bir AI komuta merkezinde etik, toplum ve gizlilik uzmanısın. Kısa, çok profesyonel ve sadece 2 cümlelik bir analiz raporu sun.",
+                messages: [
+                    { role: "user", content: `Gündem: ${topic}` }
+                ]
+            })
+        });
 
-        // Kategorilere göre profesyonel tailored yanıtlar
-        let openaiResponse, claudeResponse, geminiResponse, masterTitle, masterDecision;
+        // İki gerçek API'nin cevap vermesini aynı anda bekle (Hız kazandırır)
+        const [openAiRes, claudeRes] = await Promise.all([openAiReq, claudeReq]);
 
-        switch (category) {
-            case 'tech':
-                openaiResponse = `[Mimari & Güvenlik]\nGündem: ${topic}\n\nTeknik mimaride veri bütünlüğü riski görüyorum. Çözüm olarak, kapalı devre bir doğrulama süzgeci ve kademeli şifreleme katmanı (NIST standartlarında) kurulmasını öneriyorum.`;
-                claudeResponse = `[Etik & Uyumluluk]\nGündem: ${topic}\n\nAlgoritmik önyargı ve veri gizliliği şeffaflığı kritik. Sistemin her adımında 'explainable AI' (açıklanabilir YZ) prensipleri ve insan onaylı bir etik bariyer uygulanmalıdır.`;
-                geminiResponse = `[Hız & UX]\nGündem: ${topic}\n\nKullanıcı deneyimi pürüzsüz olmalı. Veri işleme süreçlerini asenkron (asynchronous) hale getirip, önbellekleme (caching) ile milisaniye bazında yanıt süreleri hedeflemeliyiz.`;
-                masterTitle = "Kademeli Şifreli Şeffaf Entegrasyon";
-                masterDecision = `KONSENSÜS PROTOKOLÜ (TEKNOLOJİ)\n\nGündem: "${topic}"\n\nStrateji:\n1. OpenAI'ın kapalı devre güvenliği mimariye eklenecek.\n2. Claude'un etik bariyeri ve açıklanabilirliği sağlanacak.\n3. Gemini'nin asenkron önbellekleme yapısı ile hız optimize edilecek.\n\n-> Sistem hazır. Lütfen onaylayın.`;
-                break;
-            case 'eco':
-                openaiResponse = `[Risk & Verimlilik]\nGündem: ${topic}\n\nMaliyet/fayda analizinde %12'lik bir sapma riski var. Teknik bütçeyi revize edip, operasyonel giderleri minimize edecek bir optimizasyon modeli uygulamalıyız.`;
-                claudeResponse = `[Sürdürülebilirlik & Etik]\nGündem: ${topic}\n\nUzun vadeli pazar etkisi ve paydaş etiği gözetilmeli. Kısa vadeli kâr yerine, ESG (Çevresel, Sosyal, Yönetişim) kriterlerine uygun bir yatırım stratejisi izlenmelidir.`;
-                geminiResponse = `[Pazar Hızı & Optimizasyon]\nGündem: ${topic}\n\nRakiplerin hızı kritik. İşlem hacmini artırmak için mikro hizmet mimarisine geçiş yapmalı ve pazar verilerini anlık (real-time) işleyen bir API yapısı kurmalıyız.`;
-                masterTitle = "Sürdürülebilir Operasyonel Optimizasyon";
-                masterDecision = `KONSENSÜS PROTOKOLÜ (EKONOMİ)\n\nGündem: "${topic}"\n\nStrateji:\n1. OpenAI'ın bütçe optimizasyonu uygulanacak.\n2. Claude'un ESG kriterleri yatırıma entegre edilecek.\n3. Gemini'nin real-time veri işleme yapısı ile pazar hızı sağlanacak.\n\n-> Maliyet analizi sentezlendi. Lütfen onaylayın.`;
-                break;
-            case 'society':
-                openaiResponse = `[Sistem & Veri Güvenliği]\nGündem: ${topic}\n\nToplumsal verilerin güvenliği esastır. Veri sızıntılarını önlemek adına sıfır güven (zero-trust) mimarisi ve tam şifrelenmiş katmanlar kurulmasını öneriyorum.`;
-                claudeResponse = `[Toplumsal Etik & Gizlilik]\nGündem: ${topic}\n\nİnsan onuru ve veri gizliliği en büyük öncelik. Veri toplama süreçleri minimumda tutulmalı ve GDPR gibi küresel gizlilik normlarına tam uyum sağlanmalıdır.`;
-                geminiResponse = `[Erişilebilirlik & UX]\nGündem: ${topic}\n\nÇözüm herkes için erişilebilir olmalı. Arayüzü kapsayıcı (inclusive) tasarlamalı, düşük bant genişliğinde bile tıkır tıkır çalışacak şekilde optimize etmeliyiz.`;
-                masterTitle = "Kapsayıcı Şifreli Veri Protokolü";
-                masterDecision = `KONSENSÜS PROTOKOLÜ (TOPLUM/ETİK)\n\nGündem: "${topic}"\n\nStrateji:\n1. OpenAI'ın zero-trust mimarisi veri güvenliğini sağlayacak.\n2. Claude'un GDPR uyumu ve etik normları temel alınacak.\n3. Gemini'nin kapsayıcı UX ve hız optimizasyonu uygulanacak.\n\n-> Sosyal etki analizi sentezlendi. Lütfen onaylayın.`;
-                break;
-            default:
-                openaiResponse = `[Sistem Mantığı]\nGündem: ${topic}\n\nKonunun yapısal bütünlüğü ve mantıksal akışı esastır. Karar süreçlerini şeffaf, kademeli ve denetlenebilir bir sistem üzerine inşa etmeyi öneriyorum.`;
-                claudeResponse = `[Etik Bariyer]\nGündem: ${topic}\n\nKonunun insan ve etik boyutu gözetilmeli. Kararların doğuracağı sonuçları risk analiziyle belgeleyip, insan odaklı bir yaklaşım sergilemeliyiz.`;
-                geminiResponse = `[Hız & Adaptasyon]\nGündem: ${topic}\n\nSürecin hızlı ve adaptif olması kritik. Değişkenlere anlık tepki verecek, asenkron ve kullanıcı dostu bir operasyonel akış tasarlamalıyız.`;
-                masterTitle = "Şeffaf Adaptif Sistem Protokolü";
-                masterDecision = `KONSENSÜS PROTOKOLÜ (GENEL)\n\nGündem: "${topic}"\n\nStrateji:\n1. OpenAI'ın şeffaf mantık yapısı kurulacak.\n2. Claude'un etik bariyeri ve insan odaklılığı sağlanacak.\n3. Gemini'nin adaptif ve asenkron akışı uygulanacak.\n\n-> Genel sentez Vercel API üzerinden yapıldı. Lütfen onaylayın.`;
-        }
+        const openAiData = await openAiRes.json();
+        const claudeData = await claudeRes.json();
 
-        // Ortak karar öncesi 1 saniye daha düşünme
-        await delay(1000);
+        // Yanıtları Değişkenlere Al
+        const openaiText = openAiData.choices?.[0]?.message?.content || "OpenAI yanıt veremedi.";
+        const claudeText = claudeData.content?.[0]?.text || "Claude yanıt veremedi.";
+        
+        // 3. GEMINI SİMÜLASYONU (Anahtarın olmadığı için akıllı mock kullanıyoruz)
+        const geminiText = `Kullanıcı deneyimi pürüzsüz olmalı. Veri işleme süreçlerini asenkron (asynchronous) hale getirip, önbellekleme (caching) ile milisaniye bazında yanıt süreleri hedeflemeliyiz.`;
 
-        // Frontend'e profesyonel ve konuya özel veriyi dön
+        // 4. ORTAK KARAR SENTEZİ (Bunu OpenAI'a yaptırıyoruz)
+        const masterReq = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${OPENAI_KEY}`
+            },
+            body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [
+                    { role: "system", content: "Sen komuta merkezi başkanısın. Sana 3 farklı AI'ın raporu verilecek. Bunları birleştirip 3 maddelik bir strateji ve en üste 3-4 kelimelik havalı bir 'Protokol Başlığı' yaz. Yanıtı doğrudan ver, giriş cümlesi kullanma." },
+                    { role: "user", content: `Konu: ${topic}\nOpenAI: ${openaiText}\nClaude: ${claudeText}\nGemini: ${geminiText}` }
+                ]
+            })
+        });
+
+        const masterData = await masterReq.json();
+        const masterFullText = masterData.choices?.[0]?.message?.content || "Sentez yapılamadı.";
+        
+        // Başlığı ve içeriği basitçe ayırıyoruz (İlk satır başlık, gerisi içerik)
+        const parts = masterFullText.split('\n');
+        const masterTitle = parts[0].replace(/["*]/g, ''); // Temiz başlık
+        const masterDecision = parts.slice(1).join('\n').trim();
+
+        // SONUÇLARI FRONTEND'E GÖNDER
         res.status(200).json({
-            openai: openaiResponse,
-            claude: claudeResponse,
-            gemini: geminiResponse,
+            openai: `[Sistem Mimarisi Raporu]\n\n${openaiText}`,
+            claude: `[Etik & Gizlilik Raporu]\n\n${claudeText}`,
+            gemini: `[UX & Performans Raporu]\n\n${geminiText}`,
             masterTitle: masterTitle,
             masterDecision: masterDecision
         });
 
     } catch (error) {
-        console.error("API Hatası:", error);
-        res.status(500).json({ error: "Sistemde profesyonel bir arıza meydana geldi." });
+        console.error("Gerçek API Bağlantı Hatası:", error);
+        res.status(500).json({ error: "API sunucularıyla iletişim kurulamadı." });
     }
 }
