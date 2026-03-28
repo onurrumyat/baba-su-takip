@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Komuta Merkezi | Kusursuz Sığan Sürüm</title>
+    <title>AI Komuta Merkezi | Dev Masa</title>
     <style>
         :root {
             --bg-main: #05070a;
@@ -30,14 +30,12 @@
             background-size: 100% 100%, 40px 40px, 40px 40px;
             color: var(--text-light);
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            
-            /* KRİTİK DÜZELTME: 100dvh ile mobil adres çubuklarına karşı koruma sağlandı */
-            height: 100dvh; 
+            height: 100dvh; /* Ekrana kesin sığma garantisi */
             display: flex; flex-direction: column;
             overflow: hidden; 
         }
 
-        /* --- ÜST PANEL (Daha derli toplu) --- */
+        /* --- ÜST PANEL --- */
         .header-panel {
             background: var(--bg-panel); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             border-bottom: 1px solid var(--border-glass); padding: 10px 15px;
@@ -59,13 +57,13 @@
         .btn-no:hover:not(:disabled) { background: #ef4444; color: white; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
         .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* --- ORTA ALAN: EKRANA TAM OTURAN MASA --- */
+        /* --- ORTA ALAN: DEV MASA EKRANI KAPLIYOR --- */
         .stage {
-            /* flex: 1 ve min-height: 0 kombinasyonu alanın dışarı taşmasını KESİN engeller */
             flex: 1; min-height: 0; 
             display: flex; justify-content: center; align-items: center; position: relative;
             perspective: 1200px;
-            padding: 15px; /* Gereksiz devasa boşluklar kaldırıldı */
+            /* Avatarların kenarlardan kesilmemesi için gereken MİNİMUM boşluk */
+            padding: 45px 50px; 
         }
         
         .system-status {
@@ -76,30 +74,31 @@
 
         .table-wrapper {
             position: relative; 
-            width: 80%; /* Masanın ekranda kapladığı alan */
-            max-width: 450px; 
-            aspect-ratio: 2 / 1.1; 
+            width: 100%; /* Masa genişliği köklendi */
+            max-width: 850px; /* Çok daha büyük bir tavan sınır */
+            aspect-ratio: 2 / 1; /* Yatayda geniş dev masa */
             transform: rotateX(15deg); 
             transform-style: preserve-3d;
+            max-height: 55vh; /* Dikeyde panelleri ezmemesi için sınır */
         }
         
         .board-table {
-            width: 100%; height: 100%; background: var(--table-surface); border: 4px solid var(--table-rim);
-            border-radius: 500px; box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8);
+            width: 100%; height: 100%; background: var(--table-surface); border: 5px solid var(--table-rim);
+            border-radius: 500px; box-shadow: 0 25px 50px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,0,0,0.8);
             display: flex; justify-content: center; align-items: center; position: relative;
         }
         .holo-center {
-            width: 60%; height: 50%; background: rgba(0, 242, 255, 0.03); border-radius: 500px;
+            width: 65%; height: 55%; background: rgba(0, 242, 255, 0.03); border-radius: 500px;
             border: 1px solid rgba(0, 242, 255, 0.15); box-shadow: inset 0 0 15px rgba(0, 242, 255, 0.08); position: relative;
         }
 
-        /* --- AVATARLAR (Taşmayı önlemek için boyutları dengelendi) --- */
-        .node { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 4px; transform: translate(-50%, -50%); z-index: 5; }
+        /* --- AVATARLAR --- */
+        .node { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 6px; transform: translate(-50%, -50%); z-index: 5; }
         .node-icon {
-            width: 32px; height: 32px; border-radius: 8px; background: #0a0e14; display: flex; justify-content: center; align-items: center;
-            font-size: 14px; font-weight: 800; border: 2px solid; box-shadow: 0 5px 10px rgba(0,0,0,0.8); transition: all 0.3s ease;
+            width: 42px; height: 42px; border-radius: 10px; background: #0a0e14; display: flex; justify-content: center; align-items: center;
+            font-size: 18px; font-weight: 800; border: 2px solid; box-shadow: 0 8px 15px rgba(0,0,0,0.8); transition: all 0.3s ease;
         }
-        .node-name { font-size: 7px; font-weight: 800; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; background: rgba(0,0,0,0.7); padding: 2px 4px; border-radius: 6px;}
+        .node-name { font-size: 9px; font-weight: 800; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 6px;}
 
         .n-openai .node-icon { border-color: var(--c-openai); color: var(--c-openai); }
         .n-gemini .node-icon { border-color: var(--c-gemini); color: var(--c-gemini); }
@@ -112,14 +111,14 @@
         .n-claude { top: 50%; left: 100%; } 
 
         .thinking .node-icon { animation: glow 1.2s infinite alternate; }
-        @keyframes glow { from { box-shadow: 0 0 5px currentColor; } to { box-shadow: 0 0 15px currentColor, inset 0 0 8px currentColor; } }
+        @keyframes glow { from { box-shadow: 0 0 5px currentColor; } to { box-shadow: 0 0 20px currentColor, inset 0 0 10px currentColor; } }
 
         /* --- DOSYALAR --- */
         .doc {
-            position: absolute; width: 22px; height: 30px; background: rgba(255,255,255,0.95); border-radius: 2px; display: flex; justify-content: center; align-items: center;
-            cursor: pointer; opacity: 0; transform: scale(0); transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 4px 8px rgba(0,0,0,0.6); font-size: 11px;
+            position: absolute; width: 28px; height: 38px; background: rgba(255,255,255,0.95); border-radius: 3px; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; opacity: 0; transform: scale(0); transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 5px 12px rgba(0,0,0,0.6); font-size: 14px;
         }
-        .doc:hover { transform: scale(1.3) translateY(-5px) !important; z-index: 10; box-shadow: 0 8px 15px rgba(0,0,0,0.7);}
+        .doc:hover { transform: scale(1.3) translateY(-5px) !important; z-index: 10; box-shadow: 0 10px 20px rgba(0,0,0,0.7);}
         .doc.visible { opacity: 1; transform: scale(1); }
 
         .d-openai { top: 18%; left: 50%; transform: translateX(-50%); }
@@ -127,27 +126,26 @@
         .d-claude { top: 50%; right: 18%; transform: translateY(-50%); }
 
         .master-doc {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); width: 35px; height: 50px; background: linear-gradient(135deg, #fbbf24, #d97706);
-            border-radius: 3px 6px 6px 3px; display: flex; justify-content: center; align-items: center; font-size: 18px; cursor: pointer; opacity: 0; transition: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 0 20px rgba(251, 191, 36, 0.4); border-left: 4px solid #b45309; z-index: 2;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); width: 50px; height: 65px; background: linear-gradient(135deg, #fbbf24, #d97706);
+            border-radius: 4px 8px 8px 4px; display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; opacity: 0; transition: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 0 25px rgba(251, 191, 36, 0.4); border-left: 5px solid #b45309; z-index: 2;
         }
-        .master-doc:hover { transform: translate(-50%, -50%) scale(1.15) !important; box-shadow: 0 0 30px rgba(251, 191, 36, 0.7);}
+        .master-doc:hover { transform: translate(-50%, -50%) scale(1.15) !important; box-shadow: 0 0 35px rgba(251, 191, 36, 0.7);}
         .master-doc.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
         /* --- KULLANICI GİRİŞ ALANI --- */
         .input-area {
             background: var(--bg-panel); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-top: 1px solid var(--border-glass); 
-            padding: 10px 15px; 
-            /* iPhone alt çizgisi için güvenlik boşluğu */
-            padding-bottom: calc(10px + env(safe-area-inset-bottom));
-            display: flex; gap: 8px;
+            padding: 12px 20px; 
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            display: flex; gap: 10px;
         }
         .chat-input {
-            flex: 1; background: #010409; border: 1px solid var(--border-glass); color: white; padding: 10px 15px; border-radius: 8px; font-size: 13px; outline: none; transition: 0.3s;
+            flex: 1; background: #010409; border: 1px solid var(--border-glass); color: white; padding: 12px 18px; border-radius: 8px; font-size: 14px; outline: none; transition: 0.3s;
         }
-        .chat-input:focus { border-color: var(--c-user); box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
+        .chat-input:focus { border-color: var(--c-user); box-shadow: 0 0 12px rgba(0, 242, 255, 0.2); }
         .send-btn {
-            background: var(--c-user); color: #000; border: none; padding: 0 15px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+            background: var(--c-user); color: #000; border: none; padding: 0 20px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
         }
         .send-btn:hover { background: #00c4cc; transform: scale(1.02); }
 
@@ -157,27 +155,28 @@
         }
         .modal.show { display: flex; opacity: 1; }
         .modal-content { background: #0d1117; width: 100%; max-width: 450px; border-radius: 12px; border: 1px solid var(--border-glass); padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,1); position: relative; max-height: 80dvh; overflow-y: auto;}
-        .close-btn { position: absolute; top: 8px; right: 12px; font-size: 20px; color: var(--text-muted); cursor: pointer; }
+        .close-btn { position: absolute; top: 8px; right: 12px; font-size: 24px; color: var(--text-muted); cursor: pointer; }
         .close-btn:hover { color: white; }
-        .modal-title { font-size: 14px; font-weight: bold; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border-glass); text-transform: uppercase; letter-spacing: 1px;}
-        .modal-body { font-size: 13px; line-height: 1.5; color: #c9d1d9; white-space: pre-line; }
+        .modal-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-glass); text-transform: uppercase; letter-spacing: 1px;}
+        .modal-body { font-size: 14px; line-height: 1.6; color: #c9d1d9; white-space: pre-line; }
 
-        /* --- MOBİL & TABLET KESİN UYUM --- */
+        /* --- MOBİL İÇİN KÖKLENMİŞ GENİŞLİK --- */
         @media (max-width: 768px) {
             .header-panel { padding: 8px 12px; gap: 6px; }
-            .info-card { min-width: 100%; } /* Mobilde yan yana değil alt alta sığsınlar */
+            .info-card { min-width: 100%; }
             .vote-actions { width: 100%; justify-content: space-between; gap: 5px;} .btn { flex: 1; text-align: center;}
             
-            .stage { padding: 15px; } /* Mobilde boşluklar iyice alındı */
+            .stage { padding: 30px; } /* Avatarlar için güvenli boşluk */
             
             .table-wrapper { 
-                width: 70%; /* Avatarların kenarlardan taşmaması için masa daraltıldı */
-                aspect-ratio: 1 / 1.4; /* Dikey oval şekil */
-                transform: rotateX(5deg); 
+                width: 90%; /* Mobilde ekranı iyice kaplar */
+                max-width: 400px;
+                aspect-ratio: 1 / 1.3; 
+                transform: rotateX(8deg); 
             } 
             
-            .node-icon { width: 28px; height: 28px; font-size: 12px; border-width: 1px;}
-            .node-name { font-size: 6px; padding: 1px 3px;}
+            .node-icon { width: 34px; height: 34px; font-size: 14px; border-width: 2px;}
+            .node-name { font-size: 8px; padding: 2px 5px;}
         }
     </style>
 </head>
