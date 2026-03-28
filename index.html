@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Komuta Merkezi | Kusursuz Sürüm</title>
+    <title>AI Komuta Merkezi | Kusursuz Sığan Sürüm</title>
     <style>
         :root {
             --bg-main: #05070a;
@@ -30,27 +30,28 @@
             background-size: 100% 100%, 40px 40px, 40px 40px;
             color: var(--text-light);
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            height: 100vh;
+            
+            /* KRİTİK DÜZELTME: 100dvh ile mobil adres çubuklarına karşı koruma sağlandı */
+            height: 100dvh; 
             display: flex; flex-direction: column;
-            overflow: hidden; /* Dış taşmaları kesin engelle */
-            padding-bottom: env(safe-area-inset-bottom); /* iPhone çentik koruması */
+            overflow: hidden; 
         }
 
-        /* --- ÜST PANEL --- */
+        /* --- ÜST PANEL (Daha derli toplu) --- */
         .header-panel {
             background: var(--bg-panel); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border-bottom: 1px solid var(--border-glass); padding: 12px 20px;
-            display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; z-index: 10;
+            border-bottom: 1px solid var(--border-glass); padding: 10px 15px;
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; z-index: 10;
         }
-        .info-card { flex: 1; min-width: 180px; }
-        .info-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 3px; }
-        .info-value { font-size: 13px; font-weight: 600; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .vote-highlight { color: #fbbf24; font-size: 14px; text-shadow: 0 0 10px rgba(251, 191, 36, 0.4); font-weight: 700;}
+        .info-card { flex: 1; min-width: 150px; }
+        .info-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+        .info-value { font-size: 12px; font-weight: 600; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .vote-highlight { color: #fbbf24; font-size: 13px; text-shadow: 0 0 10px rgba(251, 191, 36, 0.4); font-weight: 700;}
 
-        .vote-actions { display: flex; gap: 8px; }
+        .vote-actions { display: flex; gap: 6px; }
         .btn {
-            padding: 7px 14px; border: none; border-radius: 6px; font-weight: 700; font-size: 11px;
-            cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 1px;
+            padding: 6px 12px; border: none; border-radius: 6px; font-weight: 700; font-size: 10px;
+            cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px;
         }
         .btn-yes { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.5); }
         .btn-yes:hover:not(:disabled) { background: #22c55e; color: white; box-shadow: 0 0 15px rgba(34, 197, 94, 0.4); }
@@ -58,95 +59,95 @@
         .btn-no:hover:not(:disabled) { background: #ef4444; color: white; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
         .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* --- ORTA ALAN: EKRA TAM SIĞAN KONTROL PANELİ --- */
+        /* --- ORTA ALAN: EKRANA TAM OTURAN MASA --- */
         .stage {
-            flex: 1; display: flex; justify-content: center; align-items: center; position: relative;
-            perspective: 1200px; /* Daha derin 3D */
-            /* Avatarların taşmasını önlemek için güvenli koruma boşlukları */
-            padding: 50px 70px; 
-            overflow: hidden; /* Alan dışını gizle */
+            /* flex: 1 ve min-height: 0 kombinasyonu alanın dışarı taşmasını KESİN engeller */
+            flex: 1; min-height: 0; 
+            display: flex; justify-content: center; align-items: center; position: relative;
+            perspective: 1200px;
+            padding: 15px; /* Gereksiz devasa boşluklar kaldırıldı */
         }
+        
         .system-status {
-            position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-            color: var(--c-user); font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            color: var(--c-user); font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
             text-shadow: 0 0 8px rgba(0, 242, 255, 0.7); width: 100%; text-align: center; font-weight: 700;
         }
 
         .table-wrapper {
-            position: relative; width: 100%; 
-            max-width: 500px; /* Maksimum genişlik daraltıldı */
-            aspect-ratio: 2 / 1.1; /* Daha dengeli oval yatay oran */
-            transform: rotateX(15deg); /* Hafif 3D eğim */
+            position: relative; 
+            width: 80%; /* Masanın ekranda kapladığı alan */
+            max-width: 450px; 
+            aspect-ratio: 2 / 1.1; 
+            transform: rotateX(15deg); 
             transform-style: preserve-3d;
-            /* Ekran yüksekliğine göre küçülme sınırı ekle (Mobilde sığması için) */
-            max-height: 45vh; 
         }
+        
         .board-table {
-            width: 100%; height: 100%; background: var(--table-surface); border: 5px solid var(--table-rim);
-            border-radius: 500px; box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 25px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.05);
+            width: 100%; height: 100%; background: var(--table-surface); border: 4px solid var(--table-rim);
+            border-radius: 500px; box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8);
             display: flex; justify-content: center; align-items: center; position: relative;
         }
         .holo-center {
-            width: 62%; height: 52%; background: rgba(0, 242, 255, 0.03); border-radius: 500px;
-            border: 1px solid rgba(0, 242, 255, 0.15); box-shadow: inset 0 0 20px rgba(0, 242, 255, 0.08); position: relative;
+            width: 60%; height: 50%; background: rgba(0, 242, 255, 0.03); border-radius: 500px;
+            border: 1px solid rgba(0, 242, 255, 0.15); box-shadow: inset 0 0 15px rgba(0, 242, 255, 0.08); position: relative;
         }
 
-        /* --- AVATARLAR (Modüller) --- */
-        .node { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 5px; transform: translate(-50%, -50%); z-index: 5; }
+        /* --- AVATARLAR (Taşmayı önlemek için boyutları dengelendi) --- */
+        .node { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 4px; transform: translate(-50%, -50%); z-index: 5; }
         .node-icon {
-            width: 38px; height: 38px; border-radius: 10px; background: #0a0e14; display: flex; justify-content: center; align-items: center;
-            font-size: 16px; font-weight: 800; border: 2px solid; box-shadow: 0 8px 15px rgba(0,0,0,0.8); transition: all 0.3s ease;
+            width: 32px; height: 32px; border-radius: 8px; background: #0a0e14; display: flex; justify-content: center; align-items: center;
+            font-size: 14px; font-weight: 800; border: 2px solid; box-shadow: 0 5px 10px rgba(0,0,0,0.8); transition: all 0.3s ease;
         }
-        .node-name { font-size: 8px; font-weight: 800; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 8px;}
+        .node-name { font-size: 7px; font-weight: 800; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; background: rgba(0,0,0,0.7); padding: 2px 4px; border-radius: 6px;}
 
         .n-openai .node-icon { border-color: var(--c-openai); color: var(--c-openai); }
         .n-gemini .node-icon { border-color: var(--c-gemini); color: var(--c-gemini); }
         .n-claude .node-icon { border-color: var(--c-claude); color: var(--c-claude); }
         .n-user .node-icon { border-color: var(--c-user); color: var(--c-user); }
 
-        /* Konumlandırma (Yüzde ile) */
         .n-openai { top: 0; left: 50%; } 
         .n-user { top: 100%; left: 50%; } 
         .n-gemini { top: 50%; left: 0; } 
         .n-claude { top: 50%; left: 100%; } 
 
-        /* Düşünme Efekti */
         .thinking .node-icon { animation: glow 1.2s infinite alternate; }
-        @keyframes glow { from { box-shadow: 0 0 5px currentColor; } to { box-shadow: 0 0 20px currentColor, inset 0 0 8px currentColor; } }
+        @keyframes glow { from { box-shadow: 0 0 5px currentColor; } to { box-shadow: 0 0 15px currentColor, inset 0 0 8px currentColor; } }
 
-        /* --- DOSYALAR VE ANA PROTOKOL --- */
+        /* --- DOSYALAR --- */
         .doc {
-            position: absolute; width: 26px; height: 36px; background: rgba(255,255,255,0.95); border-radius: 3px; display: flex; justify-content: center; align-items: center;
-            cursor: pointer; opacity: 0; transform: scale(0); transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 4px 10px rgba(0,0,0,0.6); font-size: 13px;
+            position: absolute; width: 22px; height: 30px; background: rgba(255,255,255,0.95); border-radius: 2px; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; opacity: 0; transform: scale(0); transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 4px 8px rgba(0,0,0,0.6); font-size: 11px;
         }
-        .doc:hover { transform: scale(1.3) translateY(-5px) !important; z-index: 10; box-shadow: 0 10px 20px rgba(0,0,0,0.7);}
+        .doc:hover { transform: scale(1.3) translateY(-5px) !important; z-index: 10; box-shadow: 0 8px 15px rgba(0,0,0,0.7);}
         .doc.visible { opacity: 1; transform: scale(1); }
 
-        /* Dosya Konumları (Ortadaki Holo-Alan içinde) */
         .d-openai { top: 18%; left: 50%; transform: translateX(-50%); }
         .d-gemini { top: 50%; left: 18%; transform: translateY(-50%); }
         .d-claude { top: 50%; right: 18%; transform: translateY(-50%); }
 
-        /* Ortak Ana Klasör */
         .master-doc {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); width: 45px; height: 60px; background: linear-gradient(135deg, #fbbf24, #d97706);
-            border-radius: 3px 7px 7px 3px; display: flex; justify-content: center; align-items: center; font-size: 22px; cursor: pointer; opacity: 0; transition: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 0 25px rgba(251, 191, 36, 0.4); border-left: 5px solid #b45309; z-index: 2;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); width: 35px; height: 50px; background: linear-gradient(135deg, #fbbf24, #d97706);
+            border-radius: 3px 6px 6px 3px; display: flex; justify-content: center; align-items: center; font-size: 18px; cursor: pointer; opacity: 0; transition: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.4); border-left: 4px solid #b45309; z-index: 2;
         }
-        .master-doc:hover { transform: translate(-50%, -50%) scale(1.15) !important; box-shadow: 0 0 35px rgba(251, 191, 36, 0.7);}
+        .master-doc:hover { transform: translate(-50%, -50%) scale(1.15) !important; box-shadow: 0 0 30px rgba(251, 191, 36, 0.7);}
         .master-doc.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
         /* --- KULLANICI GİRİŞ ALANI --- */
         .input-area {
-            background: var(--bg-panel); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-top: 1px solid var(--border-glass); padding: 15px 20px;
-            display: flex; gap: 10px; padding-bottom: calc(15px + env(safe-area-inset-bottom));
+            background: var(--bg-panel); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-top: 1px solid var(--border-glass); 
+            padding: 10px 15px; 
+            /* iPhone alt çizgisi için güvenlik boşluğu */
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            display: flex; gap: 8px;
         }
         .chat-input {
-            flex: 1; background: #010409; border: 1px solid var(--border-glass); color: white; padding: 12px 18px; border-radius: 10px; font-size: 14px; outline: none; transition: 0.3s;
+            flex: 1; background: #010409; border: 1px solid var(--border-glass); color: white; padding: 10px 15px; border-radius: 8px; font-size: 13px; outline: none; transition: 0.3s;
         }
         .chat-input:focus { border-color: var(--c-user); box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
         .send-btn {
-            background: var(--c-user); color: #000; border: none; padding: 0 20px; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+            background: var(--c-user); color: #000; border: none; padding: 0 15px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
         }
         .send-btn:hover { background: #00c4cc; transform: scale(1.02); }
 
@@ -155,32 +156,28 @@
             position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: 0.3s; padding: 20px;
         }
         .modal.show { display: flex; opacity: 1; }
-        .modal-content { background: #0d1117; width: 100%; max-width: 450px; border-radius: 12px; border: 1px solid var(--border-glass); padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,1); position: relative; max-height: 80vh; overflow-y: auto;}
-        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 24px; color: var(--text-muted); cursor: pointer; }
+        .modal-content { background: #0d1117; width: 100%; max-width: 450px; border-radius: 12px; border: 1px solid var(--border-glass); padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,1); position: relative; max-height: 80dvh; overflow-y: auto;}
+        .close-btn { position: absolute; top: 8px; right: 12px; font-size: 20px; color: var(--text-muted); cursor: pointer; }
         .close-btn:hover { color: white; }
-        .modal-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-glass); text-transform: uppercase; letter-spacing: 1px;}
-        .modal-body { font-size: 14px; line-height: 1.6; color: #c9d1d9; white-space: pre-line; }
+        .modal-title { font-size: 14px; font-weight: bold; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border-glass); text-transform: uppercase; letter-spacing: 1px;}
+        .modal-body { font-size: 13px; line-height: 1.5; color: #c9d1d9; white-space: pre-line; }
 
-        /* --- MOBİL & TABLET UYUM (KESİN SIĞAR) --- */
+        /* --- MOBİL & TABLET KESİN UYUM --- */
         @media (max-width: 768px) {
-            .header-panel { padding: 10px 15px; gap: 8px; }
-            .info-card { min-width: 140px; }
-            .vote-actions { width: 100%; justify-content: space-between; gap: 5px;} .btn { flex: 1; text-align: center; padding: 6px; font-size: 10px;}
+            .header-panel { padding: 8px 12px; gap: 6px; }
+            .info-card { min-width: 100%; } /* Mobilde yan yana değil alt alta sığsınlar */
+            .vote-actions { width: 100%; justify-content: space-between; gap: 5px;} .btn { flex: 1; text-align: center;}
             
-            /* Mobilde masa dış kenar korumalarını artırıp, masayı dikey kapsül yapıyoruz */
-            .stage { padding: 30px 40px; } 
+            .stage { padding: 15px; } /* Mobilde boşluklar iyice alındı */
             
             .table-wrapper { 
-                aspect-ratio: 1 / 1.4; /* Mobilde dikey kapsül oranı */
-                max-width: 240px; /* Mobildeki maksimum genişlik iyice daraltıldı */
-                transform: rotateX(8deg); /* Mobilde 3D'yi biraz daha düzleştir */
+                width: 70%; /* Avatarların kenarlardan taşmaması için masa daraltıldı */
+                aspect-ratio: 1 / 1.4; /* Dikey oval şekil */
+                transform: rotateX(5deg); 
             } 
             
-            .node-icon { width: 30px; height: 30px; font-size: 13px; border-width: 1.5px;}
-            .node-name { font-size: 7px; padding: 1px 4px;}
-            .doc { width: 22px; height: 30px; font-size: 12px; }
-            .master-doc { width: 40px; height: 55px; font-size: 20px; border-left-width: 4px;}
-            .system-status { font-size: 9px; }
+            .node-icon { width: 28px; height: 28px; font-size: 12px; border-width: 1px;}
+            .node-name { font-size: 6px; padding: 1px 3px;}
         }
     </style>
 </head>
@@ -238,12 +235,8 @@
 
         async function startProcess() {
             const fullText = document.getElementById('topic-input').value;
-            if (!fullText.trim() || fullText.trim().length < 3) {
-                alert("Lütfen en az 3 karakterden oluşan geçerli bir konu girin.");
-                return;
-            }
+            if (!fullText.trim() || fullText.trim().length < 3) return;
 
-            // UI Temizleme ve Başlangıç
             const words = fullText.split(' ');
             const summary = words.length > 3 ? words.slice(0, 3).join(' ') + "..." : fullText;
             document.getElementById('ui-topic').innerText = `"${summary}"`;
@@ -254,40 +247,34 @@
             document.getElementById('btn-y').disabled = true;
             document.getElementById('btn-n').disabled = true;
 
-            // Düşünme efekti başlat
             aiNodes.forEach(id => document.getElementById('ai-' + id).classList.add('thinking'));
-            document.getElementById('ui-status').innerText = "Modeller Vercel API üzerinden analiz yapıyor...";
+            document.getElementById('ui-status').innerText = "Modeller analiz yapıyor...";
 
             try {
-                // VERCEL SUNUCUSUNA (api/analyze.js) CANLI İSTEK GÖNDERME
                 const response = await fetch('/api/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ topic: fullText })
                 });
 
-                if (!response.ok) throw new Error("Vercel sunucusuyla iletişim kurulamadı.");
+                if (!response.ok) throw new Error("API hatası.");
                 const data = await response.json();
 
                 if (data.error) throw new Error(data.error);
 
-                // Gelen gerçek/akıllı verileri veritabanına yaz
                 database['OpenAI'] = data.openai;
                 database['Gemini'] = data.gemini;
                 database['Claude'] = data.claude;
                 database['Ortak Karar'] = data.masterDecision;
 
-                // Animasyonları kapat ve bireysel dosyaları göster
                 aiNodes.forEach(id => document.getElementById('ai-' + id).classList.remove('thinking'));
                 ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.add('visible'));
                 document.getElementById('ui-status').innerText = "Raporlar ulaştı. Sentezleniyor...";
                 
-                // Kısa bir görsel şov bekleyişi sonrası ana dosyayı çıkart
                 setTimeout(() => {
                     document.getElementById('doc-master').classList.add('visible');
                     document.getElementById('ui-status').innerText = "Akıllı sentez hazır. Protokolü oylayın.";
                     
-                    // Oylama Panelini Canlı Başlıkla Güncelle
                     document.getElementById('ui-vote-title').innerText = data.masterTitle;
                     document.getElementById('ui-vote-title').style.color = "#fbbf24";
                     
@@ -297,7 +284,7 @@
 
             } catch (error) {
                 console.error(error);
-                document.getElementById('ui-status').innerText = `HATA: ${error.message}`;
+                document.getElementById('ui-status').innerText = `HATA: Bağlantı sorunu.`;
                 document.getElementById('ui-vote-title').innerText = "Analiz başarısız.";
                 aiNodes.forEach(id => document.getElementById('ai-' + id).classList.remove('thinking'));
             }
@@ -320,7 +307,7 @@
 
         function userVote(isYes) {
             if(isYes) {
-                alert("EVET oyu verdiniz. Sentezlenen protokol başarıyla onaylandı.");
+                alert("EVET oyu verdiniz. Protokol onaylandı.");
                 document.getElementById('ui-status').innerText = "PROTOKOL ONAYLANDI.";
             } else {
                 alert("HAYIR oyu verdiniz. Protokol reddedildi.");
