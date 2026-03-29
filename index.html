@@ -24,7 +24,7 @@
             width: 100%;
             display: flex; 
             flex-direction: column; 
-            overflow: hidden; /* Tüm taşmaları ve scroll'u engeller */
+            overflow: hidden; 
             transition: background 0.5s; 
         }
 
@@ -72,7 +72,6 @@
         .btn-rev { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); } .btn-rev:hover:not(:disabled) { background: #38bdf8; color: black; }
         .btn-team { background: rgba(194, 85, 255, 0.15); color: #c255ff; border: 1px solid rgba(194, 85, 255, 0.4); display: none; } .btn-team:hover { background: #c255ff; color: white; }
         .btn-pitch { background: #64748b; color: white; display: none; } .btn-pitch:hover { background: #94a3b8; }
-        .btn-invest { background: #10b981; color: #000; display: none; } .btn-invest:hover { background: #059669; color: white;}
         .btn-pdf { background: #fbbf24; color: #000; display: none; } .btn-pdf:hover { background: #d97706; color: white; }
         .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
@@ -136,7 +135,7 @@
         @keyframes speakGlow { from { box-shadow: 0 0 10px currentColor; } to { box-shadow: 0 0 35px currentColor, inset 0 0 15px currentColor; } }
         .hidden-node { opacity: 0 !important; pointer-events: none; }
 
-        /* SİMETRİK DOSYALAR */
+        /* SİMETRİK DOSYALAR (Ana Karar Dosyaları) */
         .doc { position: absolute; width: 26px; height: 36px; background: rgba(255,255,255,0.95); border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 8px 15px rgba(0,0,0,0.8); font-size: 13px; border-left: 3px solid #ccc; color: black; z-index: 100; transform: translate(-50%, -50%) translateZ(20px) scale(0);}
         .doc:hover { transform: translate(-50%, -50%) translateZ(40px) scale(1.3) !important; z-index: 110; }
         .doc.visible { opacity: 1; transform: translate(-50%, -50%) translateZ(20px) scale(1); }
@@ -149,11 +148,25 @@
         .master-doc:hover { transform: translate(-50%, -50%) translateZ(50px) scale(1.15) !important; z-index: 160; }
         .master-doc.visible { opacity: 1; transform: translate(-50%, -50%) translateZ(30px) scale(1); }
 
-        /* YÜKLENEN DIŞ DOSYA */
-        .uploaded-doc { position: absolute; bottom: 15%; right: 15%; width: 34px; height: 46px; background: #e2e8f0; border-radius: 3px; display: none; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; box-shadow: 0 8px 20px rgba(0,0,0,0.8); z-index: 200; border-top-right-radius: 10px; transform: translateZ(40px);}
+        /* DIŞARIDAN YÜKLENEN DOSYALARIN DİZİLECEĞİ ALAN (YAN YANA) */
+        .uploaded-files-container {
+            position: absolute;
+            bottom: 8%;
+            right: 5%;
+            width: 180px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap-reverse;
+            justify-content: flex-end;
+            z-index: 200;
+            transform: translateZ(40px);
+        }
+
+        .uploaded-doc { position: relative; width: 34px; height: 46px; background: #e2e8f0; border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; box-shadow: 0 8px 20px rgba(0,0,0,0.8); border-top-right-radius: 10px; animation: dropIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
         .uploaded-doc::before { content: ''; position: absolute; top: 0; right: 0; border-width: 0 10px 10px 0; border-style: solid; border-color: #cbd5e1 transparent transparent #cbd5e1; display: block; width: 0; }
-        .uploaded-doc:hover { transform: translateZ(50px) scale(1.2) translateY(-5px); }
+        .uploaded-doc:hover { transform: translateY(-5px) scale(1.15); z-index: 210;}
         .uploaded-doc span { font-size: 9px; font-weight: bold; color: #0f1117; z-index: 2; text-transform: uppercase;}
+        @keyframes dropIn { from { opacity: 0; transform: translateY(-20px) scale(0.5); } to { opacity: 1; transform: translateY(0) scale(1); } }
         
         .shredder-box { position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%) translateZ(10px); width: 80px; height: 30px; background: #222; border: 2px solid #444; border-radius: 5px; z-index: 20; opacity: 0; transition: 0.3s; display: flex; justify-content: center;}
         .shredder-box.active { opacity: 1; bottom: 20%; }
@@ -190,11 +203,9 @@
         .modal-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-glass); }
         .modal-body { font-size: 13px; line-height: 1.6; color: #cbd5e1; white-space: pre-wrap; font-family: monospace; }
         
-        /* ÖZEL EKLENTİ MODALLARI (Yatırımcı, Sunum, QR, Ekip) */
+        /* ÖZEL EKLENTİ MODALLARI (Sunum, QR, Ekip) */
         .project-item { background: rgba(255,255,255,0.05); padding: 15px; margin-bottom: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s;}
         .project-title { font-weight: bold; color: var(--c-user); font-size: 15px; margin-bottom: 5px;}
-        .slot-machine { font-size: 24px; font-weight: 900; color: #fbbf24; background: #000; padding: 15px; border-radius: 10px; border: 2px solid #fbbf24; text-align: center; margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; box-shadow: inset 0 0 15px rgba(251, 191, 36, 0.4);}
-        .investor-feedback { font-size: 14px; font-style: italic; color: #cbd5e1; text-align: center;}
         
         .slide-container { position: relative; width: 100%; height: 250px; background: #1e293b; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center; border: 1px solid #334155; margin-bottom: 15px;}
         .slide { display: none; font-size: 15px; animation: fadeIn 0.4s; color: white;}
@@ -268,7 +279,6 @@
             <div class="vote-actions">
                 <button class="btn btn-yes" id="btn-y" disabled onclick="userVote(true)">Onayla</button>
                 <button class="btn btn-team" id="btn-team" onclick="openTeamVote()">📲 Ekibe Sor</button>
-                <button class="btn btn-invest" id="btn-invest" onclick="openInvestorSpin()">🎰 Yatırımcı</button>
                 <button class="btn btn-rev" id="btn-rev" disabled onclick="requestRevision()">Revize</button>
                 <button class="btn btn-no" id="btn-n" disabled onclick="rejectWithShredder()">Reddet</button>
                 <button class="btn btn-pitch" id="btn-pitch" onclick="openPitchDeck()">🖥️ Sunum</button>
@@ -289,9 +299,7 @@
                         <div class="laser-line ll-user"></div>
                     </div>
 
-                    <div class="uploaded-doc" id="uploaded-doc" onclick="openDoc('Uploaded')">
-                        <span id="uploaded-ext">TXT</span>
-                    </div>
+                    <div class="uploaded-files-container" id="uploaded-files-container"></div>
 
                     <div class="holo-center" id="holo-center">
                         <div class="holo-core" id="holo-core"></div>
@@ -320,7 +328,7 @@
 
         <div class="input-area">
             <div class="standard-inputs" id="standard-inputs">
-                <label class="file-label" title="Belge Yükle">📎 <input type="file" id="file-upload" accept=".txt,.csv,.json" hidden onchange="handleFileUpload(event)"></label>
+                <label class="file-label" title="Belge Yükle">📎 <input type="file" id="file-upload" hidden multiple onchange="handleFileUpload(event)"></label>
                 <input type="text" class="chat-input" id="topic-input" placeholder="Gündemi yazın..." onkeypress="if(event.key==='Enter') triggerSend()">
                 <button class="send-btn" id="send-btn" onclick="triggerSend()">Kurulu Topla</button>
             </div>
@@ -336,15 +344,6 @@
     <div class="modal" id="doc-modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('doc-modal')">&times;</span><div class="modal-title" id="modal-title">Başlık</div><div class="modal-body" id="modal-text" style="white-space: pre-wrap;">İçerik...</div></div></div>
     <div class="modal" id="projects-modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('projects-modal')">&times;</span><div class="modal-title" style="color:var(--c-user)">📂 Onaylanmış Projelerim</div><div id="projects-list" style="max-height: 400px; overflow-y: auto;">Kayıt yok.</div></div></div>
     
-    <div class="modal" id="investor-modal">
-        <div class="modal-content" style="text-align: center;">
-            <span class="close-btn" onclick="closeModal('investor-modal')">&times;</span>
-            <div class="modal-title" style="color:#10b981">🎰 Yatırımcı Ruleti</div>
-            <div class="slot-machine" id="slot-machine">DÖNÜYOR...</div>
-            <div class="investor-feedback" id="investor-feedback" style="display:none;"></div>
-        </div>
-    </div>
-
     <div class="modal" id="pitch-modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('pitch-modal')">&times;</span>
@@ -372,11 +371,11 @@
     <div id="pdf-container"><h1>Yönetim Kurulu Karar Tutanağı</h1><p><strong>Tarih:</strong> <span id="pdf-date"></span></p><p><strong>Gündem:</strong> <span id="pdf-topic"></span></p><h3>Karar: <span id="pdf-title" style="color:#d97706;"></span></h3><h3>Aksiyon Planı:</h3><p id="pdf-decision"></p></div>
 
     <script>
-        const database = { 'OpenAI': '', 'Gemini': '', 'Claude': '', 'Ortak Karar': '', 'Münazara': '', 'Topic': '', 'Score': '', 'Slides': [], 'InvestorType': '', 'InvestorFeedback': ''};
+        const database = { 'OpenAI': '', 'Gemini': '', 'Claude': '', 'Ortak Karar': '', 'Münazara': '', 'Topic': '', 'Score': '', 'Slides': [] };
         const aiNodes = ['openai', 'gemini', 'claude', 'user'];
-        let uploadedFileText = "";
-        let uploadedFileName = "";
-        let uploadedFileExt = "";
+        
+        // Yeni Çoklu Dosya Dizisi
+        let uploadedFiles = []; 
 
         let isLiveMode = false;
         let isRecording = false;
@@ -444,17 +443,36 @@
             setTimeout(() => { mr.style.display = 'none'; }, 2500);
         }
 
+        // ÇOKLU DOSYA YÜKLEME MANTIĞI
         function handleFileUpload(event) { 
-            const file = event.target.files[0]; if (!file) return; 
-            uploadedFileName = file.name; uploadedFileExt = uploadedFileName.split('.').pop().toUpperCase().substring(0,4);
-            const reader = new FileReader(); 
-            reader.onload = function(e) { 
-                uploadedFileText = e.target.result; 
-                document.getElementById('uploaded-ext').innerText = uploadedFileExt;
-                document.getElementById('uploaded-doc').style.display = 'flex'; 
-                startMatrixEffect(); alert("Belge masaya eklendi.");
-            }; 
-            reader.readAsText(file); 
+            const files = event.target.files; 
+            if (!files.length) return; 
+            
+            Array.from(files).forEach(file => {
+                const reader = new FileReader(); 
+                reader.onload = function(e) { 
+                    const fileData = {
+                        name: file.name,
+                        ext: file.name.split('.').pop().toUpperCase().substring(0,4),
+                        text: e.target.result
+                    };
+                    uploadedFiles.push(fileData);
+                    renderUploadedFiles();
+                    startMatrixEffect(); 
+                }; 
+                reader.readAsText(file); 
+            });
+            alert(files.length + " belge masaya eklendi.");
+            event.target.value = ''; // Aynı dosyanın tekrar seçilebilmesi için
+        }
+
+        function renderUploadedFiles() {
+            const container = document.getElementById('uploaded-files-container');
+            container.innerHTML = '';
+            uploadedFiles.forEach((file, index) => {
+                const docHTML = `<div class="uploaded-doc" onclick="openUploadedDoc(${index})"><span>${file.ext}</span></div>`;
+                container.innerHTML += docHTML;
+            });
         }
 
         function showCenterSpeaker(id) {
@@ -477,8 +495,6 @@
         function toggleLiveDebate() {
             isLiveMode = !isLiveMode;
             let btn = document.getElementById('btn-live-debate');
-            let input = document.getElementById('topic-input');
-            let sendBtn = document.getElementById('send-btn');
             
             if(isLiveMode) {
                 let unlockAudio = new SpeechSynthesisUtterance(' '); unlockAudio.volume = 0; synthVoice.speak(unlockAudio);
@@ -586,22 +602,25 @@
             synthVoice.speak(utterance);
         }
 
-        // --- STANDART KURUL MODU (KESİNTİSİZ ŞOV VE EFEKTLER) ---
+        // --- STANDART KURUL MODU (KESİNTİSİZ ŞOV VE DOSYA ENTEGRASYONU) ---
         async function startProcess(isRevision = false, revNote = "") {
             if(isLiveMode) return;
             let fullText = document.getElementById('topic-input').value;
             if (!isRevision && (!fullText.trim() || fullText.trim().length < 2)) { alert("Lütfen geçerli bir konu yazın."); return; }
             if (!isRevision) database['Topic'] = fullText;
 
+            // Masadaki bütün dosyaları birleştir (API'ye yollamak için)
+            let allFilesText = uploadedFiles.map(f => `DOSYA [${f.name}]:\n${f.text}`).join('\n\n');
+
             document.getElementById('ui-topic').innerText = "Özetleniyor..."; document.getElementById('ui-vote-title').innerText = "Analiz ediliyor...";
             if(!isRevision) document.getElementById('topic-input').value = '';
             
             document.querySelectorAll('.doc, .master-doc').forEach(el => el.classList.remove('visible'));
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
-            ['btn-team','btn-pitch','btn-invest','btn-pdf'].forEach(id => document.getElementById(id).style.display = 'none');
+            ['btn-team','btn-pitch','btn-pdf'].forEach(id => document.getElementById(id).style.display = 'none');
             document.getElementById('ui-score').style.display = 'none';
 
-            // EFEKTLER KESİN BAŞLAR (LAZER VE HOLO)
+            // EFEKTLER KESİN BAŞLAR
             aiNodes.forEach(id => { let el = document.getElementById('ai-' + id); if(el) el.classList.add('thinking'); });
             document.getElementById('holo-core').style.display = 'block'; 
             document.getElementById('lasers').style.display = 'block'; 
@@ -610,7 +629,15 @@
             try {
                 const response = await fetch('/api/analyze', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ topic: database['Topic'], boardType: document.getElementById('boardType').value, fileText: uploadedFileText, revisionNote: revNote, isCrisis: document.getElementById('krizModu').checked, isNight: document.getElementById('nightModu').checked, isLiveDebate: false })
+                    body: JSON.stringify({ 
+                        topic: database['Topic'], 
+                        boardType: document.getElementById('boardType').value, 
+                        fileText: allFilesText, 
+                        revisionNote: revNote, 
+                        isCrisis: document.getElementById('krizModu').checked, 
+                        isNight: document.getElementById('nightModu').checked, 
+                        isLiveDebate: false 
+                    })
                 });
 
                 if (!response.ok) throw new Error("API Yanıt Vermedi (Vercel/Anahtar Hatası)");
@@ -618,7 +645,7 @@
 
                 database['OpenAI'] = data.openai || "Yanıt alınamadı."; database['Gemini'] = data.gemini || "Yanıt alınamadı."; database['Claude'] = data.claude || "Yanıt alınamadı.";
                 database['Münazara'] = data.debate || "Münazara yapılamadı."; database['Ortak Karar'] = data.masterDecision || "Karar alınamadı."; database['Title'] = data.masterTitle || "Sentez Raporu"; database['Score'] = data.score || "85"; 
-                database['Slides'] = data.slides || []; database['InvestorType'] = data.investorType || "MELEK YATIRIMCI"; database['InvestorFeedback'] = data.investorFeedback || "Harika plan.";
+                database['Slides'] = data.slides || []; 
 
             } catch (error) {
                 console.error(error); 
@@ -631,7 +658,6 @@
             document.getElementById('lasers').style.display = 'none';
             aiNodes.forEach(id => { let el = document.getElementById('ai-' + id); if(el) el.classList.remove('thinking'); });
             
-            // DOSYALARI MASAYA ŞAK DİYE KOY
             ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.add('visible'));
             
             if (database['Title'] !== "SİSTEM BAĞLANTI HATASI") {
@@ -648,28 +674,11 @@
                 scoreUI.innerText = `Verim: %${database['Score']}`; scoreUI.style.display = 'block';
                 
                 ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = false);
-                ['btn-team','btn-pitch','btn-invest'].forEach(id => document.getElementById(id).style.display = 'inline-block');
+                ['btn-team','btn-pitch'].forEach(id => document.getElementById(id).style.display = 'inline-block');
             }, 1500);
         }
 
-        // --- YENİ EKLENEN ÖZELLİKLER (Rulet, Sunum, QR, vb.) ---
-        function openInvestorSpin() {
-            let slot = document.getElementById('slot-machine');
-            let feedback = document.getElementById('investor-feedback');
-            feedback.style.display = 'none';
-            document.getElementById('investor-modal').classList.add('show');
-            
-            const types = ["MELEK YATIRIMCI", "RİSK SERMAYESİ (VC)", "BANKA KREDİSİ", "KİTLE FONLAMASI"];
-            let i = 0; let spinInterval = setInterval(() => { slot.innerText = types[i % types.length]; i++; }, 100);
-
-            setTimeout(() => {
-                clearInterval(spinInterval);
-                slot.innerText = database['InvestorType'].toUpperCase();
-                slot.style.color = "#10b981"; slot.style.borderColor = "#10b981";
-                feedback.innerText = database['InvestorFeedback']; feedback.style.display = 'block';
-            }, 2000);
-        }
-
+        // --- SUNUM VE QR ÖZELLİKLERİ ---
         let currentSlide = 0;
         function openPitchDeck() {
             let slidesData = database['Slides'] || [];
@@ -706,10 +715,13 @@
             document.getElementById('ui-status').innerText = "KARAR REDDEDİLDİ. Dosya imha ediliyor...";
             document.getElementById('ui-vote-title').innerText = "Plan Çöpe Atıldı.";
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
-            ['btn-team','btn-pitch','btn-invest', 'btn-pdf'].forEach(id => document.getElementById(id).style.display = 'none');
+            ['btn-team','btn-pitch','btn-pdf'].forEach(id => document.getElementById(id).style.display = 'none');
             
             ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.remove('visible'));
-            document.getElementById('uploaded-doc').style.display = 'none'; uploadedFileText = ""; 
+            
+            // Masadaki dosyaları tamamen temizle
+            uploadedFiles = [];
+            renderUploadedFiles();
 
             document.getElementById('shredder-box').classList.add('active');
             let masterDoc = document.getElementById('doc-master'); masterDoc.classList.add('shredding');
@@ -721,13 +733,16 @@
             }, 1800);
         }
 
+        function openUploadedDoc(index) {
+            const file = uploadedFiles[index];
+            document.getElementById('modal-title').style.color = "#38bdf8"; 
+            document.getElementById('modal-title').innerText = "Eklenen Dosya: " + file.name;
+            document.getElementById('modal-text').innerText = file.text.substring(0, 5000) + (file.text.length > 5000 ? "\n\n...[Devamı Kesildi]" : ""); 
+            document.getElementById('doc-modal').classList.add('show');
+        }
+
         function openDoc(owner) {
-            let content = "";
-            if(owner === 'Uploaded') {
-                document.getElementById('modal-title').style.color = "#38bdf8"; document.getElementById('modal-title').innerText = "Eklenen Dosya: " + uploadedFileName;
-                document.getElementById('modal-text').innerText = uploadedFileText; document.getElementById('doc-modal').classList.add('show'); return;
-            }
-            content = database[owner];
+            let content = database[owner];
             if(owner === 'Ortak Karar') {
                 document.getElementById('modal-title').style.color = "#fbbf24"; document.getElementById('modal-title').innerText = "Ortak Karar Dosyası";
                 let textToType = "MÜNAZARA:\n" + database['Münazara'] + "\n\nAKSİYON PLANI:\n" + content;
@@ -764,10 +779,15 @@
                 document.getElementById('ui-status').innerText = "KARAR ONAYLANDI VE PROJELERE EKLENDİ.";
                 
                 document.getElementById('btn-pdf').style.display = 'inline-block'; 
-                ['btn-team','btn-pitch','btn-invest'].forEach(id => document.getElementById(id).style.display = 'none');
+                ['btn-team','btn-pitch'].forEach(id => document.getElementById(id).style.display = 'none');
                 saveToProjects();
             }
-            document.getElementById('doc-master').classList.remove('visible'); document.getElementById('uploaded-doc').style.display = 'none'; uploadedFileText = "";
+            document.getElementById('doc-master').classList.remove('visible');
+            
+            // Masayı temizle
+            uploadedFiles = [];
+            renderUploadedFiles();
+
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
         }
 
