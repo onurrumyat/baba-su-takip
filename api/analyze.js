@@ -40,7 +40,8 @@ export default async function handler(req, res) {
         let toneCommand = isCrisis ? "DİKKAT: DEFCON 1 KRİZ MODU! Kurumsal jargonu bırak. Kanamayı anında durduracak acil durum taktikleri ver." : (isNight ? "Gece mesaisindeyiz. Dilini samimi, felsefi ve yoldaşça bir tona çek." : "");
         let finalContext = `Gündem: ${topic}\n${toneCommand}`;
         
-        if (fileText) finalContext += `\n\nMASAYA KONAN DOSYA:\n${fileText.substring(0, 3000)}`;
+        // Bütün dosyaları bağlama dahil ediyoruz (10.000 karaktere kadar)
+        if (fileText) finalContext += `\n\nMASAYA KONAN DOSYALAR:\n${fileText.substring(0, 10000)}`;
         if (revisionNote) finalContext += `\n\nREVİZYON EMRİ:\n"Bunu dikkate alarak planı baştan yap: ${revisionNote}"`;
 
         const openAiReq = fetch('https://api.openai.com/v1/chat/completions', {
@@ -73,9 +74,7 @@ export default async function handler(req, res) {
                     4) 'ortakKarar': 3-4 maddelik net Aksiyon Planı.
                     5) 'verimlilikSkoru': 1-100 arası başarı ihtimali.
                     6) 'zihinHaritasi': 3 anahtar kelime dizisi.
-                    7) 'sunumSlaytlari': 4 elemanlı sunum dizisi. (Önemli)
-                    8) 'yatirimciTipi': Sadece şu üçünden biri: "MELEK YATIRIMCI", "RİSK SERMAYESİ (VC)", "BANKA KREDİSİ".
-                    9) 'yatirimciYorumu': Bu yatırımcı tipinin bu plana neden yatırım yapıp/yapmayacağını anlatan acımasız 3 cümlelik analiz.` },
+                    7) 'sunumSlaytlari': 4 elemanlı sunum dizisi.` },
                     { role: "user", content: `${finalContext}\n\nOpenAI:\n${openaiText}\n\nClaude:\n${claudeText}\n\nGemini:\n${geminiText}` }
                 ]
             })
@@ -92,9 +91,7 @@ export default async function handler(req, res) {
             masterDecision: synthesis.ortakKarar || "Aksiyon planı çıkarılamadı.",
             score: synthesis.verimlilikSkoru || "85",
             mindMap: synthesis.zihinHaritasi || ["Analiz", "Strateji", "Uygulama"],
-            slides: synthesis.sunumSlaytlari || ["Sorun", "Yaklaşım", "Uygulama", "Sonuç"],
-            investorType: synthesis.yatirimciTipi || "MELEK YATIRIMCI",
-            investorFeedback: synthesis.yatirimciYorumu || "Bu plan çok yenilikçi, yatırım yapmaya değer."
+            slides: synthesis.sunumSlaytlari || ["Sorun", "Yaklaşım", "Uygulama", "Sonuç"]
         });
 
     } catch (error) {
