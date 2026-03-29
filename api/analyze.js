@@ -1,9 +1,9 @@
-// api/analyze.js (Fikir Üreten, Madde İmli ve Pratik Sürüm)
+// api/analyze.js (Nihai Profesyonel Sürüm: Roller, Arşiv ve Revizyon Destekli)
 
 export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(405).json({ error: "Sadece POST." });
+    if (req.method !== 'POST') return res.status(405).json({ error: "Sadece POST metodu." });
 
-    const { topic } = req.body;
+    const { topic, boardType, feedback } = req.body;
     if (!topic || topic.trim().length < 3) return res.status(400).json({ error: "Geçerli konu girin." });
 
     const OPENAI_KEY = process.env.OPENAI_API_KEY;
@@ -11,46 +11,75 @@ export default async function handler(req, res) {
 
     if (!OPENAI_KEY || !CLAUDE_KEY) return res.status(500).json({ error: "API Anahtarları eksik." });
 
+    // Dinamik Karakterler (Board Type)
+    let role1 = "", role2 = "", role3 = "";
+    if (boardType === 'creative') {
+        role1 = "Sen sınırları zorlayan bir 'Vizyoner'sin. Çılgın, riskli ama devasa getirisi olan 3 pratik fikir üret.";
+        role2 = "Sen bir 'Eleştirmen'sin. Fikirlere temkinli yaklaşır, markanın itibarını koruyacak 3 pratik önlem üretirsin.";
+        role3 = "Sen bir 'İnovasyon Uzmanı'sın. Teknolojik ve sıra dışı 3 oyunlaştırılmış fikir üretirsin.";
+    } else if (boardType === 'crisis') {
+        role1 = "Sen bir 'Kriz Yöneticisi'sin (CEO). Acımasız, anında kanamayı durduracak 3 sert ve pratik karar al.";
+        role2 = "Sen 'Hukuk Müşaviri'sin. Yasal riskleri ve tazminatları önleyecek 3 katı ve pratik kural belirle.";
+        role3 = "Sen 'Halkla İlişkiler (PR)' uzmanısın. İtibarı kurtaracak, algıyı yönetecek 3 pratik acil durum hamlesi ver.";
+    } else {
+        // Varsayılan: Kurumsal Yönetim
+        role1 = "Sen sonuç odaklı 'Strateji Direktörü'sün. Kâr ve verimlilik odaklı, maliyet düşürücü 3 pratik taktik ver.";
+        role2 = "Sen 'Risk Yöneticisi'sin (CRO). Olası görünmez tehlikeleri önleyecek, güvenli ve temkinli 3 pratik kural koy.";
+        role3 = "Sen 'Teknoloji Lideri'sin (CTO). Süreci hızlandıracak, otomasyon ve dijitalleşme odaklı 3 pratik çözüm üret.";
+    }
+
+    // Eğer kullanıcı revizyon istediyse, promptlara ekle
+    const revisionContext = feedback ? `\n\nDİKKAT! Önceki plan reddedildi. Kullanıcının şu eleştirisine göre yepyeni fikirler üret: "${feedback}"` : "";
+
     try {
-        // 1. OPENAI (Agresif, Pratik, Maddeler Halinde)
-        const openAiReq = fetch('https://api.openai.com/v1/chat/completions', {
+        console.log(`[ANALİZ] Konu: ${topic} | Tip: ${boardType} | Revizyon: ${feedback ? 'Evet' : 'Hayır'}`);
+
+        // 1. KOLTUK (OPENAI)
+        const req1 = fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
             body: JSON.stringify({
                 model: 'gpt-4o-mini', 
                 messages: [
-                    { role: "system", content: "Sen sonuç odaklı bir iş insanısın. ASLA uzun paragraf veya metin yazma. Doğrudan konuya gir ve sorunu çözecek 3 adet vurucu, pratik ve net fikir üret. Her birini madde işareti (-) ile yaz." },
-                    { role: "user", content: `Konu: ${topic}` }
+                    { role: "system", content: role1 + revisionContext + " Paragraf yazma, sadece 3 net madde (-) üret." },
+                    { role: "user", content: `Gündem: ${topic}` }
                 ]
             })
         });
 
-        // 2. CLAUDE (Temkinli, Risk Çözen, Maddeler Halinde)
-        const claudeReq = fetch('https://api.anthropic.com/v1/messages', {
+        // 2. KOLTUK (CLAUDE)
+        const req2 = fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-api-key': CLAUDE_KEY, 'anthropic-version': '2023-06-01' },
             body: JSON.stringify({
                 model: 'claude-3-haiku-20240307', 
-                max_tokens: 200,
-                system: "Sen bir risk ve sistem uzmanısın. ASLA uzun metinler yazma. Sadece konudaki tehlikeleri önleyecek 3 pratik ve net önlem fikri üret. Kesinlikle madde işareti (-) kullan.",
+                max_tokens: 250,
+                system: role2 + revisionContext + " Paragraf yazma, sadece 3 net madde (-) üret.",
+                messages: [{ role: "user", content: `Gündem: ${topic}` }]
+            })
+        });
+
+        // 3. KOLTUK (Yine OpenAI ile dinamikleştirildi, sıfır maliyetle gerçek zeka)
+        const req3 = fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
+            body: JSON.stringify({
+                model: 'gpt-4o-mini', 
                 messages: [
-                    { role: "user", content: `Konu: ${topic}` }
+                    { role: "system", content: role3 + revisionContext + " Paragraf yazma, sadece 3 net madde (-) üret." },
+                    { role: "user", content: `Gündem: ${topic}` }
                 ]
             })
         });
 
-        const [openAiRes, claudeRes] = await Promise.all([openAiReq, claudeReq]);
+        const [res1, res2, res3] = await Promise.all([req1, req2, req3]);
+        const data1 = await res1.json(); const data2 = await res2.json(); const data3 = await res3.json();
 
-        const openAiData = await openAiRes.json();
-        const claudeData = await claudeRes.json();
-
-        const openaiText = openAiData.choices?.[0]?.message?.content || "Fikir üretilemedi.";
-        const claudeText = claudeData.content?.[0]?.text || "Fikir üretilemedi.";
+        const text1 = data1.choices?.[0]?.message?.content || "Fikir üretilemedi.";
+        const text2 = data2.content?.[0]?.text || "Fikir üretilemedi.";
+        const text3 = data3.choices?.[0]?.message?.content || "Fikir üretilemedi.";
         
-        // 3. GEMINI SİMÜLASYONU (Pratik, oyunlaştırılmış maddeler)
-        const geminiText = `- İşi sıradanlıktan çıkarıp oyunlaştırma (gamification) ekle.\n- Zaman kaybını önlemek için asenkron bir onay mekanizması kur.\n- Eski kuralları esneterek süreci 2 kat hızlandır.`;
-
-        // 4. BAŞKAN / SENTEZ (Sadece Eylem Planı)
+        // 4. BAŞKAN / SENTEZ (JSON FORMATINDA AKSİYON PLANI)
         const masterReq = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
@@ -58,8 +87,8 @@ export default async function handler(req, res) {
                 model: 'gpt-4o-mini',
                 response_format: { type: "json_object" }, 
                 messages: [
-                    { role: "system", content: "Sen başkansın. Format: JSON. Sana 3 farklı pratik fikir listesi gelecek. Uzun paragraf ve felsefe YAPMA. Şunları üret: 1) 'ozetKonu': 3-4 kelimelik başlık. 2) 'protokolBasligi': Eylem planının havalı ismi. 3) 'ortakKarar': Gelen fikirleri süz, hemen uygulanabilir, aşırı net, sadece 3-4 maddeden oluşan kısa bir 'Aksiyon Planı' listesi ver." },
-                    { role: "user", content: `Konu: ${topic}\nOpenAI Fikirleri: ${openaiText}\nClaude Fikirleri: ${claudeText}\nGemini Fikirleri: ${geminiText}` }
+                    { role: "system", content: "Sen başkansın. Format: JSON. Sana 3 farklı vizyondan listeler gelecek. Şunları üret: 1) 'ozetKonu': 3-4 kelimelik başlık. 2) 'protokolBasligi': Planın havalı ismi. 3) 'ortakKarar': Gelen fikirleri süz, hemen uygulanabilir, aşırı net, en iyi 3 maddelik 'Nihai Aksiyon Planı'." },
+                    { role: "user", content: `Konu: ${topic}\nUzman 1: ${text1}\nUzman 2: ${text2}\nUzman 3: ${text3}${revisionContext}` }
                 ]
             })
         });
@@ -68,9 +97,7 @@ export default async function handler(req, res) {
         const synthesis = JSON.parse(masterData.choices?.[0]?.message?.content || "{}");
 
         res.status(200).json({
-            openai: `[Pragmatist Fikirler]\n\n${openaiText}`,
-            claude: `[Temkinli Fikirler]\n\n${claudeText}`,
-            gemini: `[Yenilikçi Fikirler]\n\n${geminiText}`,
+            seat1: text1, seat2: text2, seat3: text3,
             topicSummary: synthesis.ozetKonu || "Gündem Özeti",
             masterTitle: synthesis.protokolBasligi || "Ortak Aksiyon Planı",
             masterDecision: synthesis.ortakKarar || "Aksiyon planı çıkarılamadı."
@@ -78,6 +105,6 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error("API Bağlantı Hatası:", error);
-        res.status(500).json({ error: "Analiz sırasında sunucu hatası oluştu." });
+        res.status(500).json({ error: "Sunucu hatası oluştu." });
     }
 }
