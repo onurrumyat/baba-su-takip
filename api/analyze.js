@@ -10,23 +10,20 @@ export default async function handler(req, res) {
     if (!OPENAI_KEY || !CLAUDE_KEY) return res.status(500).json({ error: "API Anahtarları eksik." });
 
     try {
-        // --- DİNAMİK UZMAN ROLLERİ (TARİHİN DAHİLERİ EKLENDİ) ---
         let r1, r2, r3;
         if (boardType === 'hukuk') { r1 = "Siber Güvenlik Uzmanı"; r2 = "Şirket Avukatı"; r3 = "Mali Müşavir"; } 
         else if (boardType === 'pazarlama') { r1 = "Growth Hacker"; r2 = "Tüketici Psikoloğu"; r3 = "Gerilla Pazarlamacı"; } 
-        else if (boardType === 'dahiler') { r1 = "Steve Jobs (Mükemmeliyetçi & Tasarımcı)"; r2 = "Sun Tzu (Acımasız Savaş Stratejisti)"; r3 = "Machiavelli (Kurnaz Politikacı)"; } 
+        else if (boardType === 'dahiler') { r1 = "Steve Jobs (Mükemmeliyetçi)"; r2 = "Sun Tzu (Stratejist)"; r3 = "Machiavelli (Politikacı)"; } 
         else { r1 = "Acımasız CEO"; r2 = "Risk Avcısı"; r3 = "İnovasyon Dehası"; }
 
-        // --- PSİKOLOJİK MODLAR (GECE / KRİZ) ---
         let toneCommand = "";
         if (isCrisis) toneCommand = "DİKKAT: DEFCON 1 KRİZ MODU! Kurumsal jargonu bırak. Kanamayı anında durduracak acil durum taktikleri ver.";
-        else if (isNight) toneCommand = "Gece mesaisindeyiz. Dışarıda yağmur yağıyor. Dilini çok daha samimi, felsefi ve yoldaşça bir tona çek. (Örn: 'Başkanım, uzun bir gün oldu ama şunu şöyle çözeriz' gibi başla).";
+        else if (isNight) toneCommand = "Gece mesaisindeyiz. Dışarıda yağmur yağıyor. Dilini samimi, felsefi ve yoldaşça bir tona çek.";
 
         let finalContext = `Gündem: ${topic}\n${toneCommand}`;
         if (fileText) finalContext += `\n\nMASAYA KONAN DOSYA:\n${fileText.substring(0, 3000)}`;
         if (revisionNote) finalContext += `\n\nREVİZYON EMRİ:\n"Bunu dikkate alarak planı baştan yap: ${revisionNote}"`;
 
-        // 1. OPENAI (Agresif/Birinci Uzman)
         const openAiReq = fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
@@ -39,7 +36,6 @@ export default async function handler(req, res) {
             })
         });
 
-        // 2. CLAUDE (Risk/İkinci Uzman)
         const claudeReq = fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-api-key': CLAUDE_KEY, 'anthropic-version': '2023-06-01' },
@@ -58,10 +54,8 @@ export default async function handler(req, res) {
         const openaiText = openAiData.choices?.[0]?.message?.content || "Fikir üretilemedi.";
         const claudeText = claudeData.content?.[0]?.text || "Fikir üretilemedi.";
         
-        // 3. GEMINI SİMÜLASYONU (Üçüncü Uzman)
         const geminiText = `- (${r3} Gözünden): Sektör standartlarını çöpe at. Süreci tamamen rakiplerin beklemediği bir modele taşı.\n- Müşteri/Personel direncini kırmak için manipülatif bir teşvik sistemi kur.\n- Maliyeti dış kaynak veya otomasyon ile sıfırla.`;
 
-        // 4. BAŞKAN / SENTEZ (Pre-Mortem Eklendi)
         const masterReq = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
@@ -76,8 +70,7 @@ export default async function handler(req, res) {
                     4) 'ortakKarar': 3-4 maddelik net Aksiyon Planı.
                     5) 'verimlilikSkoru': 1-100 arası başarı ihtimali.
                     6) 'zihinHaritasi': 3 anahtar kelime dizisi.
-                    7) 'sunumSlaytlari': 4 elemanlı sunum dizisi.
-                    8) 'preMortem': (FELAKET SİMÜLATÖRÜ) 1 yıl sonrasına git ve 'Bu plan GİZLİ bir sebepten dolayı patladı ve şirket devasa zarar etti' varsayımıyla, bu çöküşün NEDENİNİ anlatan 3 cümlelik acımasız ve korkutucu bir 'Otopsi Raporu' yaz.` },
+                    7) 'sunumSlaytlari': 4 elemanlı sunum dizisi.` },
                     { role: "user", content: `${finalContext}\n\n${r1} Fikirleri:\n${openaiText}\n\n${r2} Fikirleri:\n${claudeText}\n\n${r3} Fikirleri:\n${geminiText}` }
                 ]
             })
@@ -96,8 +89,7 @@ export default async function handler(req, res) {
             masterDecision: synthesis.ortakKarar || "Aksiyon planı çıkarılamadı.",
             score: synthesis.verimlilikSkoru || "85",
             mindMap: synthesis.zihinHaritasi || ["Analiz", "Strateji", "Uygulama"],
-            slides: synthesis.sunumSlaytlari || ["Sorun", "Yaklaşım", "Uygulama", "Sonuç"],
-            preMortem: synthesis.preMortem || "Bu plan başarısız oldu çünkü piyasa dinamikleri değişti."
+            slides: synthesis.sunumSlaytlari || ["Sorun", "Yaklaşım", "Uygulama", "Sonuç"]
         });
 
     } catch (error) {
