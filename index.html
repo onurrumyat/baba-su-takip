@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Komuta Merkezi | Canlı Toplantı & Simetrik Yönetim</title>
+    <title>AI Komuta Merkezi | Sağlam Sürüm</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -17,7 +17,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
         body { background-color: var(--bg-main); background-image: radial-gradient(circle at 50% -20%, rgba(56, 189, 248, 0.05) 0%, transparent 70%); color: var(--text-light); font-family: 'Segoe UI', system-ui, sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.5s; }
 
-        /* KRİZ & GECE MODU */
         body.crisis-mode { background-color: #1a0505; background-image: radial-gradient(circle at 50% -20%, rgba(255, 0, 0, 0.15) 0%, transparent 70%); animation: crisisPulse 2s infinite; }
         body.crisis-mode .board-table { box-shadow: 0 30px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,0,0,0.2); border-color: #3a1515;}
         @keyframes crisisPulse { 0%, 100% { background-color: #1a0505; } 50% { background-color: #2a0505; } }
@@ -25,20 +24,17 @@
         body.night-mode { background-color: #020617; background-image: none; }
         body.night-mode .board-table { box-shadow: 0 40px 60px rgba(0,0,0,0.9), inset 0 0 30px rgba(14, 165, 233, 0.1); border-color: #0f172a;}
         
-        /* SAKİN MOD (YAĞMUR VE MÜZİK) */
         .rain-container { position: absolute; inset: 0; pointer-events: none; z-index: 100; overflow: hidden; display: none; }
         body.relax-mode .rain-container { display: block; }
         .rain-drop { position: absolute; background: linear-gradient(transparent, rgba(255,255,255,0.4)); width: 1px; height: 50px; animation: rainFall linear infinite; }
         @keyframes rainFall { to { transform: translateY(100vh); } }
 
-        /* MÜHÜR EFEKTİ */
         .stamp { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(5); opacity: 0; pointer-events: none; z-index: 1000; font-size: 60px; color: #ef4444; border: 6px solid #ef4444; padding: 10px 20px; border-radius: 15px; font-weight: 900; letter-spacing: 3px; text-shadow: 0 0 10px rgba(255,0,0,0.5); font-family: Impact, sans-serif; }
         .stamp.animate { animation: stampIn 0.5s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes stampIn { to { transform: translate(-50%, -50%) scale(1) rotate(-15deg); opacity: 0.9; } }
         .shake { animation: shakeScreen 0.4s; }
         @keyframes shakeScreen { 0%,100%{transform:translate(0,0);} 20%{transform:translate(-2px,0);} 40%{transform:translate(2px,-2px);} 60%{transform:translate(-2px,2px);} 80%{transform:translate(2px,2px);} }
 
-        /* ÜST PANEL */
         #main-app { display: flex; flex-direction: column; height: 100%; width: 100%; }
         .header-panel { background: var(--bg-panel); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border-glass); padding: 10px 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; z-index: 10; }
         .header-left { display: flex; gap: 8px; align-items: center; flex-wrap: wrap;}
@@ -48,7 +44,6 @@
         .projects-btn { background: rgba(56, 189, 248, 0.1); color: var(--c-user); border: 1px solid var(--c-user); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.2s; }
         .projects-btn:hover { background: var(--c-user); color: #000; }
         
-        /* CANLI MÜZAKERE BUTONU */
         .live-btn { background: #c255ff; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.2s; animation: pulseLive 2s infinite alternate;}
         .live-btn.active { background: white; color: #c255ff; box-shadow: 0 0 15px #c255ff; }
         @keyframes pulseLive { from{box-shadow: 0 0 0px #c255ff;} to{box-shadow: 0 0 10px #c255ff;} }
@@ -88,7 +83,7 @@
         .center-speaker .node-name { font-size: 12px; padding: 4px 10px; background: rgba(0,0,0,0.9); border-radius: 4px; font-weight:bold;}
         @keyframes centerPop { 0% { transform: scale(0) translateY(30px) rotateX(-15deg); opacity: 0; } 100% { transform: scale(1) translateY(0) rotateX(-15deg); opacity: 1; } }
 
-        /* 4 YÖNLÜ VERİ AKIŞ LAZERLERİ (GERİ GELDİ) */
+        /* LAZERLER (4 YÖNLÜ VERİ AKIŞI) */
         .laser-container { position: absolute; inset: 0; pointer-events: none; display: none; z-index: 3; }
         .laser-line { position: absolute; top: 50%; left: 50%; transform-origin: left center; height: 2px; opacity: 0; }
         
@@ -97,11 +92,7 @@
         .ll-gemini { background: linear-gradient(90deg, transparent, var(--c-gemini)); transform: rotate(180deg); animation: shootData 0.7s infinite 0.4s; }
         .ll-claude { background: linear-gradient(90deg, transparent, var(--c-claude)); transform: rotate(0deg); animation: shootData 0.8s infinite 0.1s; }
         
-        @keyframes shootData { 
-            0% { width: 0px; opacity: 1; } 
-            50% { width: 120px; opacity: 1; } 
-            100% { width: 220px; opacity: 0; } 
-        }
+        @keyframes shootData { 0% { width: 0px; opacity: 1; } 50% { width: 120px; opacity: 1; } 100% { width: 220px; opacity: 0; } }
 
         .matrix-rain { position: absolute; inset: 0; pointer-events: none; color: #4ade80; font-family: monospace; font-size: 12px; display: none; text-shadow: 0 0 5px #4ade80; z-index: 1;}
         .matrix-drop { position: absolute; top: -20px; animation: fall linear forwards; }
@@ -117,19 +108,17 @@
         .n-claude .node-icon { border-color: var(--c-claude); color: var(--c-claude); } 
         .n-user .node-icon { border-color: var(--c-user); color: var(--c-user); }
         
-        /* Avatar Pozisyonları */
         .n-openai { top: 0; left: 50%; transform: translate(-50%, -50%); } 
         .n-user { top: 100%; left: 50%; transform: translate(-50%, -50%); } 
         .n-gemini { top: 50%; left: 0; transform: translate(-50%, -50%); } 
         .n-claude { top: 50%; left: 100%; transform: translate(-50%, -50%); } 
         
-        /* Düşünme Efekti */
         .thinking .node-icon { animation: glow 1s infinite alternate; opacity: 1;}
         @keyframes glow { from { box-shadow: 0 0 5px currentColor; } to { box-shadow: 0 0 20px currentColor, inset 0 0 10px currentColor; } }
         @keyframes speakGlow { from { box-shadow: 0 0 10px currentColor; } to { box-shadow: 0 0 35px currentColor, inset 0 0 15px currentColor; } }
         .hidden-node { opacity: 0 !important; pointer-events: none; }
 
-        /* SİMETRİK DOSYALAR (İÇ DAİREDE, AVATARLARIN TAM ÖNÜNDE) */
+        /* SİMETRİK DOSYALAR (İÇ DAİREDE) */
         .doc { position: absolute; width: 26px; height: 36px; background: rgba(255,255,255,0.95); border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0; transform: scale(0) translate(-50%, -50%); transition: 0.4s; box-shadow: 0 4px 10px rgba(0,0,0,0.7); font-size: 13px; border-left: 3px solid #ccc; color: black; z-index: 6;}
         .doc:hover { transform: scale(1.3) translate(-40%, -40%) !important; z-index: 10; }
         .doc.visible { opacity: 1; transform: scale(1) translate(-50%, -50%); }
@@ -327,7 +316,6 @@
             else { document.body.classList.remove('night-mode'); } 
         }
         
-        // SAKİN MOD (YAĞMUR + MÜZİK)
         function toggleRelaxMode() { 
             if(document.getElementById('relaxModu').checked) { 
                 document.body.classList.add('relax-mode'); 
@@ -368,7 +356,7 @@
             reader.onload = function(e) { 
                 uploadedFileText = e.target.result; 
                 document.getElementById('uploaded-ext').innerText = uploadedFileExt;
-                document.getElementById('uploaded-doc').style.display = 'flex'; // Dış cephede göster
+                document.getElementById('uploaded-doc').style.display = 'flex';
                 startMatrixEffect(); 
                 alert("Belge dış cepheye yerleştirildi.");
             }; 
@@ -425,7 +413,10 @@
 
         // --- SES KAYIT / BAS-KONUŞ (PTT) ---
         function initSpeech() {
-            if (!('webkitSpeechRecognition' in window)) { alert("Tarayıcınız desteklemiyor (Lütfen Chrome kullanın)."); return false; }
+            if (!('webkitSpeechRecognition' in window)) { 
+                alert("Tarayıcınız ses tanımayı desteklemiyor. Lütfen Google Chrome kullanın."); 
+                return false; 
+            }
             recognition = new webkitSpeechRecognition();
             recognition.lang = 'tr-TR';
             recognition.interimResults = true;
@@ -440,7 +431,13 @@
                 document.getElementById('topic-input').value = finalPttText + interimText;
             };
 
-            recognition.onerror = (e) => { stopPTT(); };
+            recognition.onerror = (e) => { 
+                console.error("Mikrofon Hatası:", e.error); 
+                stopPTT(); 
+                document.getElementById('ptt-btn').innerText = "🎙️ Hata: Mikrofon algılanamadı.";
+                setTimeout(() => { document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; }, 3000);
+            };
+
             recognition.onend = () => {
                 if (finalPttText.trim().length > 0) {
                     sendLiveMessage(finalPttText);
@@ -475,7 +472,7 @@
             document.getElementById('ptt-btn').innerText = "🎙️ Dinliyorum... (Konuşun)";
             showCenterSpeaker('user');
 
-            try { recognition.start(); } catch(err) {}
+            try { recognition.start(); } catch(err) { console.error(err); }
         }
 
         function stopPTT(e) {
@@ -485,7 +482,7 @@
 
             document.getElementById('ptt-btn').classList.remove('recording');
             document.getElementById('ptt-btn').innerText = "⏳ Sesiniz İşleniyor...";
-            try { recognition.stop(); } catch(err) {}
+            try { recognition.stop(); } catch(err) { console.error(err); }
         }
 
         function triggerSend() {
@@ -497,24 +494,27 @@
             }
         }
 
-        // --- SESLİ CEVAP ÜRETTİRME (API) ---
+        // --- SESLİ CEVAP ÜRETTİRME (API) KORUMALI ---
         async function sendLiveMessage(text) {
             if(!text || text.trim() === "") { document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; hideCenterSpeaker(); return; }
             
             document.getElementById('ui-status').innerText = "YAPAY ZEKALAR TARTIŞIYOR...";
             hideCenterSpeaker(); 
             document.getElementById('holo-core').style.display = 'block';
-            document.getElementById('lasers').style.display = 'block'; // Lazerleri aç
+            document.getElementById('lasers').style.display = 'block'; 
 
             try {
                 const response = await fetch('/api/analyze', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ topic: text, isLiveDebate: true, history: conversationHistory })
                 });
+
+                if (!response.ok) throw new Error("API Yanıt Vermedi (Vercel/Anahtar Hatası)");
+                
                 const data = await response.json();
                 
                 document.getElementById('holo-core').style.display = 'none';
-                document.getElementById('lasers').style.display = 'none'; // Lazerleri kapat
+                document.getElementById('lasers').style.display = 'none'; 
                 
                 conversationHistory.push({role: "Başkan", text: text});
                 document.getElementById('topic-input').value = ''; 
@@ -523,10 +523,12 @@
                     currentDialogueQueue = data.liveDialogue;
                     playNextDebateLine(); 
                 } else {
-                    document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş";
+                    throw new Error("Boş veri döndü.");
                 }
             } catch(e) {
-                console.error(e); document.getElementById('ui-status').innerText = "HATA OLUŞTU.";
+                console.error(e); 
+                alert("Bağlantı Hatası: " + e.message);
+                document.getElementById('ui-status').innerText = "HATA OLUŞTU.";
                 document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; 
                 document.getElementById('holo-core').style.display = 'none';
                 document.getElementById('lasers').style.display = 'none';
@@ -553,21 +555,19 @@
             let utterance = new SpeechSynthesisUtterance(line.text);
             utterance.lang = 'tr-TR';
             
-            if(nativeTurkishVoice) {
-                utterance.voice = nativeTurkishVoice;
-            }
+            if(nativeTurkishVoice) { utterance.voice = nativeTurkishVoice; }
             
             if(speakerId === 'claude') { utterance.pitch = 0.9; utterance.rate = 1.0; }
             else if(speakerId === 'gemini') { utterance.pitch = 1.1; utterance.rate = 1.05; }
             else { utterance.pitch = 1.0; utterance.rate = 1.0; }
 
             utterance.onend = () => { playNextDebateLine(); }; 
-            utterance.onerror = (e) => { playNextDebateLine(); }; 
+            utterance.onerror = (e) => { console.error(e); playNextDebateLine(); }; 
             
             synthVoice.speak(utterance);
         }
 
-        // --- STANDART KURUL MODU (Veri Akışı - Lazerler Aktif) ---
+        // --- STANDART KURUL MODU (Veri Akışı - Korumalı) ---
         async function startProcess(isRevision = false, revNote = "") {
             if(isLiveMode) return;
 
@@ -582,7 +582,6 @@
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
             document.getElementById('btn-pdf').style.display = 'none';
 
-            // DÜŞÜNME EFEKTİ VE LAZERLER BAŞLAR
             aiNodes.forEach(id => { let el = document.getElementById('ai-' + id); if(el) el.classList.add('thinking'); });
             document.getElementById('holo-core').style.display = 'block'; 
             document.getElementById('lasers').style.display = 'block'; 
@@ -601,7 +600,7 @@
                     })
                 });
 
-                if (!response.ok) throw new Error("Bağlantı Hatası");
+                if (!response.ok) throw new Error("API Yanıt Vermedi (Vercel/Anahtar Hatası)");
                 const data = await response.json();
 
                 database['OpenAI'] = data.openai; database['Gemini'] = data.gemini; database['Claude'] = data.claude;
@@ -610,7 +609,6 @@
 
                 document.getElementById('ui-topic').innerText = data.topicSummary;
                 
-                // LAZERLER VE EFEKTLER DURUR
                 document.getElementById('holo-core').style.display = 'none'; 
                 document.getElementById('lasers').style.display = 'none';
                 aiNodes.forEach(id => { let el = document.getElementById('ai-' + id); if(el) el.classList.remove('thinking'); });
@@ -630,14 +628,16 @@
                 }, 1500);
 
             } catch (error) {
-                console.error(error); document.getElementById('ui-status').innerText = "HATA OLUŞTU.";
+                console.error(error); 
+                alert("Bağlantı Hatası: " + error.message);
+                document.getElementById('ui-status').innerText = "HATA OLUŞTU.";
                 document.getElementById('holo-core').style.display = 'none'; 
                 document.getElementById('lasers').style.display = 'none';
                 aiNodes.forEach(id => { let el = document.getElementById('ai-' + id); if(el) el.classList.remove('thinking'); });
             }
         }
 
-        // --- ÖĞÜTÜCÜ VE TEMİZLİK (YÜKLENEN DOSYAYI DA SİLER) ---
+        // --- ÖĞÜTÜCÜ VE TEMİZLİK ---
         function rejectWithShredder() {
             document.getElementById('ui-status').innerText = "KARAR REDDEDİLDİ. Dosya imha ediliyor...";
             document.getElementById('ui-vote-title').innerText = "Plan Çöpe Atıldı.";
@@ -645,7 +645,6 @@
             document.getElementById('btn-pdf').style.display = 'none';
             document.getElementById('ui-score').style.display = 'none';
             
-            // Tüm dosyaları masadan çek
             ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.remove('visible'));
             document.getElementById('uploaded-doc').style.display = 'none'; 
             uploadedFileText = ""; 
@@ -660,7 +659,6 @@
             }, 1800);
         }
 
-        // --- DIŞ CEPHE DOSYA OKUMA VE DAKTİLO ---
         function openDoc(owner) {
             let content = "";
             
@@ -697,8 +695,8 @@
         }
         function openProjects() {
             let history = JSON.parse(localStorage.getItem('aiBoardProjects')) || []; let html = "";
-            if(history.length === 0) html = "Kayıt yok.";
-            else { history.forEach(item => { html += `<div class="project-item"><div class="project-title">${item.title}</div><div style="font-size:12px; color:#cbd5e1;">${item.decision.substring(0, 100)}...</div></div>`; }); }
+            if(history.length === 0) html = "Henüz onaylanmış bir projeniz yok.";
+            else { history.forEach(item => { html += `<div class="project-item"><div class="project-title">${item.title}</div><div class="project-date">🗓️ ${item.date} | 📌 ${item.topic}</div><div style="font-size:12px; color:#cbd5e1;">${item.decision.substring(0, 100)}...</div></div>`; }); }
             document.getElementById('projects-list').innerHTML = html; document.getElementById('projects-modal').classList.add('show');
         }
 
