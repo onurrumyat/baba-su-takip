@@ -3,211 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Yönetim Kurulu | Kurumsal Sürüm</title>
+    <title>AI Komuta Merkezi | Ultimate Sürüm</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
-            --bg-main: #0a0b10;
-            --bg-panel: rgba(15, 18, 25, 0.9);
-            --border-glass: rgba(255, 255, 255, 0.08);
-            --text-light: #e2e8f0;
-            --text-muted: #64748b;
-            --c-openai: #10a37f;
-            --c-gemini: #c255ff;
-            --c-claude: #d97757;
-            --c-user: #38bdf8;
-            
-            /* Kurumsal Masa Renkleri: Koyu Maun Ahşap / Deri ve Metal */
-            --table-surface: linear-gradient(145deg, #1c1512 0%, #0d0907 100%);
-            --table-rim: #2a2d35; /* Kalın mat metal çerçeve */
-            --table-inner-glow: rgba(255, 255, 255, 0.03);
+            --bg-main: #05070a; --bg-panel: rgba(13, 17, 23, 0.85); --border-glass: rgba(255, 255, 255, 0.1);
+            --text-light: #e6edf3; --text-muted: #7d8590;
+            --c-1: #10a37f; --c-2: #d97757; --c-3: #c255ff; --c-user: #00f2ff;
+            --table-surface: linear-gradient(135deg, #11141c 0%, #090b0f 100%); --table-rim: #1f2430;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-light); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
-        body {
-            background-color: var(--bg-main);
-            background-image: radial-gradient(circle at 50% -20%, rgba(56, 189, 248, 0.05) 0%, transparent 70%);
-            color: var(--text-light);
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            height: 100dvh;
-            display: flex; flex-direction: column;
-            overflow: hidden; 
-        }
-
-        /* --- ÜST PANEL --- */
-        .header-panel {
-            background: var(--bg-panel); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-glass); padding: 12px 20px;
-            display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; z-index: 10;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        }
-        .info-card { flex: 1; min-width: 150px; }
-        .info-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
-        .info-value { font-size: 13px; font-weight: 600; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .vote-highlight { color: #fbbf24; font-size: 14px; text-shadow: 0 0 10px rgba(251, 191, 36, 0.3); font-weight: 700;}
-
-        .vote-actions { display: flex; gap: 8px; }
-        .btn {
-            padding: 8px 16px; border: none; border-radius: 6px; font-weight: 700; font-size: 11px;
-            cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px;
-        }
-        .btn-yes { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
-        .btn-yes:hover:not(:disabled) { background: #22c55e; color: white; box-shadow: 0 0 15px rgba(34, 197, 94, 0.3); }
-        .btn-no { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
-        .btn-no:hover:not(:disabled) { background: #ef4444; color: white; box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
-        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-        /* --- ORTA ALAN & RESMİ MASA --- */
-        .stage {
-            flex: 1; min-height: 0; 
-            display: flex; justify-content: center; align-items: center; position: relative;
-            perspective: 1000px; /* Derinlik hissi artırıldı */
-            padding: 30px 40px; 
-        }
+        /* ÜST PANEL */
+        .header-panel { background: var(--bg-panel); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border-glass); padding: 10px 15px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; z-index: 10; }
+        .top-actions { display: flex; gap: 10px; align-items: center; }
         
-        .system-status {
-            position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
-            color: var(--c-user); font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
-            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); width: 100%; text-align: center; font-weight: 700;
-        }
+        /* Yeni Arayüz Elemanları */
+        .btn-archive { background: transparent; border: 1px solid var(--border-glass); color: var(--text-muted); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.2s;}
+        .btn-archive:hover { border-color: var(--text-light); color: var(--text-light); }
+        .board-selector { background: #010409; border: 1px solid var(--border-glass); color: white; padding: 6px; border-radius: 6px; font-size: 11px; outline: none; cursor: pointer; }
 
-        .table-wrapper {
-            position: relative; 
-            width: 100%; 
-            max-width: 900px; 
-            aspect-ratio: 2.2 / 1; /* Daha geniş, resmi dikdörtgen masa oranı */
-            transform: rotateX(25deg); /* Masaya üstten/çaprazdan bakış açısı */
-            transform-style: preserve-3d;
-            max-height: 50vh; 
-        }
+        .info-card { flex: 1; min-width: 120px; }
+        .info-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .info-value { font-size: 12px; font-weight: 600; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .vote-highlight { color: #fbbf24; font-size: 13px; text-shadow: 0 0 10px rgba(251, 191, 36, 0.4); font-weight: 700;}
+
+        .vote-actions { display: flex; gap: 6px; }
+        .btn { padding: 6px 12px; border: none; border-radius: 6px; font-weight: 700; font-size: 10px; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
+        .btn-yes { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.5); }
+        .btn-yes:hover:not(:disabled) { background: #22c55e; color: white; }
+        .btn-no { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.5); }
+        .btn-no:hover:not(:disabled) { background: #ef4444; color: white; }
+        .btn-revise { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.5); }
+        .btn-revise:hover:not(:disabled) { background: #38bdf8; color: white; }
+        .btn-pdf { background: #fbbf24; color: #000; display: none; }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; display: none !important;}
+
+        /* MASA VE ORTA ALAN */
+        .stage { flex: 1; min-height: 0; display: flex; justify-content: center; align-items: center; position: relative; perspective: 1200px; padding: 45px 50px; }
+        .system-status { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); color: var(--c-user); font-size: 10px; text-transform: uppercase; text-shadow: 0 0 8px rgba(0, 242, 255, 0.7); font-weight: 700; width:100%; text-align:center;}
         
-        /* GERÇEKÇİ KURUMSAL MASA (Köşeleri yuvarlatılmış ağır dikdörtgen) */
-        .board-table {
-            width: 100%; height: 100%; 
-            background: var(--table-surface); 
-            border: 12px solid var(--table-rim); /* Ağır metalik dış çerçeve */
-            border-radius: 60px; /* Kapsül değil, modern dikdörtgen masa köşesi */
-            box-shadow: 
-                0 40px 60px rgba(0,0,0,0.9), /* Yere düşen dev gölge */
-                inset 0 4px 15px var(--table-inner-glow), /* Işık yansıması */
-                inset 0 -10px 30px rgba(0,0,0,0.8); /* Masanın kendi iç gölgesi */
-            display: flex; justify-content: center; align-items: center; position: relative;
-        }
+        .table-wrapper { position: relative; width: 100%; max-width: 850px; aspect-ratio: 2 / 1; transform: rotateX(15deg); transform-style: preserve-3d; max-height: 55vh; }
+        .board-table { width: 100%; height: 100%; background: var(--table-surface); border: 5px solid var(--table-rim); border-radius: 500px; box-shadow: 0 25px 50px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; position: relative; }
+        .holo-center { width: 65%; height: 55%; background: rgba(0, 242, 255, 0.03); border-radius: 500px; border: 1px solid rgba(0, 242, 255, 0.15); position: relative; }
+
+        /* AVATARLAR */
+        .node { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 6px; transform: translate(-50%, -50%); z-index: 5; }
+        .node-icon { width: 42px; height: 42px; border-radius: 10px; background: #0a0e14; display: flex; justify-content: center; align-items: center; font-size: 18px; font-weight: 800; border: 2px solid; box-shadow: 0 8px 15px rgba(0,0,0,0.8); }
+        .node-name { font-size: 8px; font-weight: 800; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; background: rgba(0,0,0,0.8); padding: 3px 6px; border-radius: 6px; white-space: nowrap;}
         
-        /* Masanın Ortasındaki Dijital Cam/Buzlu Alan */
-        .holo-center {
-            width: 70%; height: 50%; 
-            background: rgba(56, 189, 248, 0.02); 
-            border-radius: 30px;
-            border: 1px solid rgba(56, 189, 248, 0.1); 
-            box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.03); 
-            position: relative;
-        }
-
-        /* --- AVATARLAR (Modüller masanın kenarlarına hizalandı) --- */
-        .node { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 8px; transform: translate(-50%, -50%); z-index: 5; }
-        .node-icon {
-            width: 45px; height: 45px; border-radius: 12px; background: #0f1117; display: flex; justify-content: center; align-items: center;
-            font-size: 20px; font-weight: 800; border: 2px solid; box-shadow: 0 10px 20px rgba(0,0,0,0.8); transition: all 0.3s ease;
-        }
-        .node-name { font-size: 10px; font-weight: 800; letter-spacing: 1px; color: #fff; text-transform: uppercase; background: rgba(0,0,0,0.8); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);}
-
-        .n-openai .node-icon { border-color: var(--c-openai); color: var(--c-openai); }
-        .n-gemini .node-icon { border-color: var(--c-gemini); color: var(--c-gemini); }
-        .n-claude .node-icon { border-color: var(--c-claude); color: var(--c-claude); }
-        .n-user .node-icon { border-color: var(--c-user); color: var(--c-user); }
-
-        .n-openai { top: -5px; left: 50%; } 
-        .n-user { top: calc(100% + 5px); left: 50%; } 
-        .n-gemini { top: 50%; left: -5px; } 
-        .n-claude { top: 50%; left: calc(100% + 5px); } 
-
+        .n-1 .node-icon { border-color: var(--c-1); color: var(--c-1); } .n-1 { top: 0; left: 50%; }
+        .n-2 .node-icon { border-color: var(--c-2); color: var(--c-2); } .n-2 { top: 50%; left: 100%; }
+        .n-3 .node-icon { border-color: var(--c-3); color: var(--c-3); } .n-3 { top: 50%; left: 0; }
+        .n-user .node-icon { border-color: var(--c-user); color: var(--c-user); } .n-user { top: 100%; left: 50%; }
         .thinking .node-icon { animation: glow 1s infinite alternate; }
-        @keyframes glow { from { box-shadow: 0 0 5px currentColor; } to { box-shadow: 0 0 25px currentColor, inset 0 0 10px currentColor; } }
+        @keyframes glow { from { box-shadow: 0 0 5px currentColor; } to { box-shadow: 0 0 20px currentColor, inset 0 0 10px currentColor; } }
 
-        /* --- DOSYALAR --- */
-        .doc {
-            position: absolute; width: 32px; height: 44px; background: rgba(255,255,255,0.95); border-radius: 4px; display: flex; justify-content: center; align-items: center;
-            cursor: pointer; opacity: 0; transform: scale(0); transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 6px 15px rgba(0,0,0,0.7); font-size: 16px; border-left: 3px solid #ccc;
-        }
-        .doc:hover { transform: scale(1.3) translateY(-5px) !important; z-index: 10; box-shadow: 0 12px 25px rgba(0,0,0,0.8);}
+        /* DOSYALAR */
+        .doc { position: absolute; width: 28px; height: 38px; background: rgba(255,255,255,0.95); border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0; transform: scale(0); transition: 0.4s; font-size: 14px; }
+        .doc:hover { transform: scale(1.3) translateY(-5px) !important; z-index: 10; }
         .doc.visible { opacity: 1; transform: scale(1); }
-
-        .d-openai { top: 15%; left: 50%; transform: translateX(-50%); border-left-color: var(--c-openai); }
-        .d-gemini { top: 50%; left: 15%; transform: translateY(-50%); border-left-color: var(--c-gemini); }
-        .d-claude { top: 50%; right: 15%; transform: translateY(-50%); border-left-color: var(--c-claude); }
-
-        .master-doc {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); width: 55px; height: 70px; background: linear-gradient(135deg, #fbbf24, #d97706);
-            border-radius: 5px 10px 10px 5px; display: flex; justify-content: center; align-items: center; font-size: 28px; cursor: pointer; opacity: 0; transition: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 0 30px rgba(251, 191, 36, 0.4); border-left: 6px solid #b45309; z-index: 2;
-        }
-        .master-doc:hover { transform: translate(-50%, -50%) scale(1.15) !important; box-shadow: 0 0 40px rgba(251, 191, 36, 0.7);}
+        .d-1 { top: 18%; left: 50%; transform: translateX(-50%); }
+        .d-2 { top: 50%; right: 18%; transform: translateY(-50%); }
+        .d-3 { top: 50%; left: 18%; transform: translateY(-50%); }
+        .master-doc { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); width: 50px; height: 65px; background: linear-gradient(135deg, #fbbf24, #d97706); border-radius: 4px 8px 8px 4px; display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; opacity: 0; transition: 0.5s; z-index: 2; border-left: 5px solid #b45309; }
         .master-doc.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        .master-doc:hover { transform: translate(-50%, -50%) scale(1.15) !important; }
 
-        /* --- KULLANICI GİRİŞ ALANI --- */
-        .input-area {
-            background: var(--bg-panel); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border-glass); 
-            padding: 15px 25px; 
-            padding-bottom: calc(15px + env(safe-area-inset-bottom));
-            display: flex; gap: 12px;
-        }
-        .chat-input {
-            flex: 1; background: #010409; border: 1px solid var(--border-glass); color: white; padding: 14px 20px; border-radius: 8px; font-size: 15px; outline: none; transition: 0.3s;
-        }
-        .chat-input:focus { border-color: var(--c-user); box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
-        .send-btn {
-            background: var(--c-user); color: #000; border: none; padding: 0 25px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;
-        }
-        .send-btn:hover { background: #0ea5e9; transform: scale(1.02); }
+        /* GİRİŞ ALANI */
+        .input-area { background: var(--bg-panel); border-top: 1px solid var(--border-glass); padding: 12px 20px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 10px; }
+        .chat-input { flex: 1; background: #010409; border: 1px solid var(--border-glass); color: white; padding: 10px 15px; border-radius: 8px; font-size: 13px; outline: none; transition: 0.3s; }
+        .chat-input:focus { border-color: var(--c-user); }
+        .send-btn { background: var(--c-user); color: #000; border: none; padding: 0 20px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 11px; text-transform: uppercase; }
 
-        /* --- OKUMA PENCERESİ (MODAL) - MADDE İMİ ODAKLI --- */
-        .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: 0.3s; padding: 20px;
-        }
+        /* MODALLAR (Rapor, Revize, Arşiv) */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: 0.3s; padding: 20px; }
         .modal.show { display: flex; opacity: 1; }
-        .modal-content { background: #0f1117; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid var(--border-glass); padding: 30px; box-shadow: 0 25px 50px rgba(0,0,0,1); position: relative; max-height: 80dvh; overflow-y: auto;}
-        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 28px; color: var(--text-muted); cursor: pointer; }
-        .close-btn:hover { color: white; }
-        .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border-glass); text-transform: uppercase; letter-spacing: 1px;}
-        .modal-body { font-size: 15px; line-height: 1.7; color: #cbd5e1; white-space: pre-line; }
+        .modal-content { background: #0d1117; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid var(--border-glass); padding: 25px; position: relative; max-height: 80dvh; overflow-y: auto;}
+        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 24px; color: var(--text-muted); cursor: pointer; }
+        .modal-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid var(--border-glass); text-transform: uppercase; color: #fff;}
+        .modal-body { font-size: 14px; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
+        
+        /* Arşiv Listesi */
+        .history-item { padding: 10px; border: 1px solid var(--border-glass); border-radius: 6px; margin-bottom: 10px; cursor: pointer; background: rgba(255,255,255,0.02); }
+        .history-item:hover { background: rgba(255,255,255,0.05); border-color: var(--text-muted); }
 
-        /* --- MOBİL İÇİN KESİN UYUM --- */
         @media (max-width: 768px) {
-            .header-panel { padding: 10px 15px; gap: 8px; }
-            .info-card { min-width: 100%; }
-            .vote-actions { width: 100%; justify-content: space-between; gap: 5px;} .btn { flex: 1; text-align: center; font-size: 10px; padding: 8px;}
-            
-            .stage { padding: 25px; } 
-            
-            .table-wrapper { 
-                width: 90%; 
-                max-width: 400px;
-                aspect-ratio: 1 / 1.5; /* Mobilde dikey dikdörtgen masa */
-                transform: rotateX(15deg); 
-            } 
-            .board-table { border-radius: 40px; border-width: 8px; }
-            .holo-center { border-radius: 20px; }
-            
-            .node-icon { width: 36px; height: 36px; font-size: 16px; border-width: 2px;}
-            .node-name { font-size: 8px; padding: 2px 5px;}
+            .header-panel { padding: 8px; gap: 6px; flex-direction: column; align-items: stretch;}
+            .top-actions { justify-content: space-between; margin-bottom: 5px;}
+            .vote-actions { justify-content: stretch; } .btn { flex: 1; text-align: center;}
+            .stage { padding: 30px 15px; } 
+            .table-wrapper { width: 90%; aspect-ratio: 1 / 1.3; transform: rotateX(8deg); } 
+            .node-icon { width: 34px; height: 34px; font-size: 14px; }
         }
+
+        /* PDF İÇİN GİZLİ ALAN */
+        #pdf-content { display: none; background: #fff; color: #000; padding: 40px; font-family: Arial, sans-serif; }
     </style>
 </head>
 <body>
 
     <div class="header-panel">
+        <div class="top-actions">
+            <button class="btn-archive" onclick="openHistory()">📜 ARŞİV</button>
+            <select id="board-type" class="board-selector" onchange="updateRoles()">
+                <option value="corporate">Kurumsal (Strateji, Risk, Teknoloji)</option>
+                <option value="creative">Yaratıcı (Vizyoner, Eleştirmen, İnovatör)</option>
+                <option value="crisis">Kriz Masası (CEO, Hukuk, PR)</option>
+            </select>
+        </div>
+        
         <div class="info-card">
             <div class="info-label">Gündem Özeti</div>
             <div class="info-value" id="ui-topic">Bekleniyor...</div>
         </div>
         <div class="info-card">
             <div class="info-label" style="color: #fbbf24;">Oylamaya Sunulan Karar</div>
-            <div class="vote-highlight" id="ui-vote-title">Modellerin fikirleri bekleniyor...</div>
+            <div class="vote-highlight" id="ui-vote-title">Modellerin analizi bekleniyor...</div>
         </div>
         <div class="vote-actions">
-            <button class="btn btn-yes" id="btn-y" disabled onclick="userVote(true)">Onayla ve Uygula</button>
-            <button class="btn btn-no" id="btn-n" disabled onclick="userVote(false)">Reddet</button>
+            <button class="btn btn-yes" id="btn-y" onclick="userVote('accept')">Kabul Et</button>
+            <button class="btn btn-revise" id="btn-r" onclick="userVote('revise')">Revize İste</button>
+            <button class="btn btn-no" id="btn-n" onclick="userVote('reject')">Reddet</button>
+            <button class="btn btn-pdf" id="btn-pdf" onclick="downloadPDF()">📄 PDF İndir</button>
         </div>
     </div>
 
@@ -216,125 +136,167 @@
         <div class="table-wrapper">
             <div class="board-table">
                 <div class="holo-center">
-                    <div class="doc d-openai" id="doc-openai" onclick="openDoc('OpenAI')">📄</div>
-                    <div class="doc d-gemini" id="doc-gemini" onclick="openDoc('Gemini')">📄</div>
-                    <div class="doc d-claude" id="doc-claude" onclick="openDoc('Claude')">📄</div>
-                    <div class="master-doc" id="doc-master" onclick="openDoc('Ortak Karar')">📁</div>
+                    <div class="doc d-1" id="doc-1" onclick="openDoc(1)">📄</div>
+                    <div class="doc d-2" id="doc-2" onclick="openDoc(2)">📄</div>
+                    <div class="doc d-3" id="doc-3" onclick="openDoc(3)">📄</div>
+                    <div class="master-doc" id="doc-master" onclick="openDoc('master')">📁</div>
                 </div>
-                <div class="node n-openai" id="ai-openai"><div class="node-icon">O</div><div class="node-name">OpenAI</div></div>
-                <div class="node n-gemini" id="ai-gemini"><div class="node-icon">G</div><div class="node-name">Gemini</div></div>
-                <div class="node n-claude" id="ai-claude"><div class="node-icon">C</div><div class="node-name">Claude</div></div>
-                <div class="node n-user" id="ai-user"><div class="node-icon">👤</div><div class="node-name">Sen</div></div>
+                <div class="node n-1" id="ai-1"><div class="node-icon">1</div><div class="node-name" id="name-1">STRATEJİ</div></div>
+                <div class="node n-2" id="ai-2"><div class="node-icon">2</div><div class="node-name" id="name-2">RİSK</div></div>
+                <div class="node n-3" id="ai-3"><div class="node-icon">3</div><div class="node-name" id="name-3">TEKNOLOJİ</div></div>
+                <div class="node n-user" id="ai-user"><div class="node-icon">👤</div><div class="node-name">SEN</div></div>
             </div>
         </div>
     </div>
 
     <div class="input-area">
-        <input type="text" class="chat-input" id="topic-input" placeholder="Gündem maddesini masaya yatır..." onkeypress="if(event.key==='Enter') startProcess()">
-        <button class="send-btn" onclick="startProcess()">Fikir Üret</button>
+        <input type="text" class="chat-input" id="topic-input" placeholder="Gündem maddesini veya konuyu yazın..." onkeypress="if(event.key==='Enter') startProcess()">
+        <button class="send-btn" onclick="startProcess()">Masaya İlet</button>
     </div>
 
     <div class="modal" id="doc-modal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <div class="modal-title" id="modal-title">Başlık</div>
+            <span class="close-btn" onclick="closeModal('doc-modal')">&times;</span>
+            <div class="modal-title" id="modal-title">Rapor</div>
             <div class="modal-body" id="modal-text">İçerik...</div>
         </div>
     </div>
 
+    <div class="modal" id="revise-modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('revise-modal')">&times;</span>
+            <div class="modal-title" style="color:#38bdf8;">Planı Revize Et</div>
+            <div style="margin-bottom: 15px; font-size: 13px; color: var(--text-muted);">Neyi beğenmediniz? Yapay zekalar bu geri bildirime göre planı baştan yapacak.</div>
+            <textarea id="revise-input" class="chat-input" style="width: 100%; height: 80px; resize: none; margin-bottom: 10px;" placeholder="Örn: Bütçemiz yok, maliyetsiz fikirler bulun..."></textarea>
+            <button class="send-btn" style="width: 100%; padding: 10px;" onclick="submitRevision()">Revizyonu Gönder</button>
+        </div>
+    </div>
+
+    <div class="modal" id="history-modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('history-modal')">&times;</span>
+            <div class="modal-title">Geçmiş Toplantılar</div>
+            <div class="modal-body" id="history-list">
+                Kayıtlı toplantı yok.
+            </div>
+        </div>
+    </div>
+
+    <div id="pdf-content">
+        <h1 style="border-bottom: 2px solid #000; padding-bottom: 10px; color:#111;">Toplantı Tutanağı</h1>
+        <p><strong>Tarih:</strong> <span id="pdf-date"></span></p>
+        <p><strong>Gündem:</strong> <span id="pdf-topic"></span></p>
+        <h2 style="color:#b45309; margin-top:20px;" id="pdf-title"></h2>
+        <div style="background:#f1f5f9; padding:15px; border-left:4px solid #b45309; margin-top:10px;">
+            <p id="pdf-decision" style="white-space: pre-line;"></p>
+        </div>
+        <hr style="margin: 20px 0;">
+        <h3 style="color:#333;">Departman Görüşleri:</h3>
+        <p><strong id="pdf-n1"></strong><br><span id="pdf-d1" style="white-space: pre-line;"></span></p><br>
+        <p><strong id="pdf-n2"></strong><br><span id="pdf-d2" style="white-space: pre-line;"></span></p><br>
+        <p><strong id="pdf-n3"></strong><br><span id="pdf-d3" style="white-space: pre-line;"></span></p>
+    </div>
+
     <script>
-        const database = { 'OpenAI': '', 'Gemini': '', 'Claude': '', 'Ortak Karar': '' };
-        const aiNodes = ['openai', 'gemini', 'claude'];
+        let currentData = {};
+        let originalTopic = "";
+        const aiNodes = [1, 2, 3];
 
-        async function startProcess() {
-            const fullText = document.getElementById('topic-input').value;
-            if (!fullText.trim() || fullText.trim().length < 3) return;
+        // ROLLERE GÖRE İSİM GÜNCELLEME
+        function updateRoles() {
+            const type = document.getElementById('board-type').value;
+            if(type === 'creative') {
+                document.getElementById('name-1').innerText = "VİZYONER";
+                document.getElementById('name-2').innerText = "ELEŞTİRMEN";
+                document.getElementById('name-3').innerText = "İNOVATÖR";
+            } else if(type === 'crisis') {
+                document.getElementById('name-1').innerText = "CEO";
+                document.getElementById('name-2').innerText = "HUKUK";
+                document.getElementById('name-3').innerText = "PR";
+            } else {
+                document.getElementById('name-1').innerText = "STRATEJİ";
+                document.getElementById('name-2').innerText = "RİSK";
+                document.getElementById('name-3').innerText = "TEKNOLOJİ";
+            }
+        }
 
-            document.getElementById('ui-topic').innerText = "Özetleniyor...";
-            document.getElementById('ui-topic').style.color = "var(--text-muted)";
-            document.getElementById('ui-vote-title').innerText = "Pratik fikirler üretiliyor...";
-            document.getElementById('ui-vote-title').style.color = "var(--text-muted)";
-            document.getElementById('topic-input').value = '';
+        // ANA SÜREÇ (İLK İSTEK VE REVİZYON)
+        async function startProcess(isRevision = false) {
+            let fullText = "";
+            let feedback = "";
+
+            if (isRevision) {
+                feedback = document.getElementById('revise-input').value;
+                if(!feedback.trim()) return;
+                fullText = originalTopic; // Ana konuyu hatırlıyoruz
+                closeModal('revise-modal');
+            } else {
+                fullText = document.getElementById('topic-input').value;
+                if (!fullText.trim() || fullText.trim().length < 3) return;
+                originalTopic = fullText;
+                document.getElementById('topic-input').value = '';
+            }
+
+            const boardType = document.getElementById('board-type').value;
+
+            // UI Temizleme
+            document.getElementById('ui-topic').innerText = isRevision ? "Revize Ediliyor..." : "Özetleniyor...";
+            document.getElementById('ui-vote-title').innerText = isRevision ? "Yeni plan yapılıyor..." : "Analiz bekleniyor...";
             document.querySelectorAll('.doc, .master-doc').forEach(el => el.classList.remove('visible'));
-            document.getElementById('btn-y').disabled = true;
-            document.getElementById('btn-n').disabled = true;
+            
+            ['btn-y', 'btn-n', 'btn-r', 'btn-pdf'].forEach(id => document.getElementById(id).style.display = 'none');
 
-            aiNodes.forEach(id => document.getElementById('ai-' + id).classList.add('thinking'));
-            document.getElementById('ui-status').innerText = "Modeller pratik çözüm adımları arıyor...";
+            aiNodes.forEach(id => document.getElementById(`ai-${id}`).classList.add('thinking'));
+            document.getElementById('ui-status').innerText = isRevision ? "Modeller eleştirinizi dikkate alıyor..." : "Modeller konuyu analiz ediyor...";
 
             try {
+                // VERCEL API'YE İSTEK
                 const response = await fetch('/api/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ topic: fullText })
+                    body: JSON.stringify({ topic: fullText, boardType: boardType, feedback: feedback })
                 });
 
                 if (!response.ok) throw new Error("API hatası.");
                 const data = await response.json();
-
                 if (data.error) throw new Error(data.error);
 
-                database['OpenAI'] = data.openai;
-                database['Gemini'] = data.gemini;
-                database['Claude'] = data.claude;
-                database['Ortak Karar'] = data.masterDecision;
+                // Verileri Kaydet
+                currentData = data;
+                currentData.topic = fullText;
+                currentData.names = [
+                    document.getElementById('name-1').innerText,
+                    document.getElementById('name-2').innerText,
+                    document.getElementById('name-3').innerText
+                ];
 
                 document.getElementById('ui-topic').innerText = `"${data.topicSummary}"`;
-                document.getElementById('ui-topic').style.color = "var(--text-light)";
 
-                aiNodes.forEach(id => document.getElementById('ai-' + id).classList.remove('thinking'));
-                ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.add('visible'));
-                document.getElementById('ui-status').innerText = "Pratik fikirler masada. Sentezleniyor...";
+                aiNodes.forEach(id => document.getElementById(`ai-${id}`).classList.remove('thinking'));
+                ['doc-1', 'doc-2', 'doc-3'].forEach(id => document.getElementById(id).classList.add('visible'));
+                document.getElementById('ui-status').innerText = "Fikirler süzülüyor. Sentez bekleniyor...";
                 
                 setTimeout(() => {
                     document.getElementById('doc-master').classList.add('visible');
-                    document.getElementById('ui-status').innerText = "Net aksiyon planı hazır. Karar sizin.";
-                    
+                    document.getElementById('ui-status').innerText = "Aksiyon planı hazır. İnceleyin ve oylayın.";
                     document.getElementById('ui-vote-title').innerText = data.masterTitle;
-                    document.getElementById('ui-vote-title').style.color = "#fbbf24";
                     
-                    document.getElementById('btn-y').disabled = false;
-                    document.getElementById('btn-n').disabled = false;
+                    // Oylama butonlarını göster
+                    ['btn-y', 'btn-n', 'btn-r'].forEach(id => document.getElementById(id).style.display = 'inline-block');
                 }, 1500);
 
             } catch (error) {
                 console.error(error);
-                document.getElementById('ui-status').innerText = `HATA: Bağlantı sorunu.`;
-                document.getElementById('ui-vote-title').innerText = "İşlem başarısız.";
-                document.getElementById('ui-topic').innerText = "Hata.";
-                aiNodes.forEach(id => document.getElementById('ai-' + id).classList.remove('thinking'));
+                document.getElementById('ui-status').innerText = "HATA: Bağlantı sorunu.";
+                aiNodes.forEach(id => document.getElementById(`ai-${id}`).classList.remove('thinking'));
             }
+        }
+
+        function submitRevision() {
+            startProcess(true);
         }
 
         function openDoc(owner) {
-            let color = "#fff";
-            if(owner === 'OpenAI') color = "var(--c-openai)";
-            else if(owner === 'Gemini') color = "var(--c-gemini)";
-            else if(owner === 'Claude') color = "var(--c-claude)";
-            else color = "#fbbf24";
-
-            document.getElementById('modal-title').style.color = color;
-            document.getElementById('modal-title').innerText = owner + " Fikirleri";
-            document.getElementById('modal-text').innerText = database[owner];
-            document.getElementById('doc-modal').classList.add('show');
-        }
-
-        function closeModal() { document.getElementById('doc-modal').classList.remove('show'); }
-
-        function userVote(isYes) {
-            if(isYes) {
-                alert("EVET: Aksiyon planı onaylandı ve uygulamaya geçiliyor.");
-                document.getElementById('ui-status').innerText = "EYLEM PLANI ONAYLANDI.";
-            } else {
-                alert("HAYIR: Fikirler reddedildi.");
-                document.getElementById('ui-status').innerText = "FİKİRLER REDDEDİLDİ. Yeni konu bekleniyor.";
-                document.getElementById('ui-vote-title').innerText = "Yeni fikir üretimi bekleniyor...";
-                document.getElementById('ui-vote-title').style.color = "var(--text-muted)";
-            }
-            document.getElementById('doc-master').classList.remove('visible');
-            document.getElementById('btn-y').disabled = true;
-            document.getElementById('btn-n').disabled = true;
-        }
-    </script>
-</body>
-</html>
+            let title = "", text = "", color = "";
+            if(owner === 1) { title = currentData.names[0] + " Fikirleri"; text = currentData.seat1; color = "var(--c-1)"; }
+            else
