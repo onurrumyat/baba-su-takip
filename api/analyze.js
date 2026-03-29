@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     if (!OPENAI_KEY || !CLAUDE_KEY) return res.status(500).json({ error: "API Anahtarları eksik." });
 
     try {
-        // --- DİNAMİK UZMAN ROLLERİ VE KRİZ MODU ---
+        // --- DİNAMİK UZMAN ROLLERİ ---
         let r1, r2, r3;
         if (boardType === 'hukuk') {
             r1 = "Siber Güvenlik Uzmanı"; r2 = "Şirket Avukatı"; r3 = "Mali Müşavir";
@@ -20,7 +20,7 @@ export default async function handler(req, res) {
             r1 = "Pragmatist CEO"; r2 = "Temkinli Risk Analisti"; r3 = "İnovasyon Lideri";
         }
 
-        let crisisCommand = isCrisis ? "DİKKAT: DEFCON 1 KRİZ MODU AKTİF! Uzun vadeyi bırak. Şirketi kurtaracak, kanamayı anında durduracak 10 dakikalık acil durum refleksleri üret." : "";
+        let crisisCommand = isCrisis ? "DİKKAT: DEFCON 1 KRİZ MODU AKTİF! Uzun vadeyi bırak. Kanamayı anında durduracak 10 dakikalık acil durum refleksleri üret." : "";
 
         let finalContext = `Gündem: ${topic}\n${crisisCommand}`;
         if (fileText) finalContext += `\n\nMASAYA KONAN DOSYA ÖZETİ:\n${fileText.substring(0, 3000)}`;
@@ -59,9 +59,9 @@ export default async function handler(req, res) {
         const claudeText = claudeData.content?.[0]?.text || "Fikir üretilemedi.";
         
         // 3. GEMINI SİMÜLASYONU
-        const geminiText = `- (${r3} Gözünden): Krizi fırsata çevirecek agresif bir pivot yap.\n- Eski kuralları yıkıp asenkron bir iletişim/onay ağı kur.\n- ${isCrisis ? 'Derhal piyasa manipülasyonu/PR hamlesi ile algıyı yönet.' : 'Süreci oyunlaştır.'}`;
+        const geminiText = `- (${r3} Gözünden): Krizi fırsata çevirecek agresif bir pivot yap.\n- Eski kuralları yıkıp asenkron bir iletişim/onay ağı kur.\n- Pazar manipülasyonu/PR hamlesi ile algıyı yönet.`;
 
-        // 4. BAŞKAN / SENTEZ (Skor ve Zihin Haritası Eklendi)
+        // 4. BAŞKAN / SENTEZ
         const masterReq = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
@@ -74,8 +74,8 @@ export default async function handler(req, res) {
                     2) 'protokolBasligi': Planın havalı ismi. 
                     3) 'munazara': OpenAI, Claude ve Gemini'nin 3 satırlık tartışması. 
                     4) 'ortakKarar': Tartışmadan çıkan 3-4 maddelik Kesin Aksiyon Planı.
-                    5) 'verimlilikSkoru': 1 ile 100 arası bir sayı. Konunun şirket için çözülebilirlik ve başarı ihtimalini temsil etsin. Sadece sayı.
-                    6) 'zihinHaritasi': Ortak kararı temsil eden 3 anahtar kelimelik bir dizi (Array). Örn: ["Maliyet Kesintisi", "PR Kampanyası", "Güvenlik Yaması"]` },
+                    5) 'verimlilikSkoru': 1 ile 100 arası bir sayı. Sadece sayı.
+                    6) 'zihinHaritasi': 3 anahtar kelimelik dizi. Örn: ["Maliyet", "PR", "Güvenlik"]` },
                     { role: "user", content: `${finalContext}\n\nOpenAI Fikirleri:\n${openaiText}\n\nClaude Fikirleri:\n${claudeText}\n\nGemini Fikirleri:\n${geminiText}` }
                 ]
             })
