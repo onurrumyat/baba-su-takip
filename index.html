@@ -91,10 +91,14 @@
         .holo-core { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed var(--holo-color); animation: spinHolo 3s linear infinite; display: none; box-shadow: 0 0 15px var(--holo-color);}
         @keyframes spinHolo { 100% { transform: rotate(360deg); } }
         
-        .center-speaker { position: absolute; display: none; flex-direction: column; align-items: center; gap: 8px; z-index: 10; animation: centerPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform: translateZ(30px); }
-        .center-speaker .node-icon { width: 70px; height: 70px; font-size: 30px; border-radius: 15px; border: 3px solid; background: rgba(0,0,0,0.8); animation: speakGlow 0.4s infinite alternate; }
-        .center-speaker .node-name { font-size: 12px; padding: 4px 10px; background: rgba(0,0,0,0.9); border-radius: 4px; font-weight:bold;}
-        @keyframes centerPop { 0% { transform: scale(0) translateY(30px) rotateX(-15deg); opacity: 0; } 100% { transform: scale(1) translateY(0) rotateX(-15deg); opacity: 1; } }
+        /* DÜZELTİLMİŞ MERKEZ KONUŞMACI KISMI (TAM ORTADA) */
+        .center-speaker { position: absolute; top: 50%; left: 50%; display: none; flex-direction: column; align-items: center; gap: 8px; z-index: 300; animation: centerPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .center-speaker .node-icon { width: 70px; height: 70px; font-size: 30px; border-radius: 15px; border: 3px solid; background: rgba(0,0,0,0.8); animation: speakGlow 0.4s infinite alternate; display: flex; justify-content: center; align-items: center;}
+        .center-speaker .node-name { font-size: 12px; padding: 4px 10px; background: rgba(0,0,0,0.9); border-radius: 4px; font-weight:bold; color: white;}
+        @keyframes centerPop { 
+            0% { transform: translate(-50%, -50%) translateZ(10px) scale(0); opacity: 0; } 
+            100% { transform: translate(-50%, -50%) translateZ(60px) scale(1); opacity: 1; } 
+        }
 
         /* 4 YÖNLÜ VERİ LAZERLERİ */
         .laser-container { position: absolute; inset: 0; pointer-events: none; display: none; z-index: 3; transform: translateZ(10px); }
@@ -105,11 +109,7 @@
         .ll-gemini { background: linear-gradient(90deg, transparent, var(--c-gemini), #fff); transform: rotate(180deg); animation: shootData 0.7s infinite 0.4s; box-shadow: 0 0 10px var(--c-gemini); }
         .ll-claude { background: linear-gradient(90deg, transparent, var(--c-claude), #fff); transform: rotate(0deg); animation: shootData 0.8s infinite 0.1s; box-shadow: 0 0 10px var(--c-claude); }
         
-        @keyframes shootData { 
-            0% { width: 0px; opacity: 1; left: 50%;} 
-            50% { width: 140px; opacity: 1; } 
-            100% { width: 240px; opacity: 0; left: 50%;} 
-        }
+        @keyframes shootData { 0% { width: 0px; opacity: 1; left: 50%;} 50% { width: 140px; opacity: 1; } 100% { width: 240px; opacity: 0; left: 50%;} }
 
         .matrix-rain { position: absolute; inset: 0; pointer-events: none; color: #4ade80; font-family: monospace; font-size: 12px; display: none; text-shadow: 0 0 5px #4ade80; z-index: 1;}
         .matrix-drop { position: absolute; top: -20px; animation: fall linear forwards; }
@@ -149,19 +149,7 @@
         .master-doc.visible { opacity: 1; transform: translate(-50%, -50%) translateZ(30px) scale(1); }
 
         /* DIŞARIDAN YÜKLENEN DOSYALARIN DİZİLECEĞİ ALAN (YAN YANA) */
-        .uploaded-files-container {
-            position: absolute;
-            bottom: 8%;
-            right: 5%;
-            width: 180px;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap-reverse;
-            justify-content: flex-end;
-            z-index: 200;
-            transform: translateZ(40px);
-        }
-
+        .uploaded-files-container { position: absolute; bottom: 8%; right: 5%; width: 180px; display: flex; gap: 8px; flex-wrap: wrap-reverse; justify-content: flex-end; z-index: 200; transform: translateZ(40px); }
         .uploaded-doc { position: relative; width: 34px; height: 46px; background: #e2e8f0; border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; box-shadow: 0 8px 20px rgba(0,0,0,0.8); border-top-right-radius: 10px; animation: dropIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
         .uploaded-doc::before { content: ''; position: absolute; top: 0; right: 0; border-width: 0 10px 10px 0; border-style: solid; border-color: #cbd5e1 transparent transparent #cbd5e1; display: block; width: 0; }
         .uploaded-doc:hover { transform: translateY(-5px) scale(1.15); z-index: 210;}
@@ -183,7 +171,6 @@
 
         /* ALT PANEL (GİRİŞ VE PTT TUŞU) */
         .input-area { flex-shrink: 0; background: var(--bg-panel); backdrop-filter: blur(20px); border-top: 1px solid var(--border-glass); padding: 12px 15px; display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center; position: relative; z-index: 500;}
-        
         .standard-inputs { display: flex; width: 100%; gap: 8px; align-items: center; justify-content: center;}
         .file-label { cursor: pointer; font-size: 16px; opacity: 0.7; transition: 0.2s;} .file-label:hover { opacity: 1; }
         .chat-input { width: 100%; max-width: 600px; background: #010409; border: 1px solid var(--border-glass); color: white; padding: 10px 15px; border-radius: 8px; font-size: 14px; outline: none; transition: 0.3s; }
@@ -203,7 +190,6 @@
         .modal-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-glass); }
         .modal-body { font-size: 13px; line-height: 1.6; color: #cbd5e1; white-space: pre-wrap; font-family: monospace; }
         
-        /* ÖZEL EKLENTİ MODALLARI (Sunum, QR, Ekip) */
         .project-item { background: rgba(255,255,255,0.05); padding: 15px; margin-bottom: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s;}
         .project-title { font-weight: bold; color: var(--c-user); font-size: 15px; margin-bottom: 5px;}
         
@@ -220,7 +206,6 @@
         .vote-bar-fill { height: 100%; background: #4ade80; width: 0%; transition: width 1s ease-out; }
         .vote-text { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: bold; color: white; text-shadow: 0 0 3px black;}
 
-        /* MOBILE VOTE UI */
         #vote-app { display: none; flex-direction: column; justify-content: center; align-items: center; height: 100vh; width: 100%; padding: 20px; text-align: center; background: #0a0b10;}
         .vote-title { font-size: 22px; color: #fbbf24; margin-bottom: 20px;}
         .vote-big-btn { width: 100%; padding: 20px; margin: 10px 0; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s;}
@@ -373,18 +358,21 @@
     <script>
         const database = { 'OpenAI': '', 'Gemini': '', 'Claude': '', 'Ortak Karar': '', 'Münazara': '', 'Topic': '', 'Score': '', 'Slides': [] };
         const aiNodes = ['openai', 'gemini', 'claude', 'user'];
-        
-        // Yeni Çoklu Dosya Dizisi
         let uploadedFiles = []; 
 
         let isLiveMode = false;
         let isRecording = false;
         let conversationHistory = [];
         let synthVoice = window.speechSynthesis;
-        let nativeTurkishVoice = null;
         let currentDialogueQueue = [];
         let recognition;
         let finalPttText = "";
+
+        // SES MOTORU DEĞİŞKENLERİ
+        let turkishVoices = [];
+        let maleVoice1 = null;  // OpenAI için
+        let femaleVoice = null; // Claude için
+        let maleVoice2 = null;  // Gemini için
 
         const colors = { 'openai': '#10a37f', 'claude': '#d97757', 'gemini': '#c255ff', 'user': '#38bdf8' };
         const icons = { 'openai': 'O', 'claude': 'C', 'gemini': 'G', 'user': '👤' };
@@ -392,16 +380,27 @@
 
         let lofiAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3'); lofiAudio.loop = true;
 
-        function setTurkishVoice() {
+        // GELİŞMİŞ TÜRKÇE SES SEÇİCİ
+        function setTurkishVoices() {
             let voices = synthVoice.getVoices();
-            nativeTurkishVoice = voices.find(v => v.lang.includes('tr') && v.name.includes('Google')) || 
-                                 voices.find(v => v.lang.includes('tr') && v.name.includes('Microsoft')) || 
-                                 voices.find(v => v.lang === 'tr-TR' || v.lang === 'tr_TR');
+            // Sadece %100 Türkçe sesleri al (Yabancı aksanı önlemek için)
+            turkishVoices = voices.filter(v => v.lang.includes('tr') || v.lang === 'tr-TR' || v.lang === 'tr_TR');
+            
+            if(turkishVoices.length > 0) {
+                // İsim bazlı cinsiyet tahmini (Cem, Tolga vs Erkek | Yelda, Emel vs Kadın)
+                femaleVoice = turkishVoices.find(v => v.name.toLowerCase().includes('yelda') || v.name.toLowerCase().includes('emel') || v.name.toLowerCase().includes('kadın') || v.name.toLowerCase().includes('female'));
+                maleVoice1 = turkishVoices.find(v => v.name.toLowerCase().includes('cem') || v.name.toLowerCase().includes('tolga') || v.name.toLowerCase().includes('erkek') || v.name.toLowerCase().includes('male'));
+                
+                // Bulunamazsa dizidekileri sırayla ata
+                if(!femaleVoice) femaleVoice = turkishVoices[0];
+                if(!maleVoice1) maleVoice1 = turkishVoices.length > 1 ? turkishVoices[1] : turkishVoices[0];
+                maleVoice2 = turkishVoices.length > 2 ? turkishVoices[2] : maleVoice1; 
+            }
         }
 
         window.onload = () => {
-            setTurkishVoice();
-            if (synthVoice.onvoiceschanged !== undefined) { synthVoice.onvoiceschanged = setTurkishVoice; }
+            setTurkishVoices();
+            if (synthVoice.onvoiceschanged !== undefined) { synthVoice.onvoiceschanged = setTurkishVoices; }
             
             const params = new URLSearchParams(window.location.search);
             if(params.get('vote')) {
@@ -443,7 +442,6 @@
             setTimeout(() => { mr.style.display = 'none'; }, 2500);
         }
 
-        // ÇOKLU DOSYA YÜKLEME MANTIĞI
         function handleFileUpload(event) { 
             const files = event.target.files; 
             if (!files.length) return; 
@@ -451,11 +449,7 @@
             Array.from(files).forEach(file => {
                 const reader = new FileReader(); 
                 reader.onload = function(e) { 
-                    const fileData = {
-                        name: file.name,
-                        ext: file.name.split('.').pop().toUpperCase().substring(0,4),
-                        text: e.target.result
-                    };
+                    const fileData = { name: file.name, ext: file.name.split('.').pop().toUpperCase().substring(0,4), text: e.target.result };
                     uploadedFiles.push(fileData);
                     renderUploadedFiles();
                     startMatrixEffect(); 
@@ -463,7 +457,7 @@
                 reader.readAsText(file); 
             });
             alert(files.length + " belge masaya eklendi.");
-            event.target.value = ''; // Aynı dosyanın tekrar seçilebilmesi için
+            event.target.value = ''; 
         }
 
         function renderUploadedFiles() {
@@ -583,6 +577,7 @@
             }
         }
 
+        // FARKLI SESLERİN VE TONLARIN AYARLANDIĞI YER
         function playNextDebateLine() {
             if(currentDialogueQueue.length === 0) {
                 document.getElementById('ui-status').innerText = "SIRA SİZDE. KONUŞABİLİRSİNİZ.";
@@ -593,23 +588,39 @@
             conversationHistory.push({role: speakerId, text: line.text});
             
             document.getElementById('ui-status').innerText = `${displayNames[speakerId]} KONUŞUYOR...`; showCenterSpeaker(speakerId);
-            let utterance = new SpeechSynthesisUtterance(line.text); utterance.lang = 'tr-TR';
-            if(nativeTurkishVoice) { utterance.voice = nativeTurkishVoice; }
-            if(speakerId === 'claude') { utterance.pitch = 0.9; utterance.rate = 1.0; }
-            else if(speakerId === 'gemini') { utterance.pitch = 1.1; utterance.rate = 1.05; }
-            else { utterance.pitch = 1.0; utterance.rate = 1.0; }
-            utterance.onend = () => { playNextDebateLine(); }; utterance.onerror = (e) => { console.error(e); playNextDebateLine(); }; 
+            
+            let utterance = new SpeechSynthesisUtterance(line.text); 
+            utterance.lang = 'tr-TR'; // Türkçeyi zorla
+
+            // Ses Karakterleri Ataması
+            if (speakerId === 'openai') {
+                if(maleVoice1) utterance.voice = maleVoice1;
+                utterance.pitch = 0.9; // Normal tok erkek
+                utterance.rate = 1.0;
+            } else if (speakerId === 'claude') {
+                if(femaleVoice) utterance.voice = femaleVoice;
+                utterance.pitch = 1.3; // İnce kadın sesi illüzyonu
+                utterance.rate = 1.05;
+            } else if (speakerId === 'gemini') {
+                if(maleVoice2) utterance.voice = maleVoice2;
+                else if(maleVoice1) utterance.voice = maleVoice1; // 2. erkek yoksa 1'i kullan ama kalınlaştır
+                utterance.pitch = 0.6; // Ekstra kalın ve farklı bir erkek sesi illüzyonu
+                utterance.rate = 0.95;
+            } else {
+                if(turkishVoices.length > 0) utterance.voice = turkishVoices[0];
+            }
+
+            utterance.onend = () => { playNextDebateLine(); }; 
+            utterance.onerror = (e) => { console.error(e); playNextDebateLine(); }; 
             synthVoice.speak(utterance);
         }
 
-        // --- STANDART KURUL MODU (KESİNTİSİZ ŞOV VE DOSYA ENTEGRASYONU) ---
         async function startProcess(isRevision = false, revNote = "") {
             if(isLiveMode) return;
             let fullText = document.getElementById('topic-input').value;
             if (!isRevision && (!fullText.trim() || fullText.trim().length < 2)) { alert("Lütfen geçerli bir konu yazın."); return; }
             if (!isRevision) database['Topic'] = fullText;
 
-            // Masadaki bütün dosyaları birleştir (API'ye yollamak için)
             let allFilesText = uploadedFiles.map(f => `DOSYA [${f.name}]:\n${f.text}`).join('\n\n');
 
             document.getElementById('ui-topic').innerText = "Özetleniyor..."; document.getElementById('ui-vote-title').innerText = "Analiz ediliyor...";
@@ -620,7 +631,6 @@
             ['btn-team','btn-pitch','btn-pdf'].forEach(id => document.getElementById(id).style.display = 'none');
             document.getElementById('ui-score').style.display = 'none';
 
-            // EFEKTLER KESİN BAŞLAR
             aiNodes.forEach(id => { let el = document.getElementById('ai-' + id); if(el) el.classList.add('thinking'); });
             document.getElementById('holo-core').style.display = 'block'; 
             document.getElementById('lasers').style.display = 'block'; 
@@ -629,18 +639,10 @@
             try {
                 const response = await fetch('/api/analyze', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        topic: database['Topic'], 
-                        boardType: document.getElementById('boardType').value, 
-                        fileText: allFilesText, 
-                        revisionNote: revNote, 
-                        isCrisis: document.getElementById('krizModu').checked, 
-                        isNight: document.getElementById('nightModu').checked, 
-                        isLiveDebate: false 
-                    })
+                    body: JSON.stringify({ topic: database['Topic'], boardType: document.getElementById('boardType').value, fileText: allFilesText, revisionNote: revNote, isCrisis: document.getElementById('krizModu').checked, isNight: document.getElementById('nightModu').checked, isLiveDebate: false })
                 });
 
-                if (!response.ok) throw new Error("API Yanıt Vermedi (Vercel/Anahtar Hatası)");
+                if (!response.ok) throw new Error("API Yanıt Vermedi");
                 const data = await response.json();
 
                 database['OpenAI'] = data.openai || "Yanıt alınamadı."; database['Gemini'] = data.gemini || "Yanıt alınamadı."; database['Claude'] = data.claude || "Yanıt alınamadı.";
@@ -650,10 +652,9 @@
             } catch (error) {
                 console.error(error); 
                 database['OpenAI'] = "Sistem Hatası: " + error.message; database['Gemini'] = "Sistem Hatası: " + error.message; database['Claude'] = "Sistem Hatası: " + error.message;
-                database['Münazara'] = "Hata oluştu."; database['Ortak Karar'] = "API bağlantısı kurulamadı. Lütfen Vercel loglarını kontrol edin."; database['Title'] = "SİSTEM BAĞLANTI HATASI"; database['Score'] = "0"; 
+                database['Münazara'] = "Hata oluştu."; database['Ortak Karar'] = "Bağlantı kurulamadı."; database['Title'] = "SİSTEM BAĞLANTI HATASI"; database['Score'] = "0"; 
             }
 
-            // EFEKTLERİ DURDUR
             document.getElementById('holo-core').style.display = 'none'; 
             document.getElementById('lasers').style.display = 'none';
             aiNodes.forEach(id => { let el = document.getElementById('ai-' + id); if(el) el.classList.remove('thinking'); });
@@ -663,7 +664,7 @@
             if (database['Title'] !== "SİSTEM BAĞLANTI HATASI") {
                 document.getElementById('ui-status').innerText = "Raporlar ulaştı. Karar sentezleniyor...";
                 document.getElementById('ui-topic').innerText = database['Topic'].substring(0, 20) + "...";
-            } else { document.getElementById('ui-status').innerText = "HATA OLUŞTU (Sahte veri gösteriliyor)."; }
+            } else { document.getElementById('ui-status').innerText = "HATA OLUŞTU."; }
             
             setTimeout(() => {
                 document.getElementById('doc-master').classList.remove('shredding'); document.getElementById('doc-master').classList.add('visible');
@@ -678,7 +679,6 @@
             }, 1500);
         }
 
-        // --- SUNUM VE QR ÖZELLİKLERİ ---
         let currentSlide = 0;
         function openPitchDeck() {
             let slidesData = database['Slides'] || [];
@@ -719,9 +719,7 @@
             
             ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.remove('visible'));
             
-            // Masadaki dosyaları tamamen temizle
-            uploadedFiles = [];
-            renderUploadedFiles();
+            uploadedFiles = []; renderUploadedFiles();
 
             document.getElementById('shredder-box').classList.add('active');
             let masterDoc = document.getElementById('doc-master'); masterDoc.classList.add('shredding');
@@ -783,11 +781,7 @@
                 saveToProjects();
             }
             document.getElementById('doc-master').classList.remove('visible');
-            
-            // Masayı temizle
-            uploadedFiles = [];
-            renderUploadedFiles();
-
+            uploadedFiles = []; renderUploadedFiles();
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
         }
 
