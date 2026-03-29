@@ -23,8 +23,8 @@ export default async function handler(req, res) {
                     model: 'gpt-4o-mini',
                     response_format: { type: "json_object" },
                     messages: [
-                        { role: "system", content: `Sen sırasıyla OpenAI, Claude ve Gemini modellerini simüle eden bir süper zekasın. Kullanıcının (Başkan) söylediği konuya bu 3 farklı yapay zekanın SESLİ TARTIŞIYORMUŞ GİBİ kısa (1'er cümlelik), net ve ardışık cevaplar vermesini sağla. Eski konuşmaları (Geçmiş) unutma. JSON Formatında dön: { "dialogue": [ {"speaker": "openai", "text": "..."}, {"speaker": "claude", "text": "..."}, {"speaker": "gemini", "text": "..."} ] }` },
-                        { role: "user", content: `GEÇMİŞ KONUŞMALAR:\n${chatHistory}\n\nBAŞKAN (KULLANICI) ŞİMDİ ŞUNU SÖYLEDİ: "${topic}"\nHaydi, aranızda tartışarak doğrudan cevap verin.` }
+                        { role: "system", content: `Sen sırasıyla OpenAI, Claude ve Gemini modellerini simüle eden bir süper zekasın. Kullanıcının (Başkan) söylediği konuya bu 3 farklı yapay zekanın SESLİ TARTIŞIYORMUŞ GİBİ kısa (1'er cümlelik), net ve ardışık cevaplar vermesini sağla. İnsan rolü yapma. JSON Formatında dön: { "dialogue": [ {"speaker": "openai", "text": "..."}, {"speaker": "claude", "text": "..."}, {"speaker": "gemini", "text": "..."} ] }` },
+                        { role: "user", content: `GEÇMİŞ:\n${chatHistory}\n\nBAŞKAN ŞUNU SÖYLEDİ: "${topic}"\nHaydi, aranızda tartışarak doğrudan cevap verin.` }
                     ]
                 })
             });
@@ -34,11 +34,11 @@ export default async function handler(req, res) {
             return res.status(200).json({ liveDialogue: parsedDebate.dialogue });
         }
 
-        // --- STANDART KURUL MODU (Metin Çıktısı) ---
+        // --- STANDART KURUL MODU ---
         let toneCommand = isCrisis ? "DİKKAT: DEFCON 1 KRİZ MODU! Kanamayı anında durduracak taktikler ver." : (isNight ? "Gece mesaisi. Sakin ve stratejik bir ton kullan." : "");
         let finalContext = `Gündem: ${topic}\n${toneCommand}`;
-        if (fileText) finalContext += `\n\nDOSYA:\n${fileText.substring(0, 3000)}`;
-        if (revisionNote) finalContext += `\n\nREVİZYON EMRİ:\n"${revisionNote}"`;
+        if (fileText) finalContext += `\n\nMASAYA KONAN DOSYA:\n${fileText.substring(0, 3000)}`;
+        if (revisionNote) finalContext += `\n\nREVİZYON EMRİ:\n"Bunu dikkate alarak planı baştan yap: ${revisionNote}"`;
 
         const openAiReq = fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
@@ -56,14 +56,14 @@ export default async function handler(req, res) {
 
         const openaiText = openAiData.choices?.[0]?.message?.content || "Fikir üretilemedi.";
         const claudeText = claudeData.content?.[0]?.text || "Fikir üretilemedi.";
-        const geminiText = `- Sektör standartlarını çöpe at. Süreci rakiplerin beklemediği bir modele taşı.\n- Teşvik sistemi kur.\n- Maliyeti otomasyon ile sıfırla.`;
+        const geminiText = `- Sektör standartlarını çöpe at. Süreci rakiplerin beklemediği bir modele taşı.\n- Teşvik sistemi kur.\n- Maliyeti dış kaynak ile sıfırla.`;
 
         const masterReq = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
             body: JSON.stringify({
                 model: 'gpt-4o-mini', response_format: { type: "json_object" }, 
                 messages: [
-                    { role: "system", content: `Sen yönetim kurulu başkanısın. Format: JSON. Üret: 1) 'ozetKonu': Özet. 2) 'protokolBasligi': Karar ismi. 3) 'munazara': Tartışma özeti. 4) 'ortakKarar': 3-4 maddelik Aksiyon Planı. 5) 'verimlilikSkoru': 1-100 arası sayı.` },
+                    { role: "system", content: `Sen yönetim kurulu başkanısın. Format: JSON. Üret: 1) 'ozetKonu': Özet. 2) 'protokolBasligi': Karar ismi. 3) 'munazara': Kısa tartışma. 4) 'ortakKarar': 3-4 maddelik Aksiyon Planı. 5) 'verimlilikSkoru': 1-100 arası sayı.` },
                     { role: "user", content: `${finalContext}\n\nOpenAI:\n${openaiText}\n\nClaude:\n${claudeText}\n\nGemini:\n${geminiText}` }
                 ]
             })
