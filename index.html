@@ -29,7 +29,7 @@
         .rain-drop { position: absolute; background: linear-gradient(transparent, rgba(255,255,255,0.3)); width: 1px; height: 50px; animation: rainFall linear infinite; }
         @keyframes rainFall { to { transform: translateY(100vh); } }
 
-        /* MÜHÜR VE TİTREME */
+        /* MÜHÜR EFEKTİ */
         .stamp { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(5); opacity: 0; pointer-events: none; z-index: 1000; font-size: 60px; color: #ef4444; border: 6px solid #ef4444; padding: 10px 20px; border-radius: 15px; font-weight: 900; letter-spacing: 3px; text-shadow: 0 0 10px rgba(255,0,0,0.5); font-family: Impact, sans-serif; }
         .stamp.animate { animation: stampIn 0.5s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes stampIn { to { transform: translate(-50%, -50%) scale(1) rotate(-15deg); opacity: 0.9; } }
@@ -50,35 +50,47 @@
         .live-btn.active { background: white; color: #c255ff; box-shadow: 0 0 15px #c255ff; }
         @keyframes pulseLive { from{box-shadow: 0 0 0px #c255ff;} to{box-shadow: 0 0 10px #c255ff;} }
 
+        .crisis-checkbox { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #ef4444; font-weight: bold; cursor: pointer;}
+        .night-checkbox { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #38bdf8; font-weight: bold; cursor: pointer;}
+        .board-select { width: 140px; background: #010409; color: white; border: 1px solid var(--border-glass); padding: 6px; border-radius: 6px; font-size: 11px; outline: none;}
+
         .info-card { flex: 1; min-width: 120px; }
         .info-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-        .vote-highlight { color: #fbbf24; font-size: 13px; text-shadow: 0 0 10px rgba(251, 191, 36, 0.3); font-weight: 700; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
-        
+        .vote-highlight { color: #fbbf24; font-size: 13px; text-shadow: 0 0 10px rgba(251, 191, 36, 0.3); font-weight: 700; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+        .efficiency-score { font-size: 11px; color: #4ade80; font-weight: bold; display: none; margin-top: 2px;}
+
         .vote-actions { display: flex; gap: 6px; flex-wrap: wrap;}
         .btn { padding: 6px 12px; border: none; border-radius: 6px; font-weight: 700; font-size: 10px; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
         .btn-yes { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); } .btn-yes:hover:not(:disabled) { background: #22c55e; color: white; }
         .btn-no { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); } .btn-no:hover:not(:disabled) { background: #ef4444; color: white; }
+        .btn-rev { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); } .btn-rev:hover:not(:disabled) { background: #38bdf8; color: black; }
         .btn-team { background: rgba(194, 85, 255, 0.15); color: #c255ff; border: 1px solid rgba(194, 85, 255, 0.4); display: none; } .btn-team:hover { background: #c255ff; color: white; }
-        .btn-pdf { background: #fbbf24; color: #000; display: none; } .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn-pdf { background: #fbbf24; color: #000; display: none; } .btn-pdf:hover { background: #d97706; color: white; }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* --- ORTA ALAN VE MASA --- */
+        /* --- ORTA ALAN: SABİT MASA --- */
         .stage { flex: 1; min-height: 0; display: flex; justify-content: center; align-items: center; position: relative; perspective: 1000px; padding: 30px; }
         .system-status { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); color: var(--c-user); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; z-index: 20; text-align: center;}
         
         .table-wrapper { position: relative; width: 100%; max-width: 650px; aspect-ratio: 2 / 1.2; transform: rotateX(15deg); transform-style: preserve-3d; }
         .board-table { width: 100%; height: 100%; background: var(--table-surface); border: 8px solid var(--table-rim); border-radius: 500px; box-shadow: 0 25px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; position: relative; transition: 0.5s; }
+        
+        /* AHŞAP MASA MODU */
         .table-wrapper.wood-mode .board-table { background: linear-gradient(135deg, #4f2e1e 0%, #2e180d 50%, #1a0c05 100%); border-color: #2b1408; box-shadow: 0 35px 60px rgba(0,0,0,0.9), inset 0 0 40px rgba(0,0,0,0.9), inset 0 0 10px rgba(255, 165, 0, 0.1); }
         .table-wrapper.wood-mode .board-table::before { content: ''; position: absolute; inset: 0; border-radius: 500px; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px); pointer-events: none; }
-        
+        .table-wrapper.wood-mode .holo-center { background: rgba(0, 0, 0, 0.4); border-color: rgba(255,255,255,0.05); box-shadow: inset 0 0 25px rgba(0,0,0,0.8);}
+
         /* HOLO MERKEZ VE ORTAYA ÇIKAN AVATAR (CENTER SPEAKER) */
         .holo-center { width: 65%; height: 50%; background: rgba(56, 189, 248, 0.02); border-radius: 500px; border: 1px solid rgba(56, 189, 248, 0.1); position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; transition: 0.3s; z-index: 2;}
-        .holo-core { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed var(--holo-color); animation: spinHolo 3s linear infinite; box-shadow: 0 0 15px var(--holo-color);}
+        .holo-core { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed var(--holo-color); animation: spinHolo 3s linear infinite; display: none; box-shadow: 0 0 15px var(--holo-color);}
         @keyframes spinHolo { 100% { transform: rotate(360deg); } }
         
+        /* Merkez Konuşmacı Animasyonu */
         .center-speaker { position: absolute; display: none; flex-direction: column; align-items: center; gap: 8px; z-index: 10; animation: centerPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        .center-speaker .node-icon { width: 60px; height: 60px; font-size: 26px; border-radius: 15px; border: 3px solid; background: rgba(0,0,0,0.8); animation: speakGlow 0.4s infinite alternate; }
-        .center-speaker .node-name { font-size: 11px; padding: 4px 10px; background: rgba(0,0,0,0.9); }
+        .center-speaker .node-icon { width: 70px; height: 70px; font-size: 30px; border-radius: 15px; border: 3px solid; background: rgba(0,0,0,0.8); animation: speakGlow 0.4s infinite alternate; }
+        .center-speaker .node-name { font-size: 12px; padding: 4px 10px; background: rgba(0,0,0,0.9); border-radius: 4px;}
         @keyframes centerPop { 0% { transform: scale(0) translateY(50px) rotateX(-15deg); opacity: 0; } 100% { transform: scale(1) translateY(0) rotateX(-15deg); opacity: 1; } }
+        @keyframes speakGlow { from { box-shadow: 0 0 10px currentColor; } to { box-shadow: 0 0 35px currentColor, inset 0 0 15px currentColor; } }
 
         /* 4 YÖNLÜ LAZERLER */
         .laser-container { position: absolute; inset: 0; pointer-events: none; display: none; z-index: 3; }
@@ -86,6 +98,10 @@
         .laser.l-horiz { top: 50%; width: 100%; height: 1px; background: linear-gradient(90deg, transparent 10%, var(--c-claude) 20%, transparent 50%, var(--c-gemini) 80%, transparent 90%); }
         .laser.l-vert { left: 50%; height: 100%; width: 1px; background: linear-gradient(0deg, transparent 10%, var(--c-user) 20%, transparent 50%, var(--c-openai) 80%, transparent 90%); }
         @keyframes laserPulse { 0% { opacity: 0; transform: scale(1); } 30% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; transform: scale(1.02); } }
+
+        .matrix-rain { position: absolute; inset: 0; pointer-events: none; color: #4ade80; font-family: monospace; font-size: 12px; display: none; text-shadow: 0 0 5px #4ade80; z-index: 1;}
+        .matrix-drop { position: absolute; top: -20px; animation: fall linear forwards; }
+        @keyframes fall { to { top: 100%; } }
 
         /* SİMETRİK DOSYALAR VE ÖĞÜTÜCÜ */
         .doc { position: absolute; width: 26px; height: 36px; background: rgba(255,255,255,0.95); border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0; transform: scale(0); transition: 0.4s; box-shadow: 0 4px 10px rgba(0,0,0,0.7); font-size: 13px; border-left: 3px solid #ccc; color: black; z-index: 6;}
@@ -109,20 +125,22 @@
         .node-name { font-size: 9px; font-weight: 800; letter-spacing: 1px; color: #fff; text-transform: uppercase; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px; transform: rotateX(-15deg); margin-top:-5px;}
         .n-openai .node-icon { border-color: var(--c-openai); color: var(--c-openai); } .n-gemini .node-icon { border-color: var(--c-gemini); color: var(--c-gemini); } .n-claude .node-icon { border-color: var(--c-claude); color: var(--c-claude); } .n-user .node-icon { border-color: var(--c-user); color: var(--c-user); }
         .n-openai { top: 0; left: 50%; transform: translate(-50%, -50%); } .n-user { top: 100%; left: 50%; transform: translate(-50%, -50%); } .n-gemini { top: 50%; left: 0; transform: translate(-50%, -50%); } .n-claude { top: 50%; left: 100%; transform: translate(-50%, -50%); } 
-        .speaking { opacity: 0; } /* Merkezde belireceği için kenardakini gizle */
-        @keyframes speakGlow { from { box-shadow: 0 0 10px currentColor; } to { box-shadow: 0 0 30px currentColor, inset 0 0 10px currentColor; } }
+        
+        .thinking .node-icon { animation: glow 1s infinite alternate; opacity: 1;}
+        @keyframes glow { from { box-shadow: 0 0 5px currentColor; } to { box-shadow: 0 0 20px currentColor, inset 0 0 10px currentColor; } }
+        /* Merkezde belireceği için kenardakini tamamen gizle */
+        .hidden-node { opacity: 0 !important; pointer-events: none; }
 
-        /* ALT PANEL (GİRİŞ VE PTT TUŞU) */
+        /* --- ALT PANEL VE BAS-KONUŞ GİRİŞİ --- */
         .input-area { background: var(--bg-panel); backdrop-filter: blur(20px); border-top: 1px solid var(--border-glass); padding: 15px; padding-bottom: calc(15px + env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: center; justify-content: center; position: relative;}
         
-        /* STANDART MOD GİRİŞLERİ */
         .standard-inputs { display: flex; width: 100%; gap: 8px; align-items: center; }
         .file-label { cursor: pointer; font-size: 16px; opacity: 0.7; transition: 0.2s;} .file-label:hover { opacity: 1; }
         .chat-input { flex: 1; background: #010409; border: 1px solid var(--border-glass); color: white; padding: 10px 15px; border-radius: 8px; font-size: 13px; outline: none; transition: 0.3s; }
         .chat-input:focus { border-color: var(--c-user); }
         .send-btn { background: var(--c-user); color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; text-transform: uppercase;}
         
-        /* BAS-KONUŞ (PTT) BUTONU */
+        /* CANLI TOPLANTI BAS-KONUŞ BUTONU */
         .ptt-container { display: none; width: 100%; justify-content: center; }
         .ptt-btn { width: 100%; max-width: 400px; background: #c255ff; color: white; border: none; padding: 15px; border-radius: 30px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(194, 85, 255, 0.4); transition: 0.2s; text-transform: uppercase; letter-spacing: 1px;}
         .ptt-btn.recording { background: #ef4444; box-shadow: 0 0 30px rgba(239, 68, 68, 0.8); transform: scale(0.98); }
@@ -134,7 +152,6 @@
         .close-btn { position: absolute; top: 10px; right: 15px; font-size: 24px; color: var(--text-muted); cursor: pointer; }
         .modal-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-glass); }
         .modal-body { font-size: 13px; line-height: 1.6; color: #cbd5e1; white-space: pre-wrap; font-family: monospace; }
-        
         .project-item { background: rgba(255,255,255,0.05); padding: 15px; margin-bottom: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s;}
         .project-title { font-weight: bold; color: var(--c-user); font-size: 15px; margin-bottom: 5px;}
         
@@ -176,14 +193,18 @@
                 <button class="projects-btn" onclick="openProjects()">📂 Projelerim</button>
                 <button class="live-btn" id="btn-live-debate" onclick="toggleLiveDebate()">🗣️ Canlı Müzakere</button>
                 <button class="tools-btn" id="board-toggle-btn" onclick="toggleBoardMode()">🪵 Ahşap Masa</button>
-                <label class="crisis-checkbox"><input type="checkbox" id="krizModu" onchange="toggleCrisis()">🚨 KRİZ</label>
+                
+                <select class="board-select" id="boardType">
+                    <option value="genel">Genel Strateji</option>
+                    <option value="hukuk">Hukuk & Güvenlik</option>
+                    <option value="pazarlama">Pazarlama</option>
+                </select>
                 <label class="night-checkbox"><input type="checkbox" id="nightModu" onchange="toggleNightMode()">🌙 GECE</label>
             </div>
             
             <div class="info-card">
                 <div class="info-label" style="color: #fbbf24;">Gündem: <span id="ui-topic" style="color:#fff; font-weight:normal;">Bekleniyor</span></div>
                 <div class="vote-highlight" id="ui-vote-title">Modeller bekleniyor...</div>
-                <div class="efficiency-score" id="ui-score">Verim: %0</div>
             </div>
 
             <div class="vote-actions">
@@ -209,6 +230,7 @@
                             <div class="node-name" id="center-speaker-name">OpenAI</div>
                         </div>
 
+                        <div class="matrix-rain" id="matrix-rain"></div>
                         <div class="doc d-openai" id="doc-openai" onclick="openDoc('OpenAI')">📄</div>
                         <div class="doc d-gemini" id="doc-gemini" onclick="openDoc('Gemini')">📄</div>
                         <div class="doc d-claude" id="doc-claude" onclick="openDoc('Claude')">📄</div>
@@ -227,9 +249,9 @@
 
         <div class="input-area">
             <div class="standard-inputs" id="standard-inputs">
-                <label class="file-label" title="Belge Yükle">📎 <input type="file" id="file-upload" accept=".txt,.csv" hidden onchange="handleFileUpload(event)"></label>
+                <label class="file-label" id="file-label-btn" title="Belge Yükle">📎 <input type="file" id="file-upload" accept=".txt,.csv" hidden onchange="handleFileUpload(event)"></label>
                 <input type="text" class="chat-input" id="topic-input" placeholder="Gündemi yazın..." onkeypress="if(event.key==='Enter') startProcess()">
-                <button class="send-btn" onclick="startProcess()">Kurulu Topla</button>
+                <button class="send-btn" id="send-btn" onclick="startProcess()">Kurulu Topla</button>
             </div>
             
             <div class="ptt-container" id="ptt-container">
@@ -242,16 +264,15 @@
 
     <div class="modal" id="doc-modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('doc-modal')">&times;</span><div class="modal-title" id="modal-title">Başlık</div><div class="modal-body" id="modal-text">İçerik...</div></div></div>
     <div class="modal" id="projects-modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('projects-modal')">&times;</span><div class="modal-title" style="color:var(--c-user)">📂 Onaylanmış Projelerim</div><div id="projects-list" style="max-height: 400px; overflow-y: auto;">Kayıt yok.</div></div></div>
-    <div class="modal" id="qr-modal"><div class="modal-content" style="max-width: 400px; text-align: center;"><span class="close-btn" onclick="closeModal('qr-modal')">&times;</span><div class="modal-title" style="color:#c255ff">Ekip Oylaması (Canlı)</div><div class="qr-wrapper"><img src="" id="qr-img" class="qr-img" alt="QR Code"><div class="vote-bar-container"><div class="vote-bar-fill" id="vote-bar-fill"></div><div class="vote-text" id="vote-text">Oylar Bekleniyor... %0</div></div></div></div></div>
+    <div class="modal" id="qr-modal"><div class="modal-content" style="max-width: 400px; text-align: center;"><span class="close-btn" onclick="closeModal('qr-modal')">&times;</span><div class="modal-title" style="color:#c255ff">Ekip Oylaması (Canlı)</div><div class="qr-wrapper"><img src="" id="qr-img" class="qr-img" alt="QR Code"><p style="font-size: 12px; color: #94a3b8;">Ekip üyeleri telefonuyla okutarak oylama ekranına gidebilir.</p><div class="vote-bar-container"><div class="vote-bar-fill" id="vote-bar-fill"></div><div class="vote-text" id="vote-text">Oylar Bekleniyor... %0</div></div></div></div></div>
 
     <div id="pdf-container"><h1>Yönetim Kurulu Karar Tutanağı</h1><p><strong>Tarih:</strong> <span id="pdf-date"></span></p><p><strong>Gündem:</strong> <span id="pdf-topic"></span></p><h3>Karar: <span id="pdf-title" style="color:#d97706;"></span></h3><h3>Aksiyon Planı:</h3><p id="pdf-decision"></p></div>
 
     <script>
         const database = { 'OpenAI': '', 'Gemini': '', 'Claude': '', 'Ortak Karar': '', 'Münazara': '', 'Topic': '', 'Score': ''};
-        const aiNodes = ['openai', 'gemini', 'claude'];
+        const aiNodes = ['openai', 'gemini', 'claude', 'user'];
         let uploadedFileText = "";
 
-        // SES VE MÜZAKERE DEĞİŞKENLERİ
         let isLiveMode = false;
         let isRecording = false;
         let conversationHistory = [];
@@ -259,6 +280,7 @@
         let currentDialogueQueue = [];
         let recognition;
 
+        // Avatar Renkleri ve Simgeleri
         const colors = { 'openai': '#10a37f', 'claude': '#d97757', 'gemini': '#c255ff', 'user': '#38bdf8' };
         const icons = { 'openai': 'O', 'claude': 'C', 'gemini': 'G', 'user': '👤' };
         const displayNames = { 'openai': 'OpenAI', 'claude': 'Claude', 'gemini': 'Gemini', 'user': 'Sen (Başkan)' };
@@ -274,16 +296,21 @@
         function toggleNightMode() { if(document.getElementById('nightModu').checked) { document.body.classList.add('night-mode'); document.getElementById('rain-container').style.display='block'; } else { document.body.classList.remove('night-mode'); document.getElementById('rain-container').style.display='none'; } }
         function handleFileUpload(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { uploadedFileText = e.target.result; alert("Belge sisteme entegre edildi.");}; reader.readAsText(file); }
 
-        // --- MERKEZ AVATAR GÖSTERİMİ ---
+        // --- MERKEZ AVATAR GÖSTERİMİ (ŞOV KISMI) ---
         function showCenterSpeaker(id) {
             let center = document.getElementById('center-speaker');
             let icon = document.getElementById('center-speaker-icon');
             let name = document.getElementById('center-speaker-name');
             
             document.getElementById('holo-core').style.display = 'none';
-            aiNodes.forEach(n => document.getElementById('ai-' + n).classList.remove('speaking'));
             
-            if(id !== 'user') document.getElementById('ai-' + id).classList.add('speaking');
+            // Köşedeki küçük olanı gizle
+            aiNodes.forEach(n => {
+                let el = document.getElementById('ai-' + n);
+                if(el) el.classList.remove('hidden-node');
+            });
+            let activeNode = document.getElementById('ai-' + id);
+            if(activeNode) activeNode.classList.add('hidden-node'); // Köşedekini sakla
 
             icon.innerText = icons[id];
             name.innerText = displayNames[id];
@@ -292,12 +319,16 @@
             
             center.style.display = 'flex';
         }
+
         function hideCenterSpeaker() {
             document.getElementById('center-speaker').style.display = 'none';
-            aiNodes.forEach(n => document.getElementById('ai-' + n).classList.remove('speaking'));
+            aiNodes.forEach(n => {
+                let el = document.getElementById('ai-' + n);
+                if(el) el.classList.remove('hidden-node'); // Köşedekileri geri getir
+            });
         }
 
-        // --- CANLI MÜZAKERE MODU GEÇİŞİ ---
+        // --- CANLI MÜZAKERE MODU (TOGGLE) ---
         function toggleLiveDebate() {
             isLiveMode = !isLiveMode;
             let btn = document.getElementById('btn-live-debate');
@@ -319,33 +350,39 @@
             }
         }
 
-        // --- BAS-KONUŞ (PTT) VE SÖZ KESME MANTIĞI ---
+        // --- BAS-KONUŞ VE SÖZ KESME MANTIĞI ---
         function startPTT(e) {
             if(e) e.preventDefault();
             if(isRecording) return;
             isRecording = true;
 
-            // SÖZ KESME (Interruption): Biri konuşuyorsa anında sustur.
+            // SÖZ KESME (Interruption): Araya girilirse yapay zeka hemen susar.
             if(synthVoice.speaking) {
                 synthVoice.cancel();
-                currentDialogueQueue = []; // Kuyruğu sil
+                currentDialogueQueue = [];
                 document.getElementById('ui-status').innerText = "SÖZ KESİLDİ.";
             }
 
             document.getElementById('ptt-btn').classList.add('recording');
             document.getElementById('ptt-btn').innerText = "🎙️ Dinliyorum... (Konuşun)";
+            
+            // Senin avatarın merkeze gelir
             showCenterSpeaker('user');
 
-            if (!('webkitSpeechRecognition' in window)) return alert("Tarayıcınız desteklemiyor.");
+            if (!('webkitSpeechRecognition' in window)) return alert("Tarayıcınız ses tanımayı desteklemiyor.");
+            
             if(!recognition) {
                 recognition = new webkitSpeechRecognition();
                 recognition.lang = 'tr-TR';
+                
                 recognition.onresult = (e) => {
                     let text = e.results[0][0].transcript;
-                    document.getElementById('topic-input').value = text;
+                    document.getElementById('topic-input').value = text; // Görsel olarak kutuya at
                     sendLiveMessage(text);
                 };
-                recognition.onerror = () => { stopPTT(); }
+                
+                recognition.onerror = () => stopPTT();
+                recognition.onend = () => stopPTT(); // Tuş bırakıldığında da durdurmak için
             }
             recognition.start();
         }
@@ -357,7 +394,7 @@
 
             document.getElementById('ptt-btn').classList.remove('recording');
             document.getElementById('ptt-btn').innerText = "⏳ İşleniyor...";
-            recognition.stop();
+            if(recognition) recognition.stop();
         }
 
         async function sendLiveMessage(text) {
@@ -367,8 +404,8 @@
             }
             
             document.getElementById('ui-status').innerText = "YAPAY ZEKALAR DÜŞÜNÜYOR...";
+            hideCenterSpeaker(); // Sen merkezen çık
             document.getElementById('holo-core').style.display = 'block';
-            hideCenterSpeaker();
 
             try {
                 const response = await fetch('/api/analyze', {
@@ -382,7 +419,7 @@
                 
                 if(data.liveDialogue && data.liveDialogue.length > 0) {
                     currentDialogueQueue = data.liveDialogue;
-                    playNextDebateLine();
+                    playNextDebateLine(); // Onlar konuşmaya başlasın
                 } else {
                     document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş";
                 }
@@ -394,7 +431,7 @@
             }
         }
 
-        // --- SESLİ OKUMA KUYRUĞU ---
+        // --- SESLİ OKUMA KUYRUĞU (GERÇEK SESLİ TOPLANTI) ---
         function playNextDebateLine() {
             if(currentDialogueQueue.length === 0) {
                 document.getElementById('ui-status').innerText = "SIRA SİZDE.";
@@ -407,12 +444,15 @@
             let speakerId = line.speaker.toLowerCase(); 
             conversationHistory.push({role: speakerId, text: line.text});
             
-            document.getElementById('ui-status').innerText = `${displayNames[speakerId]} KONUŞUYOR...`;
+            document.getElementById('ui-status').innerText = `${displayNames[speakerId]} SESLİ YANIT VERİYOR...`;
+            
+            // Konuşanın avatarını merkeze al ve parlat
             showCenterSpeaker(speakerId);
 
             let utterance = new SpeechSynthesisUtterance(line.text);
             utterance.lang = 'tr-TR';
             
+            // Modellerin karakterine uygun ses ayarları
             if(speakerId === 'claude') { utterance.pitch = 0.8; utterance.rate = 1.0; }
             else if(speakerId === 'gemini') { utterance.pitch = 1.3; utterance.rate = 1.1; }
             else { utterance.pitch = 1.0; utterance.rate = 1.0; }
@@ -422,9 +462,9 @@
         }
 
 
-        // --- STANDART KURUL MODU (Metin Analizi) ---
+        // --- STANDART KURUL MODU (Eski Sistem) ---
         async function startProcess(isRevision = false, revNote = "") {
-            if(isLiveMode) return; // Canlı moddaysa standart işlemi engelle
+            if(isLiveMode) return;
 
             let fullText = document.getElementById('topic-input').value;
             if (!isRevision && (!fullText.trim() || fullText.trim().length < 3)) return;
@@ -438,7 +478,7 @@
             ['btn-team','btn-pdf'].forEach(id => document.getElementById(id).style.display = 'none');
             document.getElementById('ui-score').style.display = 'none';
 
-            document.getElementById('holo-core').style.display = 'block'; 
+            document.getElementById('holo-core').style.display = 'block'; document.getElementById('lasers').style.display = 'block';
             document.getElementById('ui-status').innerText = "Münazara Başladı...";
 
             try {
@@ -455,7 +495,7 @@
                 database['Score'] = data.score; 
 
                 document.getElementById('ui-topic').innerText = data.topicSummary;
-                document.getElementById('holo-core').style.display = 'none'; 
+                document.getElementById('holo-core').style.display = 'none'; document.getElementById('lasers').style.display = 'none';
                 
                 ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.add('visible'));
                 document.getElementById('ui-status').innerText = "Raporlar ulaştı. Karar sentezleniyor...";
@@ -475,8 +515,8 @@
                 }, 1500);
 
             } catch (error) {
-                console.error(error); document.getElementById('ui-status').innerText = `HATA: ${error.message}`;
-                document.getElementById('holo-core').style.display = 'none'; 
+                console.error(error); document.getElementById('ui-status').innerText = "HATA OLUŞTU.";
+                document.getElementById('holo-core').style.display = 'none'; document.getElementById('lasers').style.display = 'none';
             }
         }
 
