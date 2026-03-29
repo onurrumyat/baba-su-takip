@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Komuta Merkezi | Canlı Toplantı (Doğal Ses)</title>
+    <title>AI Komuta Merkezi | Canlı Toplantı & Simetrik Yönetim</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -17,7 +17,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
         body { background-color: var(--bg-main); background-image: radial-gradient(circle at 50% -20%, rgba(56, 189, 248, 0.05) 0%, transparent 70%); color: var(--text-light); font-family: 'Segoe UI', system-ui, sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.5s; }
 
-        /* KRİZ & GECE MODU */
         body.crisis-mode { background-color: #1a0505; background-image: radial-gradient(circle at 50% -20%, rgba(255, 0, 0, 0.15) 0%, transparent 70%); animation: crisisPulse 2s infinite; }
         body.crisis-mode .board-table { box-shadow: 0 30px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,0,0,0.2); border-color: #3a1515;}
         @keyframes crisisPulse { 0%, 100% { background-color: #1a0505; } 50% { background-color: #2a0505; } }
@@ -29,14 +28,12 @@
         .rain-drop { position: absolute; background: linear-gradient(transparent, rgba(255,255,255,0.3)); width: 1px; height: 50px; animation: rainFall linear infinite; }
         @keyframes rainFall { to { transform: translateY(100vh); } }
 
-        /* MÜHÜR EFEKTİ */
         .stamp { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(5); opacity: 0; pointer-events: none; z-index: 1000; font-size: 60px; color: #ef4444; border: 6px solid #ef4444; padding: 10px 20px; border-radius: 15px; font-weight: 900; letter-spacing: 3px; text-shadow: 0 0 10px rgba(255,0,0,0.5); font-family: Impact, sans-serif; }
         .stamp.animate { animation: stampIn 0.5s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes stampIn { to { transform: translate(-50%, -50%) scale(1) rotate(-15deg); opacity: 0.9; } }
         .shake { animation: shakeScreen 0.4s; }
         @keyframes shakeScreen { 0%,100%{transform:translate(0,0);} 20%{transform:translate(-2px,0);} 40%{transform:translate(2px,-2px);} 60%{transform:translate(-2px,2px);} 80%{transform:translate(2px,2px);} }
 
-        /* ÜST PANEL */
         #main-app { display: flex; flex-direction: column; height: 100%; width: 100%; }
         .header-panel { background: var(--bg-panel); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border-glass); padding: 10px 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; z-index: 10; }
         .header-left { display: flex; gap: 8px; align-items: center; flex-wrap: wrap;}
@@ -45,7 +42,6 @@
         .tools-btn.active { background: var(--c-user); color: #000; border-color: var(--c-user);}
         .projects-btn { background: rgba(56, 189, 248, 0.1); color: var(--c-user); border: 1px solid var(--c-user); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.2s; }
         
-        /* CANLI MÜZAKERE BUTONU */
         .live-btn { background: #c255ff; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.2s; animation: pulseLive 2s infinite alternate;}
         .live-btn.active { background: white; color: #c255ff; box-shadow: 0 0 15px #c255ff; }
         @keyframes pulseLive { from{box-shadow: 0 0 0px #c255ff;} to{box-shadow: 0 0 10px #c255ff;} }
@@ -74,8 +70,8 @@
         .table-wrapper.wood-mode .board-table { background: linear-gradient(135deg, #4f2e1e 0%, #2e180d 50%, #1a0c05 100%); border-color: #2b1408; box-shadow: 0 35px 60px rgba(0,0,0,0.9), inset 0 0 40px rgba(0,0,0,0.9), inset 0 0 10px rgba(255, 165, 0, 0.1); }
         .table-wrapper.wood-mode .board-table::before { content: ''; position: absolute; inset: 0; border-radius: 500px; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px); pointer-events: none; }
 
-        /* HOLO MERKEZ VE ORTAYA ÇIKAN AVATAR */
-        .holo-center { width: 65%; height: 50%; background: rgba(56, 189, 248, 0.02); border-radius: 500px; border: 1px solid rgba(56, 189, 248, 0.1); position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; transition: 0.3s; z-index: 2;}
+        /* HOLO MERKEZ (İÇ DAİRE) */
+        .holo-center { width: 65%; height: 55%; background: rgba(56, 189, 248, 0.02); border-radius: 500px; border: 1px solid rgba(56, 189, 248, 0.1); position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; transition: 0.3s; z-index: 2;}
         .holo-core { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed var(--holo-color); animation: spinHolo 3s linear infinite; display: none; box-shadow: 0 0 15px var(--holo-color);}
         @keyframes spinHolo { 100% { transform: rotate(360deg); } }
         
@@ -84,7 +80,7 @@
         .center-speaker .node-name { font-size: 12px; padding: 4px 10px; background: rgba(0,0,0,0.9); border-radius: 4px; font-weight:bold;}
         @keyframes centerPop { 0% { transform: scale(0) translateY(30px) rotateX(-15deg); opacity: 0; } 100% { transform: scale(1) translateY(0) rotateX(-15deg); opacity: 1; } }
 
-        /* 4 YÖNLÜ LAZERLER */
+        /* LAZERLER */
         .laser-container { position: absolute; inset: 0; pointer-events: none; display: none; z-index: 3; }
         .laser { position: absolute; opacity: 0; animation: laserPulse 1.2s infinite; }
         .laser.l-horiz { top: 50%; width: 100%; height: 1px; background: linear-gradient(90deg, transparent 10%, var(--c-claude) 20%, transparent 50%, var(--c-gemini) 80%, transparent 90%); }
@@ -95,35 +91,55 @@
         .matrix-drop { position: absolute; top: -20px; animation: fall linear forwards; }
         @keyframes fall { to { top: 100%; } }
 
-        /* DOSYALAR VE ÖĞÜTÜCÜ */
-        .doc { position: absolute; width: 26px; height: 36px; background: rgba(255,255,255,0.95); border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0; transform: scale(0); transition: 0.4s; box-shadow: 0 4px 10px rgba(0,0,0,0.7); font-size: 13px; border-left: 3px solid #ccc; color: black; z-index: 6;}
-        .doc.visible { opacity: 1; transform: scale(1); }
-        .d-openai { top: 18%; left: 50%; transform: translateX(-50%); border-left-color: var(--c-openai); }
-        .d-gemini { top: 50%; left: 18%; transform: translateY(-50%); border-left-color: var(--c-gemini); }
-        .d-claude { top: 50%; right: 18%; transform: translateY(-50%); border-left-color: var(--c-claude); }
-        .master-doc { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); width: 45px; height: 60px; background: linear-gradient(135deg, #fbbf24, #d97706); border-radius: 4px 8px 8px 4px; display: flex; justify-content: center; align-items: center; font-size: 22px; cursor: pointer; opacity: 0; transition: 0.5s; box-shadow: 0 0 25px rgba(251, 191, 36, 0.4); border-left: 5px solid #b45309; z-index: 8;}
-        .master-doc.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        
-        .shredder-box { position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); width: 80px; height: 30px; background: #222; border: 2px solid #444; border-radius: 5px; z-index: 20; opacity: 0; transition: 0.3s; display: flex; justify-content: center;}
-        .shredder-box.active { opacity: 1; bottom: 20%; }
-        .shredder-slot { width: 60px; height: 6px; background: #000; margin-top: 5px; border-radius: 3px;}
-        .shredding { animation: shredDoc 1.5s forwards ease-in !important; pointer-events: none;}
-        @keyframes shredDoc { 0% { top: 50%; transform: translate(-50%, -50%) scale(1); opacity: 1;} 40% { top: 75%; transform: translate(-50%, -50%) scale(0.8); opacity: 1;} 100% { top: 85%; transform: translate(-50%, -20%) scale(0.8); opacity: 0; height: 0;} }
-
-        /* KÜÇÜK AVATARLAR */
+        /* KÜÇÜK AVATARLAR (SİMETRİK YERLEŞİM) */
         .node { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 5; opacity: 0.6; transition: 0.3s;}
         .node-icon { width: 35px; height: 35px; border-radius: 8px; background: #0f1117; display: flex; justify-content: center; align-items: center; font-size: 16px; font-weight: 800; border: 2px solid; box-shadow: 0 8px 15px rgba(0,0,0,0.8); transform: rotateX(-15deg); }
         .node-name { font-size: 9px; font-weight: 800; letter-spacing: 1px; color: #fff; text-transform: uppercase; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px; transform: rotateX(-15deg); margin-top:-5px;}
-        .n-openai .node-icon { border-color: var(--c-openai); color: var(--c-openai); } .n-gemini .node-icon { border-color: var(--c-gemini); color: var(--c-gemini); } .n-claude .node-icon { border-color: var(--c-claude); color: var(--c-claude); } .n-user .node-icon { border-color: var(--c-user); color: var(--c-user); }
-        .n-openai { top: 0; left: 50%; transform: translate(-50%, -50%); } .n-user { top: 100%; left: 50%; transform: translate(-50%, -50%); } .n-gemini { top: 50%; left: 0; transform: translate(-50%, -50%); } .n-claude { top: 50%; left: 100%; transform: translate(-50%, -50%); } 
+        
+        .n-openai .node-icon { border-color: var(--c-openai); color: var(--c-openai); } 
+        .n-gemini .node-icon { border-color: var(--c-gemini); color: var(--c-gemini); } 
+        .n-claude .node-icon { border-color: var(--c-claude); color: var(--c-claude); } 
+        .n-user .node-icon { border-color: var(--c-user); color: var(--c-user); }
+        
+        /* Avatar Pozisyonları */
+        .n-openai { top: 0; left: 50%; transform: translate(-50%, -50%); } 
+        .n-user { top: 100%; left: 50%; transform: translate(-50%, -50%); } 
+        .n-gemini { top: 50%; left: 0; transform: translate(-50%, -50%); } 
+        .n-claude { top: 50%; left: 100%; transform: translate(-50%, -50%); } 
         
         @keyframes speakGlow { from { box-shadow: 0 0 10px currentColor; } to { box-shadow: 0 0 35px currentColor, inset 0 0 15px currentColor; } }
         .hidden-node { opacity: 0 !important; pointer-events: none; }
+
+        /* SİMETRİK DOSYALAR (İÇ DAİREDE, AVATARLARIN TAM ÖNÜNDE) */
+        .doc { position: absolute; width: 26px; height: 36px; background: rgba(255,255,255,0.95); border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0; transform: scale(0) translate(-50%, -50%); transition: 0.4s; box-shadow: 0 4px 10px rgba(0,0,0,0.7); font-size: 13px; border-left: 3px solid #ccc; color: black; z-index: 6;}
+        .doc:hover { transform: scale(1.3) translate(-40%, -40%) !important; z-index: 10; }
+        .doc.visible { opacity: 1; transform: scale(1) translate(-50%, -50%); }
+        
+        .d-openai { top: 22%; left: 50%; border-left-color: var(--c-openai); } /* Tepedeki OpenAI'ın önü */
+        .d-gemini { top: 50%; left: 22%; border-left-color: var(--c-gemini); } /* Soldaki Gemini'nin önü */
+        .d-claude { top: 50%; left: 78%; border-left-color: var(--c-claude); } /* Sağdaki Claude'un önü */
+        
+        .master-doc { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); width: 45px; height: 60px; background: linear-gradient(135deg, #fbbf24, #d97706); border-radius: 4px 8px 8px 4px; display: flex; justify-content: center; align-items: center; font-size: 22px; cursor: pointer; opacity: 0; transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 0 25px rgba(251, 191, 36, 0.4); border-left: 5px solid #b45309; z-index: 8;}
+        .master-doc:hover { transform: translate(-50%, -50%) scale(1.15) !important; z-index: 10; }
+        .master-doc.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+        /* YÜKLENEN DIŞ DOSYA (A4 ŞEKLİNDE - DIŞ CEPHE) */
+        .uploaded-doc { position: absolute; bottom: 15%; right: 15%; width: 34px; height: 46px; background: #e2e8f0; border-radius: 3px; display: none; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.6); z-index: 5; border-top-right-radius: 10px; }
+        .uploaded-doc::before { content: ''; position: absolute; top: 0; right: 0; border-width: 0 10px 10px 0; border-style: solid; border-color: #cbd5e1 transparent transparent #cbd5e1; display: block; width: 0; }
+        .uploaded-doc:hover { transform: scale(1.2) translateY(-5px); }
+        .uploaded-doc span { font-size: 9px; font-weight: bold; color: #0f1117; z-index: 2; text-transform: uppercase;}
+        
+        .shredder-box { position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); width: 80px; height: 30px; background: #222; border: 2px solid #444; border-radius: 5px; z-index: 20; opacity: 0; transition: 0.3s; display: flex; justify-content: center;}
+        .shredder-box.active { opacity: 1; bottom: 20%; }
+        .shredder-slot { width: 60px; height: 6px; background: #000; margin-top: 5px; border-radius: 3px; box-shadow: inset 0 0 5px black;}
+        .shredding { animation: shredDoc 1.5s forwards ease-in !important; pointer-events: none;}
+        @keyframes shredDoc { 0% { top: 50%; transform: translate(-50%, -50%) scale(1); opacity: 1;} 40% { top: 75%; transform: translate(-50%, -50%) scale(0.8); opacity: 1;} 100% { top: 85%; transform: translate(-50%, -20%) scale(0.8); opacity: 0; height: 0;} }
 
         /* ALT PANEL (GİRİŞ VE PTT TUŞU) */
         .input-area { background: var(--bg-panel); backdrop-filter: blur(20px); border-top: 1px solid var(--border-glass); padding: 15px; display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center; position: relative;}
         
         .standard-inputs { display: flex; width: 100%; gap: 8px; align-items: center; justify-content: center;}
+        .file-label { cursor: pointer; font-size: 16px; opacity: 0.7; transition: 0.2s;} .file-label:hover { opacity: 1; }
         .chat-input { width: 100%; max-width: 600px; background: #010409; border: 1px solid var(--border-glass); color: white; padding: 12px 15px; border-radius: 8px; font-size: 14px; outline: none; transition: 0.3s; }
         .chat-input:focus { border-color: var(--c-user); }
         .send-btn { background: var(--c-user); color: #000; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; text-transform: uppercase;}
@@ -194,6 +210,10 @@
                 <div class="board-table">
                     <div class="laser-container" id="lasers"><div class="laser l-horiz"></div><div class="laser l-vert"></div></div>
 
+                    <div class="uploaded-doc" id="uploaded-doc" onclick="openDoc('Uploaded')">
+                        <span id="uploaded-ext">TXT</span>
+                    </div>
+
                     <div class="holo-center" id="holo-center">
                         <div class="holo-core" id="holo-core"></div>
                         
@@ -202,6 +222,7 @@
                             <div class="node-name" id="center-speaker-name">OpenAI</div>
                         </div>
 
+                        <div class="matrix-rain" id="matrix-rain"></div>
                         <div class="doc d-openai" id="doc-openai" onclick="openDoc('OpenAI')">📄</div>
                         <div class="doc d-gemini" id="doc-gemini" onclick="openDoc('Gemini')">📄</div>
                         <div class="doc d-claude" id="doc-claude" onclick="openDoc('Claude')">📄</div>
@@ -213,14 +234,14 @@
                     <div class="node n-openai" id="ai-openai"><div class="node-icon">O</div><div class="node-name">OpenAI</div></div>
                     <div class="node n-gemini" id="ai-gemini"><div class="node-icon">G</div><div class="node-name">Gemini</div></div>
                     <div class="node n-claude" id="ai-claude"><div class="node-icon">C</div><div class="node-name">Claude</div></div>
-                    <div class="node n-user" id="ai-user"><div class="node-icon">👤</div><div class="node-name">Sen (Başkan)</div></div>
+                    <div class="node n-user" id="ai-user"><div class="node-icon">👤</div><div class="node-name">Sen</div></div>
                 </div>
             </div>
         </div>
 
         <div class="input-area">
             <div class="standard-inputs" id="standard-inputs">
-                <label class="file-label" title="Belge Yükle">📎 <input type="file" id="file-upload" accept=".txt,.csv" hidden></label>
+                <label class="file-label" title="Belge Yükle">📎 <input type="file" id="file-upload" accept=".txt,.csv,.json" hidden onchange="handleFileUpload(event)"></label>
                 <input type="text" class="chat-input" id="topic-input" placeholder="Gündemi yazın..." onkeypress="if(event.key==='Enter') triggerSend()">
                 <button class="send-btn" id="send-btn" onclick="triggerSend()">Kurulu Topla</button>
             </div>
@@ -233,7 +254,7 @@
         </div>
     </div>
 
-    <div class="modal" id="doc-modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('doc-modal')">&times;</span><div class="modal-title" id="modal-title">Başlık</div><div class="modal-body" id="modal-text">İçerik...</div></div></div>
+    <div class="modal" id="doc-modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('doc-modal')">&times;</span><div class="modal-title" id="modal-title">Başlık</div><div class="modal-body" id="modal-text" style="white-space: pre-wrap;">İçerik...</div></div></div>
     <div class="modal" id="projects-modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('projects-modal')">&times;</span><div class="modal-title" style="color:var(--c-user)">📂 Onaylanmış Projelerim</div><div id="projects-list" style="max-height: 400px; overflow-y: auto;">Kayıt yok.</div></div></div>
     <div id="pdf-container"><h1>Yönetim Kurulu Karar Tutanağı</h1><p><strong>Tarih:</strong> <span id="pdf-date"></span></p><p><strong>Gündem:</strong> <span id="pdf-topic"></span></p><h3>Karar: <span id="pdf-title" style="color:#d97706;"></span></h3><h3>Aksiyon Planı:</h3><p id="pdf-decision"></p></div>
 
@@ -241,6 +262,8 @@
         const database = { 'OpenAI': '', 'Gemini': '', 'Claude': '', 'Ortak Karar': '', 'Münazara': '', 'Topic': '', 'Score': ''};
         const aiNodes = ['openai', 'gemini', 'claude', 'user'];
         let uploadedFileText = "";
+        let uploadedFileName = "";
+        let uploadedFileExt = "";
 
         // SES VE MÜZAKERE DEĞİŞKENLERİ
         let isLiveMode = false;
@@ -256,7 +279,7 @@
         const icons = { 'openai': 'O', 'claude': 'C', 'gemini': 'G', 'user': '👤' };
         const displayNames = { 'openai': 'OpenAI', 'claude': 'Claude', 'gemini': 'Gemini', 'user': 'Sen (Başkan)' };
 
-        // --- DOĞAL TÜRKÇE SES BULUCU (YABANCI AKSANI ÇÖZER) ---
+        // --- DOĞAL TÜRKÇE SES BULUCU ---
         function setTurkishVoice() {
             let voices = synthVoice.getVoices();
             nativeTurkishVoice = voices.find(v => v.lang.includes('tr') && v.name.includes('Google')) || 
@@ -266,13 +289,35 @@
 
         window.onload = () => {
             setTurkishVoice();
-            if (synthVoice.onvoiceschanged !== undefined) {
-                synthVoice.onvoiceschanged = setTurkishVoice;
-            }
+            if (synthVoice.onvoiceschanged !== undefined) { synthVoice.onvoiceschanged = setTurkishVoice; }
         };
 
         function toggleBoardMode() { document.getElementById('table-wrapper').classList.toggle('wood-mode'); document.getElementById('board-toggle-btn').classList.toggle('active'); }
         function toggleNightMode() { if(document.getElementById('nightModu').checked) { document.body.classList.add('night-mode'); document.getElementById('rain-container').style.display='block'; } else { document.body.classList.remove('night-mode'); document.getElementById('rain-container').style.display='none'; } }
+        
+        function startMatrixEffect() {
+            const mr = document.getElementById('matrix-rain'); mr.style.display = 'block'; mr.innerHTML = '';
+            for(let i=0; i<30; i++) { let drop = document.createElement('span'); drop.className = 'matrix-drop'; drop.innerText = Math.random()>0.5 ? '1':'0'; drop.style.left = Math.random()*100 + '%'; drop.style.animationDuration = (Math.random()*1 + 0.5)+'s'; mr.appendChild(drop); }
+            setTimeout(() => { mr.style.display = 'none'; }, 2500);
+        }
+
+        // --- DIŞ CEPHE DOSYA YÜKLEME ---
+        function handleFileUpload(event) { 
+            const file = event.target.files[0]; 
+            if (!file) return; 
+            uploadedFileName = file.name;
+            uploadedFileExt = uploadedFileName.split('.').pop().toUpperCase().substring(0,4);
+            
+            const reader = new FileReader(); 
+            reader.onload = function(e) { 
+                uploadedFileText = e.target.result; 
+                document.getElementById('uploaded-ext').innerText = uploadedFileExt;
+                document.getElementById('uploaded-doc').style.display = 'flex'; // Dış cephede göster
+                startMatrixEffect(); 
+                alert("Belge dış cepheye yerleştirildi.");
+            }; 
+            reader.readAsText(file); 
+        }
 
         // --- MERKEZ AVATAR GÖSTERİMİ ---
         function showCenterSpeaker(id) {
@@ -303,10 +348,7 @@
             let sendBtn = document.getElementById('send-btn');
             
             if(isLiveMode) {
-                // Tarayıcı Ses Kilidini Aç (Ses motorunu tetikler)
-                let unlockAudio = new SpeechSynthesisUtterance(' '); 
-                unlockAudio.volume = 0; 
-                synthVoice.speak(unlockAudio);
+                let unlockAudio = new SpeechSynthesisUtterance(' '); unlockAudio.volume = 0; synthVoice.speak(unlockAudio);
                 
                 btn.classList.add('active'); btn.innerText = "🛑 Toplantıyı Bitir";
                 document.getElementById('ptt-container').style.display = 'flex';
@@ -345,7 +387,6 @@
             };
 
             recognition.onerror = (e) => { stopPTT(); };
-            
             recognition.onend = () => {
                 if (finalPttText.trim().length > 0) {
                     sendLiveMessage(finalPttText);
@@ -366,7 +407,6 @@
             if(e) { e.preventDefault(); e.stopPropagation(); }
             if(isRecording) return;
 
-            // SÖZ KESME (Yapay Zekayı Susturur)
             if(synthVoice.speaking) {
                 synthVoice.cancel();
                 currentDialogueQueue = [];
@@ -375,8 +415,7 @@
 
             if(!recognition) { if(!initSpeech()) return; }
 
-            finalPttText = "";
-            document.getElementById('topic-input').value = "";
+            finalPttText = ""; document.getElementById('topic-input').value = "";
             isRecording = true;
             document.getElementById('ptt-btn').classList.add('recording');
             document.getElementById('ptt-btn').innerText = "🎙️ Dinliyorum... (Konuşun)";
@@ -453,13 +492,8 @@
 
             let utterance = new SpeechSynthesisUtterance(line.text);
             utterance.lang = 'tr-TR';
+            if(nativeTurkishVoice) { utterance.voice = nativeTurkishVoice; }
             
-            // Eğer sistemde düzgün Türkçe ses bulunduysa ATA, yoksa tarayıcı varsayılanı okur
-            if(nativeTurkishVoice) {
-                utterance.voice = nativeTurkishVoice;
-            }
-            
-            // İnsani hız ve vurgu ayarları (Çok daha doğal)
             if(speakerId === 'claude') { utterance.pitch = 0.9; utterance.rate = 1.0; }
             else if(speakerId === 'gemini') { utterance.pitch = 1.1; utterance.rate = 1.05; }
             else { utterance.pitch = 1.0; utterance.rate = 1.0; }
@@ -499,6 +533,7 @@
 
                 database['OpenAI'] = data.openai; database['Gemini'] = data.gemini; database['Claude'] = data.claude;
                 database['Münazara'] = data.debate; database['Ortak Karar'] = data.masterDecision; database['Title'] = data.masterTitle;
+                database['Score'] = data.score; 
 
                 document.getElementById('ui-topic').innerText = data.topicSummary;
                 document.getElementById('holo-core').style.display = 'none'; document.getElementById('lasers').style.display = 'none';
@@ -511,23 +546,29 @@
                     document.getElementById('doc-master').classList.add('visible');
                     document.getElementById('ui-status').innerText = "Aksiyon planı hazır. Karar sizin.";
                     document.getElementById('ui-vote-title').innerText = data.masterTitle;
+                    
+                    let scoreUI = document.getElementById('ui-score');
+                    scoreUI.innerText = `Verim: %${data.score}`; scoreUI.style.display = 'block';
                     ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = false);
                 }, 1500);
 
             } catch (error) {
-                document.getElementById('ui-status').innerText = "HATA OLUŞTU.";
+                console.error(error); document.getElementById('ui-status').innerText = "HATA OLUŞTU.";
                 document.getElementById('holo-core').style.display = 'none'; document.getElementById('lasers').style.display = 'none';
             }
         }
 
-        // --- ÖĞÜTÜCÜ VE TEMİZLİK ---
+        // --- ÖĞÜTÜCÜ VE TEMİZLİK (YÜKLENEN DOSYAYI DA SİLER) ---
         function rejectWithShredder() {
             document.getElementById('ui-status').innerText = "KARAR REDDEDİLDİ. Dosya imha ediliyor...";
             document.getElementById('ui-vote-title').innerText = "Plan Çöpe Atıldı.";
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
             document.getElementById('btn-pdf').style.display = 'none';
             
+            // Tüm dosyaları masadan çek
             ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.remove('visible'));
+            document.getElementById('uploaded-doc').style.display = 'none'; // Dış dosya da temizlenir
+            uploadedFileText = ""; 
 
             document.getElementById('shredder-box').classList.add('active');
             let masterDoc = document.getElementById('doc-master'); masterDoc.classList.add('shredding');
@@ -539,18 +580,35 @@
             }, 1800);
         }
 
+        // --- DIŞ CEPHE DOSYA OKUMA VE DAKTİLO ---
         function openDoc(owner) {
-            let content = database[owner];
+            let content = "";
+            
+            if(owner === 'Uploaded') {
+                document.getElementById('modal-title').style.color = "#38bdf8"; 
+                document.getElementById('modal-title').innerText = "Eklenen Dosya: " + uploadedFileName;
+                document.getElementById('modal-text').innerText = uploadedFileText;
+                document.getElementById('doc-modal').classList.add('show');
+                return;
+            }
+            
+            content = database[owner];
             if(owner === 'Ortak Karar') {
                 document.getElementById('modal-title').style.color = "#fbbf24"; document.getElementById('modal-title').innerText = "Ortak Karar Dosyası";
-                document.getElementById('modal-text').innerText = content;
+                let textToType = "MÜNAZARA:\n" + database['Münazara'] + "\n\nAKSİYON PLANI:\n" + content;
+                let el = document.getElementById('modal-text'); el.innerHTML = ""; let i = 0;
+                clearInterval(window.typeInterval); typeAudio.currentTime = 0; typeAudio.play();
+                window.typeInterval = setInterval(() => {
+                    if(i < textToType.length) { el.innerHTML += textToType.charAt(i) === '\n' ? '<br>' : textToType.charAt(i); i++;
+                    } else { clearInterval(window.typeInterval); typeAudio.pause(); }
+                }, 30); 
             } else {
                 document.getElementById('modal-title').style.color = "#fff"; document.getElementById('modal-text').innerText = content;
                 document.getElementById('modal-title').innerText = owner + " Dosyası";
             }
             document.getElementById('doc-modal').classList.add('show');
         }
-        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); clearInterval(window.typeInterval); typeAudio.pause(); }
 
         function saveToProjects() {
             let history = JSON.parse(localStorage.getItem('aiBoardProjects')) || [];
@@ -575,6 +633,8 @@
                 saveToProjects();
             }
             document.getElementById('doc-master').classList.remove('visible');
+            document.getElementById('uploaded-doc').style.display = 'none'; // Yüklenen dosya kalkar
+            uploadedFileText = "";
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
         }
 
