@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     if (!OPENAI_KEY || !CLAUDE_KEY) return res.status(500).json({ error: "API Anahtarları eksik." });
 
     try {
-        // --- 1. CANLI SESLİ MÜZAKERE MODU ---
+        // --- CANLI SESLİ MÜZAKERE MODU ---
         if (isLiveDebate) {
             let chatHistory = history && history.length > 0 
                 ? history.map(h => `${h.role.toUpperCase()}: ${h.text}`).join('\n') 
@@ -34,8 +34,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ liveDialogue: parsedDebate.dialogue });
         }
 
-        // --- 2. STANDART KURUL MODU (Metin Çıktısı) ---
-        let r1 = "OpenAI", r2 = "Claude", r3 = "Gemini";
+        // --- STANDART KURUL MODU (Metin Çıktısı) ---
         let toneCommand = isCrisis ? "DİKKAT: DEFCON 1 KRİZ MODU! Kanamayı anında durduracak taktikler ver." : (isNight ? "Gece mesaisi. Sakin ve stratejik bir ton kullan." : "");
         let finalContext = `Gündem: ${topic}\n${toneCommand}`;
         if (fileText) finalContext += `\n\nDOSYA:\n${fileText.substring(0, 3000)}`;
