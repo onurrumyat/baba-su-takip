@@ -28,7 +28,7 @@
         /* SAKİN MOD (YAĞMUR VE MÜZİK) */
         .rain-container { position: absolute; inset: 0; pointer-events: none; z-index: 100; overflow: hidden; display: none; }
         body.relax-mode .rain-container { display: block; }
-        .rain-drop { position: absolute; background: linear-gradient(transparent, rgba(255,255,255,0.3)); width: 1px; height: 50px; animation: rainFall linear infinite; }
+        .rain-drop { position: absolute; background: linear-gradient(transparent, rgba(255,255,255,0.4)); width: 1px; height: 50px; animation: rainFall linear infinite; }
         @keyframes rainFall { to { transform: translateY(100vh); } }
 
         /* MÜHÜR EFEKTİ */
@@ -109,7 +109,6 @@
         .n-claude .node-icon { border-color: var(--c-claude); color: var(--c-claude); } 
         .n-user .node-icon { border-color: var(--c-user); color: var(--c-user); }
         
-        /* Avatar Pozisyonları */
         .n-openai { top: 0; left: 50%; transform: translate(-50%, -50%); } 
         .n-user { top: 100%; left: 50%; transform: translate(-50%, -50%); } 
         .n-gemini { top: 50%; left: 0; transform: translate(-50%, -50%); } 
@@ -123,9 +122,9 @@
         .doc:hover { transform: scale(1.3) translate(-40%, -40%) !important; z-index: 10; }
         .doc.visible { opacity: 1; transform: scale(1) translate(-50%, -50%); }
         
-        .d-openai { top: 22%; left: 50%; border-left-color: var(--c-openai); } /* Tepedeki OpenAI'ın önü */
-        .d-gemini { top: 50%; left: 22%; border-left-color: var(--c-gemini); } /* Soldaki Gemini'nin önü */
-        .d-claude { top: 50%; left: 78%; border-left-color: var(--c-claude); } /* Sağdaki Claude'un önü */
+        .d-openai { top: 22%; left: 50%; border-left-color: var(--c-openai); }
+        .d-gemini { top: 50%; left: 22%; border-left-color: var(--c-gemini); } 
+        .d-claude { top: 50%; left: 78%; border-left-color: var(--c-claude); } 
         
         .master-doc { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); width: 45px; height: 60px; background: linear-gradient(135deg, #fbbf24, #d97706); border-radius: 4px 8px 8px 4px; display: flex; justify-content: center; align-items: center; font-size: 22px; cursor: pointer; opacity: 0; transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 0 25px rgba(251, 191, 36, 0.4); border-left: 5px solid #b45309; z-index: 8;}
         .master-doc:hover { transform: translate(-50%, -50%) scale(1.15) !important; z-index: 10; }
@@ -198,7 +197,6 @@
                 </select>
                 <label class="night-checkbox"><input type="checkbox" id="nightModu" onchange="toggleNightMode()">🌙 GECE</label>
                 <label class="relax-checkbox"><input type="checkbox" id="relaxModu" onchange="toggleRelaxMode()">☕ SAKİN</label>
-                <label class="crisis-checkbox"><input type="checkbox" id="krizModu" onchange="toggleCrisis()">🚨 KRİZ</label>
             </div>
             
             <div class="info-card">
@@ -294,7 +292,6 @@
         const displayNames = { 'openai': 'OpenAI', 'claude': 'Claude', 'gemini': 'Gemini', 'user': 'Sen (Başkan)' };
 
         let lofiAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3'); lofiAudio.loop = true;
-        let typeAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_27131846b4.mp3'); typeAudio.loop = true;
 
         // --- DOĞAL TÜRKÇE SES BULUCU ---
         function setTurkishVoice() {
@@ -310,23 +307,34 @@
         };
 
         function toggleBoardMode() { document.getElementById('table-wrapper').classList.toggle('wood-mode'); document.getElementById('board-toggle-btn').classList.toggle('active'); }
-        function toggleCrisis() { document.body.classList.toggle('crisis-mode'); }
         
-        // Gece Modu (Sadece Arayüzü Karartır)
         function toggleNightMode() { 
             if(document.getElementById('nightModu').checked) { document.body.classList.add('night-mode'); } 
             else { document.body.classList.remove('night-mode'); } 
         }
         
-        // SAKİN MOD (Müzik ve Yağmur)
+        // SAKİN MOD (YAĞMUR + MÜZİK)
         function toggleRelaxMode() { 
             if(document.getElementById('relaxModu').checked) { 
                 document.body.classList.add('relax-mode'); 
                 lofiAudio.play();
+                createRain(); 
             } else { 
                 document.body.classList.remove('relax-mode'); 
                 lofiAudio.pause();
+                document.getElementById('rain-container').innerHTML = ''; 
             } 
+        }
+
+        function createRain() {
+            const rc = document.getElementById('rain-container'); rc.innerHTML = '';
+            for(let i=0; i<40; i++) { 
+                let drop = document.createElement('div'); drop.className='rain-drop'; 
+                drop.style.left = Math.random()*100 + '%'; 
+                drop.style.animationDuration = (Math.random()*0.5 + 0.5) + 's'; 
+                drop.style.animationDelay = Math.random() + 's'; 
+                rc.appendChild(drop); 
+            }
         }
         
         function startMatrixEffect() {
@@ -346,7 +354,7 @@
             reader.onload = function(e) { 
                 uploadedFileText = e.target.result; 
                 document.getElementById('uploaded-ext').innerText = uploadedFileExt;
-                document.getElementById('uploaded-doc').style.display = 'flex'; // Dış cephede göster
+                document.getElementById('uploaded-doc').style.display = 'flex';
                 startMatrixEffect(); 
                 alert("Belge dış cepheye yerleştirildi.");
             }; 
@@ -527,9 +535,7 @@
             let utterance = new SpeechSynthesisUtterance(line.text);
             utterance.lang = 'tr-TR';
             
-            if(nativeTurkishVoice) {
-                utterance.voice = nativeTurkishVoice;
-            }
+            if(nativeTurkishVoice) { utterance.voice = nativeTurkishVoice; }
             
             if(speakerId === 'claude') { utterance.pitch = 0.9; utterance.rate = 1.0; }
             else if(speakerId === 'gemini') { utterance.pitch = 1.1; utterance.rate = 1.05; }
@@ -570,7 +576,6 @@
 
                 database['OpenAI'] = data.openai; database['Gemini'] = data.gemini; database['Claude'] = data.claude;
                 database['Münazara'] = data.debate; database['Ortak Karar'] = data.masterDecision; database['Title'] = data.masterTitle;
-                database['Score'] = data.score; 
 
                 document.getElementById('ui-topic').innerText = data.topicSummary;
                 document.getElementById('holo-core').style.display = 'none'; document.getElementById('lasers').style.display = 'none';
@@ -592,16 +597,15 @@
             }
         }
 
-        // --- ÖĞÜTÜCÜ VE TEMİZLİK (YÜKLENEN DOSYAYI DA SİLER) ---
+        // --- ÖĞÜTÜCÜ VE TEMİZLİK ---
         function rejectWithShredder() {
             document.getElementById('ui-status').innerText = "KARAR REDDEDİLDİ. Dosya imha ediliyor...";
             document.getElementById('ui-vote-title').innerText = "Plan Çöpe Atıldı.";
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
             document.getElementById('btn-pdf').style.display = 'none';
             
-            // Tüm dosyaları masadan çek
             ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.remove('visible'));
-            document.getElementById('uploaded-doc').style.display = 'none'; // Dış dosya da temizlenir
+            document.getElementById('uploaded-doc').style.display = 'none'; 
             uploadedFileText = ""; 
 
             document.getElementById('shredder-box').classList.add('active');
@@ -614,7 +618,6 @@
             }, 1800);
         }
 
-        // --- DIŞ CEPHE DOSYA OKUMA VE DAKTİLO ---
         function openDoc(owner) {
             let content = "";
             
@@ -631,10 +634,10 @@
                 document.getElementById('modal-title').style.color = "#fbbf24"; document.getElementById('modal-title').innerText = "Ortak Karar Dosyası";
                 let textToType = "MÜNAZARA:\n" + database['Münazara'] + "\n\nAKSİYON PLANI:\n" + content;
                 let el = document.getElementById('modal-text'); el.innerHTML = ""; let i = 0;
-                clearInterval(window.typeInterval); typeAudio.currentTime = 0; typeAudio.play();
+                clearInterval(window.typeInterval); 
                 window.typeInterval = setInterval(() => {
                     if(i < textToType.length) { el.innerHTML += textToType.charAt(i) === '\n' ? '<br>' : textToType.charAt(i); i++;
-                    } else { clearInterval(window.typeInterval); typeAudio.pause(); }
+                    } else { clearInterval(window.typeInterval); }
                 }, 30); 
             } else {
                 document.getElementById('modal-title').style.color = "#fff"; document.getElementById('modal-text').innerText = content;
@@ -642,7 +645,7 @@
             }
             document.getElementById('doc-modal').classList.add('show');
         }
-        function closeModal(id) { document.getElementById(id).classList.remove('show'); clearInterval(window.typeInterval); typeAudio.pause(); }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); clearInterval(window.typeInterval); }
 
         function saveToProjects() {
             let history = JSON.parse(localStorage.getItem('aiBoardProjects')) || [];
@@ -656,6 +659,8 @@
             document.getElementById('projects-list').innerHTML = html; document.getElementById('projects-modal').classList.add('show');
         }
 
+        function requestRevision() { const note = prompt("Hangi kısmı düzeltelim?"); if(note) startProcess(true, note); }
+
         function userVote(isYes) {
             if(isYes) {
                 document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 400);
@@ -665,7 +670,7 @@
                 saveToProjects();
             }
             document.getElementById('doc-master').classList.remove('visible');
-            document.getElementById('uploaded-doc').style.display = 'none'; // Yüklenen dosya kalkar
+            document.getElementById('uploaded-doc').style.display = 'none';
             uploadedFileText = "";
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
         }
