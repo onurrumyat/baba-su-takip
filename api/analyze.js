@@ -19,7 +19,7 @@ export default async function handler(req, res) {
                     model: 'gpt-4o-mini', response_format: { type: "json_object" },
                     messages: [
                         { role: "system", content: `Sen OpenAI, Claude ve Gemini modellerini yöneten bir zekasın. Kullanıcının söylediği konuya bu 3 farklı yapay zekanın SESLİ TARTIŞIYORMUŞ GİBİ kısa (1'er cümlelik), net cevaplar vermesini sağla. JSON Formatında dön: { "dialogue": [ {"speaker": "openai", "text": "..."}, {"speaker": "claude", "text": "..."}, {"speaker": "gemini", "text": "..."} ] }` },
-                        { role: "user", content: `GEÇMİŞ:\n${chatHistory}\n\nBAŞKAN (KULLANICI) DEDİ Kİ: "${topic}"\nCevap verin.` }
+                        { role: "user", content: `GEÇMİŞ:\n${chatHistory}\n\nBAŞKAN DEDİ Kİ: "${topic}"\nCevap verin.` }
                     ]
                 })
             });
@@ -28,7 +28,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ liveDialogue: parsedDebate.dialogue });
         }
 
-        // --- 2. STANDART KURUL MODU (NORMAL ARAMA) ---
+        // --- 2. STANDART KURUL MODU (VERİ ANALİZİ) ---
         let toneCommand = isCrisis ? "DİKKAT: DEFCON 1 KRİZ MODU! Acil durum taktikleri ver." : (isNight ? "Gece mesaisi. Sakin ve stratejik bir ton kullan." : "");
         let finalContext = `Gündem: ${topic}\n${toneCommand}`;
         if (fileText) finalContext += `\n\nMASAYA KONAN DOSYA:\n${fileText.substring(0, 3000)}`;
