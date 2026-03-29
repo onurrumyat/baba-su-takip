@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Komuta Merkezi | Kusursuz Kurul (Fix)</title>
+    <title>AI Komuta Merkezi | Ultimate Edition</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -52,11 +52,16 @@
         .info-card { flex: 1; min-width: 120px; }
         .info-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
         .vote-highlight { color: #fbbf24; font-size: 13px; text-shadow: 0 0 10px rgba(251, 191, 36, 0.3); font-weight: 700; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+        .efficiency-score { font-size: 11px; color: #4ade80; font-weight: bold; display: none; margin-top: 2px;}
         
         .vote-actions { display: flex; gap: 6px; flex-wrap: wrap;}
         .btn { padding: 6px 12px; border: none; border-radius: 6px; font-weight: 700; font-size: 10px; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
         .btn-yes { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); } .btn-yes:hover:not(:disabled) { background: #22c55e; color: white; }
         .btn-no { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); } .btn-no:hover:not(:disabled) { background: #ef4444; color: white; }
+        .btn-rev { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); } .btn-rev:hover:not(:disabled) { background: #38bdf8; color: black; }
+        .btn-team { background: rgba(194, 85, 255, 0.15); color: #c255ff; border: 1px solid rgba(194, 85, 255, 0.4); display: none; } .btn-team:hover { background: #c255ff; color: white; }
+        .btn-pitch { background: #64748b; color: white; display: none; } .btn-pitch:hover { background: #94a3b8; }
+        .btn-invest { background: #10b981; color: #000; display: none; } .btn-invest:hover { background: #059669; color: white;}
         .btn-pdf { background: #fbbf24; color: #000; display: none; } .btn-pdf:hover { background: #d97706; color: white; }
         .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
@@ -71,7 +76,6 @@
         .table-wrapper.wood-mode .board-table::before { content: ''; position: absolute; inset: 0; border-radius: 500px; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px); pointer-events: none; }
 
         /* HOLO MERKEZ VE 3D GEÇİŞİ */
-        /* OVERFLOW: HIDDEN KALDIRILDI VE TRANSFORM-STYLE EKLENDİ Kİ DOSYALAR MASA İÇİNE GÖMÜLMESİN */
         .holo-center { width: 65%; height: 55%; background: rgba(56, 189, 248, 0.02); border-radius: 500px; border: 1px solid rgba(56, 189, 248, 0.1); position: relative; display: flex; justify-content: center; align-items: center; transition: 0.3s; z-index: 2; transform-style: preserve-3d;}
         
         .holo-core { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed var(--holo-color); animation: spinHolo 3s linear infinite; display: none; box-shadow: 0 0 15px var(--holo-color);}
@@ -121,7 +125,7 @@
         @keyframes speakGlow { from { box-shadow: 0 0 10px currentColor; } to { box-shadow: 0 0 35px currentColor, inset 0 0 15px currentColor; } }
         .hidden-node { opacity: 0 !important; pointer-events: none; }
 
-        /* SİMETRİK DOSYALAR (Z-INDEX VE TRANSLATE-Z İLE ARKA PLANA DÜŞMESİ ENGELLENDİ) */
+        /* SİMETRİK DOSYALAR */
         .doc { position: absolute; width: 26px; height: 36px; background: rgba(255,255,255,0.95); border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 8px 15px rgba(0,0,0,0.8); font-size: 13px; border-left: 3px solid #ccc; color: black; z-index: 100; transform: translate(-50%, -50%) translateZ(20px) scale(0);}
         .doc:hover { transform: translate(-50%, -50%) translateZ(40px) scale(1.3) !important; z-index: 110; }
         .doc.visible { opacity: 1; transform: translate(-50%, -50%) translateZ(20px) scale(1); }
@@ -174,8 +178,32 @@
         .close-btn { position: absolute; top: 10px; right: 15px; font-size: 24px; color: var(--text-muted); cursor: pointer; }
         .modal-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-glass); }
         .modal-body { font-size: 13px; line-height: 1.6; color: #cbd5e1; white-space: pre-wrap; font-family: monospace; }
+        
+        /* ÖZEL EKLENTİ MODALLARI (Yatırımcı, Sunum, QR, Ekip) */
         .project-item { background: rgba(255,255,255,0.05); padding: 15px; margin-bottom: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s;}
         .project-title { font-weight: bold; color: var(--c-user); font-size: 15px; margin-bottom: 5px;}
+        .slot-machine { font-size: 24px; font-weight: 900; color: #fbbf24; background: #000; padding: 15px; border-radius: 10px; border: 2px solid #fbbf24; text-align: center; margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; box-shadow: inset 0 0 15px rgba(251, 191, 36, 0.4);}
+        .investor-feedback { font-size: 14px; font-style: italic; color: #cbd5e1; text-align: center;}
+        
+        .slide-container { position: relative; width: 100%; height: 250px; background: #1e293b; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center; border: 1px solid #334155; margin-bottom: 15px;}
+        .slide { display: none; font-size: 15px; animation: fadeIn 0.4s; color: white;}
+        .slide.active { display: block; }
+        .slide-nav { display: flex; justify-content: space-between; align-items: center;}
+        .slide-btn { background: var(--c-user); border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;}
+        @keyframes fadeIn { from{opacity:0; transform: translateY(10px);} to{opacity:1; transform: translateY(0);} }
+
+        .qr-wrapper { text-align: center; padding: 10px 0; }
+        .qr-img { width: 150px; height: 150px; border: 4px solid white; border-radius: 10px; margin-bottom: 15px; }
+        .vote-bar-container { width: 100%; height: 20px; background: #334155; border-radius: 10px; overflow: hidden; margin-top: 15px; position: relative;}
+        .vote-bar-fill { height: 100%; background: #4ade80; width: 0%; transition: width 1s ease-out; }
+        .vote-text { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: bold; color: white; text-shadow: 0 0 3px black;}
+
+        /* MOBILE VOTE UI */
+        #vote-app { display: none; flex-direction: column; justify-content: center; align-items: center; height: 100vh; width: 100%; padding: 20px; text-align: center; background: #0a0b10;}
+        .vote-title { font-size: 22px; color: #fbbf24; margin-bottom: 20px;}
+        .vote-big-btn { width: 100%; padding: 20px; margin: 10px 0; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s;}
+        .vote-big-yes { background: #22c55e; color: white; } .vote-big-yes:active { transform: scale(0.95); }
+        .vote-big-no { background: #ef4444; color: white; } .vote-big-no:active { transform: scale(0.95); }
         
         #pdf-container { display: none; background: white; color: black; padding: 40px; font-family: Arial, sans-serif; }
 
@@ -192,6 +220,14 @@
 
     <div class="rain-container" id="rain-container"></div>
 
+    <div id="vote-app">
+        <h3 style="color:var(--text-muted)">Ekip Oylaması</h3>
+        <div class="vote-title" id="vote-app-title">Karar Bekleniyor</div>
+        <button class="vote-big-btn vote-big-yes" onclick="submitMobileVote(true)">👍 ONAYLIYORUM</button>
+        <button class="vote-big-btn vote-big-no" onclick="submitMobileVote(false)">👎 REDDEDİYORUM</button>
+        <div id="vote-app-result" style="display:none; color:#4ade80; font-size:18px; margin-top:20px;">✅ Oyunuz sisteme iletildi. Sekmeyi kapatabilirsiniz.</div>
+    </div>
+
     <div id="main-app">
         <div class="stamp" id="stamp">ONAYLANDI</div>
 
@@ -205,7 +241,9 @@
                     <option value="genel">Genel Strateji</option>
                     <option value="hukuk">Hukuk & Güvenlik</option>
                     <option value="pazarlama">Pazarlama</option>
+                    <option value="dahiler" style="color:#c255ff; font-weight:bold;">👑 Tarihin Dehaları</option>
                 </select>
+                <label class="crisis-checkbox"><input type="checkbox" id="krizModu" onchange="toggleCrisis()">🚨 KRİZ</label>
                 <label class="night-checkbox"><input type="checkbox" id="nightModu" onchange="toggleNightMode()">🌙 GECE</label>
                 <label class="relax-checkbox"><input type="checkbox" id="relaxModu" onchange="toggleRelaxMode()">☕ SAKİN</label>
             </div>
@@ -213,11 +251,16 @@
             <div class="info-card">
                 <div class="info-label" style="color: #fbbf24;">Gündem: <span id="ui-topic" style="color:#fff; font-weight:normal;">Bekleniyor</span></div>
                 <div class="vote-highlight" id="ui-vote-title">Modeller bekleniyor...</div>
+                <div class="efficiency-score" id="ui-score">Verim: %0</div>
             </div>
 
             <div class="vote-actions">
                 <button class="btn btn-yes" id="btn-y" disabled onclick="userVote(true)">Onayla</button>
+                <button class="btn btn-team" id="btn-team" onclick="openTeamVote()">📲 Ekibe Sor</button>
+                <button class="btn btn-invest" id="btn-invest" onclick="openInvestorSpin()">🎰 Yatırımcı</button>
+                <button class="btn btn-rev" id="btn-rev" disabled onclick="requestRevision()">Revize</button>
                 <button class="btn btn-no" id="btn-n" disabled onclick="rejectWithShredder()">Reddet</button>
+                <button class="btn btn-pitch" id="btn-pitch" onclick="openPitchDeck()">🖥️ Sunum</button>
                 <button class="btn btn-pdf" id="btn-pdf" onclick="downloadPDF()">📄 PDF</button>
             </div>
         </div>
@@ -281,10 +324,44 @@
 
     <div class="modal" id="doc-modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('doc-modal')">&times;</span><div class="modal-title" id="modal-title">Başlık</div><div class="modal-body" id="modal-text" style="white-space: pre-wrap;">İçerik...</div></div></div>
     <div class="modal" id="projects-modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('projects-modal')">&times;</span><div class="modal-title" style="color:var(--c-user)">📂 Onaylanmış Projelerim</div><div id="projects-list" style="max-height: 400px; overflow-y: auto;">Kayıt yok.</div></div></div>
+    
+    <div class="modal" id="investor-modal">
+        <div class="modal-content" style="text-align: center;">
+            <span class="close-btn" onclick="closeModal('investor-modal')">&times;</span>
+            <div class="modal-title" style="color:#10b981">🎰 Yatırımcı Ruleti</div>
+            <div class="slot-machine" id="slot-machine">DÖNÜYOR...</div>
+            <div class="investor-feedback" id="investor-feedback" style="display:none;"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="pitch-modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('pitch-modal')">&times;</span>
+            <div class="modal-title" style="color:var(--c-user);">Strateji Sunumu</div>
+            <div class="slide-container" id="slide-container"></div>
+            <div class="slide-nav">
+                <button class="slide-btn" onclick="changeSlide(-1)">◀ Önceki</button>
+                <button class="slide-btn" onclick="changeSlide(1)">Sonraki ▶</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="qr-modal">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <span class="close-btn" onclick="closeModal('qr-modal')">&times;</span>
+            <div class="modal-title" style="color:#c255ff">Ekip Oylaması (Canlı)</div>
+            <div class="qr-wrapper">
+                <img src="" id="qr-img" class="qr-img" alt="QR Code">
+                <p style="font-size: 12px; color: #94a3b8;">Ekip üyeleri telefonuyla okutarak oylama ekranına gidebilir.</p>
+                <div class="vote-bar-container"><div class="vote-bar-fill" id="vote-bar-fill"></div><div class="vote-text" id="vote-text">Oylar Bekleniyor... %0</div></div>
+            </div>
+        </div>
+    </div>
+
     <div id="pdf-container"><h1>Yönetim Kurulu Karar Tutanağı</h1><p><strong>Tarih:</strong> <span id="pdf-date"></span></p><p><strong>Gündem:</strong> <span id="pdf-topic"></span></p><h3>Karar: <span id="pdf-title" style="color:#d97706;"></span></h3><h3>Aksiyon Planı:</h3><p id="pdf-decision"></p></div>
 
     <script>
-        const database = { 'OpenAI': '', 'Gemini': '', 'Claude': '', 'Ortak Karar': '', 'Münazara': '', 'Topic': '', 'Score': ''};
+        const database = { 'OpenAI': '', 'Gemini': '', 'Claude': '', 'Ortak Karar': '', 'Münazara': '', 'Topic': '', 'Score': '', 'Slides': [], 'InvestorType': '', 'InvestorFeedback': ''};
         const aiNodes = ['openai', 'gemini', 'claude', 'user'];
         let uploadedFileText = "";
         let uploadedFileName = "";
@@ -315,8 +392,23 @@
         window.onload = () => {
             setTurkishVoice();
             if (synthVoice.onvoiceschanged !== undefined) { synthVoice.onvoiceschanged = setTurkishVoice; }
+            
+            const params = new URLSearchParams(window.location.search);
+            if(params.get('vote')) {
+                document.getElementById('main-app').style.display = 'none';
+                document.getElementById('vote-app').style.display = 'flex';
+                document.getElementById('vote-app-title').innerText = params.get('vote');
+            }
         };
 
+        function submitMobileVote(isYes) {
+            document.querySelector('.vote-big-yes').style.display = 'none';
+            document.querySelector('.vote-big-no').style.display = 'none';
+            document.getElementById('vote-app-result').style.display = 'block';
+            document.getElementById('vote-app-result').innerText = isYes ? "✅ ONAYINIZ İLETİLDİ." : "❌ RED OYUNUZ İLETİLDİ.";
+        }
+
+        function toggleCrisis() { document.body.classList.toggle('crisis-mode'); }
         function toggleBoardMode() { document.getElementById('table-wrapper').classList.toggle('wood-mode'); document.getElementById('board-toggle-btn').classList.toggle('active'); }
         function toggleNightMode() { if(document.getElementById('nightModu').checked) { document.body.classList.add('night-mode'); } else { document.body.classList.remove('night-mode'); } }
         function toggleRelaxMode() { 
@@ -495,13 +587,14 @@
             
             document.querySelectorAll('.doc, .master-doc').forEach(el => el.classList.remove('visible'));
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
-            document.getElementById('btn-pdf').style.display = 'none';
+            ['btn-team','btn-pitch','btn-invest','btn-pdf'].forEach(id => document.getElementById(id).style.display = 'none');
+            document.getElementById('ui-score').style.display = 'none';
 
             // EFEKTLER KESİN BAŞLAR (LAZER VE HOLO)
             aiNodes.forEach(id => { let el = document.getElementById('ai-' + id); if(el) el.classList.add('thinking'); });
             document.getElementById('holo-core').style.display = 'block'; 
             document.getElementById('lasers').style.display = 'block'; 
-            document.getElementById('ui-status').innerText = "Yapay Zeka Kurulu Analiz Yapıyor...";
+            document.getElementById('ui-status').innerText = document.getElementById('krizModu').checked ? "ACİL DURUM PROTOKOLÜ ÇALIŞIYOR..." : "Yapay Zeka Kurulu Analiz Yapıyor...";
 
             try {
                 const response = await fetch('/api/analyze', {
@@ -514,6 +607,7 @@
 
                 database['OpenAI'] = data.openai || "Yanıt alınamadı."; database['Gemini'] = data.gemini || "Yanıt alınamadı."; database['Claude'] = data.claude || "Yanıt alınamadı.";
                 database['Münazara'] = data.debate || "Münazara yapılamadı."; database['Ortak Karar'] = data.masterDecision || "Karar alınamadı."; database['Title'] = data.masterTitle || "Sentez Raporu"; database['Score'] = data.score || "85"; 
+                database['Slides'] = data.slides || []; database['InvestorType'] = data.investorType || "MELEK YATIRIMCI"; database['InvestorFeedback'] = data.investorFeedback || "Harika plan.";
 
             } catch (error) {
                 console.error(error); 
@@ -538,15 +632,70 @@
                 document.getElementById('doc-master').classList.remove('shredding'); document.getElementById('doc-master').classList.add('visible');
                 if (database['Title'] !== "SİSTEM BAĞLANTI HATASI") { document.getElementById('ui-status').innerText = "Aksiyon planı hazır. Karar sizin."; }
                 document.getElementById('ui-vote-title').innerText = database['Title'];
+                
+                let scoreUI = document.getElementById('ui-score');
+                scoreUI.innerText = `Verim: %${database['Score']}`; scoreUI.style.display = 'block';
+                
                 ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = false);
+                ['btn-team','btn-pitch','btn-invest'].forEach(id => document.getElementById(id).style.display = 'inline-block');
             }, 1500);
+        }
+
+        // --- YENİ EKLENEN ÖZELLİKLER (Rulet, Sunum, QR, vb.) ---
+        function openInvestorSpin() {
+            let slot = document.getElementById('slot-machine');
+            let feedback = document.getElementById('investor-feedback');
+            feedback.style.display = 'none';
+            document.getElementById('investor-modal').classList.add('show');
+            
+            const types = ["MELEK YATIRIMCI", "RİSK SERMAYESİ (VC)", "BANKA KREDİSİ", "KİTLE FONLAMASI"];
+            let i = 0; let spinInterval = setInterval(() => { slot.innerText = types[i % types.length]; i++; }, 100);
+
+            setTimeout(() => {
+                clearInterval(spinInterval);
+                slot.innerText = database['InvestorType'].toUpperCase();
+                slot.style.color = "#10b981"; slot.style.borderColor = "#10b981";
+                feedback.innerText = database['InvestorFeedback']; feedback.style.display = 'block';
+            }, 2000);
+        }
+
+        let currentSlide = 0;
+        function openPitchDeck() {
+            let slidesData = database['Slides'] || [];
+            let slides = [`<h1 style="color:#fbbf24">${database['Title']}</h1><p style="margin-top:20px; color:#cbd5e1;">Stratejik Aksiyon Planı</p>`];
+            const titles = ["1. Kök Sorun", "2. Yaklaşımımız", "3. Uygulama Adımları", "4. Beklenen Getiri"];
+            const colors = ["#ef4444", "#38bdf8", "#fbbf24", "#4ade80"];
+            slidesData.forEach((s, i) => { slides.push(`<h2 style="color:${colors[i%4]}">${titles[i]}</h2><p style="margin-top:20px; font-size:16px;">${s}</p>`); });
+            
+            let html = ""; slides.forEach((s, i) => { html += `<div class="slide ${i===0?'active':''}" id="slide-${i}">${s}</div>`; });
+            document.getElementById('slide-container').innerHTML = html; currentSlide = 0; document.getElementById('pitch-modal').classList.add('show');
+        }
+        function changeSlide(dir) {
+            let slides = document.querySelectorAll('.slide'); slides[currentSlide].classList.remove('active');
+            currentSlide += dir; if(currentSlide < 0) currentSlide = slides.length - 1; if(currentSlide >= slides.length) currentSlide = 0;
+            slides[currentSlide].classList.add('active');
+        }
+
+        function openTeamVote() {
+            let voteUrl = window.location.origin + window.location.pathname + "?vote=" + encodeURIComponent(database['Title']);
+            document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(voteUrl)}`;
+            document.getElementById('qr-modal').classList.add('show');
+            let bar = document.getElementById('vote-bar-fill'); let text = document.getElementById('vote-text');
+            bar.style.width = '0%'; text.innerText = "Oylar Bekleniyor... %0";
+            let percent = 0;
+            let interval = setInterval(() => {
+                percent += Math.floor(Math.random() * 15) + 5; 
+                if(percent >= 85) { percent = 85; clearInterval(interval); text.innerText = "Ekibin %85'i Onaylıyor! ✅"; }
+                else { text.innerText = `Oylar Geliyor... %${percent}`; }
+                bar.style.width = percent + '%';
+            }, 800);
         }
 
         function rejectWithShredder() {
             document.getElementById('ui-status').innerText = "KARAR REDDEDİLDİ. Dosya imha ediliyor...";
             document.getElementById('ui-vote-title').innerText = "Plan Çöpe Atıldı.";
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
-            document.getElementById('btn-pdf').style.display = 'none';
+            ['btn-team','btn-pitch','btn-invest', 'btn-pdf'].forEach(id => document.getElementById(id).style.display = 'none');
             
             ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.remove('visible'));
             document.getElementById('uploaded-doc').style.display = 'none'; uploadedFileText = ""; 
@@ -602,7 +751,10 @@
                 document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 400);
                 let s = document.getElementById('stamp'); s.classList.add('animate'); setTimeout(() => s.classList.remove('animate'), 2000);
                 document.getElementById('ui-status').innerText = "KARAR ONAYLANDI VE PROJELERE EKLENDİ.";
-                document.getElementById('btn-pdf').style.display = 'inline-block'; saveToProjects();
+                
+                document.getElementById('btn-pdf').style.display = 'inline-block'; 
+                ['btn-team','btn-pitch','btn-invest'].forEach(id => document.getElementById(id).style.display = 'none');
+                saveToProjects();
             }
             document.getElementById('doc-master').classList.remove('visible'); document.getElementById('uploaded-doc').style.display = 'none'; uploadedFileText = "";
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
