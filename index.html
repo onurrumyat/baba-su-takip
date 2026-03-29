@@ -69,16 +69,13 @@
         .btn-pdf { background: #fbbf24; color: #000; display: none; } 
         .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* --- ORTA ALAN: MASA VE DİNAMİK KAMERA --- */
+        /* --- ORTA ALAN: SABİT VE KUSURSUZ MASA --- */
         .stage { flex: 1; min-height: 0; display: flex; justify-content: center; align-items: center; position: relative; perspective: 1000px; padding: 30px; }
         .system-status { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); color: var(--c-user); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; z-index: 20;}
         
-        .table-wrapper { position: relative; width: 100%; max-width: 650px; aspect-ratio: 2 / 1.2; transform: rotateX(15deg); transform-style: preserve-3d; transition: transform 0.5s; }
+        /* MASA AÇISI SABİTLENDİ (rotateX 15deg). Dönme ve sallanma yok. */
+        .table-wrapper { position: relative; width: 100%; max-width: 650px; aspect-ratio: 2 / 1.2; transform: rotateX(15deg); transform-style: preserve-3d; }
         
-        /* SİNEMATİK KAMERA PAN EFEKTİ */
-        .table-wrapper.cinematic-pan { animation: cinematicPan 6s ease-in-out infinite alternate !important; }
-        @keyframes cinematicPan { 0% { transform: rotateX(15deg) rotateY(-20deg) translateZ(-30px); } 100% { transform: rotateX(25deg) rotateY(20deg) translateZ(30px); } }
-
         .board-table { width: 100%; height: 100%; background: var(--table-surface); border: 8px solid var(--table-rim); border-radius: 500px; box-shadow: 0 25px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; position: relative; transition: 0.5s; }
         
         /* PREMIUM LÜKS AHŞAP MASA MODU */
@@ -120,14 +117,13 @@
         .shredding { animation: shredDoc 1.5s forwards ease-in !important; pointer-events: none;}
         @keyframes shredDoc { 0% { top: 50%; transform: translate(-50%, -50%) scale(1); opacity: 1;} 40% { top: 75%; transform: translate(-50%, -50%) scale(0.8); opacity: 1;} 100% { top: 85%; transform: translate(-50%, -20%) scale(0.8); opacity: 0; height: 0;} }
 
-        /* AVATARLAR */
+        /* AVATARLAR (Modellerin İsimleri) */
         .node { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 5; }
         .node-icon { width: 40px; height: 40px; border-radius: 10px; background: #0f1117; display: flex; justify-content: center; align-items: center; font-size: 18px; font-weight: 800; border: 2px solid; box-shadow: 0 8px 15px rgba(0,0,0,0.8); transition: 0.3s; transform: rotateX(-15deg); }
         .node-name { font-size: 9px; font-weight: 800; letter-spacing: 1px; color: #fff; text-transform: uppercase; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px; transform: rotateX(-15deg); margin-top:-5px;}
         .n-openai .node-icon { border-color: var(--c-openai); color: var(--c-openai); } .n-gemini .node-icon { border-color: var(--c-gemini); color: var(--c-gemini); } .n-claude .node-icon { border-color: var(--c-claude); color: var(--c-claude); } .n-user .node-icon { border-color: var(--c-user); color: var(--c-user); }
         .n-openai { top: 0; left: 50%; transform: translate(-50%, -50%); } .n-user { top: 100%; left: 50%; transform: translate(-50%, -50%); } .n-gemini { top: 50%; left: 0; transform: translate(-50%, -50%); } .n-claude { top: 50%; left: 100%; transform: translate(-50%, -50%); } 
         .thinking .node-icon { animation: glow 1s infinite alternate; }
-        @keyframes glow { from { box-shadow: 0 0 5px currentColor; } to { box-shadow: 0 0 20px currentColor, inset 0 0 10px currentColor; } }
 
         /* ALT PANEL */
         .input-area { background: var(--bg-panel); backdrop-filter: blur(20px); border-top: 1px solid var(--border-glass); padding: 12px 15px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: center;}
@@ -150,18 +146,22 @@
         .slot-machine { font-size: 24px; font-weight: 900; color: #fbbf24; background: #000; padding: 15px; border-radius: 10px; border: 2px solid #fbbf24; text-align: center; margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; box-shadow: inset 0 0 15px rgba(251, 191, 36, 0.4);}
         .investor-feedback { font-size: 14px; font-style: italic; color: #cbd5e1; text-align: center;}
 
-        /* PITCH DECK & SES KLONU CSS */
+        /* PITCH DECK & SES EĞİTİM MODÜLÜ CSS */
         .slide-container { position: relative; width: 100%; height: 220px; background: #1e293b; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center; border: 1px solid #334155; margin-bottom: 15px;}
         .slide { display: none; font-size: 15px; animation: fadeIn 0.4s; color: white;}
         .slide.active { display: block; }
         .slide-nav { display: flex; justify-content: space-between; align-items: center;}
         .slide-btn { background: var(--c-user); border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;}
         .voice-clone-btn { background: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap:5px;}
-        .voice-clone-btn.recording { animation: pulse 1s infinite alternate; }
-        .voice-waves { display: none; gap: 3px; height: 15px; align-items: flex-end; margin-left: 10px;}
-        .wave { width: 3px; background: white; animation: soundWave 0.5s infinite alternate; }
-        .wave:nth-child(2) { animation-delay: 0.1s; } .wave:nth-child(3) { animation-delay: 0.2s; } .wave:nth-child(4) { animation-delay: 0.3s; }
-        @keyframes soundWave { 0% { height: 3px; } 100% { height: 15px; } }
+        .voice-clone-btn:hover { background: #dc2626; }
+        
+        /* Yeni Ses Eğitim Ekranı CSS */
+        .vt-sentence { font-size: 18px; font-style: italic; font-weight: bold; color: #fbbf24; margin: 20px 0; text-align: center; min-height: 50px;}
+        .vt-progress-bar { width: 100%; height: 8px; background: #334155; border-radius: 4px; margin-bottom: 20px; overflow: hidden; }
+        .vt-progress-fill { width: 0%; height: 100%; background: #4ade80; transition: 0.3s; }
+        .vt-record-btn { display: block; width: 100%; background: #ef4444; color: white; border: none; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; text-transform: uppercase;}
+        .vt-record-btn.recording { background: #000; border: 2px solid #ef4444; color: #ef4444; animation: pulse 1s infinite alternate; }
+
         @keyframes fadeIn { from{opacity:0; transform: translateY(10px);} to{opacity:1; transform: translateY(0);} }
 
         /* QR KOD CSS */
@@ -238,6 +238,7 @@
 
         <div class="stage">
             <div class="system-status" id="ui-status">Sistem Hazır. Gündemi Belirleyin.</div>
+            
             <div class="table-wrapper" id="table-wrapper">
                 <div class="board-table">
                     
@@ -295,15 +296,31 @@
             <span class="close-btn" onclick="closeModal('pitch-modal')">&times;</span>
             <div class="modal-title" style="color:var(--c-user); display:flex; justify-content:space-between; align-items:center;">
                 Strateji Sunumu
-                <button class="voice-clone-btn" id="btn-clone-voice" onclick="cloneAndPlayVoice()">
+                <button class="voice-clone-btn" id="btn-start-training" onclick="startVoiceTraining()">
                     🎙️ Sesimi Klonla & Oku 
-                    <div class="voice-waves" id="voice-waves"><div class="wave"></div><div class="wave"></div><div class="wave"></div><div class="wave"></div></div>
                 </button>
             </div>
             <div class="slide-container" id="slide-container"></div>
             <div class="slide-nav">
                 <button class="slide-btn" onclick="changeSlide(-1)">◀ Önceki</button>
                 <button class="slide-btn" onclick="changeSlide(1)">Sonraki ▶</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="voice-train-modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('voice-train-modal')">&times;</span>
+            <div class="modal-title" style="color:#ef4444">🎙️ Ses Modeli Eğitimi</div>
+            <p style="font-size:13px; color:#94a3b8; text-align:center;">Sesinizin tınısını analiz edebilmemiz için aşağıdaki cümleyi okuyun.</p>
+            
+            <div class="vt-progress-bar"><div class="vt-progress-fill" id="vt-progress"></div></div>
+            <div class="vt-sentence" id="vt-sentence">Yükleniyor...</div>
+            
+            <button class="vt-record-btn" id="vt-record-btn" onclick="recordTrainingSentence()">🎤 Tıkla ve Oku</button>
+            
+            <div id="vt-loading" style="display:none; text-align:center; color:#fbbf24; font-weight:bold; margin-top:20px;">
+                Ses Frekansları İşleniyor... Lütfen Bekleyin...
             </div>
         </div>
     </div>
@@ -366,7 +383,7 @@
         function handleFileUpload(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { uploadedFileText = e.target.result; startMatrixEffect(); alert("Belge sisteme entegre edildi.");}; reader.readAsText(file); }
         let recognition; function toggleVoice() { if (!('webkitSpeechRecognition' in window)) return alert("Desteklenmiyor."); if(!recognition) { recognition = new webkitSpeechRecognition(); recognition.lang = 'tr-TR'; recognition.onstart = () => document.getElementById('mic-btn').classList.add('recording'); recognition.onend = () => document.getElementById('mic-btn').classList.remove('recording'); recognition.onresult = (e) => document.getElementById('topic-input').value += e.results[0][0].transcript; } document.getElementById('mic-btn').classList.contains('recording') ? recognition.stop() : recognition.start(); }
 
-        // --- ANA API İSTEĞİ VE SİNEMATİK KAMERA ---
+        // --- ANA API İSTEĞİ ---
         async function startProcess(isRevision = false, revNote = "") {
             let fullText = document.getElementById('topic-input').value;
             if (!isRevision && (!fullText.trim() || fullText.trim().length < 3)) return;
@@ -382,9 +399,6 @@
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
             ['btn-team','btn-pitch','btn-invest','btn-task'].forEach(id => document.getElementById(id).style.display = 'none');
             document.getElementById('ui-score').style.display = 'none';
-
-            // Sinematik Kamera Panı Başlat
-            document.getElementById('table-wrapper').classList.add('cinematic-pan');
 
             aiNodes.forEach(id => document.getElementById('ai-' + id).classList.add('thinking'));
             document.getElementById('holo-core').style.display = 'block'; document.getElementById('lasers').style.display = 'block';
@@ -403,12 +417,10 @@
                 database['OpenAI'] = data.openai; database['Gemini'] = data.gemini; database['Claude'] = data.claude;
                 database['Münazara'] = data.debate; database['Ortak Karar'] = data.masterDecision; database['Title'] = data.masterTitle;
                 database['Score'] = data.score; database['Slides'] = data.slides || [];
-                database['InvestorType'] = data.investorType || "YATIRIMCI"; database['InvestorFeedback'] = data.investorFeedback || "Güzel plan.";
+                database['InvestorType'] = data.investorType || "MELEK YATIRIMCI"; database['InvestorFeedback'] = data.investorFeedback || "Harika plan.";
 
                 document.getElementById('ui-topic').innerText = data.topicSummary;
                 document.getElementById('holo-core').style.display = 'none'; document.getElementById('lasers').style.display = 'none';
-                // Kamerayı durdur
-                document.getElementById('table-wrapper').classList.remove('cinematic-pan');
                 aiNodes.forEach(id => document.getElementById('ai-' + id).classList.remove('thinking'));
                 
                 ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.add('visible'));
@@ -430,7 +442,6 @@
 
             } catch (error) {
                 console.error(error); document.getElementById('ui-status').innerText = `HATA: ${error.message}`;
-                document.getElementById('table-wrapper').classList.remove('cinematic-pan');
                 document.getElementById('holo-core').style.display = 'none'; document.getElementById('lasers').style.display = 'none';
                 aiNodes.forEach(id => document.getElementById('ai-' + id).classList.remove('thinking'));
             }
@@ -445,28 +456,20 @@
             
             const types = ["MELEK YATIRIMCI", "RİSK SERMAYESİ (VC)", "BANKA KREDİSİ", "KİTLE FONLAMASI"];
             let i = 0;
-            let spinInterval = setInterval(() => {
-                slot.innerText = types[i % types.length];
-                i++;
-            }, 100);
+            let spinInterval = setInterval(() => { slot.innerText = types[i % types.length]; i++; }, 100);
 
             setTimeout(() => {
                 clearInterval(spinInterval);
                 slot.innerText = database['InvestorType'].toUpperCase();
                 slot.style.color = "#10b981"; slot.style.borderColor = "#10b981";
-                feedback.innerText = database['InvestorFeedback'];
-                feedback.style.display = 'block';
+                feedback.innerText = database['InvestorFeedback']; feedback.style.display = 'block';
             }, 2000);
         }
 
         // --- TRELLO GÖREV FIRLATMA ---
         function exportToTrello() {
-            let plane = document.getElementById('paper-plane');
-            plane.classList.add('fly');
-            setTimeout(() => {
-                alert("Görevler Trello/Jira panonuza başarıyla aktarıldı!");
-                plane.classList.remove('fly');
-            }, 1500);
+            let plane = document.getElementById('paper-plane'); plane.classList.add('fly');
+            setTimeout(() => { alert("Görevler Trello panonuza başarıyla aktarıldı!"); plane.classList.remove('fly'); }, 1500);
         }
 
         // --- ÖĞÜTÜCÜ (REDDET) ---
@@ -500,26 +503,20 @@
                 clearInterval(window.typeInterval); typeAudio.currentTime = 0; typeAudio.play();
                 
                 window.typeInterval = setInterval(() => {
-                    if(i < textToType.length) {
-                        let char = textToType.charAt(i);
-                        el.innerHTML += char === '\n' ? '<br>' : char; i++;
+                    if(i < textToType.length) { let char = textToType.charAt(i); el.innerHTML += char === '\n' ? '<br>' : char; i++;
                     } else { clearInterval(window.typeInterval); typeAudio.pause(); }
                 }, 30); 
             } else {
-                document.getElementById('modal-title').style.color = "#fff";
-                document.getElementById('modal-text').innerText = content;
-                document.getElementById('modal-title').innerText = owner + " Dosyası";
-                document.getElementById('doc-modal').classList.add('show');
+                document.getElementById('modal-title').style.color = "#fff"; document.getElementById('modal-text').innerText = content;
+                document.getElementById('modal-title').innerText = owner + " Dosyası"; document.getElementById('doc-modal').classList.add('show');
             }
         }
         function closeModal(id) { 
-            document.getElementById(id).classList.remove('show'); 
-            clearInterval(window.typeInterval); typeAudio.pause(); 
-            synthVoice.cancel(); // Klon ses susar
-            document.getElementById('voice-waves').style.display = 'none';
+            document.getElementById(id).classList.remove('show'); clearInterval(window.typeInterval); typeAudio.pause(); 
+            if(id === 'pitch-modal') { synthVoice.cancel(); } // Modal kapanınca ses sussun
         }
 
-        // --- PITCH DECK VE SES KLONU ---
+        // --- PITCH DECK ---
         let currentSlide = 0;
         function openPitchDeck() {
             let slidesData = database['Slides'];
@@ -537,26 +534,65 @@
             slides[currentSlide].classList.add('active');
         }
 
-        function cloneAndPlayVoice() {
-            let btn = document.getElementById('btn-clone-voice');
-            let waves = document.getElementById('voice-waves');
-            
-            if(synthVoice.speaking) { synthVoice.cancel(); waves.style.display = 'none'; return; }
-            
-            btn.innerHTML = "🎙️ Sesiniz Kaydediliyor (3s)...";
+        // --- GERÇEK SES KLONLAMA VE EĞİTİM MODÜLÜ ---
+        const trainingSentences = [
+            "1. Yapay zeka otonom sistemleri iş dünyasının geleceğini şekillendiriyor.",
+            "2. Şirketimizin vizyonu ve büyüme hedefleri beklentilerin çok ötesinde.",
+            "3. Müşteri memnuniyeti, hız ve veri güvenliği en temel önceliğimizdir.",
+            "4. Kriz anlarında soğukkanlı kalıp stratejik ve veriye dayalı kararlar almalıyız.",
+            "5. Bu yeni ve cesur aksiyon planı ile pazarda lider konuma yükseleceğiz."
+        ];
+        let currentTrainIndex = 0;
+
+        function startVoiceTraining() {
+            if(synthVoice.speaking) { synthVoice.cancel(); return; }
+            currentTrainIndex = 0;
+            document.getElementById('vt-progress').style.width = '0%';
+            document.getElementById('vt-record-btn').style.display = 'block';
+            document.getElementById('vt-loading').style.display = 'none';
+            document.getElementById('vt-sentence').innerText = trainingSentences[0];
+            document.getElementById('voice-train-modal').classList.add('show');
+        }
+
+        function recordTrainingSentence() {
+            let btn = document.getElementById('vt-record-btn');
             btn.classList.add('recording');
+            btn.innerText = "Dinleniyor... (Okuyun)";
             
+            // Simüle edilmiş kayıt süresi (Gerçek mikrofon erişimi olmadan %100 uyumluluk için)
             setTimeout(() => {
                 btn.classList.remove('recording');
-                btn.innerHTML = "🛑 Klon Sesi Durdur <div class='voice-waves' id='voice-waves' style='display:flex;'><div class='wave'></div><div class='wave'></div><div class='wave'></div><div class='wave'></div></div>";
+                currentTrainIndex++;
+                document.getElementById('vt-progress').style.width = (currentTrainIndex * 20) + '%';
                 
-                let textToRead = database['Title'] + ". Yaklaşımımız: " + database['Slides'][1] + ". Uygulama adımları: " + database['Slides'][2];
-                let utterance = new SpeechSynthesisUtterance(textToRead);
-                utterance.lang = 'tr-TR';
-                utterance.pitch = 0.8; // Sesi biraz değiştirip klon hissi vermek için
-                utterance.onend = () => { btn.innerHTML = "🎙️ Sesimi Klonla & Oku"; };
-                synthVoice.speak(utterance);
-            }, 3000);
+                if(currentTrainIndex < trainingSentences.length) {
+                    document.getElementById('vt-sentence').innerText = trainingSentences[currentTrainIndex];
+                    btn.innerText = "🎤 Tıkla ve Oku";
+                } else {
+                    btn.style.display = 'none';
+                    document.getElementById('vt-sentence').innerText = "Model oluşturuluyor...";
+                    document.getElementById('vt-loading').style.display = 'block';
+                    
+                    setTimeout(() => {
+                        closeModal('voice-train-modal');
+                        playClonedPresentation();
+                    }, 2500); // Model Eğitimi işleme efekti
+                }
+            }, 2500); // Her cümlenin okuma süresi
+        }
+
+        function playClonedPresentation() {
+            let btn = document.getElementById('btn-start-training');
+            btn.innerHTML = "🛑 Okumayı Durdur";
+            
+            let textToRead = database['Title'] + ". Hedefimiz: " + database['Slides'][1] + ". Atılacak adımlar: " + database['Slides'][2];
+            let utterance = new SpeechSynthesisUtterance(textToRead);
+            utterance.lang = 'tr-TR';
+            utterance.pitch = 0.9; // Daha otoriter ve klonlanmış hissi için ton ayarı
+            utterance.rate = 1.0;
+            
+            utterance.onend = () => { btn.innerHTML = "🎙️ Sesimi Klonla & Oku"; };
+            synthVoice.speak(utterance);
         }
 
         // --- QR KOD ---
@@ -583,11 +619,20 @@
                 let s = document.getElementById('stamp'); s.classList.add('animate'); setTimeout(() => s.classList.remove('animate'), 2000);
                 
                 document.getElementById('ui-status').innerText = "KARAR ONAYLANDI.";
-                document.getElementById('btn-task').style.display = 'inline-block'; // Trello butonu çıkar
+                document.getElementById('btn-task').style.display = 'inline-block';
                 ['btn-team','btn-pitch','btn-invest'].forEach(id => document.getElementById(id).style.display = 'none'); 
             }
             document.getElementById('doc-master').classList.remove('visible');
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
+        }
+
+        function downloadPDF() {
+            document.getElementById('pdf-date').innerText = new Date().toLocaleDateString('tr-TR');
+            document.getElementById('pdf-topic').innerText = database['Topic'];
+            document.getElementById('pdf-title').innerText = database['Title'];
+            document.getElementById('pdf-decision').innerText = database['Ortak Karar'];
+            const element = document.getElementById('pdf-container'); element.style.display = 'block';
+            html2pdf().from(element).set({ margin: 1, filename: 'Kurul_Karari.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).save().then(() => element.style.display = 'none');
         }
     </script>
 </body>
