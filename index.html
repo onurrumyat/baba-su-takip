@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Komuta Merkezi | Kusursuz Kurul</title>
+    <title>AI Komuta Merkezi | Kesintisiz Lazer Şov</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -38,6 +38,7 @@
         .tools-btn:hover { background: rgba(255,255,255,0.1); }
         .tools-btn.active { background: var(--c-user); color: #000; border-color: var(--c-user);}
         .projects-btn { background: rgba(56, 189, 248, 0.1); color: var(--c-user); border: 1px solid var(--c-user); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.2s; }
+        .projects-btn:hover { background: var(--c-user); color: #000; }
         
         .live-btn { background: #c255ff; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.2s; animation: pulseLive 2s infinite alternate;}
         .live-btn.active { background: white; color: #c255ff; box-shadow: 0 0 15px #c255ff; }
@@ -59,20 +60,20 @@
         .btn-pdf { background: #fbbf24; color: #000; display: none; } .btn-pdf:hover { background: #d97706; color: white; }
         .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* --- ORTA ALAN VE MASA --- */
+        /* --- ORTA ALAN: SABİT VE KUSURSUZ MASA --- */
         .stage { flex: 1; min-height: 0; display: flex; justify-content: center; align-items: center; position: relative; perspective: 1000px; padding: 30px; }
         .system-status { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); color: var(--c-user); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; z-index: 20; text-align: center; white-space:nowrap;}
         
         .table-wrapper { position: relative; width: 100%; max-width: 650px; aspect-ratio: 2 / 1.2; transform: rotateX(15deg); transform-style: preserve-3d; }
         .board-table { width: 100%; height: 100%; background: var(--table-surface); border: 8px solid var(--table-rim); border-radius: 500px; box-shadow: 0 25px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; position: relative; transition: 0.5s; }
         .table-wrapper.wood-mode .board-table { background: linear-gradient(135deg, #4f2e1e 0%, #2e180d 50%, #1a0c05 100%); border-color: #2b1408; box-shadow: 0 35px 60px rgba(0,0,0,0.9), inset 0 0 40px rgba(0,0,0,0.9), inset 0 0 10px rgba(255, 165, 0, 0.1); }
+        .table-wrapper.wood-mode .board-table::before { content: ''; position: absolute; inset: 0; border-radius: 500px; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px); pointer-events: none; }
 
-        /* HOLO MERKEZ */
+        /* HOLO MERKEZ VE ORTAYA ÇIKAN AVATAR */
         .holo-center { width: 65%; height: 55%; background: rgba(56, 189, 248, 0.02); border-radius: 500px; border: 1px solid rgba(56, 189, 248, 0.1); position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; transition: 0.3s; z-index: 2;}
         .holo-core { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed var(--holo-color); animation: spinHolo 3s linear infinite; display: none; box-shadow: 0 0 15px var(--holo-color);}
         @keyframes spinHolo { 100% { transform: rotate(360deg); } }
         
-        /* CANLI TOPLANTI KONUŞMACI AVATARI */
         .center-speaker { position: absolute; display: none; flex-direction: column; align-items: center; gap: 8px; z-index: 10; animation: centerPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .center-speaker .node-icon { width: 70px; height: 70px; font-size: 30px; border-radius: 15px; border: 3px solid; background: rgba(0,0,0,0.8); animation: speakGlow 0.4s infinite alternate; }
         .center-speaker .node-name { font-size: 12px; padding: 4px 10px; background: rgba(0,0,0,0.9); border-radius: 4px; font-weight:bold;}
@@ -80,12 +81,13 @@
 
         /* MÜTHİŞ VERİ GİT-GEL EFEKTİ (LAZERLER) */
         .laser-container { position: absolute; inset: 0; pointer-events: none; display: none; z-index: 3; }
-        .laser-line { position: absolute; top: 50%; left: 50%; transform-origin: left center; height: 3px; opacity: 0; }
+        .laser-line { position: absolute; top: 50%; left: 50%; transform-origin: left center; height: 4px; opacity: 0; border-radius: 2px; }
         
-        .ll-openai { background: linear-gradient(90deg, transparent, var(--c-openai), #fff); transform: rotate(-90deg); animation: shootData 0.6s infinite; }
-        .ll-user   { background: linear-gradient(90deg, transparent, var(--c-user), #fff); transform: rotate(90deg); animation: shootData 0.9s infinite 0.2s; }
-        .ll-gemini { background: linear-gradient(90deg, transparent, var(--c-gemini), #fff); transform: rotate(180deg); animation: shootData 0.7s infinite 0.4s; }
-        .ll-claude { background: linear-gradient(90deg, transparent, var(--c-claude), #fff); transform: rotate(0deg); animation: shootData 0.8s infinite 0.1s; }
+        /* Lazerlerin parlaklığı artırıldı ve şov garanti altına alındı */
+        .ll-openai { background: linear-gradient(90deg, transparent, var(--c-openai), #fff); transform: rotate(-90deg); animation: shootData 0.6s infinite; box-shadow: 0 0 10px var(--c-openai); }
+        .ll-user   { background: linear-gradient(90deg, transparent, var(--c-user), #fff); transform: rotate(90deg); animation: shootData 0.9s infinite 0.2s; box-shadow: 0 0 10px var(--c-user); }
+        .ll-gemini { background: linear-gradient(90deg, transparent, var(--c-gemini), #fff); transform: rotate(180deg); animation: shootData 0.7s infinite 0.4s; box-shadow: 0 0 10px var(--c-gemini); }
+        .ll-claude { background: linear-gradient(90deg, transparent, var(--c-claude), #fff); transform: rotate(0deg); animation: shootData 0.8s infinite 0.1s; box-shadow: 0 0 10px var(--c-claude); }
         
         @keyframes shootData { 
             0% { width: 0px; opacity: 1; left: 50%;} 
@@ -93,7 +95,11 @@
             100% { width: 240px; opacity: 0; left: 50%;} 
         }
 
-        /* AVATARLARIN SABİT YERLERİ */
+        .matrix-rain { position: absolute; inset: 0; pointer-events: none; color: #4ade80; font-family: monospace; font-size: 12px; display: none; text-shadow: 0 0 5px #4ade80; z-index: 1;}
+        .matrix-drop { position: absolute; top: -20px; animation: fall linear forwards; }
+        @keyframes fall { to { top: 100%; } }
+
+        /* KÜÇÜK AVATARLAR (SİMETRİK YERLEŞİM) */
         .node { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 5; opacity: 0.6; transition: 0.3s;}
         .node-icon { width: 35px; height: 35px; border-radius: 8px; background: #0f1117; display: flex; justify-content: center; align-items: center; font-size: 16px; font-weight: 800; border: 2px solid; box-shadow: 0 8px 15px rgba(0,0,0,0.8); transform: rotateX(-15deg); transition: 0.3s;}
         .node-name { font-size: 9px; font-weight: 800; letter-spacing: 1px; color: #fff; text-transform: uppercase; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px; transform: rotateX(-15deg); margin-top:-5px;}
@@ -113,8 +119,8 @@
         @keyframes speakGlow { from { box-shadow: 0 0 10px currentColor; } to { box-shadow: 0 0 35px currentColor, inset 0 0 15px currentColor; } }
         .hidden-node { opacity: 0 !important; pointer-events: none; }
 
-        /* SİMETRİK ÇIKAN DOSYALAR (MASANIN ORTASI) */
-        .doc { position: absolute; width: 26px; height: 36px; background: rgba(255,255,255,0.95); border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0; transform: scale(0) translate(-50%, -50%); transition: 0.4s; box-shadow: 0 4px 10px rgba(0,0,0,0.7); font-size: 13px; border-left: 3px solid #ccc; color: black; z-index: 6;}
+        /* SİMETRİK DOSYALAR (İÇ DAİREDE) */
+        .doc { position: absolute; width: 26px; height: 36px; background: rgba(255,255,255,0.95); border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0; transform: scale(0) translate(-50%, -50%); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 4px 10px rgba(0,0,0,0.7); font-size: 13px; border-left: 3px solid #ccc; color: black; z-index: 6;}
         .doc:hover { transform: scale(1.3) translate(-40%, -40%) !important; z-index: 10; }
         .doc.visible { opacity: 1; transform: scale(1) translate(-50%, -50%); }
         
@@ -126,7 +132,7 @@
         .master-doc:hover { transform: translate(-50%, -50%) scale(1.15) !important; z-index: 10; }
         .master-doc.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
-        /* YÜKLENEN DIŞ DOSYA (MASANIN KENARI) */
+        /* YÜKLENEN DIŞ DOSYA (A4 ŞEKLİNDE - DIŞ CEPHE) */
         .uploaded-doc { position: absolute; bottom: 15%; right: 15%; width: 34px; height: 46px; background: #e2e8f0; border-radius: 3px; display: none; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.6); z-index: 5; border-top-right-radius: 10px; }
         .uploaded-doc::before { content: ''; position: absolute; top: 0; right: 0; border-width: 0 10px 10px 0; border-style: solid; border-color: #cbd5e1 transparent transparent #cbd5e1; display: block; width: 0; }
         .uploaded-doc:hover { transform: scale(1.2) translateY(-5px); }
@@ -293,7 +299,7 @@
 
         const colors = { 'openai': '#10a37f', 'claude': '#d97757', 'gemini': '#c255ff', 'user': '#38bdf8' };
         const icons = { 'openai': 'O', 'claude': 'C', 'gemini': 'G', 'user': '👤' };
-        const displayNames = { 'openai': 'OpenAI', 'claude': 'Claude', 'gemini': 'Gemini', 'user': 'Sen' };
+        const displayNames = { 'openai': 'OpenAI', 'claude': 'Claude', 'gemini': 'Gemini', 'user': 'Sen (Başkan)' };
 
         let lofiAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3'); lofiAudio.loop = true;
 
@@ -304,18 +310,40 @@
                                  voices.find(v => v.lang.includes('tr') && v.name.includes('Microsoft')) || 
                                  voices.find(v => v.lang === 'tr-TR' || v.lang === 'tr_TR');
         }
-        window.onload = () => { setTurkishVoice(); if (synthVoice.onvoiceschanged !== undefined) { synthVoice.onvoiceschanged = setTurkishVoice; } };
+
+        window.onload = () => {
+            setTurkishVoice();
+            if (synthVoice.onvoiceschanged !== undefined) { synthVoice.onvoiceschanged = setTurkishVoice; }
+        };
 
         function toggleBoardMode() { document.getElementById('table-wrapper').classList.toggle('wood-mode'); document.getElementById('board-toggle-btn').classList.toggle('active'); }
-        function toggleNightMode() { if(document.getElementById('nightModu').checked) { document.body.classList.add('night-mode'); } else { document.body.classList.remove('night-mode'); } }
+        
+        function toggleNightMode() { 
+            if(document.getElementById('nightModu').checked) { document.body.classList.add('night-mode'); } 
+            else { document.body.classList.remove('night-mode'); } 
+        }
+        
         function toggleRelaxMode() { 
             if(document.getElementById('relaxModu').checked) { 
-                document.body.classList.add('relax-mode'); lofiAudio.play();
-                const rc = document.getElementById('rain-container'); rc.innerHTML = '';
-                for(let i=0; i<40; i++) { let d = document.createElement('div'); d.className='rain-drop'; d.style.left = Math.random()*100 + '%'; d.style.animationDuration = (Math.random()*0.5 + 0.5) + 's'; d.style.animationDelay = Math.random() + 's'; rc.appendChild(d); }
+                document.body.classList.add('relax-mode'); 
+                lofiAudio.play();
+                createRain(); 
             } else { 
-                document.body.classList.remove('relax-mode'); lofiAudio.pause(); document.getElementById('rain-container').innerHTML = ''; 
+                document.body.classList.remove('relax-mode'); 
+                lofiAudio.pause();
+                document.getElementById('rain-container').innerHTML = ''; 
             } 
+        }
+
+        function createRain() {
+            const rc = document.getElementById('rain-container'); rc.innerHTML = '';
+            for(let i=0; i<40; i++) { 
+                let drop = document.createElement('div'); drop.className='rain-drop'; 
+                drop.style.left = Math.random()*100 + '%'; 
+                drop.style.animationDuration = (Math.random()*0.5 + 0.5) + 's'; 
+                drop.style.animationDelay = Math.random() + 's'; 
+                rc.appendChild(drop); 
+            }
         }
 
         // --- DIŞ CEPHE DOSYA YÜKLEME ---
@@ -385,9 +413,15 @@
 
         // --- SES KAYIT / BAS-KONUŞ (PTT) ---
         function initSpeech() {
-            if (!('webkitSpeechRecognition' in window)) { alert("Tarayıcınız desteklemiyor (Chrome kullanın)."); return false; }
+            if (!('webkitSpeechRecognition' in window)) { 
+                alert("Tarayıcınız ses tanımayı desteklemiyor. Lütfen Google Chrome kullanın."); 
+                return false; 
+            }
             recognition = new webkitSpeechRecognition();
-            recognition.lang = 'tr-TR'; recognition.interimResults = true; recognition.continuous = true;
+            recognition.lang = 'tr-TR';
+            recognition.interimResults = true;
+            recognition.continuous = true;
+
             recognition.onresult = (event) => {
                 let interimText = '';
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -396,13 +430,25 @@
                 }
                 document.getElementById('topic-input').value = finalPttText + interimText;
             };
-            recognition.onerror = (e) => { stopPTT(); };
+
+            recognition.onerror = (e) => { 
+                console.error("Mikrofon Hatası:", e.error); 
+                stopPTT(); 
+                document.getElementById('ptt-btn').innerText = "🎙️ Hata: Mikrofon algılanamadı.";
+                setTimeout(() => { document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; }, 3000);
+            };
+
             recognition.onend = () => {
-                if (finalPttText.trim().length > 0) sendLiveMessage(finalPttText);
-                else {
+                if (finalPttText.trim().length > 0) {
+                    sendLiveMessage(finalPttText);
+                } else {
                     let typedText = document.getElementById('topic-input').value;
                     if(typedText.trim().length > 0) sendLiveMessage(typedText);
-                    else { document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; document.getElementById('ptt-btn').classList.remove('recording'); hideCenterSpeaker(); }
+                    else {
+                        document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş";
+                        document.getElementById('ptt-btn').classList.remove('recording');
+                        hideCenterSpeaker();
+                    }
                 }
             };
             return true;
@@ -412,7 +458,12 @@
             if(e) { e.preventDefault(); e.stopPropagation(); }
             if(isRecording) return;
 
-            if(synthVoice.speaking) { synthVoice.cancel(); currentDialogueQueue = []; document.getElementById('ui-status').innerText = "SÖZ KESİLDİ. SİZİ DİNLİYORUM..."; }
+            if(synthVoice.speaking) {
+                synthVoice.cancel();
+                currentDialogueQueue = [];
+                document.getElementById('ui-status').innerText = "SÖZ KESİLDİ. SİZİ DİNLİYORUM...";
+            }
+
             if(!recognition) { if(!initSpeech()) return; }
 
             finalPttText = ""; document.getElementById('topic-input').value = "";
@@ -421,7 +472,7 @@
             document.getElementById('ptt-btn').innerText = "🎙️ Dinliyorum... (Konuşun)";
             showCenterSpeaker('user');
 
-            try { recognition.start(); } catch(err) {}
+            try { recognition.start(); } catch(err) { console.error(err); }
         }
 
         function stopPTT(e) {
@@ -431,7 +482,7 @@
 
             document.getElementById('ptt-btn').classList.remove('recording');
             document.getElementById('ptt-btn').innerText = "⏳ Sesiniz İşleniyor...";
-            try { recognition.stop(); } catch(err) {}
+            try { recognition.stop(); } catch(err) { console.error(err); }
         }
 
         function triggerSend() {
@@ -449,6 +500,8 @@
             
             document.getElementById('ui-status').innerText = "YAPAY ZEKALAR TARTIŞIYOR...";
             hideCenterSpeaker(); 
+            
+            // LAZER ŞOVUNU AÇ
             document.getElementById('holo-core').style.display = 'block';
             document.getElementById('lasers').style.display = 'block'; 
 
@@ -458,9 +511,10 @@
                     body: JSON.stringify({ topic: text, isLiveDebate: true, history: conversationHistory })
                 });
 
-                if (!response.ok) throw new Error("API Yanıt Vermedi");
+                if (!response.ok) throw new Error("API Yanıt Vermedi (Vercel/Anahtar Hatası)");
                 const data = await response.json();
                 
+                // LAZER ŞOVUNU KAPAT
                 document.getElementById('holo-core').style.display = 'none';
                 document.getElementById('lasers').style.display = 'none'; 
                 
@@ -471,7 +525,7 @@
                     currentDialogueQueue = data.liveDialogue;
                     playNextDebateLine(); 
                 } else {
-                    document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş";
+                    throw new Error("Boş veri döndü.");
                 }
             } catch(e) {
                 console.error(e); 
@@ -482,6 +536,7 @@
             }
         }
 
+        // --- GERÇEK TÜRKÇE SES İLE OKUMA VE AVATAR EFEKTİ ---
         function playNextDebateLine() {
             if(currentDialogueQueue.length === 0) {
                 document.getElementById('ui-status').innerText = "SIRA SİZDE. KONUŞABİLİRSİNİZ.";
@@ -508,12 +563,12 @@
             else { utterance.pitch = 1.0; utterance.rate = 1.0; }
 
             utterance.onend = () => { playNextDebateLine(); }; 
-            utterance.onerror = (e) => { playNextDebateLine(); }; 
+            utterance.onerror = (e) => { console.error(e); playNextDebateLine(); }; 
             
             synthVoice.speak(utterance);
         }
 
-        // --- STANDART KURUL MODU (%100 KESİNTİSİZ ŞOV) ---
+        // --- STANDART KURUL MODU (KESİNTİSİZ ŞOV %100 ÇALIŞIR) ---
         async function startProcess(isRevision = false, revNote = "") {
             if(isLiveMode) return;
 
@@ -531,8 +586,9 @@
             document.querySelectorAll('.doc, .master-doc').forEach(el => el.classList.remove('visible'));
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
             document.getElementById('btn-pdf').style.display = 'none';
+            document.getElementById('ui-score').style.display = 'none';
 
-            // EFEKTLER KESİN BAŞLAR
+            // EFEKTLER KESİN BAŞLAR VE LAZERLER UÇAR
             aiNodes.forEach(id => { let el = document.getElementById('ai-' + id); if(el) el.classList.add('thinking'); });
             document.getElementById('holo-core').style.display = 'block'; 
             document.getElementById('lasers').style.display = 'block'; 
@@ -570,7 +626,7 @@
                 database['Gemini'] = "Sistem Hatası: " + error.message; 
                 database['Claude'] = "Sistem Hatası: " + error.message;
                 database['Münazara'] = "Hata oluştu."; 
-                database['Ortak Karar'] = "API bağlantısı kurulamadığı için karar oluşturulamadı. Lütfen Vercel ayarlarınızı kontrol edin."; 
+                database['Ortak Karar'] = "API bağlantısı kurulamadı. Vercel ayarlarınızı kontrol edin."; 
                 database['Title'] = "SİSTEM BAĞLANTI HATASI";
                 database['Score'] = "0"; 
             }
@@ -580,7 +636,7 @@
             document.getElementById('lasers').style.display = 'none';
             aiNodes.forEach(id => { let el = document.getElementById('ai-' + id); if(el) el.classList.remove('thinking'); });
             
-            // DOSYALARI MASAYA KOY
+            // DOSYALARI MASAYA ŞAK DİYE KOY
             ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.add('visible'));
             
             if (database['Title'] !== "SİSTEM BAĞLANTI HATASI") {
