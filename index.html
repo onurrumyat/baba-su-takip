@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Komuta Merkezi | Ultimate Edition</title>
+    <title>AI Komuta Merkezi | Premium Edition</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -15,18 +15,13 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background-color: var(--bg-main); background-image: radial-gradient(circle at 50% -20%, rgba(56, 189, 248, 0.05) 0%, transparent 70%);
-            color: var(--text-light); font-family: 'Segoe UI', system-ui, sans-serif;
-            height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.5s;
-        }
+        body { background-color: var(--bg-main); background-image: radial-gradient(circle at 50% -20%, rgba(56, 189, 248, 0.05) 0%, transparent 70%); color: var(--text-light); font-family: 'Segoe UI', system-ui, sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.5s; }
 
-        /* --- KRİZ MODU --- */
+        /* KRİZ & GECE MODU */
         body.crisis-mode { background-color: #1a0505; background-image: radial-gradient(circle at 50% -20%, rgba(255, 0, 0, 0.15) 0%, transparent 70%); animation: crisisPulse 2s infinite; }
         body.crisis-mode .board-table { box-shadow: 0 30px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,0,0,0.2); border-color: #3a1515;}
         @keyframes crisisPulse { 0%, 100% { background-color: #1a0505; } 50% { background-color: #2a0505; } }
 
-        /* --- GECE MESAİSİ MODU (NIGHT MODE) --- */
         body.night-mode { background-color: #020617; background-image: none; }
         body.night-mode .board-table { box-shadow: 0 40px 60px rgba(0,0,0,0.9), inset 0 0 30px rgba(14, 165, 233, 0.1); border-color: #0f172a;}
         .rain-container { position: absolute; inset: 0; pointer-events: none; z-index: 100; overflow: hidden; display: none; }
@@ -34,14 +29,14 @@
         .rain-drop { position: absolute; background: linear-gradient(transparent, rgba(255,255,255,0.3)); width: 1px; height: 50px; animation: rainFall linear infinite; }
         @keyframes rainFall { to { transform: translateY(100vh); } }
 
-        /* ONAY MÜHRÜ VE TİTREME */
+        /* MÜHÜR EFEKTİ */
         .stamp { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(5); opacity: 0; pointer-events: none; z-index: 1000; font-size: 60px; color: #ef4444; border: 6px solid #ef4444; padding: 10px 20px; border-radius: 15px; font-weight: 900; letter-spacing: 3px; text-shadow: 0 0 10px rgba(255,0,0,0.5); font-family: Impact, sans-serif; }
         .stamp.animate { animation: stampIn 0.5s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes stampIn { to { transform: translate(-50%, -50%) scale(1) rotate(-15deg); opacity: 0.9; } }
         .shake { animation: shakeScreen 0.4s; }
         @keyframes shakeScreen { 0%,100%{transform:translate(0,0);} 20%{transform:translate(-2px,0);} 40%{transform:translate(2px,-2px);} 60%{transform:translate(-2px,2px);} 80%{transform:translate(2px,2px);} }
 
-        /* --- ÜST PANEL --- */
+        /* ÜST PANEL */
         #main-app { display: flex; flex-direction: column; height: 100%; width: 100%; }
         .header-panel { background: var(--bg-panel); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border-glass); padding: 10px 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; z-index: 10; }
         .header-left { display: flex; gap: 8px; align-items: center; flex-wrap: wrap;}
@@ -50,11 +45,13 @@
         .tools-btn.active { background: var(--c-user); color: #000; border-color: var(--c-user);}
         .crisis-checkbox { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #ef4444; font-weight: bold; cursor: pointer;}
         .night-checkbox { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #38bdf8; font-weight: bold; cursor: pointer;}
-        .board-select { background: #010409; color: white; border: 1px solid var(--border-glass); padding: 6px; border-radius: 6px; font-size: 11px; outline: none;}
+        
+        /* Layout Shift Çözümü: Sabit Genişlik */
+        .board-select { width: 150px; background: #010409; color: white; border: 1px solid var(--border-glass); padding: 6px; border-radius: 6px; font-size: 11px; outline: none; text-overflow: ellipsis;}
 
         .info-card { flex: 1; min-width: 120px; }
         .info-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-        .vote-highlight { color: #fbbf24; font-size: 13px; text-shadow: 0 0 10px rgba(251, 191, 36, 0.3); font-weight: 700;}
+        .vote-highlight { color: #fbbf24; font-size: 13px; text-shadow: 0 0 10px rgba(251, 191, 36, 0.3); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .efficiency-score { font-size: 11px; color: #4ade80; font-weight: bold; display: none; margin-top: 2px;}
 
         .vote-actions { display: flex; gap: 6px; flex-wrap: wrap;}
@@ -62,7 +59,6 @@
         .btn-yes { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); } .btn-yes:hover:not(:disabled) { background: #22c55e; color: white; }
         .btn-no { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); } .btn-no:hover:not(:disabled) { background: #ef4444; color: white; }
         .btn-rev { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); } .btn-rev:hover:not(:disabled) { background: #38bdf8; color: black; }
-        .btn-boom { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; display: none; } .btn-boom:hover { background: #ef4444; color: white; }
         .btn-team { background: rgba(194, 85, 255, 0.15); color: #c255ff; border: 1px solid rgba(194, 85, 255, 0.4); display: none; } .btn-team:hover { background: #c255ff; color: white; }
         .btn-pitch { background: #64748b; color: white; display: none; } .btn-pitch:hover { background: #94a3b8; }
         .btn-pdf { background: #fbbf24; color: #000; display: none; } 
@@ -73,17 +69,29 @@
         .system-status { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); color: var(--c-user); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; z-index: 20;}
         
         .table-wrapper { position: relative; width: 100%; max-width: 650px; aspect-ratio: 2 / 1.2; transform: rotateX(15deg); transform-style: preserve-3d; transition: 0.5s; }
-        .board-table { width: 100%; height: 100%; background: var(--table-surface); border: 8px solid var(--table-rim); border-radius: 500px; box-shadow: 0 25px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; position: relative; transition: 0.5s; }
-        .table-wrapper.wood-mode .board-table { background: radial-gradient(circle, #4a2b18 0%, #1e1007 100%); border-color: #110803; box-shadow: 0 30px 50px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,0,0,0.9); }
+        .board-table { width: 100%; height: 100%; background: var(--table-surface); border: 8px solid var(--table-rim); border-radius: 500px; box-shadow: 0 25px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; position: relative; transition: 0.5s; overflow: hidden;}
+        
+        /* ZENGİNLEŞTİRİLMİŞ AHŞAP MASA (Premium Wood) */
+        .table-wrapper.wood-mode .board-table { background: linear-gradient(135deg, #4a2511 0%, #1e0b02 100%); border-color: #2b1408; box-shadow: 0 30px 50px rgba(0,0,0,0.9), inset 0 0 40px rgba(0,0,0,0.9), inset 0 0 10px rgba(255, 165, 0, 0.1); }
+        .table-wrapper.wood-mode .board-table::before { content: ''; position: absolute; inset: 0; border-radius: 500px; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px); pointer-events: none; }
+        .table-wrapper.wood-mode .holo-center { background: rgba(0, 0, 0, 0.5); border-color: rgba(255,255,255,0.05); box-shadow: inset 0 0 25px rgba(0,0,0,0.8);}
 
-        .holo-center { width: 65%; height: 50%; background: rgba(56, 189, 248, 0.02); border-radius: 500px; border: 1px solid rgba(56, 189, 248, 0.1); position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; transition: 0.3s;}
-        .holo-core { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed var(--holo-color); animation: spinHolo 3s linear infinite; display: none; }
+        .holo-center { width: 65%; height: 50%; background: rgba(56, 189, 248, 0.02); border-radius: 500px; border: 1px solid rgba(56, 189, 248, 0.1); position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; transition: 0.3s; z-index: 2;}
+        .holo-core { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed var(--holo-color); animation: spinHolo 3s linear infinite; display: none; box-shadow: 0 0 15px var(--holo-color);}
         @keyframes spinHolo { 100% { transform: rotate(360deg); } }
         
+        /* 4 YÖNLÜ LAZER (YUKARI, AŞAĞI, SAĞ, SOL) */
         .laser-container { position: absolute; inset: 0; pointer-events: none; display: none; }
-        .laser-line { position: absolute; top: 50%; left: 50%; width: 50%; height: 2px; background: linear-gradient(90deg, transparent, var(--c-openai), transparent); transform-origin: left; animation: shootLaser 0.6s infinite; opacity: 0; }
-        .laser-line:nth-child(2) { background: linear-gradient(90deg, transparent, var(--c-claude), transparent); animation-delay: 0.3s; transform: rotate(180deg); }
-        @keyframes shootLaser { 0% { width: 0; opacity: 1; } 50% { width: 150px; opacity: 1; } 100% { width: 200px; opacity: 0; } }
+        .laser { position: absolute; top: 50%; left: 50%; opacity: 0; }
+        .laser-1 { width: 50%; height: 2px; background: linear-gradient(90deg, var(--c-claude), transparent); transform-origin: left; transform: rotate(0deg); animation: shootLaser 0.7s infinite; }
+        .laser-2 { width: 50%; height: 2px; background: linear-gradient(90deg, var(--c-gemini), transparent); transform-origin: left; transform: rotate(180deg); animation: shootLaser 0.6s infinite 0.2s; }
+        .laser-3 { width: 50%; height: 2px; background: linear-gradient(90deg, var(--c-openai), transparent); transform-origin: left; transform: rotate(-90deg); animation: shootLaser 0.8s infinite 0.4s; }
+        .laser-4 { width: 50%; height: 2px; background: linear-gradient(90deg, var(--c-user), transparent); transform-origin: left; transform: rotate(90deg); animation: shootLaser 0.9s infinite 0.1s; }
+        @keyframes shootLaser { 0% { width: 0; opacity: 1; } 50% { width: 150px; opacity: 1; } 100% { width: 250px; opacity: 0; } }
+        
+        .matrix-rain { position: absolute; inset: 0; pointer-events: none; color: #4ade80; font-family: monospace; font-size: 12px; display: none; text-shadow: 0 0 5px #4ade80; z-index: 1;}
+        .matrix-drop { position: absolute; top: -20px; animation: fall linear forwards; }
+        @keyframes fall { to { top: 100%; } }
 
         /* SİMETRİK DOSYALAR VE ÖĞÜTÜCÜ */
         .doc { position: absolute; width: 26px; height: 36px; background: rgba(255,255,255,0.95); border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0; transform: scale(0); transition: 0.4s; box-shadow: 0 4px 10px rgba(0,0,0,0.7); font-size: 13px; border-left: 3px solid #ccc; color: black; z-index: 6;}
@@ -103,7 +111,7 @@
         .shredding { animation: shredDoc 1.5s forwards ease-in !important; pointer-events: none;}
         @keyframes shredDoc { 0% { top: 50%; transform: translate(-50%, -50%) scale(1); opacity: 1;} 40% { top: 75%; transform: translate(-50%, -50%) scale(0.8); opacity: 1;} 100% { top: 85%; transform: translate(-50%, -20%) scale(0.8); opacity: 0; height: 0;} }
 
-        /* AVATARLAR */
+        /* AVATARLAR (Modellerin Gerçek İsimleri) */
         .node { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 5; }
         .node-icon { width: 40px; height: 40px; border-radius: 10px; background: #0f1117; display: flex; justify-content: center; align-items: center; font-size: 18px; font-weight: 800; border: 2px solid; box-shadow: 0 8px 15px rgba(0,0,0,0.8); transition: 0.3s; transform: rotateX(-15deg); }
         .node-name { font-size: 9px; font-weight: 800; letter-spacing: 1px; color: #fff; text-transform: uppercase; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px; transform: rotateX(-15deg); margin-top:-5px;}
@@ -141,10 +149,6 @@
         .vote-bar-container { width: 100%; height: 20px; background: #334155; border-radius: 10px; overflow: hidden; margin-top: 15px; position: relative;}
         .vote-bar-fill { height: 100%; background: #4ade80; width: 0%; transition: width 1s ease-out; }
         .vote-text { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: bold; color: white; text-shadow: 0 0 3px black;}
-
-        /* PRE-MORTEM MODALI */
-        .modal-content.danger { border-color: #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); }
-        .pm-text { font-size: 14px; font-style: italic; color: #fca5a5; line-height: 1.8;}
 
         /* GERÇEK TELEFON OYLAMA EKRANI (VOTE UI) */
         #vote-app { display: none; flex-direction: column; justify-content: center; align-items: center; height: 100vh; width: 100%; padding: 20px; text-align: center; background: #0a0b10;}
@@ -202,7 +206,6 @@
             <div class="vote-actions">
                 <button class="btn btn-yes" id="btn-y" disabled onclick="userVote(true)">Onayla</button>
                 <button class="btn btn-team" id="btn-team" onclick="openTeamVote()">📲 Ekibe Sor</button>
-                <button class="btn btn-boom" id="btn-boom" onclick="openPreMortem()">💥 Planı Patlat</button>
                 <button class="btn btn-rev" id="btn-rev" disabled onclick="requestRevision()">Revize</button>
                 <button class="btn btn-no" id="btn-n" disabled onclick="rejectWithShredder()">Reddet</button>
                 <button class="btn btn-pitch" id="btn-pitch" onclick="openPitchDeck()">🖥️ Sunum</button>
@@ -216,7 +219,13 @@
                 <div class="board-table">
                     <div class="holo-center" id="holo-center">
                         <div class="holo-core" id="holo-core"></div>
-                        <div class="laser-container" id="lasers"><div class="laser-line"></div><div class="laser-line"></div></div>
+                        <div class="laser-container" id="lasers">
+                            <div class="laser laser-1"></div>
+                            <div class="laser laser-2"></div>
+                            <div class="laser laser-3"></div>
+                            <div class="laser laser-4"></div>
+                        </div>
+                        <div class="matrix-rain" id="matrix-rain"></div>
                         <div class="doc d-openai" id="doc-openai" onclick="openDoc('OpenAI')">📄</div>
                         <div class="doc d-gemini" id="doc-gemini" onclick="openDoc('Gemini')">📄</div>
                         <div class="doc d-claude" id="doc-claude" onclick="openDoc('Claude')">📄</div>
@@ -225,10 +234,10 @@
                     
                     <div class="shredder-box" id="shredder-box"><div class="shredder-slot"></div></div>
                     
-                    <div class="node n-openai" id="ai-openai"><div class="node-icon">1</div><div class="node-name">Uzman 1</div></div>
-                    <div class="node n-gemini" id="ai-gemini"><div class="node-icon">3</div><div class="node-name">Uzman 3</div></div>
-                    <div class="node n-claude" id="ai-claude"><div class="node-icon">2</div><div class="node-name">Uzman 2</div></div>
-                    <div class="node n-user" id="ai-user"><div class="node-icon">👤</div><div class="node-name">Başkan</div></div>
+                    <div class="node n-openai" id="ai-openai"><div class="node-icon">O</div><div class="node-name">OpenAI</div></div>
+                    <div class="node n-gemini" id="ai-gemini"><div class="node-icon">G</div><div class="node-name">Gemini</div></div>
+                    <div class="node n-claude" id="ai-claude"><div class="node-icon">C</div><div class="node-name">Claude</div></div>
+                    <div class="node n-user" id="ai-user"><div class="node-icon">👤</div><div class="node-name">Sen (Başkan)</div></div>
                 </div>
             </div>
         </div>
@@ -249,14 +258,6 @@
         </div>
     </div>
 
-    <div class="modal" id="prem-modal">
-        <div class="modal-content danger">
-            <span class="close-btn" onclick="closeModal('prem-modal')">&times;</span>
-            <div class="modal-title" style="color:#ef4444">☠️ 1 Yıl Sonra: OTOPSİ RAPORU</div>
-            <div class="pm-text" id="pm-text"></div>
-        </div>
-    </div>
-
     <div class="modal" id="pitch-modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('pitch-modal')">&times;</span><div class="modal-title" style="color:var(--c-user)">Strateji Sunumu</div><div class="slide-container" id="slide-container"></div><div class="slide-nav"><button class="slide-btn" onclick="changeSlide(-1)">◀ Önceki</button><button class="slide-btn" onclick="changeSlide(1)">Sonraki ▶</button></div></div></div>
     
     <div class="modal" id="qr-modal"><div class="modal-content" style="max-width: 400px; text-align: center;"><span class="close-btn" onclick="closeModal('qr-modal')">&times;</span><div class="modal-title" style="color:#c255ff">Ekip Oylaması (Canlı)</div><div class="qr-wrapper"><img src="" id="qr-img" class="qr-img" alt="QR"><p style="font-size: 12px; color: #94a3b8;">Ekip üyeleri okutarak oylama ekranına gidebilir.</p><div class="vote-bar-container"><div class="vote-bar-fill" id="vote-bar-fill"></div><div class="vote-text" id="vote-text">Oylar Bekleniyor... %0</div></div></div></div></div>
@@ -264,15 +265,13 @@
     <div id="pdf-container"><h1>Yönetim Kurulu Karar Tutanağı</h1><p><strong>Tarih:</strong> <span id="pdf-date"></span></p><p><strong>Gündem:</strong> <span id="pdf-topic"></span></p><h3>Karar: <span id="pdf-title" style="color:#d97706;"></span></h3><h3>Münazara:</h3><p id="pdf-debate" style="font-style:italic;"></p><h3>Aksiyon Planı:</h3><p id="pdf-decision"></p></div>
 
     <script>
-        const database = { 'OpenAI': '', 'Gemini': '', 'Claude': '', 'Ortak Karar': '', 'Münazara': '', 'Topic': '', 'Score': '', 'Slides': [], 'PreMortem': '' };
+        const database = { 'OpenAI': '', 'Gemini': '', 'Claude': '', 'Ortak Karar': '', 'Münazara': '', 'Topic': '', 'Score': '', 'Slides': [] };
         const aiNodes = ['openai', 'gemini', 'claude'];
         let uploadedFileText = "";
         
-        // SES EFEKTLERİ
         let lofiAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3'); lofiAudio.loop = true;
         let typeAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_27131846b4.mp3'); typeAudio.loop = true;
 
-        // URL KONTROLÜ (MULTİPLAYER OYLAMA İÇİN)
         window.onload = () => {
             const params = new URLSearchParams(window.location.search);
             if(params.get('vote')) {
@@ -288,17 +287,13 @@
             document.getElementById('vote-app-result').innerText = isYes ? "✅ ONAYINIZ İLETİLDİ." : "❌ RED OYUNUZ İLETİLDİ.";
         }
 
-        // GECE MESAİSİ VE EFEKTLER
         function toggleCrisis() { document.body.classList.toggle('crisis-mode'); }
         function toggleBoardMode() { document.getElementById('table-wrapper').classList.toggle('wood-mode'); document.getElementById('board-toggle-btn').classList.toggle('active'); }
         
         function toggleNightMode() {
             let isNight = document.getElementById('nightModu').checked;
-            if(isNight) {
-                document.body.classList.add('night-mode'); lofiAudio.play(); createRain();
-            } else {
-                document.body.classList.remove('night-mode'); lofiAudio.pause(); document.getElementById('rain-container').innerHTML = '';
-            }
+            if(isNight) { document.body.classList.add('night-mode'); lofiAudio.play(); createRain(); } 
+            else { document.body.classList.remove('night-mode'); lofiAudio.pause(); document.getElementById('rain-container').innerHTML = ''; }
         }
         function createRain() {
             const rc = document.getElementById('rain-container'); rc.innerHTML = '';
@@ -309,8 +304,16 @@
             }
         }
 
-        // Dosya ve Ses Okuma
-        function handleFileUpload(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { uploadedFileText = e.target.result; alert("Belge sisteme entegre edildi.");}; reader.readAsText(file); }
+        function handleFileUpload(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { uploadedFileText = e.target.result; startMatrixEffect(); alert("Belge sisteme entegre edildi.");}; reader.readAsText(file); }
+        function startMatrixEffect() {
+            const mr = document.getElementById('matrix-rain'); mr.style.display = 'block'; mr.innerHTML = '';
+            for(let i=0; i<30; i++) {
+                let drop = document.createElement('span'); drop.className = 'matrix-drop'; drop.innerText = Math.random()>0.5 ? '1':'0';
+                drop.style.left = Math.random()*100 + '%'; drop.style.animationDuration = (Math.random()*1 + 0.5)+'s'; mr.appendChild(drop);
+            }
+            setTimeout(() => { mr.style.display = 'none'; }, 2500);
+        }
+
         let recognition; function toggleVoice() { if (!('webkitSpeechRecognition' in window)) return alert("Desteklenmiyor."); if(!recognition) { recognition = new webkitSpeechRecognition(); recognition.lang = 'tr-TR'; recognition.onstart = () => document.getElementById('mic-btn').classList.add('recording'); recognition.onend = () => document.getElementById('mic-btn').classList.remove('recording'); recognition.onresult = (e) => document.getElementById('topic-input').value += e.results[0][0].transcript; } document.getElementById('mic-btn').classList.contains('recording') ? recognition.stop() : recognition.start(); }
 
         // API İSTEĞİ
@@ -326,8 +329,8 @@
             if(!isRevision) document.getElementById('topic-input').value = '';
             
             document.querySelectorAll('.doc, .master-doc').forEach(el => el.classList.remove('visible'));
-            ['btn-y','btn-n','btn-rev','btn-boom'].forEach(id => document.getElementById(id).disabled = true);
-            document.getElementById('btn-pdf').style.display = 'none'; document.getElementById('btn-team').style.display = 'none'; document.getElementById('btn-pitch').style.display = 'none'; document.getElementById('btn-boom').style.display = 'none'; document.getElementById('ui-score').style.display = 'none';
+            ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
+            document.getElementById('btn-pdf').style.display = 'none'; document.getElementById('btn-team').style.display = 'none'; document.getElementById('btn-pitch').style.display = 'none'; document.getElementById('ui-score').style.display = 'none';
 
             aiNodes.forEach(id => document.getElementById('ai-' + id).classList.add('thinking'));
             document.getElementById('holo-core').style.display = 'block'; document.getElementById('lasers').style.display = 'block';
@@ -345,7 +348,7 @@
 
                 database['OpenAI'] = data.openai; database['Gemini'] = data.gemini; database['Claude'] = data.claude;
                 database['Münazara'] = data.debate; database['Ortak Karar'] = data.masterDecision; database['Title'] = data.masterTitle;
-                database['Score'] = data.score; database['Slides'] = data.slides || []; database['PreMortem'] = data.preMortem;
+                database['Score'] = data.score; database['Slides'] = data.slides || [];
 
                 document.getElementById('ui-topic').innerText = data.topicSummary;
                 document.getElementById('holo-core').style.display = 'none'; document.getElementById('lasers').style.display = 'none';
@@ -367,7 +370,6 @@
                     ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = false);
                     document.getElementById('btn-team').style.display = 'inline-block';
                     document.getElementById('btn-pitch').style.display = 'inline-block';
-                    document.getElementById('btn-boom').style.display = 'inline-block'; document.getElementById('btn-boom').disabled = false;
                 }, 1500);
 
             } catch (error) {
@@ -377,17 +379,10 @@
             }
         }
 
-        // --- PRE-MORTEM (PLANI PATLAT) ---
-        function openPreMortem() {
-            document.getElementById('pm-text').innerText = database['PreMortem'];
-            document.getElementById('prem-modal').classList.add('show');
-        }
-
-        // --- ÖĞÜTÜCÜ MAKİNE ---
         function rejectWithShredder() {
             document.getElementById('ui-status').innerText = "KARAR REDDEDİLDİ. Dosya imha ediliyor...";
             document.getElementById('ui-vote-title').innerText = "Plan Çöpe Atıldı.";
-            ['btn-y','btn-n','btn-rev','btn-boom'].forEach(id => document.getElementById(id).disabled = true);
+            ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
             document.getElementById('btn-team').style.display = 'none'; document.getElementById('btn-pitch').style.display = 'none';
             
             document.getElementById('shredder-box').classList.add('active');
@@ -400,7 +395,7 @@
             }, 1800);
         }
 
-        // --- DAKTİLO EFEKTİ İLE OKUMA ---
+        // DAKTİLO
         function openDoc(owner) {
             let content = database[owner];
             if(owner === 'Ortak Karar') {
@@ -411,17 +406,12 @@
                 let textToType = "MÜNAZARA:\n" + database['Münazara'] + "\n\nAKSİYON PLANI:\n" + content;
                 let el = document.getElementById('modal-text'); el.innerHTML = "";
                 let i = 0;
-                
-                clearInterval(window.typeInterval);
-                typeAudio.currentTime = 0; typeAudio.play();
+                clearInterval(window.typeInterval); typeAudio.currentTime = 0; typeAudio.play();
                 
                 window.typeInterval = setInterval(() => {
                     if(i < textToType.length) {
-                        let char = textToType.charAt(i);
-                        el.innerHTML += char === '\n' ? '<br>' : char; i++;
-                    } else {
-                        clearInterval(window.typeInterval); typeAudio.pause();
-                    }
+                        let char = textToType.charAt(i); el.innerHTML += char === '\n' ? '<br>' : char; i++;
+                    } else { clearInterval(window.typeInterval); typeAudio.pause(); }
                 }, 30);
             } else {
                 document.getElementById('modal-title').style.color = "#fff";
@@ -430,10 +420,7 @@
                 document.getElementById('doc-modal').classList.add('show');
             }
         }
-        function closeModal(id) { 
-            document.getElementById(id).classList.remove('show'); 
-            clearInterval(window.typeInterval); typeAudio.pause(); // Modal kapanırsa daktilo sussun
-        }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); clearInterval(window.typeInterval); typeAudio.pause(); }
 
         // PITCH DECK
         let currentSlide = 0;
@@ -443,7 +430,6 @@
             const titles = ["1. Kök Sorun", "2. Yaklaşımımız", "3. Uygulama Adımları", "4. Beklenen Getiri"];
             const colors = ["#ef4444", "#38bdf8", "#fbbf24", "#4ade80"];
             slidesData.forEach((s, i) => { slides.push(`<h2 style="color:${colors[i%4]}">${titles[i]}</h2><p style="margin-top:20px; font-size:16px;">${s}</p>`); });
-            
             let html = ""; slides.forEach((s, i) => { html += `<div class="slide ${i===0?'active':''}" id="slide-${i}">${s}</div>`; });
             document.getElementById('slide-container').innerHTML = html; currentSlide = 0; document.getElementById('pitch-modal').classList.add('show');
         }
@@ -478,10 +464,10 @@
                 
                 document.getElementById('ui-status').innerText = "KARAR ONAYLANDI.";
                 document.getElementById('btn-pdf').style.display = 'inline-block';
-                document.getElementById('btn-team').style.display = 'none'; document.getElementById('btn-pitch').style.display = 'none'; document.getElementById('btn-boom').style.display = 'none';
+                document.getElementById('btn-team').style.display = 'none'; document.getElementById('btn-pitch').style.display = 'none'; 
             }
             document.getElementById('doc-master').classList.remove('visible');
-            ['btn-y','btn-n','btn-rev','btn-boom'].forEach(id => document.getElementById(id).disabled = true);
+            ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
         }
 
         function downloadPDF() {
