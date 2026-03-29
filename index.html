@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Komuta Merkezi | Ultimate Edition</title>
+    <title>AI Komuta Merkezi | Kurumsal Edition</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -21,17 +21,16 @@
             height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.3s;
         }
 
-        /* --- KRİZ MODU VE EFEKTLER --- */
+        /* --- KRİZ MODU --- */
         body.crisis-mode { background-color: #1a0505; background-image: radial-gradient(circle at 50% -20%, rgba(255, 0, 0, 0.15) 0%, transparent 70%); animation: crisisPulse 2s infinite; }
         body.crisis-mode .board-table { box-shadow: 0 30px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,0,0,0.2); border-color: #3a1515;}
         body.crisis-mode .holo-center { border-color: rgba(255, 0, 0, 0.3); box-shadow: inset 0 0 30px rgba(255, 0, 0, 0.1); }
         @keyframes crisisPulse { 0%, 100% { background-color: #1a0505; } 50% { background-color: #2a0505; } }
 
+        /* ONAY MÜHRÜ */
         .stamp { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(5); opacity: 0; pointer-events: none; z-index: 1000; font-size: 60px; color: #ef4444; border: 6px solid #ef4444; padding: 10px 20px; border-radius: 15px; font-weight: 900; letter-spacing: 3px; text-shadow: 0 0 10px rgba(255,0,0,0.5); font-family: Impact, sans-serif; }
         .stamp.animate { animation: stampIn 0.5s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes stampIn { to { transform: translate(-50%, -50%) scale(1) rotate(-15deg); opacity: 0.9; } }
-        .shake { animation: shakeScreen 0.4s; }
-        @keyframes shakeScreen { 0%,100% { transform: translate(0,0) rotate(0); } 20% { transform: translate(-2px,0) rotate(1deg); } 40% { transform: translate(2px,-2px) rotate(-1deg); } 60% { transform: translate(-2px,2px) rotate(0); } 80% { transform: translate(2px,2px) rotate(-1deg); } }
 
         /* --- ÜST PANEL --- */
         #main-app { display: flex; flex-direction: column; height: 100%; width: 100%; }
@@ -41,7 +40,6 @@
         .tools-btn:hover { background: rgba(255,255,255,0.1); }
         .tools-btn.active { background: var(--c-user); color: #000; border-color: var(--c-user);}
         .crisis-checkbox { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #ef4444; font-weight: bold; cursor: pointer;}
-        .board-select { background: #010409; color: white; border: 1px solid var(--border-glass); padding: 6px; border-radius: 6px; font-size: 11px; outline: none;}
 
         .info-card { flex: 1; min-width: 120px; }
         .info-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
@@ -58,17 +56,17 @@
         .btn-pdf { background: #fbbf24; color: #000; display: none; } 
         .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* --- ORTA ALAN: KUSURSUZ MASA --- */
-        .stage { flex: 1; min-height: 0; display: flex; justify-content: center; align-items: center; position: relative; perspective: 1000px; padding: 30px; }
+        /* --- ORTA ALAN: TAM SIĞAN MASA --- */
+        .stage { flex: 1; min-height: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; position: relative; perspective: 1000px; padding: 20px; }
         .system-status { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); color: var(--c-user); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; z-index: 20;}
         
-        .table-wrapper { position: relative; width: 100%; max-width: 650px; aspect-ratio: 2 / 1.2; transform: rotateX(15deg); transform-style: preserve-3d; transition: 0.5s; }
+        .table-wrapper { position: relative; width: 90vw; max-width: 650px; height: 40vh; max-height: 350px; transform: rotateX(15deg); transform-style: preserve-3d; transition: 0.5s; }
         .board-table { width: 100%; height: 100%; background: var(--table-surface); border: 8px solid var(--table-rim); border-radius: 500px; box-shadow: 0 25px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; position: relative; transition: 0.5s; }
         
         .table-wrapper.wood-mode .board-table { background: radial-gradient(circle, #4a2b18 0%, #1e1007 100%); border-color: #110803; box-shadow: 0 30px 50px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,0,0,0.9); }
         .table-wrapper.wood-mode .holo-center { background: rgba(0, 0, 0, 0.4); border-color: rgba(255,255,255,0.05); box-shadow: inset 0 0 20px rgba(0,0,0,0.8);}
 
-        .holo-center { width: 65%; height: 50%; background: rgba(56, 189, 248, 0.02); border-radius: 500px; border: 1px solid rgba(56, 189, 248, 0.1); position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; transition: 0.3s;}
+        .holo-center { width: 65%; height: 55%; background: rgba(56, 189, 248, 0.02); border-radius: 500px; border: 1px solid rgba(56, 189, 248, 0.1); position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; transition: 0.3s;}
         .holo-core { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed var(--holo-color); animation: spinHolo 3s linear infinite; display: none; box-shadow: 0 0 15px var(--holo-color); }
         @keyframes spinHolo { 100% { transform: rotate(360deg); } }
         
@@ -93,18 +91,18 @@
         .master-doc:hover { transform: translate(-50%, -50%) scale(1.15) !important; }
         .master-doc.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         
-        .shredder-box { position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); width: 80px; height: 30px; background: #222; border: 2px solid #444; border-radius: 5px; z-index: 20; opacity: 0; pointer-events: none; transition: 0.3s; display: flex; justify-content: center;}
-        .shredder-box.active { opacity: 1; bottom: 20%; }
+        .shredder-box { position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%); width: 80px; height: 30px; background: #222; border: 2px solid #444; border-radius: 5px; z-index: 20; opacity: 0; pointer-events: none; transition: 0.3s; display: flex; justify-content: center;}
+        .shredder-box.active { opacity: 1; bottom: 15%; }
         .shredder-slot { width: 60px; height: 6px; background: #000; margin-top: 5px; border-radius: 3px; box-shadow: inset 0 0 5px black;}
         
         .shredding { animation: shredDoc 1.5s forwards ease-in !important; pointer-events: none;}
         @keyframes shredDoc {
             0% { top: 50%; transform: translate(-50%, -50%) scale(1); opacity: 1;}
             40% { top: 75%; transform: translate(-50%, -50%) scale(0.8); opacity: 1;}
-            100% { top: 85%; transform: translate(-50%, -20%) scale(0.8); opacity: 0; height: 0;} 
+            100% { top: 90%; transform: translate(-50%, -20%) scale(0.8); opacity: 0; height: 0;} 
         }
 
-        /* AVATARLAR */
+        /* AVATARLAR (Taşmayı önlemek için ayarlandı) */
         .node { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 5; }
         .node-icon { width: 40px; height: 40px; border-radius: 10px; background: #0f1117; display: flex; justify-content: center; align-items: center; font-size: 18px; font-weight: 800; border: 2px solid; box-shadow: 0 8px 15px rgba(0,0,0,0.8); transition: 0.3s; transform: rotateX(-15deg); }
         .node-name { font-size: 9px; font-weight: 800; letter-spacing: 1px; color: #fff; text-transform: uppercase; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px; transform: rotateX(-15deg); margin-top:-5px;}
@@ -123,17 +121,20 @@
         /* MODALLAR */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: 0.3s; padding: 15px; }
         .modal.show { display: flex; opacity: 1; }
-        .modal-content { background: #0f1117; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid var(--border-glass); padding: 20px; position: relative; max-height: 85dvh; overflow-y: auto;}
+        .modal-content { background: #0f1117; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid var(--border-glass); padding: 25px; position: relative; max-height: 85dvh; overflow-y: auto;}
         .close-btn { position: absolute; top: 10px; right: 15px; font-size: 24px; color: var(--text-muted); cursor: pointer; }
         .modal-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-glass); }
         .modal-body { font-size: 13px; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
         .debate-box { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border-left: 3px solid #fbbf24; margin-bottom: 15px; font-style: italic; color: #94a3b8;}
         
-        /* PITCH DECK (SUNUM) CSS */
-        .slide-container { position: relative; width: 100%; height: 250px; background: #1e293b; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center; border: 1px solid #334155; margin-bottom: 15px;}
-        .slide { display: none; font-size: 15px; animation: fadeIn 0.4s; color: white;}
+        /* ŞIK PITCH DECK (SUNUM) CSS */
+        .slide-container { position: relative; width: 100%; height: 300px; background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; border: 1px solid #334155; margin-bottom: 15px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);}
+        .slide { display: none; animation: fadeIn 0.4s; width: 100%;}
         .slide.active { display: block; }
-        .slide-nav { display: flex; justify-content: space-between; }
+        .slide h2 { font-size: 20px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .slide p { font-size: 15px; line-height: 1.6; color: #e2e8f0; }
+        .slide-icon { font-size: 35px; margin-bottom: 10px; }
+        .slide-nav { display: flex; justify-content: space-between; width: 100%;}
         .slide-btn { background: var(--c-user); border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;}
         @keyframes fadeIn { from{opacity:0; transform: translateY(10px);} to{opacity:1; transform: translateY(0);} }
 
@@ -158,8 +159,8 @@
         @media (max-width: 768px) {
             .header-panel { padding: 8px; gap: 6px; } .info-card { display: none; } 
             .vote-actions { width: 100%; justify-content: center;} .btn { font-size: 9px; padding: 6px;}
-            .table-wrapper { aspect-ratio: 1 / 1.4; transform: rotateX(10deg); max-width: 320px;} 
-            .board-table { border-width: 6px; } .node-icon { width: 34px; height: 34px; font-size: 15px; transform: rotateX(-10deg);} .node-name { font-size: 8px; transform: rotateX(-10deg);}
+            .table-wrapper { height: 35vh; } /* Mobilde masa yüksekliğini kısıtla */
+            .board-table { border-width: 6px; } .node-icon { width: 34px; height: 34px; font-size: 15px;} .node-name { font-size: 8px;}
         }
     </style>
 </head>
@@ -174,16 +175,10 @@
     </div>
 
     <div id="main-app">
-        <div class="stamp" id="stamp">ONAYLANDI</div>
-
         <div class="header-panel">
             <div class="header-left">
+                <button class="tools-btn" onclick="openArchive()">📁 Arşiv</button>
                 <button class="tools-btn" id="board-toggle-btn" onclick="toggleBoardMode()">🪵 Ahşap Masa</button>
-                <select class="board-select" id="boardType">
-                    <option value="genel">Genel Strateji</option>
-                    <option value="hukuk">Hukuk & Güvenlik</option>
-                    <option value="pazarlama">Pazarlama</option>
-                </select>
                 <label class="crisis-checkbox"><input type="checkbox" id="krizModu" onchange="toggleCrisis()">🚨 KRİZ</label>
             </div>
             
@@ -258,15 +253,23 @@
     <div class="modal" id="qr-modal">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
             <span class="close-btn" onclick="closeModal('qr-modal')">&times;</span>
-            <div class="modal-title" style="color:#c255ff">Ekip Oylaması (Canlı)</div>
+            <div class="modal-title" style="color:#c255ff">Ekip Oylaması Canlı</div>
             <div class="qr-wrapper">
                 <img src="" id="qr-img" class="qr-img" alt="QR Code">
-                <p style="font-size: 12px; color: #94a3b8;">Ekip üyeleri telefonuyla okutarak oylama ekranına gidebilir.</p>
+                <p style="font-size: 12px; color: #94a3b8;">Telefon kameranızla okutarak oy verin.</p>
                 <div class="vote-bar-container">
                     <div class="vote-bar-fill" id="vote-bar-fill"></div>
                     <div class="vote-text" id="vote-text">Oylar Bekleniyor... %0</div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="modal" id="archive-modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('archive-modal')">&times;</span>
+            <div class="modal-title" style="color:var(--c-user)">Geçmiş Tutanaklar</div>
+            <div class="modal-body" id="archive-list">Kayıt bulunamadı.</div>
         </div>
     </div>
 
@@ -284,11 +287,10 @@
         const aiNodes = ['openai', 'gemini', 'claude'];
         let uploadedFileText = "";
 
-        // --- SAYFA YÜKLENDİĞİNDE URL KONTROLÜ (MULTİPLAYER OYLAMA İÇİN) ---
+        // --- URL KONTROLÜ (QR OYLAMASI İÇİN) ---
         window.onload = () => {
             const params = new URLSearchParams(window.location.search);
             if(params.get('vote')) {
-                // Eğer URL'de "?vote=PlanIsmi" varsa, masayı gizle, telefon oylama ekranını aç!
                 document.getElementById('main-app').style.display = 'none';
                 document.getElementById('vote-app').style.display = 'flex';
                 document.getElementById('vote-app-title').innerText = params.get('vote');
@@ -350,12 +352,12 @@
 
             aiNodes.forEach(id => document.getElementById('ai-' + id).classList.add('thinking'));
             document.getElementById('holo-core').style.display = 'block'; document.getElementById('lasers').style.display = 'block';
-            document.getElementById('ui-status').innerText = isCrisis ? "ACİL DURUM PROTOKOLÜ ÇALIŞIYOR..." : "Münazara Başladı...";
+            document.getElementById('ui-status').innerText = isCrisis ? "ACİL DURUM PROTOKOLÜ..." : "Sentez Başladı...";
 
             try {
                 const response = await fetch('/api/analyze', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ topic: database['Topic'], boardType: document.getElementById('boardType').value, fileText: uploadedFileText, revisionNote: revNote, isCrisis: isCrisis })
+                    body: JSON.stringify({ topic: database['Topic'], fileText: uploadedFileText, revisionNote: revNote, isCrisis: isCrisis })
                 });
 
                 if (!response.ok) throw new Error("Bağlantı Hatası");
@@ -395,7 +397,7 @@
             }
         }
 
-        // --- KAĞIT ÖĞÜTÜCÜ (REDDET) ---
+        // --- KAĞIT ÖĞÜTÜCÜ ---
         function rejectWithShredder() {
             document.getElementById('ui-status').innerText = "KARAR REDDEDİLDİ. Dosya imha ediliyor...";
             document.getElementById('ui-vote-title').innerText = "Plan Çöpe Atıldı.";
@@ -413,19 +415,20 @@
             }, 1800);
         }
 
-        // --- PITCH DECK (YAPAY ZEKA ÜRETİMİ SUNUM) ---
+        // --- ŞIK SUNUM EKRANI (PITCH DECK) ---
         let currentSlide = 0;
         function openPitchDeck() {
             let slidesData = database['Slides'];
             let slides = [
-                `<h1 style="color:#fbbf24">${database['Title']}</h1><p style="margin-top:20px; color:#cbd5e1;">Stratejik Aksiyon Planı</p>`
+                `<div class="slide-icon">🚀</div><h1 style="color:#fbbf24">${database['Title']}</h1><p style="margin-top:15px; font-weight:bold;">Stratejik Aksiyon Planı</p>`
             ];
             
-            const titles = ["1. Kök Sorun", "2. Yaklaşımımız", "3. Uygulama Adımları", "4. Beklenen Getiri"];
+            const titles = ["1. Kök Sorun", "2. Yaklaşım", "3. Uygulama Adımları", "4. Beklenen Sonuç"];
             const colors = ["#ef4444", "#38bdf8", "#fbbf24", "#4ade80"];
+            const icons = ["🎯", "💡", "⚙️", "📈"];
             
             slidesData.forEach((s, i) => {
-                slides.push(`<h2 style="color:${colors[i%4]}">${titles[i]}</h2><p style="margin-top:20px; font-size:16px;">${s}</p>`);
+                slides.push(`<div class="slide-icon">${icons[i%4]}</div><h2 style="color:${colors[i%4]}">${titles[i]}</h2><p>${s}</p>`);
             });
             
             let html = "";
@@ -443,9 +446,8 @@
             slides[currentSlide].classList.add('active');
         }
 
-        // --- QR KOD VE EKİP OYLAMASI ---
+        // --- QR KOD (MULTİPLAYER) ---
         function openTeamVote() {
-            // Şuan bulunduğun site linkinin sonuna "?vote=PlanIsmi" ekler.
             let voteUrl = window.location.origin + window.location.pathname + "?vote=" + encodeURIComponent(database['Title']);
             document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(voteUrl)}`;
             document.getElementById('qr-modal').classList.add('show');
@@ -463,45 +465,13 @@
             }, 800);
         }
 
-        // --- STANDART ETKİLEŞİMLER ---
+        // --- DİĞER FONKSİYONLAR ---
         function requestRevision() { const note = prompt("Hangi kısmı düzeltelim?"); if(note) startProcess(true, note); }
 
         function openDoc(owner) {
             let content = database[owner];
             if(owner === 'Ortak Karar') {
                 document.getElementById('modal-title').style.color = "#fbbf24";
-                document.getElementById('modal-text').innerHTML = `<div class="debate-box"><strong>🗣 Kurul Münazarası:</strong><br>${database['Münazara']}</div><div><strong>✅ Aksiyon Planı:</strong><br>${content}</div>`;
+                document.getElementById('modal-text').innerHTML = `<div class="debate-box"><strong>🗣 Münazara Özeti:</strong><br>${database['Münazara']}</div><div><strong>✅ Aksiyon Planı:</strong><br>${content}</div>`;
             } else {
-                document.getElementById('modal-title').style.color = "#fff";
-                document.getElementById('modal-text').innerText = content;
-            }
-            document.getElementById('modal-title').innerText = owner + " Dosyası";
-            document.getElementById('doc-modal').classList.add('show');
-        }
-        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-
-        function userVote(isYes) {
-            if(isYes) {
-                document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 400);
-                let s = document.getElementById('stamp'); s.classList.add('animate'); setTimeout(() => s.classList.remove('animate'), 2000);
-                
-                document.getElementById('ui-status').innerText = "KARAR ONAYLANDI.";
-                document.getElementById('btn-pdf').style.display = 'inline-block';
-                document.getElementById('btn-team').style.display = 'none'; document.getElementById('btn-pitch').style.display = 'none';
-            }
-            document.getElementById('doc-master').classList.remove('visible');
-            ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
-        }
-
-        function downloadPDF() {
-            document.getElementById('pdf-date').innerText = new Date().toLocaleDateString('tr-TR');
-            document.getElementById('pdf-topic').innerText = database['Topic'];
-            document.getElementById('pdf-title').innerText = database['Title'];
-            document.getElementById('pdf-debate').innerText = database['Münazara'];
-            document.getElementById('pdf-decision').innerText = database['Ortak Karar'];
-            const element = document.getElementById('pdf-container'); element.style.display = 'block';
-            html2pdf().from(element).set({ margin: 1, filename: 'Kurul_Karari.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).save().then(() => element.style.display = 'none');
-        }
-    </script>
-</body>
-</html>
+                document.getElementById('modal-title').style.color
