@@ -70,7 +70,9 @@ export default async function handler(req, res) {
                     4) 'ortakKarar': 3-4 maddelik net Aksiyon Planı.
                     5) 'verimlilikSkoru': 1-100 arası başarı ihtimali.
                     6) 'zihinHaritasi': 3 anahtar kelime dizisi.
-                    7) 'sunumSlaytlari': 4 elemanlı sunum dizisi.` },
+                    7) 'sunumSlaytlari': 4 elemanlı sunum dizisi.
+                    8) 'yatirimciTipi': Sadece şu üçünden biri: "MELEK YATIRIMCI", "RİSK SERMAYESİ (VC)", "BANKA KREDİSİ".
+                    9) 'yatirimciYorumu': Bu yatırımcı tipinin bu plana neden yatırım yapıp/yapmayacağını anlatan acımasız 3 cümlelik analiz.` },
                     { role: "user", content: `${finalContext}\n\nOpenAI Fikirleri:\n${openaiText}\n\nClaude Fikirleri:\n${claudeText}\n\nGemini Fikirleri:\n${geminiText}` }
                 ]
             })
@@ -79,7 +81,6 @@ export default async function handler(req, res) {
         const masterData = await masterReq.json();
         const synthesis = JSON.parse(masterData.choices?.[0]?.message?.content || "{}");
 
-        // Rol İsimleri Çıkarıldı, Sadece Saf Metinler Gidiyor
         res.status(200).json({
             openai: openaiText,
             claude: claudeText,
@@ -90,7 +91,9 @@ export default async function handler(req, res) {
             masterDecision: synthesis.ortakKarar || "Aksiyon planı çıkarılamadı.",
             score: synthesis.verimlilikSkoru || "85",
             mindMap: synthesis.zihinHaritasi || ["Analiz", "Strateji", "Uygulama"],
-            slides: synthesis.sunumSlaytlari || ["Sorun", "Yaklaşım", "Uygulama", "Sonuç"]
+            slides: synthesis.sunumSlaytlari || ["Sorun", "Yaklaşım", "Uygulama", "Sonuç"],
+            investorType: synthesis.yatirimciTipi || "MELEK YATIRIMCI",
+            investorFeedback: synthesis.yatirimciYorumu || "Bu plan çok yenilikçi, yatırım yapmaya değer."
         });
 
     } catch (error) {
