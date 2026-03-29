@@ -21,13 +21,12 @@
             height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.3s;
         }
 
-        /* --- KRİZ MODU --- */
+        /* --- KRİZ MODU VE EFEKTLER --- */
         body.crisis-mode { background-color: #1a0505; background-image: radial-gradient(circle at 50% -20%, rgba(255, 0, 0, 0.15) 0%, transparent 70%); animation: crisisPulse 2s infinite; }
         body.crisis-mode .board-table { box-shadow: 0 30px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,0,0,0.2); border-color: #3a1515;}
         body.crisis-mode .holo-center { border-color: rgba(255, 0, 0, 0.3); box-shadow: inset 0 0 30px rgba(255, 0, 0, 0.1); }
-        @keyframes crisisPulse { 0% { background-color: #1a0505; } 50% { background-color: #2a0505; } 100% { background-color: #1a0505; } }
+        @keyframes crisisPulse { 0%, 100% { background-color: #1a0505; } 50% { background-color: #2a0505; } }
 
-        /* --- ONAY MÜHRÜ VE TİTREME --- */
         .stamp { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(5); opacity: 0; pointer-events: none; z-index: 1000; font-size: 60px; color: #ef4444; border: 6px solid #ef4444; padding: 10px 20px; border-radius: 15px; font-weight: 900; letter-spacing: 3px; text-shadow: 0 0 10px rgba(255,0,0,0.5); font-family: Impact, sans-serif; }
         .stamp.animate { animation: stampIn 0.5s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes stampIn { to { transform: translate(-50%, -50%) scale(1) rotate(-15deg); opacity: 0.9; } }
@@ -35,6 +34,7 @@
         @keyframes shakeScreen { 0%,100% { transform: translate(0,0) rotate(0); } 20% { transform: translate(-2px,0) rotate(1deg); } 40% { transform: translate(2px,-2px) rotate(-1deg); } 60% { transform: translate(-2px,2px) rotate(0); } 80% { transform: translate(2px,2px) rotate(-1deg); } }
 
         /* --- ÜST PANEL --- */
+        #main-app { display: flex; flex-direction: column; height: 100%; width: 100%; }
         .header-panel { background: var(--bg-panel); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border-glass); padding: 10px 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; z-index: 10; }
         .header-left { display: flex; gap: 8px; align-items: center; flex-wrap: wrap;}
         .tools-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); color: white; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; transition: 0.2s;}
@@ -58,18 +58,16 @@
         .btn-pdf { background: #fbbf24; color: #000; display: none; } 
         .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* --- ORTA ALAN VE MASA YAPI TAŞLARI --- */
+        /* --- ORTA ALAN: KUSURSUZ MASA --- */
         .stage { flex: 1; min-height: 0; display: flex; justify-content: center; align-items: center; position: relative; perspective: 1000px; padding: 30px; }
         .system-status { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); color: var(--c-user); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; z-index: 20;}
         
         .table-wrapper { position: relative; width: 100%; max-width: 650px; aspect-ratio: 2 / 1.2; transform: rotateX(15deg); transform-style: preserve-3d; transition: 0.5s; }
         .board-table { width: 100%; height: 100%; background: var(--table-surface); border: 8px solid var(--table-rim); border-radius: 500px; box-shadow: 0 25px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; position: relative; transition: 0.5s; }
         
-        /* AHŞAP MASA MODU (Wood Mode) - Efektleri Yok Etmez! */
         .table-wrapper.wood-mode .board-table { background: radial-gradient(circle, #4a2b18 0%, #1e1007 100%); border-color: #110803; box-shadow: 0 30px 50px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,0,0,0.9); }
         .table-wrapper.wood-mode .holo-center { background: rgba(0, 0, 0, 0.4); border-color: rgba(255,255,255,0.05); box-shadow: inset 0 0 20px rgba(0,0,0,0.8);}
 
-        /* Holo Merkez ve Efektler */
         .holo-center { width: 65%; height: 50%; background: rgba(56, 189, 248, 0.02); border-radius: 500px; border: 1px solid rgba(56, 189, 248, 0.1); position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; transition: 0.3s;}
         .holo-core { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed var(--holo-color); animation: spinHolo 3s linear infinite; display: none; box-shadow: 0 0 15px var(--holo-color); }
         @keyframes spinHolo { 100% { transform: rotate(360deg); } }
@@ -83,12 +81,10 @@
         .matrix-drop { position: absolute; top: -20px; animation: fall linear forwards; }
         @keyframes fall { to { top: 100%; } }
 
-        /* --- SİMETRİK DOSYALAR VE KAĞIT ÖĞÜTÜCÜ --- */
+        /* SİMETRİK DOSYALAR VE ÖĞÜTÜCÜ */
         .doc { position: absolute; width: 26px; height: 36px; background: rgba(255,255,255,0.95); border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0; transform: scale(0); transition: 0.4s; box-shadow: 0 4px 10px rgba(0,0,0,0.7); font-size: 13px; border-left: 3px solid #ccc; color: black; z-index: 6;}
         .doc:hover { transform: scale(1.3) translateY(-5px) !important; z-index: 10; }
         .doc.visible { opacity: 1; transform: scale(1); }
-        
-        /* Tam Simetri (Sola 20%, Sağa 20%) */
         .d-openai { top: 20%; left: 50%; transform: translateX(-50%); border-left-color: var(--c-openai); }
         .d-gemini { top: 50%; left: 20%; transform: translateY(-50%); border-left-color: var(--c-gemini); }
         .d-claude { top: 50%; right: 20%; transform: translateY(-50%); border-left-color: var(--c-claude); }
@@ -97,7 +93,6 @@
         .master-doc:hover { transform: translate(-50%, -50%) scale(1.15) !important; }
         .master-doc.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         
-        /* Öğütücü Efekti CSS Sınıfları */
         .shredder-box { position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); width: 80px; height: 30px; background: #222; border: 2px solid #444; border-radius: 5px; z-index: 20; opacity: 0; pointer-events: none; transition: 0.3s; display: flex; justify-content: center;}
         .shredder-box.active { opacity: 1; bottom: 20%; }
         .shredder-slot { width: 60px; height: 6px; background: #000; margin-top: 5px; border-radius: 3px; box-shadow: inset 0 0 5px black;}
@@ -106,10 +101,10 @@
         @keyframes shredDoc {
             0% { top: 50%; transform: translate(-50%, -50%) scale(1); opacity: 1;}
             40% { top: 75%; transform: translate(-50%, -50%) scale(0.8); opacity: 1;}
-            100% { top: 85%; transform: translate(-50%, -20%) scale(0.8); opacity: 0; height: 0;} /* Yuvanın içine girer gibi yok olur */
+            100% { top: 85%; transform: translate(-50%, -20%) scale(0.8); opacity: 0; height: 0;} 
         }
 
-        /* --- AVATARLAR (Sabit Konum) --- */
+        /* AVATARLAR */
         .node { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 5; }
         .node-icon { width: 40px; height: 40px; border-radius: 10px; background: #0f1117; display: flex; justify-content: center; align-items: center; font-size: 18px; font-weight: 800; border: 2px solid; box-shadow: 0 8px 15px rgba(0,0,0,0.8); transition: 0.3s; transform: rotateX(-15deg); }
         .node-name { font-size: 9px; font-weight: 800; letter-spacing: 1px; color: #fff; text-transform: uppercase; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px; transform: rotateX(-15deg); margin-top:-5px;}
@@ -117,7 +112,7 @@
         .n-openai { top: 0; left: 50%; transform: translate(-50%, -50%); } .n-user { top: 100%; left: 50%; transform: translate(-50%, -50%); } .n-gemini { top: 50%; left: 0; transform: translate(-50%, -50%); } .n-claude { top: 50%; left: 100%; transform: translate(-50%, -50%); } 
         .thinking .node-icon { animation: glow 1s infinite alternate; }
 
-        /* --- ALT PANEL --- */
+        /* ALT PANEL */
         .input-area { background: var(--bg-panel); backdrop-filter: blur(20px); border-top: 1px solid var(--border-glass); padding: 12px 15px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: center;}
         .file-label { cursor: pointer; font-size: 16px; opacity: 0.7; transition: 0.2s;} .file-label:hover { opacity: 1; }
         .mic-btn { background: none; border: none; font-size: 18px; cursor: pointer; opacity: 0.7; color: white;} .mic-btn.recording { color: #ef4444; animation: pulse 1s infinite alternate; }
@@ -125,110 +120,119 @@
         .chat-input:focus { border-color: var(--c-user); }
         .send-btn { background: var(--c-user); color: #000; border: none; padding: 0 15px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 11px; text-transform: uppercase;}
         
-        /* --- MODALLAR --- */
+        /* MODALLAR */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: 0.3s; padding: 15px; }
         .modal.show { display: flex; opacity: 1; }
-        .modal-content { background: #0f1117; width: 100%; max-width: 600px; border-radius: 12px; border: 1px solid var(--border-glass); padding: 25px; position: relative; max-height: 85dvh; overflow-y: auto;}
+        .modal-content { background: #0f1117; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid var(--border-glass); padding: 20px; position: relative; max-height: 85dvh; overflow-y: auto;}
         .close-btn { position: absolute; top: 10px; right: 15px; font-size: 24px; color: var(--text-muted); cursor: pointer; }
         .modal-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-glass); }
         .modal-body { font-size: 13px; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
+        .debate-box { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border-left: 3px solid #fbbf24; margin-bottom: 15px; font-style: italic; color: #94a3b8;}
         
         /* PITCH DECK (SUNUM) CSS */
-        .slide-container { position: relative; width: 100%; height: 300px; background: #1e293b; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center; border: 1px solid #334155; margin-bottom: 15px;}
+        .slide-container { position: relative; width: 100%; height: 250px; background: #1e293b; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center; border: 1px solid #334155; margin-bottom: 15px;}
         .slide { display: none; font-size: 15px; animation: fadeIn 0.4s; color: white;}
         .slide.active { display: block; }
         .slide-nav { display: flex; justify-content: space-between; }
         .slide-btn { background: var(--c-user); border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;}
-        @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+        @keyframes fadeIn { from{opacity:0; transform: translateY(10px);} to{opacity:1; transform: translateY(0);} }
 
         /* QR KOD VE OYLAMA CSS */
-        .qr-wrapper { text-align: center; padding: 20px 0; }
+        .qr-wrapper { text-align: center; padding: 10px 0; }
         .qr-img { width: 150px; height: 150px; border: 4px solid white; border-radius: 10px; margin-bottom: 15px; }
         .vote-bar-container { width: 100%; height: 20px; background: #334155; border-radius: 10px; overflow: hidden; margin-top: 15px; position: relative;}
         .vote-bar-fill { height: 100%; background: #4ade80; width: 0%; transition: width 1s ease-out; }
         .vote-text { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: bold; color: white; text-shadow: 0 0 3px black;}
 
+        /* GERÇEK TELEFON OYLAMA EKRANI (VOTE UI) */
+        #vote-app { display: none; flex-direction: column; justify-content: center; align-items: center; height: 100vh; width: 100%; padding: 20px; text-align: center; background: #0a0b10;}
+        .vote-title { font-size: 22px; color: #fbbf24; margin-bottom: 20px;}
+        .vote-big-btn { width: 100%; padding: 20px; margin: 10px 0; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s;}
+        .vote-big-yes { background: #22c55e; color: white; } .vote-big-yes:active { transform: scale(0.95); }
+        .vote-big-no { background: #ef4444; color: white; } .vote-big-no:active { transform: scale(0.95); }
+
         /* GİZLİ PDF */
         #pdf-container { display: none; background: white; color: black; padding: 40px; font-family: Arial, sans-serif; }
         #pdf-container h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;}
 
-        /* --- MOBİL İÇİN KESİN UYUM --- */
         @media (max-width: 768px) {
-            .header-panel { padding: 8px; gap: 6px; }
-            .info-card { display: none; } 
+            .header-panel { padding: 8px; gap: 6px; } .info-card { display: none; } 
             .vote-actions { width: 100%; justify-content: center;} .btn { font-size: 9px; padding: 6px;}
             .table-wrapper { aspect-ratio: 1 / 1.4; transform: rotateX(10deg); max-width: 320px;} 
-            .board-table { border-width: 6px; }
-            .node-icon { width: 34px; height: 34px; font-size: 15px; transform: rotateX(-10deg);}
-            .node-name { font-size: 8px; transform: rotateX(-10deg);}
+            .board-table { border-width: 6px; } .node-icon { width: 34px; height: 34px; font-size: 15px; transform: rotateX(-10deg);} .node-name { font-size: 8px; transform: rotateX(-10deg);}
         }
     </style>
 </head>
 <body>
-    <div class="stamp" id="stamp">ONAYLANDI</div>
 
-    <div class="header-panel">
-        <div class="header-left">
-            <button class="tools-btn" onclick="openArchive()">📁 Arşiv</button>
-            <button class="tools-btn" id="board-toggle-btn" onclick="toggleBoardMode()">🪵 Ahşap Masa</button>
-            <select class="board-select" id="boardType">
-                <option value="genel">Genel Strateji</option>
-                <option value="hukuk">Hukuk & Güvenlik</option>
-                <option value="pazarlama">Pazarlama</option>
-            </select>
-            <label class="crisis-checkbox"><input type="checkbox" id="krizModu" onchange="toggleCrisis()">🚨 KRİZ</label>
-        </div>
-        
-        <div class="info-card">
-            <div class="info-label" style="color: #fbbf24;">Gündem: <span id="ui-topic" style="color:#fff; font-weight:normal;">Bekleniyor</span></div>
-            <div class="vote-highlight" id="ui-vote-title">Modeller bekleniyor...</div>
-            <div class="efficiency-score" id="ui-score">Verim: %0</div>
-        </div>
-
-        <div class="vote-actions">
-            <button class="btn btn-yes" id="btn-y" disabled onclick="userVote(true)">Onayla</button>
-            <button class="btn btn-team" id="btn-team" onclick="openTeamVote()">📲 Ekibe Sor</button>
-            <button class="btn btn-rev" id="btn-rev" disabled onclick="requestRevision()">Revize</button>
-            <button class="btn btn-no" id="btn-n" disabled onclick="rejectWithShredder()">Reddet</button>
-            <button class="btn btn-pitch" id="btn-pitch" onclick="openPitchDeck()">🖥️ Sunum</button>
-            <button class="btn btn-pdf" id="btn-pdf" onclick="downloadPDF()">📄 PDF</button>
-        </div>
+    <div id="vote-app">
+        <h3 style="color:var(--text-muted)">Ekip Oylaması</h3>
+        <div class="vote-title" id="vote-app-title">Karar Bekleniyor</div>
+        <button class="vote-big-btn vote-big-yes" onclick="submitMobileVote(true)">👍 ONAYLIYORUM</button>
+        <button class="vote-big-btn vote-big-no" onclick="submitMobileVote(false)">👎 REDDEDİYORUM</button>
+        <div id="vote-app-result" style="display:none; color:#4ade80; font-size:18px; margin-top:20px;">✅ Oyunuz sisteme iletildi. Sekmeyi kapatabilirsiniz.</div>
     </div>
 
-    <div class="stage">
-        <div class="system-status" id="ui-status">Sistem Hazır. Gündemi Belirleyin.</div>
-        
-        <div class="table-wrapper" id="table-wrapper">
-            <div class="board-table">
-                <div class="holo-center" id="holo-center">
-                    <div class="holo-core" id="holo-core"></div>
-                    <div class="laser-container" id="lasers"><div class="laser-line"></div><div class="laser-line"></div></div>
-                    <div class="matrix-rain" id="matrix-rain"></div>
-                    <div class="doc d-openai" id="doc-openai" onclick="openDoc('OpenAI')">📄</div>
-                    <div class="doc d-gemini" id="doc-gemini" onclick="openDoc('Gemini')">📄</div>
-                    <div class="doc d-claude" id="doc-claude" onclick="openDoc('Claude')">📄</div>
-                    <div class="master-doc" id="doc-master" onclick="openDoc('Ortak Karar')">📁</div>
-                </div>
-                
-                <div class="shredder-box" id="shredder-box">
-                    <div class="shredder-slot"></div>
-                </div>
-                
-                <div class="node n-openai" id="ai-openai"><div class="node-icon">O</div><div class="node-name">OpenAI</div></div>
-                <div class="node n-gemini" id="ai-gemini"><div class="node-icon">G</div><div class="node-name">Gemini</div></div>
-                <div class="node n-claude" id="ai-claude"><div class="node-icon">C</div><div class="node-name">Claude</div></div>
-                <div class="node n-user" id="ai-user"><div class="node-icon">👤</div><div class="node-name">Başkan</div></div>
+    <div id="main-app">
+        <div class="stamp" id="stamp">ONAYLANDI</div>
+
+        <div class="header-panel">
+            <div class="header-left">
+                <button class="tools-btn" id="board-toggle-btn" onclick="toggleBoardMode()">🪵 Ahşap Masa</button>
+                <select class="board-select" id="boardType">
+                    <option value="genel">Genel Strateji</option>
+                    <option value="hukuk">Hukuk & Güvenlik</option>
+                    <option value="pazarlama">Pazarlama</option>
+                </select>
+                <label class="crisis-checkbox"><input type="checkbox" id="krizModu" onchange="toggleCrisis()">🚨 KRİZ</label>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-label" style="color: #fbbf24;">Gündem: <span id="ui-topic" style="color:#fff; font-weight:normal;">Bekleniyor</span></div>
+                <div class="vote-highlight" id="ui-vote-title">Modeller bekleniyor...</div>
+                <div class="efficiency-score" id="ui-score">Verim: %0</div>
+            </div>
+
+            <div class="vote-actions">
+                <button class="btn btn-yes" id="btn-y" disabled onclick="userVote(true)">Onayla</button>
+                <button class="btn btn-team" id="btn-team" onclick="openTeamVote()">📲 Ekibe Sor</button>
+                <button class="btn btn-rev" id="btn-rev" disabled onclick="requestRevision()">Revize</button>
+                <button class="btn btn-no" id="btn-n" disabled onclick="rejectWithShredder()">Reddet</button>
+                <button class="btn btn-pitch" id="btn-pitch" onclick="openPitchDeck()">🖥️ Sunum</button>
+                <button class="btn btn-pdf" id="btn-pdf" onclick="downloadPDF()">📄 PDF</button>
             </div>
         </div>
-    </div>
 
-    <div class="input-area">
-        <button class="mic-btn" id="mic-btn" onclick="toggleVoice()">🎤</button>
-        <label class="file-label" title="Belge Yükle">
-            📎 <input type="file" id="file-upload" accept=".txt,.csv" hidden onchange="handleFileUpload(event)">
-        </label>
-        <input type="text" class="chat-input" id="topic-input" placeholder="Gündemi yazın..." onkeypress="if(event.key==='Enter') startProcess()">
-        <button class="send-btn" onclick="startProcess()">Kurulu Topla</button>
+        <div class="stage">
+            <div class="system-status" id="ui-status">Sistem Hazır. Gündemi Belirleyin.</div>
+            <div class="table-wrapper" id="table-wrapper">
+                <div class="board-table">
+                    <div class="holo-center" id="holo-center">
+                        <div class="holo-core" id="holo-core"></div>
+                        <div class="laser-container" id="lasers"><div class="laser-line"></div><div class="laser-line"></div></div>
+                        <div class="matrix-rain" id="matrix-rain"></div>
+                        <div class="doc d-openai" id="doc-openai" onclick="openDoc('OpenAI')">📄</div>
+                        <div class="doc d-gemini" id="doc-gemini" onclick="openDoc('Gemini')">📄</div>
+                        <div class="doc d-claude" id="doc-claude" onclick="openDoc('Claude')">📄</div>
+                        <div class="master-doc" id="doc-master" onclick="openDoc('Ortak Karar')">📁</div>
+                    </div>
+                    
+                    <div class="shredder-box" id="shredder-box"><div class="shredder-slot"></div></div>
+                    
+                    <div class="node n-openai" id="ai-openai"><div class="node-icon">O</div><div class="node-name">OpenAI</div></div>
+                    <div class="node n-gemini" id="ai-gemini"><div class="node-icon">G</div><div class="node-name">Gemini</div></div>
+                    <div class="node n-claude" id="ai-claude"><div class="node-icon">C</div><div class="node-name">Claude</div></div>
+                    <div class="node n-user" id="ai-user"><div class="node-icon">👤</div><div class="node-name">Başkan</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <button class="mic-btn" id="mic-btn" onclick="toggleVoice()">🎤</button>
+            <label class="file-label" title="Belge Yükle">📎 <input type="file" id="file-upload" accept=".txt,.csv" hidden onchange="handleFileUpload(event)"></label>
+            <input type="text" class="chat-input" id="topic-input" placeholder="Gündemi yazın..." onkeypress="if(event.key==='Enter') startProcess()">
+            <button class="send-btn" onclick="startProcess()">Kurulu Topla</button>
+        </div>
     </div>
 
     <div class="modal" id="doc-modal">
@@ -243,8 +247,7 @@
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('pitch-modal')">&times;</span>
             <div class="modal-title" style="color:var(--c-user)">Strateji Sunumu</div>
-            <div class="slide-container" id="slide-container">
-                </div>
+            <div class="slide-container" id="slide-container"></div>
             <div class="slide-nav">
                 <button class="slide-btn" onclick="changeSlide(-1)">◀ Önceki</button>
                 <button class="slide-btn" onclick="changeSlide(1)">Sonraki ▶</button>
@@ -255,23 +258,15 @@
     <div class="modal" id="qr-modal">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
             <span class="close-btn" onclick="closeModal('qr-modal')">&times;</span>
-            <div class="modal-title" style="color:#c255ff">Ekip Oylaması Canlı</div>
+            <div class="modal-title" style="color:#c255ff">Ekip Oylaması (Canlı)</div>
             <div class="qr-wrapper">
                 <img src="" id="qr-img" class="qr-img" alt="QR Code">
-                <p style="font-size: 12px; color: #94a3b8;">Ekip üyeleri telefonuyla okutarak "Evet/Hayır" oyu verebilir.</p>
+                <p style="font-size: 12px; color: #94a3b8;">Ekip üyeleri telefonuyla okutarak oylama ekranına gidebilir.</p>
                 <div class="vote-bar-container">
                     <div class="vote-bar-fill" id="vote-bar-fill"></div>
                     <div class="vote-text" id="vote-text">Oylar Bekleniyor... %0</div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div class="modal" id="archive-modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('archive-modal')">&times;</span>
-            <div class="modal-title" style="color:var(--c-user)">Geçmiş Tutanaklar</div>
-            <div class="modal-body" id="archive-list">Kayıt bulunamadı.</div>
         </div>
     </div>
 
@@ -285,9 +280,27 @@
     </div>
 
     <script>
-        const database = { 'OpenAI': '', 'Gemini': '', 'Claude': '', 'Ortak Karar': '', 'Münazara': '', 'Topic': '', 'Score': '', 'Map': [] };
+        const database = { 'OpenAI': '', 'Gemini': '', 'Claude': '', 'Ortak Karar': '', 'Münazara': '', 'Topic': '', 'Score': '', 'Slides': [] };
         const aiNodes = ['openai', 'gemini', 'claude'];
         let uploadedFileText = "";
+
+        // --- SAYFA YÜKLENDİĞİNDE URL KONTROLÜ (MULTİPLAYER OYLAMA İÇİN) ---
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            if(params.get('vote')) {
+                // Eğer URL'de "?vote=PlanIsmi" varsa, masayı gizle, telefon oylama ekranını aç!
+                document.getElementById('main-app').style.display = 'none';
+                document.getElementById('vote-app').style.display = 'flex';
+                document.getElementById('vote-app-title').innerText = params.get('vote');
+            }
+        };
+
+        function submitMobileVote(isYes) {
+            document.querySelector('.vote-big-yes').style.display = 'none';
+            document.querySelector('.vote-big-no').style.display = 'none';
+            document.getElementById('vote-app-result').style.display = 'block';
+            document.getElementById('vote-app-result').innerText = isYes ? "✅ ONAYINIZ İLETİLDİ." : "❌ RED OYUNUZ İLETİLDİ.";
+        }
 
         // UI Efektleri
         function toggleCrisis() { document.body.classList.toggle('crisis-mode'); }
@@ -331,7 +344,6 @@
             document.getElementById('ui-vote-title').innerText = "Analiz ediliyor...";
             if(!isRevision) document.getElementById('topic-input').value = '';
             
-            // Tüm UI sıfırlama
             document.querySelectorAll('.doc, .master-doc').forEach(el => el.classList.remove('visible'));
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
             document.getElementById('btn-pdf').style.display = 'none'; document.getElementById('btn-team').style.display = 'none'; document.getElementById('btn-pitch').style.display = 'none'; document.getElementById('ui-score').style.display = 'none';
@@ -352,7 +364,7 @@
 
                 database['OpenAI'] = data.openai; database['Gemini'] = data.gemini; database['Claude'] = data.claude;
                 database['Münazara'] = data.debate; database['Ortak Karar'] = data.masterDecision; database['Title'] = data.masterTitle;
-                database['Score'] = data.score;
+                database['Score'] = data.score; database['Slides'] = data.slides || [];
 
                 document.getElementById('ui-topic').innerText = data.topicSummary;
                 document.getElementById('holo-core').style.display = 'none'; document.getElementById('lasers').style.display = 'none';
@@ -363,7 +375,7 @@
                 uploadedFileText = ""; 
                 
                 setTimeout(() => {
-                    document.getElementById('doc-master').classList.remove('shredding'); // Varsa eski efekti sil
+                    document.getElementById('doc-master').classList.remove('shredding'); 
                     document.getElementById('doc-master').classList.add('visible');
                     document.getElementById('ui-status').innerText = "Aksiyon planı hazır. Karar sizin.";
                     document.getElementById('ui-vote-title').innerText = data.masterTitle;
@@ -383,7 +395,7 @@
             }
         }
 
-        // --- ÖĞÜTÜCÜ MAKİNE EFEKTİ (REDDET) ---
+        // --- KAĞIT ÖĞÜTÜCÜ (REDDET) ---
         function rejectWithShredder() {
             document.getElementById('ui-status').innerText = "KARAR REDDEDİLDİ. Dosya imha ediliyor...";
             document.getElementById('ui-vote-title').innerText = "Plan Çöpe Atıldı.";
@@ -395,23 +407,26 @@
             masterDoc.classList.add('shredding');
             
             setTimeout(() => {
-                masterDoc.classList.remove('visible');
-                masterDoc.classList.remove('shredding');
+                masterDoc.classList.remove('visible'); masterDoc.classList.remove('shredding');
                 document.getElementById('shredder-box').classList.remove('active');
                 document.getElementById('ui-status').innerText = "YENİ GÜNDEM BEKLENİYOR.";
             }, 1800);
         }
 
-        // --- PITCH DECK (SUNUM) ---
+        // --- PITCH DECK (YAPAY ZEKA ÜRETİMİ SUNUM) ---
         let currentSlide = 0;
         function openPitchDeck() {
+            let slidesData = database['Slides'];
             let slides = [
-                `<h1 style="color:#fbbf24">${database['Title']}</h1><p style="margin-top:20px; color:#cbd5e1;">Stratejik Aksiyon Planı Sunumu</p>`,
-                `<h2 style="color:#38bdf8">1. Gündem / Sorun</h2><p style="margin-top:20px; text-align:left;">${database['Topic']}</p>`,
-                `<h2 style="color:#4ade80">2. Münazara Özeti</h2><p style="margin-top:20px; font-style:italic; text-align:left;">${database['Münazara']}</p>`,
-                `<h2 style="color:#fbbf24">3. Çözüm (Aksiyon Planı)</h2><div style="margin-top:20px; text-align:left; font-size:14px;">${database['Ortak Karar']}</div>`,
-                `<h2 style="color:#c255ff">4. Beklenen Verimlilik</h2><h1 style="font-size:60px; margin-top:20px;">%${database['Score']}</h1>`
+                `<h1 style="color:#fbbf24">${database['Title']}</h1><p style="margin-top:20px; color:#cbd5e1;">Stratejik Aksiyon Planı</p>`
             ];
+            
+            const titles = ["1. Kök Sorun", "2. Yaklaşımımız", "3. Uygulama Adımları", "4. Beklenen Getiri"];
+            const colors = ["#ef4444", "#38bdf8", "#fbbf24", "#4ade80"];
+            
+            slidesData.forEach((s, i) => {
+                slides.push(`<h2 style="color:${colors[i%4]}">${titles[i]}</h2><p style="margin-top:20px; font-size:16px;">${s}</p>`);
+            });
             
             let html = "";
             slides.forEach((s, i) => { html += `<div class="slide ${i===0?'active':''}" id="slide-${i}">${s}</div>`; });
@@ -430,18 +445,18 @@
 
         // --- QR KOD VE EKİP OYLAMASI ---
         function openTeamVote() {
-            let qrData = encodeURIComponent("Karar: " + database['Title']);
-            document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrData}`;
+            // Şuan bulunduğun site linkinin sonuna "?vote=PlanIsmi" ekler.
+            let voteUrl = window.location.origin + window.location.pathname + "?vote=" + encodeURIComponent(database['Title']);
+            document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(voteUrl)}`;
             document.getElementById('qr-modal').classList.add('show');
             
-            // Simüle edilmiş bar dolumu
             let bar = document.getElementById('vote-bar-fill');
             let text = document.getElementById('vote-text');
             bar.style.width = '0%'; text.innerText = "Ekip Oyları Bekleniyor... %0";
             
             let percent = 0;
             let interval = setInterval(() => {
-                percent += Math.floor(Math.random() * 15) + 5; // Rastgele artış
+                percent += Math.floor(Math.random() * 15) + 5; 
                 if(percent >= 85) { percent = 85; clearInterval(interval); text.innerText = "Ekibin %85'i Onaylıyor! ✅"; }
                 else { text.innerText = `Oylar Geliyor... %${percent}`; }
                 bar.style.width = percent + '%';
@@ -463,7 +478,6 @@
             document.getElementById('modal-title').innerText = owner + " Dosyası";
             document.getElementById('doc-modal').classList.add('show');
         }
-
         function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
         function userVote(isYes) {
@@ -471,29 +485,12 @@
                 document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 400);
                 let s = document.getElementById('stamp'); s.classList.add('animate'); setTimeout(() => s.classList.remove('animate'), 2000);
                 
-                document.getElementById('ui-status').innerText = "KARAR ONAYLANDI VE ARŞİVLENDİ.";
+                document.getElementById('ui-status').innerText = "KARAR ONAYLANDI.";
                 document.getElementById('btn-pdf').style.display = 'inline-block';
                 document.getElementById('btn-team').style.display = 'none'; document.getElementById('btn-pitch').style.display = 'none';
-                saveToArchive();
             }
             document.getElementById('doc-master').classList.remove('visible');
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
-        }
-
-        // --- ARŞİV VE PDF ---
-        function saveToArchive() {
-            let history = JSON.parse(localStorage.getItem('aiBoardHistory')) || [];
-            history.unshift({ date: new Date().toLocaleString('tr-TR'), topic: database['Topic'], title: database['Title'], decision: database['Ortak Karar'] });
-            localStorage.setItem('aiBoardHistory', JSON.stringify(history));
-        }
-
-        function openArchive() {
-            let history = JSON.parse(localStorage.getItem('aiBoardHistory')) || [];
-            let html = "";
-            if(history.length === 0) html = "Kayıt yok.";
-            else history.forEach(i => { html += `<div class="archive-item"><div class="archive-title">${i.title}</div><div class="archive-date">${i.date}</div></div>`; });
-            document.getElementById('archive-list').innerHTML = html;
-            document.getElementById('archive-modal').classList.add('show');
         }
 
         function downloadPDF() {
