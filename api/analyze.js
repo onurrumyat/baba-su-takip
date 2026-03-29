@@ -54,7 +54,7 @@ export default async function handler(req, res) {
         const openaiText = openAiData.choices?.[0]?.message?.content || "Fikir üretilemedi.";
         const claudeText = claudeData.content?.[0]?.text || "Fikir üretilemedi.";
         
-        const geminiText = `- (${r3} Gözünden): Sektör standartlarını çöpe at. Süreci tamamen rakiplerin beklemediği bir modele taşı.\n- Müşteri/Personel direncini kırmak için manipülatif bir teşvik sistemi kur.\n- Maliyeti dış kaynak veya otomasyon ile sıfırla.`;
+        const geminiText = `- Sektör standartlarını çöpe at. Süreci tamamen rakiplerin beklemediği bir modele taşı.\n- Müşteri/Personel direncini kırmak için manipülatif bir teşvik sistemi kur.\n- Maliyeti dış kaynak veya otomasyon ile sıfırla.`;
 
         const masterReq = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
@@ -71,7 +71,7 @@ export default async function handler(req, res) {
                     5) 'verimlilikSkoru': 1-100 arası başarı ihtimali.
                     6) 'zihinHaritasi': 3 anahtar kelime dizisi.
                     7) 'sunumSlaytlari': 4 elemanlı sunum dizisi.` },
-                    { role: "user", content: `${finalContext}\n\n${r1} Fikirleri:\n${openaiText}\n\n${r2} Fikirleri:\n${claudeText}\n\n${r3} Fikirleri:\n${geminiText}` }
+                    { role: "user", content: `${finalContext}\n\nOpenAI Fikirleri:\n${openaiText}\n\nClaude Fikirleri:\n${claudeText}\n\nGemini Fikirleri:\n${geminiText}` }
                 ]
             })
         });
@@ -79,10 +79,11 @@ export default async function handler(req, res) {
         const masterData = await masterReq.json();
         const synthesis = JSON.parse(masterData.choices?.[0]?.message?.content || "{}");
 
+        // Rol İsimleri Çıkarıldı, Sadece Saf Metinler Gidiyor
         res.status(200).json({
-            openai: `[Rol: ${r1}]\n\n${openaiText}`,
-            claude: `[Rol: ${r2}]\n\n${claudeText}`,
-            gemini: `[Rol: ${r3}]\n\n${geminiText}`,
+            openai: openaiText,
+            claude: claudeText,
+            gemini: geminiText,
             topicSummary: synthesis.ozetKonu || "Gündem Özeti",
             masterTitle: synthesis.protokolBasligi || "Net Aksiyon Planı",
             debate: synthesis.munazara || "Münazara yapılamadı.",
