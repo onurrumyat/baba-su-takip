@@ -3,257 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Komuta Merkezi | Kurumsal SaaS</title>
+    <title>AI Komuta Merkezi | Ultimate Edition</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
-            --bg-main: #0a0b10; 
-            --bg-panel: rgba(15, 18, 25, 0.9); 
-            --border-glass: rgba(255, 255, 255, 0.08);
-            --text-light: #e2e8f0; 
-            --text-muted: #64748b;
-            --c-openai: #10a37f; 
-            --c-gemini: #c255ff; 
-            --c-claude: #d97757; 
-            --c-user: #38bdf8;
-            --table-surface: linear-gradient(145deg, #1c1512 0%, #0d0907 100%); 
-            --table-rim: #2a2d35;
+            --bg-main: #0a0b10; --bg-panel: rgba(15, 18, 25, 0.9); --border-glass: rgba(255, 255, 255, 0.08);
+            --text-light: #e2e8f0; --text-muted: #64748b;
+            --c-openai: #10a37f; --c-gemini: #c255ff; --c-claude: #d97757; --c-user: #38bdf8;
+            --table-surface: linear-gradient(145deg, #1c1512 0%, #0d0907 100%); --table-rim: #2a2d35;
+            --holo-color: rgba(56, 189, 248, 0.3);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
         body {
-            background-color: var(--bg-main); 
-            background-image: radial-gradient(circle at 50% -20%, rgba(56, 189, 248, 0.05) 0%, transparent 70%);
-            color: var(--text-light); 
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            height: 100dvh; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
+            background-color: var(--bg-main); background-image: radial-gradient(circle at 50% -20%, rgba(56, 189, 248, 0.05) 0%, transparent 70%);
+            color: var(--text-light); font-family: 'Segoe UI', system-ui, sans-serif;
+            height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.5s;
         }
 
-        /* --- ÜST PANEL --- */
-        .header-panel { 
-            background: var(--bg-panel); 
-            backdrop-filter: blur(20px); 
-            border-bottom: 1px solid var(--border-glass); 
-            padding: 12px 20px; 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 10px; 
-            justify-content: space-between; 
-            align-items: center; 
-            z-index: 10; 
-        }
-        
-        .header-left { display: flex; gap: 15px; align-items: center; }
-        
-        .archive-btn { 
-            background: transparent; 
-            border: 1px solid var(--border-glass); 
-            color: var(--text-light); 
-            padding: 5px 10px; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-size: 12px; 
-            transition: 0.2s;
-        }
-        .archive-btn:hover { background: rgba(255,255,255,0.1); }
-        
-        .board-select { 
-            background: #010409; 
-            color: white; 
-            border: 1px solid var(--border-glass); 
-            padding: 5px 10px; 
-            border-radius: 6px; 
-            font-size: 12px; 
-            outline: none;
-        }
+        /* KRİZ MODU CSS */
+        body.crisis-mode { background-color: #1a0505; background-image: radial-gradient(circle at 50% -20%, rgba(255, 0, 0, 0.15) 0%, transparent 70%); animation: crisisPulse 2s infinite; }
+        body.crisis-mode .board-table { box-shadow: 0 40px 60px rgba(0,0,0,0.9), inset 0 4px 15px rgba(255, 0, 0, 0.1), inset 0 -10px 30px rgba(0,0,0,0.8); border-color: #3a1515;}
+        body.crisis-mode .holo-center { border-color: rgba(255, 0, 0, 0.3); box-shadow: inset 0 0 30px rgba(255, 0, 0, 0.2); }
+        @keyframes crisisPulse { 0% { background-color: #1a0505; } 50% { background-color: #2a0505; } 100% { background-color: #1a0505; } }
 
+        /* MÜHÜR EFEKTİ VE EKRAN TİTREME */
+        .stamp { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(5); opacity: 0; pointer-events: none; z-index: 1000; font-size: 80px; color: red; border: 8px solid red; padding: 10px 30px; border-radius: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 5px; text-shadow: 0 0 10px rgba(255,0,0,0.5); font-family: Impact, sans-serif; }
+        .stamp.animate { animation: stampIn 0.5s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes stampIn { to { transform: translate(-50%, -50%) scale(1) rotate(-15deg); opacity: 0.8; } }
+        .shake { animation: shakeScreen 0.4s; }
+        @keyframes shakeScreen { 0% { transform: translate(1px, 1px) rotate(0deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 40% { transform: translate(1px, -2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 80% { transform: translate(3px, 1px) rotate(-1deg); } 100% { transform: translate(0px, 0px) rotate(0deg); } }
+
+        /* ÜST PANEL */
+        .header-panel { background: var(--bg-panel); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-glass); padding: 10px 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; z-index: 10; }
+        .header-left { display: flex; gap: 10px; align-items: center; flex-wrap: wrap;}
+        .tools-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); color: white; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; transition: 0.2s;}
+        .tools-btn:hover { background: rgba(255,255,255,0.1); }
+        .tools-btn.active { background: var(--c-user); color: #000; border-color: var(--c-user);}
+        .crisis-checkbox { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #f87171; font-weight: bold; cursor: pointer;}
+        
         .info-card { flex: 1; min-width: 120px; }
         .info-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
         .vote-highlight { color: #fbbf24; font-size: 14px; text-shadow: 0 0 10px rgba(251, 191, 36, 0.3); font-weight: 700;}
+        .efficiency-score { font-size: 12px; color: #4ade80; font-weight: bold; display: none; }
 
-        .vote-actions { display: flex; gap: 8px; }
-        .btn { padding: 8px 12px; border: none; border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; }
-        .btn-yes { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
-        .btn-yes:hover:not(:disabled) { background: #22c55e; color: white; }
-        .btn-no { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
-        .btn-no:hover:not(:disabled) { background: #ef4444; color: white; }
-        .btn-rev { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
-        .btn-rev:hover:not(:disabled) { background: #38bdf8; color: black; }
+        .vote-actions { display: flex; gap: 8px; flex-wrap: wrap;}
+        .btn { padding: 6px 12px; border: none; border-radius: 6px; font-weight: 700; font-size: 10px; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
+        .btn-yes { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); } .btn-yes:hover:not(:disabled) { background: #22c55e; color: white; }
+        .btn-no { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); } .btn-no:hover:not(:disabled) { background: #ef4444; color: white; }
+        .btn-rev { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); } .btn-rev:hover:not(:disabled) { background: #38bdf8; color: black; }
+        .btn-map { background: rgba(194, 85, 255, 0.15); color: #c255ff; border: 1px solid rgba(194, 85, 255, 0.4); display: none; } .btn-map:hover { background: #c255ff; color: white; }
         .btn-pdf { background: #fbbf24; color: #000; display: none; } 
         .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* --- ORTA ALAN: MASA --- */
-        .stage { 
-            flex: 1; 
-            min-height: 0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            position: relative; 
-            perspective: 1000px; 
-            padding: 30px; 
-        }
+        /* ORTA ALAN: MASA & CAM TAHTA MODU */
+        .stage { flex: 1; min-height: 0; display: flex; justify-content: center; align-items: center; position: relative; perspective: 1200px; padding: 20px; }
+        .system-status { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); color: var(--c-user); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; z-index: 20;}
         
-        .system-status { 
-            position: absolute; 
-            top: 15px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            color: var(--c-user); 
-            font-size: 11px; 
-            letter-spacing: 2px; 
-            text-transform: uppercase; 
-            font-weight: 700;
-        }
+        .table-wrapper { position: relative; width: 100%; max-width: 900px; aspect-ratio: 2.2 / 1; transform: rotateX(25deg); transform-style: preserve-3d; transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .board-table { width: 100%; height: 100%; background: var(--table-surface); border: 12px solid var(--table-rim); border-radius: 60px; box-shadow: 0 40px 60px rgba(0,0,0,0.9), inset 0 4px 15px rgba(255, 255, 255, 0.03), inset 0 -10px 30px rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; position: relative; transition: 0.8s; }
         
-        .table-wrapper { 
-            position: relative; 
-            width: 100%; 
-            max-width: 900px; 
-            aspect-ratio: 2.2 / 1; 
-            transform: rotateX(25deg); 
-            transform-style: preserve-3d; 
-            max-height: 50vh; 
-        }
-        
-        .board-table { 
-            width: 100%; 
-            height: 100%; 
-            background: var(--table-surface); 
-            border: 12px solid var(--table-rim); 
-            border-radius: 60px; 
-            box-shadow: 0 40px 60px rgba(0,0,0,0.9), inset 0 4px 15px rgba(255, 255, 255, 0.03), inset 0 -10px 30px rgba(0,0,0,0.8); 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            position: relative; 
-        }
-        
-        .holo-center { 
-            width: 70%; 
-            height: 50%; 
-            background: rgba(56, 189, 248, 0.02); 
-            border-radius: 30px; 
-            border: 1px solid rgba(56, 189, 248, 0.1); 
-            position: relative; 
-        }
-        
-        .file-indicator { position: absolute; top: 10px; left: 10px; font-size: 20px; display: none; }
+        /* White-Label Logo Area */
+        .custom-logo { position: absolute; width: 80px; height: 80px; opacity: 0.1; background-size: contain; background-repeat: no-repeat; background-position: center; pointer-events: none;}
 
-        /* --- AVATARLAR --- */
+        .holo-center { width: 70%; height: 50%; background: rgba(56, 189, 248, 0.01); border-radius: 30px; border: 1px solid rgba(56, 189, 248, 0.1); position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center;}
+        
+        /* Holo Core Animasyon */
+        .holo-core { width: 50px; height: 50px; border-radius: 50%; border: 2px dashed var(--holo-color); animation: spinHolo 4s linear infinite; display: none; box-shadow: 0 0 20px var(--holo-color); }
+        .holo-core::before { content: ''; position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px; border-radius: 50%; border: 2px solid var(--c-user); animation: spinHolo 2s linear infinite reverse; }
+        @keyframes spinHolo { 100% { transform: rotate(360deg); } }
+
+        /* Lazerler */
+        .laser-container { position: absolute; inset: 0; pointer-events: none; display: none; }
+        .laser-line { position: absolute; top: 50%; left: 50%; width: 200px; height: 2px; background: linear-gradient(90deg, transparent, var(--c-openai), transparent); transform-origin: left; animation: shootLaser 0.5s infinite; opacity: 0; }
+        .laser-line:nth-child(2) { background: linear-gradient(90deg, transparent, var(--c-claude), transparent); animation-delay: 0.2s; transform: rotate(180deg); }
+        @keyframes shootLaser { 0% { width: 0; opacity: 1; } 50% { width: 250px; opacity: 1; } 100% { width: 300px; opacity: 0; } }
+
+        /* Matrix Efekti */
+        .matrix-rain { position: absolute; inset: 0; pointer-events: none; color: #0f0; font-family: monospace; font-size: 14px; line-height: 1; overflow: hidden; display: none; text-shadow: 0 0 5px #0f0; }
+        .matrix-drop { position: absolute; top: -20px; animation: fall linear forwards; }
+        @keyframes fall { to { top: 100%; } }
+
+        /* CAM TAHTA MODU CSS */
+        .table-wrapper.glass-mode { transform: rotateX(0deg); max-height: 70vh; aspect-ratio: 16/9; }
+        .table-wrapper.glass-mode .board-table { background: rgba(255, 255, 255, 0.05); border: 4px solid rgba(255,255,255,0.2); border-radius: 10px; backdrop-filter: blur(10px); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .table-wrapper.glass-mode .holo-center { display: none; }
+        .table-wrapper.glass-mode .node { display: none; } /* Tahtada avatar gizle */
+        .table-wrapper.glass-mode .doc { border-radius: 0; width: 80px; height: 80px; font-size: 12px; padding: 5px; background: #fef08a; color: #000; box-shadow: 3px 3px 10px rgba(0,0,0,0.5); border: none; font-family: 'Comic Sans MS', cursive, sans-serif; text-align: center; }
+        .table-wrapper.glass-mode .doc::before { content: '📌'; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 16px;}
+        .table-wrapper.glass-mode .d-openai { background: #bbf7d0; top: 20%; left: 30%; transform: rotate(-5deg); }
+        .table-wrapper.glass-mode .d-gemini { background: #e9d5ff; top: 40%; left: 50%; transform: rotate(3deg); }
+        .table-wrapper.glass-mode .d-claude { background: #fecdd3; top: 20%; left: 70%; transform: rotate(-2deg); }
+        .table-wrapper.glass-mode .master-doc { width: 100px; height: 100px; background: #fde047; font-size: 14px; top: 70%; text-align: center; padding: 10px;}
+
+        /* AVATARLAR */
         .node { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 8px; transform: translate(-50%, -50%); z-index: 5; }
         .node-icon { width: 45px; height: 45px; border-radius: 12px; background: #0f1117; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: 800; border: 2px solid; box-shadow: 0 10px 20px rgba(0,0,0,0.8); transition: 0.3s; }
         .node-name { font-size: 10px; font-weight: 800; letter-spacing: 1px; color: #fff; text-transform: uppercase; background: rgba(0,0,0,0.8); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);}
-        
         .n-openai .node-icon { border-color: var(--c-openai); color: var(--c-openai); }
         .n-gemini .node-icon { border-color: var(--c-gemini); color: var(--c-gemini); }
         .n-claude .node-icon { border-color: var(--c-claude); color: var(--c-claude); }
         .n-user .node-icon { border-color: var(--c-user); color: var(--c-user); }
-        
-        .n-openai { top: -5px; left: 50%; } 
-        .n-user { top: calc(100% + 5px); left: 50%; } 
-        .n-gemini { top: 50%; left: -5px; } 
-        .n-claude { top: 50%; left: calc(100% + 5px); } 
-        
-        .thinking .node-icon { animation: glow 1s infinite alternate; }
-        @keyframes glow { from { box-shadow: 0 0 5px currentColor; } to { box-shadow: 0 0 25px currentColor, inset 0 0 10px currentColor; } }
+        .n-openai { top: -5px; left: 50%; } .n-user { top: calc(100% + 5px); left: 50%; } .n-gemini { top: 50%; left: -5px; } .n-claude { top: 50%; left: calc(100% + 5px); } 
 
-        /* --- DOSYALAR --- */
-        .doc { position: absolute; width: 32px; height: 44px; background: rgba(255,255,255,0.95); border-radius: 4px; display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0; transform: scale(0); transition: 0.4s; box-shadow: 0 6px 15px rgba(0,0,0,0.7); font-size: 16px; border-left: 3px solid #ccc; }
+        /* DOSYALAR (Klasik Mod) */
+        .doc { position: absolute; width: 32px; height: 44px; background: rgba(255,255,255,0.95); border-radius: 4px; display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0; transform: scale(0); transition: 0.4s; box-shadow: 0 6px 15px rgba(0,0,0,0.7); font-size: 16px; border-left: 3px solid #ccc; color: black; }
         .doc:hover { transform: scale(1.3) translateY(-5px) !important; z-index: 10; }
         .doc.visible { opacity: 1; transform: scale(1); }
-        
         .d-openai { top: 15%; left: 50%; transform: translateX(-50%); border-left-color: var(--c-openai); }
         .d-gemini { top: 50%; left: 15%; transform: translateY(-50%); border-left-color: var(--c-gemini); }
         .d-claude { top: 50%; right: 15%; transform: translateY(-50%); border-left-color: var(--c-claude); }
 
-        .master-doc { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); width: 55px; height: 70px; background: linear-gradient(135deg, #fbbf24, #d97706); border-radius: 5px 10px 10px 5px; display: flex; justify-content: center; align-items: center; font-size: 28px; cursor: pointer; opacity: 0; transition: 0.5s; box-shadow: 0 0 30px rgba(251, 191, 36, 0.4); border-left: 6px solid #b45309; z-index: 2; }
+        .master-doc { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); width: 55px; height: 70px; background: linear-gradient(135deg, #fbbf24, #d97706); border-radius: 5px 10px 10px 5px; display: flex; justify-content: center; align-items: center; font-size: 28px; cursor: pointer; opacity: 0; transition: 0.5s; box-shadow: 0 0 30px rgba(251, 191, 36, 0.4); border-left: 6px solid #b45309; z-index: 2; color: black;}
         .master-doc:hover { transform: translate(-50%, -50%) scale(1.15) !important; }
         .master-doc.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
-        /* --- KULLANICI GİRİŞ ALANI --- */
-        .input-area { background: var(--bg-panel); backdrop-filter: blur(20px); border-top: 1px solid var(--border-glass); padding: 15px 25px; padding-bottom: calc(15px + env(safe-area-inset-bottom)); display: flex; gap: 10px; align-items: center;}
-        
-        .file-label { cursor: pointer; font-size: 20px; padding: 5px; opacity: 0.7; transition: 0.2s;}
-        .file-label:hover { opacity: 1; }
-        
-        .mic-btn { background: none; border: none; font-size: 20px; cursor: pointer; opacity: 0.7; transition: 0.2s; color: white;}
-        .mic-btn:hover { opacity: 1; color: var(--c-user);}
-        .mic-btn.recording { color: red; animation: pulse 1s infinite alternate; }
-        
-        .chat-input { flex: 1; background: #010409; border: 1px solid var(--border-glass); color: white; padding: 14px 15px; border-radius: 8px; font-size: 14px; outline: none; transition: 0.3s; }
+        /* ALT PANEL (GİRİŞ) */
+        .input-area { background: var(--bg-panel); backdrop-filter: blur(20px); border-top: 1px solid var(--border-glass); padding: 12px 20px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 10px; align-items: center;}
+        .file-label { cursor: pointer; font-size: 18px; opacity: 0.7; transition: 0.2s;} .file-label:hover { opacity: 1; }
+        .mic-btn { background: none; border: none; font-size: 18px; cursor: pointer; opacity: 0.7; color: white;} .mic-btn.recording { color: red; animation: pulse 1s infinite alternate; }
+        .chat-input { flex: 1; background: #010409; border: 1px solid var(--border-glass); color: white; padding: 12px 15px; border-radius: 8px; font-size: 13px; outline: none; transition: 0.3s; }
         .chat-input:focus { border-color: var(--c-user); }
+        .send-btn { background: var(--c-user); color: #000; border: none; padding: 0 15px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; text-transform: uppercase;}
         
-        .send-btn { background: var(--c-user); color: #000; border: none; padding: 0 20px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 13px; text-transform: uppercase;}
-        
-        @keyframes pulse { from { opacity: 0.5; } to { opacity: 1; } }
-
-        /* --- MODALLAR --- */
+        /* MODALLAR */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: 0.3s; padding: 20px; }
         .modal.show { display: flex; opacity: 1; }
-        .modal-content { background: #0f1117; width: 100%; max-width: 600px; border-radius: 12px; border: 1px solid var(--border-glass); padding: 30px; position: relative; max-height: 85dvh; overflow-y: auto;}
+        .modal-content { background: #0f1117; width: 100%; max-width: 600px; border-radius: 12px; border: 1px solid var(--border-glass); padding: 25px; position: relative; max-height: 85dvh; overflow-y: auto;}
         .close-btn { position: absolute; top: 10px; right: 15px; font-size: 28px; color: var(--text-muted); cursor: pointer; }
-        .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border-glass); }
-        .modal-body { font-size: 14px; line-height: 1.7; color: #cbd5e1; white-space: pre-line; }
-        
-        .debate-box { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border-left: 3px solid #fbbf24; margin-bottom: 20px; font-style: italic; color: #94a3b8;}
-        
-        .archive-item { background: rgba(255,255,255,0.05); padding: 10px; margin-bottom: 10px; border-radius: 6px; cursor: pointer; border: 1px solid transparent;}
-        .archive-item:hover { border-color: var(--c-user); }
-        .archive-title { font-weight: bold; color: var(--c-user); font-size: 14px;}
-        .archive-date { font-size: 10px; color: gray; }
+        .modal-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border-glass); }
+        .modal-body { font-size: 13px; line-height: 1.6; color: #cbd5e1; white-space: pre-line; }
+        .debate-box { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border-left: 3px solid #fbbf24; margin-bottom: 15px; font-style: italic; color: #94a3b8;}
 
-        /* --- PDF ÇIKTISI İÇİN GİZLİ ALAN --- */
+        /* ZİHİN HARİTASI (MIND MAP) UI */
+        .mind-map-container { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px; }
+        .mm-core { background: #fbbf24; color: black; padding: 10px 20px; border-radius: 8px; font-weight: bold; text-align: center; border: 2px solid #b45309; }
+        .mm-branches { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; width: 100%; position: relative;}
+        .mm-branches::before { content: ''; position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 2px; height: 20px; background: white;}
+        .mm-node { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); flex: 1; min-width: 100px; text-align: center; position: relative;}
+
+        /* PDF ÇIKTISI */
         #pdf-container { display: none; background: white; color: black; padding: 40px; font-family: Arial, sans-serif; }
         #pdf-container h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;}
-        #pdf-container h3 { color: #334155; margin-top: 20px;}
 
-        /* --- MOBİL UYUMLULUK --- */
         @media (max-width: 768px) {
-            .header-panel { padding: 10px; gap: 8px; }
+            .header-panel { padding: 8px; gap: 5px; }
             .info-card { display: none; } 
-            .vote-actions { width: 100%; justify-content: center; gap: 5px;} 
-            .btn { font-size: 9px; padding: 8px;}
+            .vote-actions { width: 100%; justify-content: center;} .btn { font-size: 9px; padding: 6px;}
             .table-wrapper { aspect-ratio: 1 / 1.5; transform: rotateX(15deg); } 
-            .board-table { border-radius: 40px; border-width: 8px; }
+            .board-table { border-radius: 30px; border-width: 6px; }
+            .node-icon { width: 30px; height: 30px; font-size: 14px;}
         }
     </style>
 </head>
 <body>
+    <div class="stamp" id="stamp">ONAYLANDI</div>
 
     <div class="header-panel">
         <div class="header-left">
-            <button class="archive-btn" onclick="openArchive()">📁 Arşiv</button>
+            <button class="tools-btn" onclick="openArchive()">📁 Arşiv</button>
+            <button class="tools-btn" id="board-toggle-btn" onclick="toggleBoardMode()">🖍 Tahta Modu</button>
             <select class="board-select" id="boardType">
                 <option value="genel">Kurul: Genel Strateji</option>
                 <option value="hukuk">Kurul: Hukuk & Güvenlik</option>
                 <option value="pazarlama">Kurul: Pazarlama & Satış</option>
             </select>
+            <label class="crisis-checkbox"><input type="checkbox" id="krizModu" onchange="toggleCrisis()">🚨 KRİZ</label>
         </div>
         
         <div class="info-card">
-            <div class="info-label" style="color: #fbbf24;">Oylamaya Sunulan Karar</div>
+            <div class="info-label" style="color: #fbbf24;">Gündem: <span id="ui-topic" style="color:#fff; font-weight:normal;">Bekleniyor</span></div>
             <div class="vote-highlight" id="ui-vote-title">Modeller bekleniyor...</div>
+            <div class="efficiency-score" id="ui-score">Toplantı Verimi: %0</div>
         </div>
 
         <div class="vote-actions">
             <button class="btn btn-yes" id="btn-y" disabled onclick="userVote(true)">Onayla</button>
             <button class="btn btn-rev" id="btn-rev" disabled onclick="requestRevision()">Revize Et</button>
             <button class="btn btn-no" id="btn-n" disabled onclick="userVote(false)">Reddet</button>
-            <button class="btn btn-pdf" id="btn-pdf" onclick="downloadPDF()">📄 PDF İndir</button>
+            <button class="btn btn-map" id="btn-map" onclick="openMindMap()">🧠 Harita</button>
+            <button class="btn btn-pdf" id="btn-pdf" onclick="downloadPDF()">📄 PDF</button>
         </div>
     </div>
 
     <div class="stage">
         <div class="system-status" id="ui-status">Sistem Hazır. Gündemi Belirleyin.</div>
-        <div class="table-wrapper">
+        <div class="table-wrapper" id="table-wrapper">
             <div class="board-table">
-                <div class="holo-center">
-                    <div class="file-indicator" id="file-icon">📎 Dosya Masada</div>
+                <div class="custom-logo" id="custom-logo"></div>
+                <div class="holo-center" id="holo-center">
+                    <div class="holo-core" id="holo-core"></div>
+                    <div class="laser-container" id="lasers"><div class="laser-line"></div><div class="laser-line"></div></div>
+                    <div class="matrix-rain" id="matrix-rain"></div>
                     <div class="doc d-openai" id="doc-openai" onclick="openDoc('OpenAI')">📄</div>
                     <div class="doc d-gemini" id="doc-gemini" onclick="openDoc('Gemini')">📄</div>
                     <div class="doc d-claude" id="doc-claude" onclick="openDoc('Claude')">📄</div>
@@ -262,17 +203,20 @@
                 <div class="node n-openai" id="ai-openai"><div class="node-icon">O</div><div class="node-name">OpenAI</div></div>
                 <div class="node n-gemini" id="ai-gemini"><div class="node-icon">G</div><div class="node-name">Gemini</div></div>
                 <div class="node n-claude" id="ai-claude"><div class="node-icon">C</div><div class="node-name">Claude</div></div>
-                <div class="node n-user" id="ai-user"><div class="node-icon">👤</div><div class="node-name">Başkan (Sen)</div></div>
+                <div class="node n-user" id="ai-user"><div class="node-icon">👤</div><div class="node-name">Başkan</div></div>
             </div>
         </div>
     </div>
 
     <div class="input-area">
         <button class="mic-btn" id="mic-btn" onclick="toggleVoice()">🎤</button>
-        <label class="file-label">
+        <label class="file-label" title="Sözleşme/Rapor Yükle">
             📎 <input type="file" id="file-upload" accept=".txt,.csv" hidden onchange="handleFileUpload(event)">
         </label>
-        <input type="text" class="chat-input" id="topic-input" placeholder="Gündemi veya revizyonu yazın..." onkeypress="if(event.key==='Enter') startProcess()">
+        <label class="file-label" title="Masa Logosu Yükle" style="font-size: 14px;">
+            🖼️ <input type="file" accept="image/*" hidden onchange="loadCustomLogo(event)">
+        </label>
+        <input type="text" class="chat-input" id="topic-input" placeholder="Gündemi yazın..." onkeypress="if(event.key==='Enter') startProcess()">
         <button class="send-btn" onclick="startProcess()">Kurulu Topla</button>
     </div>
 
@@ -287,153 +231,146 @@
     <div class="modal" id="archive-modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('archive-modal')">&times;</span>
-            <div class="modal-title" style="color:var(--c-user)">Geçmiş Toplantı Tutanakları</div>
+            <div class="modal-title" style="color:var(--c-user)">Geçmiş Tutanaklar</div>
             <div class="modal-body" id="archive-list">Kayıt bulunamadı.</div>
+        </div>
+    </div>
+
+    <div class="modal" id="mindmap-modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('mindmap-modal')">&times;</span>
+            <div class="modal-title" style="color:#c255ff">Zihin Haritası</div>
+            <div class="mind-map-container" id="mindmap-render"></div>
         </div>
     </div>
 
     <div id="pdf-container">
         <h1>Yönetim Kurulu Karar Tutanağı</h1>
         <p><strong>Tarih:</strong> <span id="pdf-date"></span></p>
-        <p><strong>Gündem Özeti:</strong> <span id="pdf-topic"></span></p>
-        <h3>Karar Başlığı:</h3>
-        <p id="pdf-title" style="font-weight:bold; color:#d97706;"></p>
-        <h3>Kurul Münazarası:</h3>
-        <p id="pdf-debate" style="font-style:italic; border-left: 3px solid #ccc; padding-left:10px;"></p>
-        <h3>Nihai Aksiyon Planı (Karar):</h3>
-        <p id="pdf-decision"></p>
+        <p><strong>Gündem:</strong> <span id="pdf-topic"></span></p>
+        <h3>Karar: <span id="pdf-title" style="color:#d97706;"></span></h3>
+        <h3>Münazara:</h3><p id="pdf-debate" style="font-style:italic;"></p>
+        <h3>Aksiyon Planı:</h3><p id="pdf-decision"></p>
     </div>
 
     <script>
-        const database = { 'OpenAI': '', 'Gemini': '', 'Claude': '', 'Ortak Karar': '', 'Münazara': '', 'Topic': '' };
+        const database = { 'OpenAI': '', 'Gemini': '', 'Claude': '', 'Ortak Karar': '', 'Münazara': '', 'Topic': '', 'Score': '', 'Map': [] };
         const aiNodes = ['openai', 'gemini', 'claude'];
         let uploadedFileText = "";
 
-        // DOSYA YÜKLEME 
-        function handleFileUpload(event) {
+        // UI Efektleri
+        function toggleCrisis() { document.body.classList.toggle('crisis-mode'); }
+        function toggleBoardMode() { 
+            document.getElementById('table-wrapper').classList.toggle('glass-mode'); 
+            document.getElementById('board-toggle-btn').classList.toggle('active');
+            let docs = document.querySelectorAll('.doc');
+            docs[0].innerText = "OpenAI\nNotu"; docs[1].innerText = "Gemini\nNotu"; docs[2].innerText = "Claude\nNotu"; document.getElementById('doc-master').innerText = "KARAR";
+            if(!document.getElementById('table-wrapper').classList.contains('glass-mode')) { docs.forEach(d => d.innerText = "📄"); document.getElementById('doc-master').innerText = "📁"; }
+        }
+        function loadCustomLogo(event) {
             const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                uploadedFileText = e.target.result;
-                document.getElementById('file-icon').style.display = 'block';
-                alert("Dosya masaya başarıyla konuldu. Kurul bunu okuyacak.");
-            };
-            reader.readAsText(file);
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => document.getElementById('custom-logo').style.backgroundImage = `url(${e.target.result})`;
+                reader.readAsDataURL(file);
+            }
+        }
+        function startMatrixEffect() {
+            const mr = document.getElementById('matrix-rain'); mr.style.display = 'block'; mr.innerHTML = '';
+            for(let i=0; i<30; i++) {
+                let drop = document.createElement('span'); drop.className = 'matrix-drop'; drop.innerText = Math.random()>0.5 ? '1':'0';
+                drop.style.left = Math.random()*100 + '%'; drop.style.animationDuration = (Math.random()*1 + 0.5)+'s';
+                mr.appendChild(drop);
+            }
+            setTimeout(() => { mr.style.display = 'none'; }, 2000);
         }
 
-        // SESLİ KOMUT 
+        // Dosya ve Ses
+        function handleFileUpload(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) { uploadedFileText = e.target.result; startMatrixEffect(); alert("Dosya entegre edildi."); };
+            reader.readAsText(file);
+        }
         let recognition;
         function toggleVoice() {
-            if (!('webkitSpeechRecognition' in window)) return alert("Tarayıcınız sesli komutu desteklemiyor.");
-            if(!recognition) {
-                recognition = new webkitSpeechRecognition();
-                recognition.lang = 'tr-TR';
-                recognition.onstart = () => document.getElementById('mic-btn').classList.add('recording');
-                recognition.onend = () => document.getElementById('mic-btn').classList.remove('recording');
-                recognition.onresult = (e) => {
-                    document.getElementById('topic-input').value += e.results[0][0].transcript;
-                };
-            }
+            if (!('webkitSpeechRecognition' in window)) return alert("Desteklenmiyor.");
+            if(!recognition) { recognition = new webkitSpeechRecognition(); recognition.lang = 'tr-TR'; recognition.onstart = () => document.getElementById('mic-btn').classList.add('recording'); recognition.onend = () => document.getElementById('mic-btn').classList.remove('recording'); recognition.onresult = (e) => document.getElementById('topic-input').value += e.results[0][0].transcript; }
             document.getElementById('mic-btn').classList.contains('recording') ? recognition.stop() : recognition.start();
         }
 
-        // SESLİ OKUMA 
-        function speakText(text) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'tr-TR';
-            utterance.rate = 1.1;
-            window.speechSynthesis.speak(utterance);
-        }
-
-        // ANA SÜREÇ (FETCH)
+        // FETCH SÜRECİ
         async function startProcess(isRevision = false, revNote = "") {
             let fullText = document.getElementById('topic-input').value;
             if (!isRevision && (!fullText.trim() || fullText.trim().length < 3)) return;
             if (!isRevision) database['Topic'] = fullText;
 
-            const boardType = document.getElementById('boardType').value;
+            const isCrisis = document.getElementById('krizModu').checked;
 
-            document.getElementById('ui-vote-title').innerText = "Akıllı analiz yapılıyor...";
-            document.getElementById('ui-vote-title').style.color = "var(--text-muted)";
+            document.getElementById('ui-topic').innerText = "Özetleniyor...";
+            document.getElementById('ui-vote-title').innerText = "Analiz ediliyor...";
             if(!isRevision) document.getElementById('topic-input').value = '';
             
             document.querySelectorAll('.doc, .master-doc').forEach(el => el.classList.remove('visible'));
-            document.getElementById('btn-y').disabled = true; 
-            document.getElementById('btn-n').disabled = true; 
-            document.getElementById('btn-rev').disabled = true;
-            document.getElementById('btn-pdf').style.display = 'none';
+            ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
+            document.getElementById('btn-pdf').style.display = 'none'; document.getElementById('btn-map').style.display = 'none'; document.getElementById('ui-score').style.display = 'none';
 
             aiNodes.forEach(id => document.getElementById('ai-' + id).classList.add('thinking'));
-            document.getElementById('ui-status').innerText = isRevision ? "Revizyon işleniyor..." : "Kurul dosyaları inceliyor...";
+            document.getElementById('holo-core').style.display = 'block'; document.getElementById('lasers').style.display = 'block';
+            document.getElementById('ui-status').innerText = isCrisis ? "ACİL DURUM PROTOKOLÜ ÇALIŞIYOR..." : "Münazara ve Sentez Başladı...";
 
             try {
                 const response = await fetch('/api/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        topic: database['Topic'], 
-                        boardType: boardType,
-                        fileText: uploadedFileText,
-                        revisionNote: revNote 
-                    })
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic: database['Topic'], boardType: document.getElementById('boardType').value, fileText: uploadedFileText, revisionNote: revNote, isCrisis: isCrisis })
                 });
 
                 if (!response.ok) throw new Error("API hatası.");
                 const data = await response.json();
                 if (data.error) throw new Error(data.error);
 
-                database['OpenAI'] = data.openai; 
-                database['Gemini'] = data.gemini; 
-                database['Claude'] = data.claude;
-                database['Münazara'] = data.debate; 
-                database['Ortak Karar'] = data.masterDecision; 
-                database['Title'] = data.masterTitle;
+                database['OpenAI'] = data.openai; database['Gemini'] = data.gemini; database['Claude'] = data.claude;
+                database['Münazara'] = data.debate; database['Ortak Karar'] = data.masterDecision; database['Title'] = data.masterTitle;
+                database['Score'] = data.score; database['Map'] = data.mindMap || [];
 
+                document.getElementById('ui-topic').innerText = data.topicSummary;
+                document.getElementById('holo-core').style.display = 'none'; document.getElementById('lasers').style.display = 'none';
                 aiNodes.forEach(id => document.getElementById('ai-' + id).classList.remove('thinking'));
+                
                 ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.add('visible'));
-                document.getElementById('ui-status').innerText = "Raporlar hazır. Sentez ve Münazara tamamlandı.";
+                document.getElementById('ui-status').innerText = "Raporlar ulaştı. Karar sentezleniyor...";
                 uploadedFileText = ""; 
-                document.getElementById('file-icon').style.display = 'none';
                 
                 setTimeout(() => {
                     document.getElementById('doc-master').classList.add('visible');
-                    document.getElementById('ui-status').innerText = "Aksiyon planı onayınızı bekliyor.";
+                    document.getElementById('ui-status').innerText = "Aksiyon planı hazır. Oylama yapın.";
                     document.getElementById('ui-vote-title').innerText = data.masterTitle;
-                    document.getElementById('ui-vote-title').style.color = "#fbbf24";
                     
-                    document.getElementById('btn-y').disabled = false; 
-                    document.getElementById('btn-n').disabled = false; 
-                    document.getElementById('btn-rev').disabled = false;
+                    let scoreUI = document.getElementById('ui-score');
+                    scoreUI.innerText = `Çözülebilirlik: %${data.score}`; scoreUI.style.display = 'block';
                     
-                    speakText("Sayın başkan, ortak karar sentezlendi. Protokol başlığı: " + data.masterTitle);
+                    ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = false);
+                    document.getElementById('btn-map').style.display = 'inline-block';
                 }, 1500);
 
             } catch (error) {
-                console.error(error);
-                document.getElementById('ui-status').innerText = `HATA: ${error.message}`;
+                console.error(error); document.getElementById('ui-status').innerText = `HATA: ${error.message}`;
+                document.getElementById('holo-core').style.display = 'none'; document.getElementById('lasers').style.display = 'none';
                 aiNodes.forEach(id => document.getElementById('ai-' + id).classList.remove('thinking'));
             }
         }
 
-        // REVİZE ET
+        // ETKİLEŞİMLER
         function requestRevision() {
-            const note = prompt("Eylem planındaki hangi kısımları değiştirmek/düzeltmek istersiniz?");
-            if(note && note.trim().length > 0) {
-                startProcess(true, note);
-            }
+            const note = prompt("Eylem planındaki hangi kısmı düzeltelim?");
+            if(note && note.trim().length > 0) startProcess(true, note);
         }
 
-        // RAPOR AÇ
         function openDoc(owner) {
             let content = database[owner];
             if(owner === 'Ortak Karar') {
                 document.getElementById('modal-title').style.color = "#fbbf24";
-                document.getElementById('modal-text').innerHTML = `
-                    <div class="debate-box"><strong>🗣 Kurul Münazarası:</strong><br>${database['Münazara']}</div>
-                    <div><strong>✅ Nihai Aksiyon Planı:</strong><br>${content}</div>
-                `;
+                document.getElementById('modal-text').innerHTML = `<div class="debate-box"><strong>🗣 Kurul Münazarası:</strong><br>${database['Münazara']}</div><div><strong>✅ Nihai Aksiyon Planı:</strong><br>${content}</div>`;
             } else {
                 document.getElementById('modal-title').style.color = "#fff";
                 document.getElementById('modal-text').innerText = content;
@@ -442,70 +379,56 @@
             document.getElementById('doc-modal').classList.add('show');
         }
 
+        function openMindMap() {
+            let html = `<div class="mm-core">${database['Title']}</div><div class="mm-branches">`;
+            database['Map'].forEach(m => { html += `<div class="mm-node">${m}</div>`; });
+            html += `</div>`;
+            document.getElementById('mindmap-render').innerHTML = html;
+            document.getElementById('mindmap-modal').classList.add('show');
+        }
+
         function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
-        // OY VER VE ARŞİVLE
         function userVote(isYes) {
             if(isYes) {
+                document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 400);
+                let s = document.getElementById('stamp'); s.classList.add('animate'); setTimeout(() => s.classList.remove('animate'), 2000);
+                
                 document.getElementById('ui-status').innerText = "KARAR ONAYLANDI VE ARŞİVLENDİ.";
                 document.getElementById('btn-pdf').style.display = 'inline-block';
                 saveToArchive();
-                speakText("Karar onaylandı ve yürürlüğe girdi.");
             } else {
                 document.getElementById('ui-status').innerText = "KARAR REDDEDİLDİ.";
                 document.getElementById('ui-vote-title').innerText = "Reddedildi.";
-                document.getElementById('ui-vote-title').style.color = "var(--text-muted)";
             }
             document.getElementById('doc-master').classList.remove('visible');
-            document.getElementById('btn-y').disabled = true; 
-            document.getElementById('btn-n').disabled = true; 
-            document.getElementById('btn-rev').disabled = true;
+            ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
         }
 
-        // LOKAL HAFIZA
+        // ARŞİV VE PDF
         function saveToArchive() {
             let history = JSON.parse(localStorage.getItem('aiBoardHistory')) || [];
-            history.unshift({
-                date: new Date().toLocaleString('tr-TR'),
-                topic: database['Topic'],
-                title: database['Title'],
-                decision: database['Ortak Karar'],
-                debate: database['Münazara']
-            });
+            history.unshift({ date: new Date().toLocaleString('tr-TR'), topic: database['Topic'], title: database['Title'], decision: database['Ortak Karar'], debate: database['Münazara'] });
             localStorage.setItem('aiBoardHistory', JSON.stringify(history));
         }
 
         function openArchive() {
             let history = JSON.parse(localStorage.getItem('aiBoardHistory')) || [];
             let html = "";
-            if(history.length === 0) html = "Henüz onaylanmış bir toplantı kaydı yok.";
-            else {
-                history.forEach(item => {
-                    html += `<div class="archive-item">
-                        <div class="archive-title">${item.title}</div>
-                        <div class="archive-date">${item.date}</div>
-                        <div style="font-size:12px; margin-top:5px; color:#cbd5e1;">${item.decision.substring(0,100)}...</div>
-                    </div>`;
-                });
-            }
+            if(history.length === 0) html = "Kayıt yok.";
+            else history.forEach(i => { html += `<div class="archive-item"><div class="archive-title">${i.title}</div><div class="archive-date">${i.date}</div><div style="font-size:12px; margin-top:5px; color:#cbd5e1;">${i.decision.substring(0,80)}...</div></div>`; });
             document.getElementById('archive-list').innerHTML = html;
             document.getElementById('archive-modal').classList.add('show');
         }
 
-        // PDF İNDİR 
         function downloadPDF() {
             document.getElementById('pdf-date').innerText = new Date().toLocaleDateString('tr-TR');
             document.getElementById('pdf-topic').innerText = database['Topic'];
             document.getElementById('pdf-title').innerText = database['Title'];
             document.getElementById('pdf-debate').innerText = database['Münazara'];
             document.getElementById('pdf-decision').innerText = database['Ortak Karar'];
-            
-            const element = document.getElementById('pdf-container');
-            element.style.display = 'block';
-            html2pdf().from(element).set({
-                margin: 1, filename: 'Yonetim_Kurulu_Karari.pdf',
-                html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            }).save().then(() => element.style.display = 'none');
+            const element = document.getElementById('pdf-container'); element.style.display = 'block';
+            html2pdf().from(element).set({ margin: 1, filename: 'Kurul_Karari.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).save().then(() => element.style.display = 'none');
         }
     </script>
 </body>
