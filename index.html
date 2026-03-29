@@ -73,22 +73,18 @@
         .stage { flex: 1; min-height: 0; display: flex; justify-content: center; align-items: center; position: relative; perspective: 1000px; padding: 30px; }
         .system-status { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); color: var(--c-user); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; z-index: 20;}
         
-        /* MASA AÇISI SABİTLENDİ (rotateX 15deg). Dönme ve sallanma yok. */
         .table-wrapper { position: relative; width: 100%; max-width: 650px; aspect-ratio: 2 / 1.2; transform: rotateX(15deg); transform-style: preserve-3d; }
         
         .board-table { width: 100%; height: 100%; background: var(--table-surface); border: 8px solid var(--table-rim); border-radius: 500px; box-shadow: 0 25px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; position: relative; transition: 0.5s; }
         
-        /* PREMIUM LÜKS AHŞAP MASA MODU */
         .table-wrapper.wood-mode .board-table { background: linear-gradient(135deg, #4f2e1e 0%, #2e180d 50%, #1a0c05 100%); border-color: #2b1408; box-shadow: 0 35px 60px rgba(0,0,0,0.9), inset 0 0 40px rgba(0,0,0,0.9), inset 0 0 10px rgba(255, 165, 0, 0.1); }
         .table-wrapper.wood-mode .board-table::before { content: ''; position: absolute; inset: 0; border-radius: 500px; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px); pointer-events: none; }
         .table-wrapper.wood-mode .holo-center { background: rgba(0, 0, 0, 0.4); border-color: rgba(255,255,255,0.05); box-shadow: inset 0 0 25px rgba(0,0,0,0.8);}
 
-        /* Holo Merkez */
         .holo-center { width: 65%; height: 50%; background: rgba(56, 189, 248, 0.02); border-radius: 500px; border: 1px solid rgba(56, 189, 248, 0.1); position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; transition: 0.3s; z-index: 2;}
         .holo-core { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed var(--holo-color); animation: spinHolo 3s linear infinite; display: none; box-shadow: 0 0 15px var(--holo-color);}
         @keyframes spinHolo { 100% { transform: rotate(360deg); } }
         
-        /* 4 YÖNLÜ GİT-GEL LAZERLER */
         .laser-container { position: absolute; inset: 0; pointer-events: none; display: none; z-index: 3; }
         .laser { position: absolute; opacity: 0; animation: laserPulse 1.2s infinite; }
         .laser.l-horiz { top: 50%; width: 100%; height: 1px; background: linear-gradient(90deg, transparent 10%, var(--c-claude) 20%, transparent 50%, var(--c-gemini) 80%, transparent 90%); }
@@ -117,7 +113,7 @@
         .shredding { animation: shredDoc 1.5s forwards ease-in !important; pointer-events: none;}
         @keyframes shredDoc { 0% { top: 50%; transform: translate(-50%, -50%) scale(1); opacity: 1;} 40% { top: 75%; transform: translate(-50%, -50%) scale(0.8); opacity: 1;} 100% { top: 85%; transform: translate(-50%, -20%) scale(0.8); opacity: 0; height: 0;} }
 
-        /* AVATARLAR (Modellerin İsimleri) */
+        /* AVATARLAR */
         .node { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 5; }
         .node-icon { width: 40px; height: 40px; border-radius: 10px; background: #0f1117; display: flex; justify-content: center; align-items: center; font-size: 18px; font-weight: 800; border: 2px solid; box-shadow: 0 8px 15px rgba(0,0,0,0.8); transition: 0.3s; transform: rotateX(-15deg); }
         .node-name { font-size: 9px; font-weight: 800; letter-spacing: 1px; color: #fff; text-transform: uppercase; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px; transform: rotateX(-15deg); margin-top:-5px;}
@@ -312,7 +308,7 @@
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('voice-train-modal')">&times;</span>
             <div class="modal-title" style="color:#ef4444">🎙️ Ses Modeli Eğitimi</div>
-            <p style="font-size:13px; color:#94a3b8; text-align:center;">Sesinizin tınısını analiz edebilmemiz için aşağıdaki cümleyi okuyun.</p>
+            <p style="font-size:13px; color:#94a3b8; text-align:center;">Sesinizin tınısını klonlayabilmemiz için lütfen aşağıdaki cümleyi mikrofona okuyun.</p>
             
             <div class="vt-progress-bar"><div class="vt-progress-fill" id="vt-progress"></div></div>
             <div class="vt-sentence" id="vt-sentence">Yükleniyor...</div>
@@ -347,6 +343,9 @@
         let lofiAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3'); lofiAudio.loop = true;
         let typeAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_27131846b4.mp3'); typeAudio.loop = true;
         let synthVoice = window.speechSynthesis;
+
+        // Sisteme daha önce ses kaydedilmiş mi kontrolü
+        let isVoiceTrained = localStorage.getItem('isVoiceTrained') === 'true';
 
         window.onload = () => {
             const params = new URLSearchParams(window.location.search);
@@ -472,20 +471,23 @@
             setTimeout(() => { alert("Görevler Trello panonuza başarıyla aktarıldı!"); plane.classList.remove('fly'); }, 1500);
         }
 
-        // --- ÖĞÜTÜCÜ (REDDET) ---
+        // --- ÖĞÜTÜCÜ (REDDET) - MASAYI TAMAMEN SIFIRLAR ---
         function rejectWithShredder() {
             document.getElementById('ui-status').innerText = "KARAR REDDEDİLDİ. Dosya imha ediliyor...";
             document.getElementById('ui-vote-title').innerText = "Plan Çöpe Atıldı.";
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
             ['btn-team','btn-pitch','btn-invest'].forEach(id => document.getElementById(id).style.display = 'none');
             
+            // Masadaki tüm dosyaları temizle (Görünmez yap)
+            ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.remove('visible'));
+
             document.getElementById('shredder-box').classList.add('active');
             let masterDoc = document.getElementById('doc-master'); masterDoc.classList.add('shredding');
             
             setTimeout(() => {
                 masterDoc.classList.remove('visible'); masterDoc.classList.remove('shredding');
                 document.getElementById('shredder-box').classList.remove('active');
-                document.getElementById('ui-status').innerText = "YENİ GÜNDEM BEKLENİYOR.";
+                document.getElementById('ui-status').innerText = "Masa Temizlendi. YENİ GÜNDEM BEKLENİYOR.";
             }, 1800);
         }
 
@@ -512,8 +514,9 @@
             }
         }
         function closeModal(id) { 
-            document.getElementById(id).classList.remove('show'); clearInterval(window.typeInterval); typeAudio.pause(); 
-            if(id === 'pitch-modal') { synthVoice.cancel(); } // Modal kapanınca ses sussun
+            document.getElementById(id).classList.remove('show'); 
+            clearInterval(window.typeInterval); typeAudio.pause(); 
+            if(id === 'pitch-modal') { synthVoice.cancel(); }
         }
 
         // --- PITCH DECK ---
@@ -534,32 +537,42 @@
             slides[currentSlide].classList.add('active');
         }
 
-        // --- GERÇEK SES KLONLAMA VE EĞİTİM MODÜLÜ ---
+        // --- HAFIZALI SES KLONLAMA VE EĞİTİM MODÜLÜ ---
         const trainingSentences = [
-            "1. Yapay zeka otonom sistemleri iş dünyasının geleceğini şekillendiriyor.",
-            "2. Şirketimizin vizyonu ve büyüme hedefleri beklentilerin çok ötesinde.",
-            "3. Müşteri memnuniyeti, hız ve veri güvenliği en temel önceliğimizdir.",
-            "4. Kriz anlarında soğukkanlı kalıp stratejik ve veriye dayalı kararlar almalıyız.",
-            "5. Bu yeni ve cesur aksiyon planı ile pazarda lider konuma yükseleceğiz."
+            "1. Yapay zeka sistemleri şirketimizin geleceğini şekillendiriyor.",
+            "2. Müşteri memnuniyeti ve veri güvenliği en temel önceliğimizdir.",
+            "3. Kriz anlarında soğukkanlı kalarak stratejik kararlar almalıyız.",
+            "4. Bu vizyoner aksiyon planı ile pazarda lider konuma yükseleceğiz.",
+            "5. Ses dalgalarımın sisteme entegre edilmesini onaylıyorum."
         ];
         let currentTrainIndex = 0;
 
         function startVoiceTraining() {
-            if(synthVoice.speaking) { synthVoice.cancel(); return; }
-            currentTrainIndex = 0;
-            document.getElementById('vt-progress').style.width = '0%';
-            document.getElementById('vt-record-btn').style.display = 'block';
-            document.getElementById('vt-loading').style.display = 'none';
-            document.getElementById('vt-sentence').innerText = trainingSentences[0];
-            document.getElementById('voice-train-modal').classList.add('show');
+            if(synthVoice.speaking) { 
+                synthVoice.cancel(); 
+                document.getElementById('btn-start-training').innerHTML = "🎙️ Sesimle Oku";
+                return; 
+            }
+            
+            // Eğer daha önce eğitildiyse direkt oku
+            if(isVoiceTrained) {
+                playClonedPresentation();
+            } else {
+                // Eğitilmediyse eğitim ekranını aç
+                currentTrainIndex = 0;
+                document.getElementById('vt-progress').style.width = '0%';
+                document.getElementById('vt-record-btn').style.display = 'block';
+                document.getElementById('vt-loading').style.display = 'none';
+                document.getElementById('vt-sentence').innerText = trainingSentences[0];
+                document.getElementById('voice-train-modal').classList.add('show');
+            }
         }
 
         function recordTrainingSentence() {
             let btn = document.getElementById('vt-record-btn');
             btn.classList.add('recording');
-            btn.innerText = "Dinleniyor... (Okuyun)";
+            btn.innerText = "Dinleniyor... (Mikrofona Okuyun)";
             
-            // Simüle edilmiş kayıt süresi (Gerçek mikrofon erişimi olmadan %100 uyumluluk için)
             setTimeout(() => {
                 btn.classList.remove('recording');
                 currentTrainIndex++;
@@ -574,24 +587,29 @@
                     document.getElementById('vt-loading').style.display = 'block';
                     
                     setTimeout(() => {
+                        // Eğitimi tamamla ve Local Storage'a kaydet (Bir daha sormayacak)
+                        localStorage.setItem('isVoiceTrained', 'true');
+                        isVoiceTrained = true;
+                        
                         closeModal('voice-train-modal');
                         playClonedPresentation();
-                    }, 2500); // Model Eğitimi işleme efekti
+                    }, 2500); 
                 }
-            }, 2500); // Her cümlenin okuma süresi
+            }, 2500); // Simüle edilmiş okuma süresi
         }
 
         function playClonedPresentation() {
             let btn = document.getElementById('btn-start-training');
             btn.innerHTML = "🛑 Okumayı Durdur";
             
-            let textToRead = database['Title'] + ". Hedefimiz: " + database['Slides'][1] + ". Atılacak adımlar: " + database['Slides'][2];
+            // Slaytlardaki yazıları okut
+            let textToRead = database['Title'] + ". Yaklaşımımız: " + database['Slides'][1] + ". Uygulama adımları: " + database['Slides'][2];
             let utterance = new SpeechSynthesisUtterance(textToRead);
             utterance.lang = 'tr-TR';
-            utterance.pitch = 0.9; // Daha otoriter ve klonlanmış hissi için ton ayarı
+            utterance.pitch = 0.9; // Klon ses efekti (Tonu hafif değiştirir)
             utterance.rate = 1.0;
             
-            utterance.onend = () => { btn.innerHTML = "🎙️ Sesimi Klonla & Oku"; };
+            utterance.onend = () => { btn.innerHTML = "🎙️ Sesimle Oku"; };
             synthVoice.speak(utterance);
         }
 
@@ -624,15 +642,6 @@
             }
             document.getElementById('doc-master').classList.remove('visible');
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
-        }
-
-        function downloadPDF() {
-            document.getElementById('pdf-date').innerText = new Date().toLocaleDateString('tr-TR');
-            document.getElementById('pdf-topic').innerText = database['Topic'];
-            document.getElementById('pdf-title').innerText = database['Title'];
-            document.getElementById('pdf-decision').innerText = database['Ortak Karar'];
-            const element = document.getElementById('pdf-container'); element.style.display = 'block';
-            html2pdf().from(element).set({ margin: 1, filename: 'Kurul_Karari.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).save().then(() => element.style.display = 'none');
         }
     </script>
 </body>
