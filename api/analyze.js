@@ -2,43 +2,36 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: "Sadece POST metodu kabul edilir." });
 
     const { topic, boardType, revisionNote, fileText, isCrisis, isNight, isLiveDebate, history } = req.body;
-    if (!topic || topic.trim().length < 2) return res.status(400).json({ error: "Geçerli bir konu girmediniz veya sesiniz anlaşılamadı." });
+    if (!topic || topic.trim().length < 2) return res.status(400).json({ error: "Geçerli bir konu girmediniz." });
 
     const OPENAI_KEY = process.env.OPENAI_API_KEY;
     const CLAUDE_KEY = process.env.CLAUDE_API_KEY;
 
-    if (!OPENAI_KEY || !CLAUDE_KEY) return res.status(500).json({ error: "Vercel'de API Anahtarları (OPENAI_API_KEY, CLAUDE_API_KEY) eksik!" });
+    if (!OPENAI_KEY || !CLAUDE_KEY) return res.status(500).json({ error: "API Anahtarları eksik." });
 
     try {
-        // --- CANLI SESLİ MÜZAKERE MODU ---
+        // --- 1. CANLI MÜZAKERE MODU ---
         if (isLiveDebate) {
-            let chatHistory = history && history.length > 0 
-                ? history.map(h => `${h.role.toUpperCase()}: ${h.text}`).join('\n') 
-                : "Toplantı yeni başladı.";
-            
+            let chatHistory = history && history.length > 0 ? history.map(h => `${h.role.toUpperCase()}: ${h.text}`).join('\n') : "";
             const debateReq = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
                 body: JSON.stringify({
-                    model: 'gpt-4o-mini',
-                    response_format: { type: "json_object" },
+                    model: 'gpt-4o-mini', response_format: { type: "json_object" },
                     messages: [
-                        { role: "system", content: `Sen sırasıyla OpenAI, Claude ve Gemini modellerini yöneten bir zekasın. Kullanıcının (Başkan) söylediği konuya bu 3 farklı yapay zekanın SESLİ TARTIŞIYORMUŞ GİBİ kısa (1'er cümlelik), net cevaplar vermesini sağla. JSON Formatında dön: { "dialogue": [ {"speaker": "openai", "text": "..."}, {"speaker": "claude", "text": "..."}, {"speaker": "gemini", "text": "..."} ] }` },
-                        { role: "user", content: `GEÇMİŞ KONUŞMALAR:\n${chatHistory}\n\nBAŞKAN (KULLANICI) ŞİMDİ ŞUNU SÖYLEDİ: "${topic}"\nDoğrudan cevap verin.` }
+                        { role: "system", content: `Sen OpenAI, Claude ve Gemini modellerini yöneten bir zekasın. Kullanıcının söylediği konuya bu 3 farklı yapay zekanın SESLİ TARTIŞIYORMUŞ GİBİ kısa (1'er cümlelik), net cevaplar vermesini sağla. JSON Formatında dön: { "dialogue": [ {"speaker": "openai", "text": "..."}, {"speaker": "claude", "text": "..."}, {"speaker": "gemini", "text": "..."} ] }` },
+                        { role: "user", content: `GEÇMİŞ:\n${chatHistory}\n\nBAŞKAN (KULLANICI) DEDİ Kİ: "${topic}"\nCevap verin.` }
                     ]
                 })
             });
-
-            if (!debateReq.ok) throw new Error("OpenAI API yanıt vermedi.");
             const debateData = await debateReq.json();
             const parsedDebate = JSON.parse(debateData.choices?.[0]?.message?.content || '{"dialogue":[]}');
             return res.status(200).json({ liveDialogue: parsedDebate.dialogue });
         }
 
-        // --- STANDART KURUL MODU ---
-        let toneCommand = isCrisis ? "DİKKAT: DEFCON 1 KRİZ MODU! Kanamayı anında durduracak taktikler ver." : (isNight ? "Gece mesaisi. Sakin ve stratejik bir ton kullan." : "");
+        // --- 2. STANDART KURUL MODU (NORMAL ARAMA) ---
+        let toneCommand = isCrisis ? "DİKKAT: DEFCON 1 KRİZ MODU! Acil durum taktikleri ver." : (isNight ? "Gece mesaisi. Sakin ve stratejik bir ton kullan." : "");
         let finalContext = `Gündem: ${topic}\n${toneCommand}`;
-        if (fileText) finalContext += `\n\nDOSYA:\n${fileText.substring(0, 3000)}`;
+        if (fileText) finalContext += `\n\nMASAYA KONAN DOSYA:\n${fileText.substring(0, 3000)}`;
         if (revisionNote) finalContext += `\n\nREVİZYON EMRİ:\n"${revisionNote}"`;
 
         const openAiReq = fetch('https://api.openai.com/v1/chat/completions', {
@@ -52,21 +45,19 @@ export default async function handler(req, res) {
         });
 
         const [openAiRes, claudeRes] = await Promise.all([openAiReq, claudeReq]);
-        if (!openAiRes.ok || !claudeRes.ok) throw new Error("OpenAI veya Claude API reddetti.");
-        
         const openAiData = await openAiRes.json();
         const claudeData = await claudeRes.json();
 
         const openaiText = openAiData.choices?.[0]?.message?.content || "Fikir üretilemedi.";
         const claudeText = claudeData.content?.[0]?.text || "Fikir üretilemedi.";
-        const geminiText = `- Sektör standartlarını çöpe at. Süreci rakiplerin beklemediği bir modele taşı.\n- Teşvik sistemi kur.\n- Maliyeti otomasyon ile sıfırla.`;
+        const geminiText = `- Rakiplerin beklemediği bir sürece geç.\n- Personel motivasyonunu artır.\n- Süreci tamamen otomatize et.`;
 
         const masterReq = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
             body: JSON.stringify({
                 model: 'gpt-4o-mini', response_format: { type: "json_object" }, 
                 messages: [
-                    { role: "system", content: `Sen yönetim kurulu başkanısın. Format: JSON. Üret: 1) 'ozetKonu': Özet. 2) 'protokolBasligi': Karar ismi. 3) 'munazara': Tartışma özeti. 4) 'ortakKarar': 3-4 maddelik Aksiyon Planı. 5) 'verimlilikSkoru': 1-100 arası sayı.` },
+                    { role: "system", content: `Sen yönetim kurulu başkanısın. Format: JSON. Üret: 1) 'ozetKonu': Özet. 2) 'protokolBasligi': Karar ismi. 3) 'munazara': Kısa tartışma metni. 4) 'ortakKarar': 3-4 maddelik Aksiyon Planı. 5) 'verimlilikSkoru': 1-100 arası sayı.` },
                     { role: "user", content: `${finalContext}\n\nOpenAI:\n${openaiText}\n\nClaude:\n${claudeText}\n\nGemini:\n${geminiText}` }
                 ]
             })
