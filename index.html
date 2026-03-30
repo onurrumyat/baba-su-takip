@@ -25,8 +25,13 @@
             display: flex; 
             flex-direction: column; 
             overflow: hidden; 
-            transition: background 0.5s; 
+            transition: background 0.5s, background-image 0.5s; 
         }
+
+        /* ATMOSFER (BACKGROUND SWAP) MODLARI */
+        body.bg-moon { background-image: linear-gradient(rgba(10,11,16,0.85), rgba(10,11,16,0.85)), url('https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-position: center; }
+        body.bg-cyberpunk { background-image: linear-gradient(rgba(10,11,16,0.85), rgba(10,11,16,0.85)), url('https://images.unsplash.com/photo-1601042879364-f3947d3f9c16?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-position: center; }
+        body.bg-rome { background-image: linear-gradient(rgba(10,11,16,0.85), rgba(10,11,16,0.85)), url('https://images.unsplash.com/photo-1552559740-452178229ab3?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-position: center; }
 
         /* KRİZ, GECE VE SAKİN MODLARI */
         body.crisis-mode { background-color: #1a0505; background-image: radial-gradient(circle at 50% -20%, rgba(255, 0, 0, 0.15) 0%, transparent 70%); animation: crisisPulse 2s infinite; }
@@ -60,6 +65,9 @@
         .relax-checkbox { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #a78bfa; font-weight: bold; cursor: pointer;}
         .board-select { width: 140px; background: #010409; color: white; border: 1px solid var(--border-glass); padding: 6px; border-radius: 6px; font-size: 11px; outline: none;}
 
+        .custom-persona-box { display: none; margin-left: 5px; }
+        .custom-persona-input { background: #010409; color: #d97757; border: 1px solid #d97757; padding: 6px; border-radius: 6px; font-size: 11px; outline: none; width: 120px; font-weight: bold;}
+
         .info-card { flex: 1; min-width: 120px; }
         .info-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
         .vote-highlight { color: #fbbf24; font-size: 13px; text-shadow: 0 0 10px rgba(251, 191, 36, 0.3); font-weight: 700; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
@@ -91,14 +99,10 @@
         .holo-core { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed var(--holo-color); animation: spinHolo 3s linear infinite; display: none; box-shadow: 0 0 15px var(--holo-color);}
         @keyframes spinHolo { 100% { transform: rotate(360deg); } }
         
-        /* DÜZELTİLMİŞ MERKEZ KONUŞMACI KISMI (TAM ORTADA) */
         .center-speaker { position: absolute; top: 50%; left: 50%; display: none; flex-direction: column; align-items: center; gap: 8px; z-index: 300; animation: centerPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .center-speaker .node-icon { width: 70px; height: 70px; font-size: 30px; border-radius: 15px; border: 3px solid; background: rgba(0,0,0,0.8); animation: speakGlow 0.4s infinite alternate; display: flex; justify-content: center; align-items: center;}
         .center-speaker .node-name { font-size: 12px; padding: 4px 10px; background: rgba(0,0,0,0.9); border-radius: 4px; font-weight:bold; color: white;}
-        @keyframes centerPop { 
-            0% { transform: translate(-50%, -50%) translateZ(10px) scale(0); opacity: 0; } 
-            100% { transform: translate(-50%, -50%) translateZ(60px) scale(1); opacity: 1; } 
-        }
+        @keyframes centerPop { 0% { transform: translate(-50%, -50%) translateZ(10px) scale(0); opacity: 0; } 100% { transform: translate(-50%, -50%) translateZ(60px) scale(1); opacity: 1; } }
 
         /* 4 YÖNLÜ VERİ LAZERLERİ */
         .laser-container { position: absolute; inset: 0; pointer-events: none; display: none; z-index: 3; transform: translateZ(10px); }
@@ -244,12 +248,24 @@
                 <button class="live-btn" id="btn-live-debate" onclick="toggleLiveDebate()">🗣️ Canlı Müzakere</button>
                 <button class="tools-btn" id="board-toggle-btn" onclick="toggleBoardMode()">🪵 Ahşap Masa</button>
                 
-                <select class="board-select" id="boardType">
+                <select class="board-select" id="atmosphereType" onchange="changeAtmosphere()" style="color:#4ade80; font-weight:bold;">
+                    <option value="standart">🌐 Merkez Üssü</option>
+                    <option value="bg-moon">🌕 Ay Üssü</option>
+                    <option value="bg-cyberpunk">🏙️ Cyberpunk</option>
+                    <option value="bg-rome">🏛️ Antik Roma</option>
+                </select>
+
+                <select class="board-select" id="boardType" onchange="checkCustomPersona()">
                     <option value="genel">Genel Strateji</option>
                     <option value="hukuk">Hukuk & Güvenlik</option>
                     <option value="pazarlama">Pazarlama</option>
                     <option value="dahiler" style="color:#c255ff; font-weight:bold;">👑 Tarihin Dehaları</option>
+                    <option value="custom" style="color:#d97757; font-weight:bold;">🎭 Özel Misafir</option>
                 </select>
+                <div class="custom-persona-box" id="custom-persona-box">
+                    <input type="text" class="custom-persona-input" id="customPersonaInput" placeholder="Örn: Elon Musk..." oninput="updateCustomAvatar()">
+                </div>
+
                 <label class="crisis-checkbox"><input type="checkbox" id="krizModu" onchange="toggleCrisis()">🚨 KRİZ</label>
                 <label class="night-checkbox"><input type="checkbox" id="nightModu" onchange="toggleNightMode()">🌙 GECE</label>
                 <label class="relax-checkbox"><input type="checkbox" id="relaxModu" onchange="toggleRelaxMode()">☕ SAKİN</label>
@@ -305,7 +321,7 @@
                     
                     <div class="node n-openai" id="ai-openai"><div class="node-icon">O</div><div class="node-name">OpenAI</div></div>
                     <div class="node n-gemini" id="ai-gemini"><div class="node-icon">G</div><div class="node-name">Gemini</div></div>
-                    <div class="node n-claude" id="ai-claude"><div class="node-icon">C</div><div class="node-name">Claude</div></div>
+                    <div class="node n-claude" id="ai-claude"><div class="node-icon" id="claude-icon">C</div><div class="node-name" id="claude-name">Claude</div></div>
                     <div class="node n-user" id="ai-user"><div class="node-icon">👤</div><div class="node-name">Sen</div></div>
                 </div>
             </div>
@@ -320,7 +336,7 @@
             
             <div class="ptt-container" id="ptt-container">
                 <button id="ptt-btn" class="ptt-btn" onmousedown="startPTT(event)" onmouseup="stopPTT(event)" ontouchstart="startPTT(event)" ontouchend="stopPTT(event)">
-                    🎙️ Basılı Tut ve Konuş
+                    🎙️ Basılı Tut ve Konuş (Veya Emir Ver)
                 </button>
             </div>
         </div>
@@ -370,28 +386,61 @@
 
         // SES MOTORU DEĞİŞKENLERİ
         let turkishVoices = [];
-        let maleVoice1 = null;  // OpenAI için
-        let femaleVoice = null; // Claude için
-        let maleVoice2 = null;  // Gemini için
+        let maleVoice1 = null; 
+        let femaleVoice = null; 
+        let maleVoice2 = null; 
 
         const colors = { 'openai': '#10a37f', 'claude': '#d97757', 'gemini': '#c255ff', 'user': '#38bdf8' };
-        const icons = { 'openai': 'O', 'claude': 'C', 'gemini': 'G', 'user': '👤' };
-        const displayNames = { 'openai': 'OpenAI', 'claude': 'Claude', 'gemini': 'Gemini', 'user': 'Sen (Başkan)' };
+        let icons = { 'openai': 'O', 'claude': 'C', 'gemini': 'G', 'user': '👤' };
+        let displayNames = { 'openai': 'OpenAI', 'claude': 'Claude', 'gemini': 'Gemini', 'user': 'Sen (Başkan)' };
 
         let lofiAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3'); lofiAudio.loop = true;
 
-        // GELİŞMİŞ TÜRKÇE SES SEÇİCİ
+        // YENİ: ATMOSFER DEĞİŞTİRİCİ
+        function changeAtmosphere() {
+            let val = document.getElementById('atmosphereType').value;
+            document.body.className = ''; // Mevcut sınıfları temizle
+            
+            // UI Switch'leri de korumak için tekrar ekle
+            if(document.getElementById('krizModu').checked) document.body.classList.add('crisis-mode');
+            if(document.getElementById('nightModu').checked) document.body.classList.add('night-mode');
+            if(document.getElementById('relaxModu').checked) document.body.classList.add('relax-mode');
+            
+            if(val !== 'standart') {
+                document.body.classList.add(val);
+            }
+        }
+
+        // YENİ: ÖZEL MİSAFİR KONTROLÜ
+        function checkCustomPersona() {
+            let val = document.getElementById('boardType').value;
+            let box = document.getElementById('custom-persona-box');
+            if(val === 'custom') {
+                box.style.display = 'inline-block';
+                updateCustomAvatar();
+            } else {
+                box.style.display = 'none';
+                document.getElementById('claude-name').innerText = "Claude";
+                document.getElementById('claude-icon').innerText = "C";
+                displayNames['claude'] = "Claude";
+                icons['claude'] = "C";
+            }
+        }
+        function updateCustomAvatar() {
+            let val = document.getElementById('customPersonaInput').value.trim();
+            if(val === "") val = "Gizli Konuk";
+            document.getElementById('claude-name').innerText = val.substring(0, 15);
+            document.getElementById('claude-icon').innerText = val.charAt(0).toUpperCase();
+            displayNames['claude'] = val.substring(0, 15);
+            icons['claude'] = val.charAt(0).toUpperCase();
+        }
+
         function setTurkishVoices() {
             let voices = synthVoice.getVoices();
-            // Sadece %100 Türkçe sesleri al (Yabancı aksanı önlemek için)
             turkishVoices = voices.filter(v => v.lang.includes('tr') || v.lang === 'tr-TR' || v.lang === 'tr_TR');
-            
             if(turkishVoices.length > 0) {
-                // İsim bazlı cinsiyet tahmini (Cem, Tolga vs Erkek | Yelda, Emel vs Kadın)
                 femaleVoice = turkishVoices.find(v => v.name.toLowerCase().includes('yelda') || v.name.toLowerCase().includes('emel') || v.name.toLowerCase().includes('kadın') || v.name.toLowerCase().includes('female'));
                 maleVoice1 = turkishVoices.find(v => v.name.toLowerCase().includes('cem') || v.name.toLowerCase().includes('tolga') || v.name.toLowerCase().includes('erkek') || v.name.toLowerCase().includes('male'));
-                
-                // Bulunamazsa dizidekileri sırayla ata
                 if(!femaleVoice) femaleVoice = turkishVoices[0];
                 if(!maleVoice1) maleVoice1 = turkishVoices.length > 1 ? turkishVoices[1] : turkishVoices[0];
                 maleVoice2 = turkishVoices.length > 2 ? turkishVoices[2] : maleVoice1; 
@@ -421,11 +470,8 @@
         function toggleBoardMode() { document.getElementById('table-wrapper').classList.toggle('wood-mode'); document.getElementById('board-toggle-btn').classList.toggle('active'); }
         function toggleNightMode() { if(document.getElementById('nightModu').checked) { document.body.classList.add('night-mode'); } else { document.body.classList.remove('night-mode'); } }
         function toggleRelaxMode() { 
-            if(document.getElementById('relaxModu').checked) { 
-                document.body.classList.add('relax-mode'); lofiAudio.play(); createRain(); 
-            } else { 
-                document.body.classList.remove('relax-mode'); lofiAudio.pause(); document.getElementById('rain-container').innerHTML = ''; 
-            } 
+            if(document.getElementById('relaxModu').checked) { document.body.classList.add('relax-mode'); lofiAudio.play(); createRain(); } 
+            else { document.body.classList.remove('relax-mode'); lofiAudio.pause(); document.getElementById('rain-container').innerHTML = ''; } 
         }
 
         function createRain() {
@@ -445,40 +491,34 @@
         function handleFileUpload(event) { 
             const files = event.target.files; 
             if (!files.length) return; 
-            
             Array.from(files).forEach(file => {
                 const reader = new FileReader(); 
                 reader.onload = function(e) { 
                     const fileData = { name: file.name, ext: file.name.split('.').pop().toUpperCase().substring(0,4), text: e.target.result };
-                    uploadedFiles.push(fileData);
-                    renderUploadedFiles();
-                    startMatrixEffect(); 
+                    uploadedFiles.push(fileData); renderUploadedFiles(); startMatrixEffect(); 
                 }; 
                 reader.readAsText(file); 
             });
-            alert(files.length + " belge masaya eklendi.");
-            event.target.value = ''; 
+            alert(files.length + " belge masaya eklendi."); event.target.value = ''; 
         }
 
         function renderUploadedFiles() {
             const container = document.getElementById('uploaded-files-container');
             container.innerHTML = '';
             uploadedFiles.forEach((file, index) => {
-                const docHTML = `<div class="uploaded-doc" onclick="openUploadedDoc(${index})"><span>${file.ext}</span></div>`;
-                container.innerHTML += docHTML;
+                container.innerHTML += `<div class="uploaded-doc" onclick="openUploadedDoc(${index})"><span>${file.ext}</span></div>`;
             });
         }
 
         function showCenterSpeaker(id) {
             let center = document.getElementById('center-speaker');
-            let icon = document.getElementById('center-speaker-icon');
-            let name = document.getElementById('center-speaker-name');
             document.getElementById('holo-core').style.display = 'none';
             aiNodes.forEach(n => { let el = document.getElementById('ai-' + n); if(el) el.classList.remove('hidden-node'); });
             let activeNode = document.getElementById('ai-' + id);
             if(activeNode) activeNode.classList.add('hidden-node'); 
-            icon.innerText = icons[id]; name.innerText = displayNames[id];
-            center.style.color = colors[id]; icon.style.borderColor = colors[id];
+            document.getElementById('center-speaker-icon').innerText = icons[id]; 
+            document.getElementById('center-speaker-name').innerText = displayNames[id];
+            center.style.color = colors[id]; document.getElementById('center-speaker-icon').style.borderColor = colors[id];
             center.style.display = 'flex';
         }
         function hideCenterSpeaker() {
@@ -494,7 +534,7 @@
                 let unlockAudio = new SpeechSynthesisUtterance(' '); unlockAudio.volume = 0; synthVoice.speak(unlockAudio);
                 btn.classList.add('active'); btn.innerText = "🛑 Toplantıyı Bitir";
                 document.getElementById('standard-inputs').style.display = 'none'; document.getElementById('ptt-container').style.display = 'flex';
-                document.getElementById('ui-status').innerText = "CANLI SESLİ TOPLANTI AKTİF. LÜTFEN KONUŞUN.";
+                document.getElementById('ui-status').innerText = "CANLI SESLİ TOPLANTI AKTİF. EMİR VEREBİLİR VEYA KONUŞABİLİRSİNİZ.";
                 conversationHistory = []; 
                 ['doc-openai', 'doc-gemini', 'doc-claude', 'doc-master'].forEach(id => document.getElementById(id).classList.remove('visible'));
             } else {
@@ -503,6 +543,41 @@
                 document.getElementById('ui-status').innerText = "Sistem Hazır. Gündemi Belirleyin.";
                 synthVoice.cancel(); hideCenterSpeaker();
             }
+        }
+
+        // YENİ: SESLİ BAŞKANLIK EMİRLERİ (VOICE COMMANDS)
+        function processVoiceCommands(text) {
+            let lowerText = text.toLowerCase();
+            let isCommand = false;
+            
+            if(lowerText.includes("kriz modunu aç") || lowerText.includes("krizi başlat")) {
+                document.getElementById('krizModu').checked = true; toggleCrisis(); isCommand = true;
+            } else if(lowerText.includes("kriz modunu kapat")) {
+                document.getElementById('krizModu').checked = false; toggleCrisis(); isCommand = true;
+            } else if(lowerText.includes("ahşap masa") || lowerText.includes("masayı değiştir")) {
+                if(!document.getElementById('table-wrapper').classList.contains('wood-mode')) toggleBoardMode(); 
+                isCommand = true;
+            } else if(lowerText.includes("sakin mod")) {
+                document.getElementById('relaxModu').checked = true; toggleRelaxMode(); isCommand = true;
+            } else if(lowerText.includes("gece mod")) {
+                document.getElementById('nightModu').checked = true; toggleNightMode(); isCommand = true;
+            } else if(lowerText.includes("cyberpunk")) {
+                document.getElementById('atmosphereType').value = 'bg-cyberpunk'; changeAtmosphere(); isCommand = true;
+            } else if(lowerText.includes("ay üssü") || lowerText.includes("uzaya çık")) {
+                document.getElementById('atmosphereType').value = 'bg-moon'; changeAtmosphere(); isCommand = true;
+            } else if(lowerText.includes("roma") || lowerText.includes("senato")) {
+                document.getElementById('atmosphereType').value = 'bg-rome'; changeAtmosphere(); isCommand = true;
+            } else if(lowerText.includes("kurulu topla") || lowerText.includes("toplantıyı başlat")) {
+                isCommand = true; setTimeout(() => triggerSend(), 800);
+            }
+
+            if(isCommand) {
+                let utterance = new SpeechSynthesisUtterance("Emredersiniz başkanım. Sistem güncellendi.");
+                utterance.lang = 'tr-TR';
+                synthVoice.speak(utterance);
+                return true;
+            }
+            return false;
         }
 
         function initSpeech() {
@@ -518,12 +593,18 @@
             };
             recognition.onerror = (e) => { stopPTT(); document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; };
             recognition.onend = () => {
-                if (finalPttText.trim().length > 0) sendLiveMessage(finalPttText);
-                else {
-                    let typedText = document.getElementById('topic-input').value;
-                    if(typedText.trim().length > 0) sendLiveMessage(typedText);
-                    else { document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; document.getElementById('ptt-btn').classList.remove('recording'); hideCenterSpeaker(); }
+                let textToProcess = finalPttText.trim().length > 0 ? finalPttText : document.getElementById('topic-input').value;
+                
+                // Önce Sesli Komut mu diye bakıyoruz
+                if(textToProcess.trim().length > 0 && processVoiceCommands(textToProcess)) {
+                    document.getElementById('topic-input').value = "";
+                    document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; 
+                    hideCenterSpeaker();
+                    return;
                 }
+
+                if (textToProcess.trim().length > 0) sendLiveMessage(textToProcess);
+                else { document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; document.getElementById('ptt-btn').classList.remove('recording'); hideCenterSpeaker(); }
             };
             return true;
         }
@@ -543,7 +624,7 @@
             if(e) { e.preventDefault(); e.stopPropagation(); }
             if(!isRecording) return;
             isRecording = false;
-            document.getElementById('ptt-btn').classList.remove('recording'); document.getElementById('ptt-btn').innerText = "⏳ Sesiniz İşleniyor...";
+            document.getElementById('ptt-btn').classList.remove('recording'); document.getElementById('ptt-btn').innerText = "⏳ İşleniyor...";
             try { recognition.stop(); } catch(err) {}
         }
 
@@ -560,8 +641,13 @@
             hideCenterSpeaker(); 
             document.getElementById('holo-core').style.display = 'block'; document.getElementById('lasers').style.display = 'block'; 
 
+            let customPersonaName = document.getElementById('boardType').value === 'custom' ? document.getElementById('customPersonaInput').value : null;
+
             try {
-                const response = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ topic: text, isLiveDebate: true, history: conversationHistory }) });
+                const response = await fetch('/api/analyze', { 
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ topic: text, isLiveDebate: true, history: conversationHistory, customPersona: customPersonaName }) 
+                });
                 if (!response.ok) throw new Error("API Yanıt Vermedi");
                 const data = await response.json();
                 
@@ -577,7 +663,7 @@
             }
         }
 
-        // FARKLI SESLERİN VE TONLARIN AYARLANDIĞI YER
+        // YENİ: ÖZEL KİŞİLİĞE GÖRE SES TONU AYARLAMA
         function playNextDebateLine() {
             if(currentDialogueQueue.length === 0) {
                 document.getElementById('ui-status').innerText = "SIRA SİZDE. KONUŞABİLİRSİNİZ.";
@@ -590,22 +676,34 @@
             document.getElementById('ui-status').innerText = `${displayNames[speakerId]} KONUŞUYOR...`; showCenterSpeaker(speakerId);
             
             let utterance = new SpeechSynthesisUtterance(line.text); 
-            utterance.lang = 'tr-TR'; // Türkçeyi zorla
+            utterance.lang = 'tr-TR';
 
-            // Ses Karakterleri Ataması
+            let isCustom = document.getElementById('boardType').value === 'custom';
+            let cPersona = document.getElementById('customPersonaInput').value.toLowerCase();
+
             if (speakerId === 'openai') {
                 if(maleVoice1) utterance.voice = maleVoice1;
-                utterance.pitch = 0.9; // Normal tok erkek
-                utterance.rate = 1.0;
-            } else if (speakerId === 'claude') {
-                if(femaleVoice) utterance.voice = femaleVoice;
-                utterance.pitch = 1.3; // İnce kadın sesi illüzyonu
-                utterance.rate = 1.05;
+                utterance.pitch = 0.9; utterance.rate = 1.0;
+            } else if (speakerId === 'claude') { // Burası artık Özel Misafir koltuğu olabilir
+                if(isCustom && cPersona) {
+                    if(cPersona.includes('musk') || cPersona.includes('erkek') || cPersona.includes('ramsay')) {
+                        if(maleVoice1) utterance.voice = maleVoice1;
+                        utterance.pitch = 0.8; utterance.rate = 1.1; 
+                    } else if(cPersona.includes('kadın') || cPersona.includes('marie')) {
+                        if(femaleVoice) utterance.voice = femaleVoice;
+                        utterance.pitch = 1.4; utterance.rate = 1.0;
+                    } else {
+                        if(maleVoice2) utterance.voice = maleVoice2; 
+                        utterance.pitch = 1.0; utterance.rate = 1.15; 
+                    }
+                } else {
+                    if(femaleVoice) utterance.voice = femaleVoice;
+                    utterance.pitch = 1.3; utterance.rate = 1.05;
+                }
             } else if (speakerId === 'gemini') {
                 if(maleVoice2) utterance.voice = maleVoice2;
-                else if(maleVoice1) utterance.voice = maleVoice1; // 2. erkek yoksa 1'i kullan ama kalınlaştır
-                utterance.pitch = 0.6; // Ekstra kalın ve farklı bir erkek sesi illüzyonu
-                utterance.rate = 0.95;
+                else if(maleVoice1) utterance.voice = maleVoice1;
+                utterance.pitch = 0.6; utterance.rate = 0.95;
             } else {
                 if(turkishVoices.length > 0) utterance.voice = turkishVoices[0];
             }
@@ -636,10 +734,21 @@
             document.getElementById('lasers').style.display = 'block'; 
             document.getElementById('ui-status').innerText = document.getElementById('krizModu').checked ? "ACİL DURUM PROTOKOLÜ ÇALIŞIYOR..." : "Yapay Zeka Kurulu Analiz Yapıyor...";
 
+            let customPersonaName = document.getElementById('boardType').value === 'custom' ? document.getElementById('customPersonaInput').value : null;
+
             try {
                 const response = await fetch('/api/analyze', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ topic: database['Topic'], boardType: document.getElementById('boardType').value, fileText: allFilesText, revisionNote: revNote, isCrisis: document.getElementById('krizModu').checked, isNight: document.getElementById('nightModu').checked, isLiveDebate: false })
+                    body: JSON.stringify({ 
+                        topic: database['Topic'], 
+                        boardType: document.getElementById('boardType').value, 
+                        fileText: allFilesText, 
+                        revisionNote: revNote, 
+                        isCrisis: document.getElementById('krizModu').checked, 
+                        isNight: document.getElementById('nightModu').checked, 
+                        isLiveDebate: false,
+                        customPersona: customPersonaName
+                    })
                 });
 
                 if (!response.ok) throw new Error("API Yanıt Vermedi");
