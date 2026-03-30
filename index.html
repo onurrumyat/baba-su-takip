@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Komuta Merkezi | White Brick Metaverse Edition</title>
+    <title>AI Komuta Merkezi | Siberpunk Karargah Edition</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -161,7 +161,7 @@
         }
 
         /* ========================================================================= */
-        /* --- YENİ EKLENEN: 3D WHITE BRICK METAVERSE (THREE.JS CSS KODLARI) --- */
+        /* --- YENİ EKLENEN: 3DWhite Brick Metaverse (THREE.JS CSS KODLARI) --- */
         /* ========================================================================= */
         #webgl-container { position: fixed; inset: 0; z-index: 100000; display: none; background: #000; }
         
@@ -544,16 +544,18 @@
         }
 
         // ==============================================================================
-        // --- SENİN YENİ İSTEDİĞİN AYDINLIK VE DOKULU 3D WHITE BRICK MOTORU ---
+        // --- YENİ İSTEDİĞİN AYDINLIK, KAPALI ODA VE DOKULU 3DMOTORU ---
         // ==============================================================================
         let scene, camera, renderer, controls, raycaster, mouse;
         let is3DInitialized = false; let currentRoom = null; let activeProject = null;
 
-        // Prosedürel Tuğla Dokusu Oluştur (Harici görsel gerektirmez)
-        function createBrickTexture() {
-            const canvas = document.createElement('canvas'); canvas.width = 128; canvas.height = 128; const ctx = canvas.getContext('2d');
-            ctx.fillStyle = "#e0e0e0"; ctx.fillRect(0, 0, 128, 128); ctx.fillStyle = "#ffffff"; ctx.fillRect(2, 2, 124, 60); ctx.fillRect(2, 66, 124, 60); ctx.fillStyle = "#d0d0d0"; ctx.fillRect(0, 62, 128, 2); ctx.fillRect(0, 126, 128, 2);
-            const texture = new THREE.CanvasTexture(canvas); texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.repeat.set(10, 5); return texture;
+        // Prosedürel Siber Panel Dokusu Oluştur
+        function createSiberTexture() {
+            const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 256; const ctx = canvas.getContext('2d');
+            ctx.fillStyle = "#161821"; ctx.fillRect(0, 0, 256, 256);
+            ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 2; ctx.strokeRect(10, 10, 236, 236); ctx.strokeRect(50, 50, 156, 156);
+            ctx.fillStyle = "#1a1d29"; ctx.fillRect(60, 60, 136, 136);
+            const texture = new THREE.CanvasTexture(canvas); texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.repeat.set(4, 4); return texture;
         }
 
         function createTextTexture(text, bgColor, textColor, isSmall = false) {
@@ -563,49 +565,47 @@
             ctx.fillText(text, canvas.width/2, canvas.height/2); return new THREE.CanvasTexture(canvas);
         }
 
-        function createDoorWithRoom(x, z, rotY, doorName, titleText, colorHex) {
+        // TAMAMEN KAPALI Siber Oda Oluştur (Clipping engellendi)
+        function createSiberDoorWithRoom(x, z, rotY, doorName, titleText, colorHex) {
             const group = new THREE.Group(); group.position.set(x, 0, z); group.rotation.y = rotY;
             const whiteMat = new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.6});
+            const siberTex = createSiberTexture();
+            const wallMat = new THREE.MeshStandardMaterial({map: siberTex, color: 0x222222, roughness: 0.8, side: THREE.DoubleSide}); // DoubleSide içeriden görmek için
 
-            // 1. Kapı Kasası ve Kapı
-            const frameGeo = new THREE.BoxGeometry(6.4, 9.4, 0.5); const frameMat = new THREE.MeshStandardMaterial({color: 0x333333, metalness: 0.6}); const frame = new THREE.Mesh(frameGeo, frameMat); frame.position.y = 4.7; group.add(frame);
-            const doorGeo = new THREE.BoxGeometry(6, 9, 0.6); const doorMat = new THREE.MeshStandardMaterial({color: 0x222222, roughness: 0.2}); const door = new THREE.Mesh(doorGeo, doorMat); door.position.y = 4.5; door.name = doorName; group.add(door);
-            const handleGeo = new THREE.BoxGeometry(0.2, 1.5, 0.8); const handleMat = new THREE.MeshStandardMaterial({color: 0xaaaaaa, metalness: 1}); const handle = new THREE.Mesh(handleGeo, handleMat); handle.position.set(2.5, 4.5, 0); door.add(handle);
+            // 1. Kapı Kasası ve Kalın Kapı (Clipping engellemek için kalın yapıldı)
+            const frameGeo = new THREE.BoxGeometry(6.6, 9.6, 1.2); const frameMat = new THREE.MeshStandardMaterial({color: 0x333333, metalness: 0.8}); const frame = new THREE.Mesh(frameGeo, frameMat); frame.position.set(0, 4.8, 0); group.add(frame);
+            const doorGeo = new THREE.BoxGeometry(6, 9, 1); const doorMat = new THREE.MeshStandardMaterial({color: 0x111111, roughness: 0.2}); const door = new THREE.Mesh(doorGeo, doorMat); door.position.set(0, 4.5, 0.1); door.name = doorName; group.add(door);
+            const handleGeo = new THREE.BoxGeometry(0.3, 1.5, 1); const handleMat = new THREE.MeshStandardMaterial({color: 0xaaaaaa, metalness: 1}); const handle = new THREE.Mesh(handleGeo, handleMat); handle.position.set(2.4, 4.5, 0.6); door.add(handle);
 
-            // 2. Kapı Tabelası (Küçük)
-            const signGeo = new THREE.PlaneGeometry(4, 1); const signTex = createTextTexture(titleText, colorHex, "#ffffff", true); const signMat = new THREE.MeshBasicMaterial({map: signTex}); const sign = new THREE.Mesh(signGeo, signMat); sign.position.set(0, 10.5, 0.31); group.add(sign);
+            // 2. Kapı Tabelası (Küçük ve Parlak)
+            const signGeo = new THREE.PlaneGeometry(4, 1); const signTex = createTextTexture(titleText, colorHex, "#ffffff", true); const signMat = new THREE.MeshBasicMaterial({map: signTex, transparent: true, opacity: 0.9}); const sign = new THREE.Mesh(signGeo, signMat); sign.position.set(0, 10.5, 0.61); group.add(sign);
 
-            // 3. Odanın İçi (Sadece Odaya Girince Görünür - Kapının Arkası)
-            const roomDecor = new THREE.Group(); roomDecor.position.set(0, 0, -15);
+            // 3. KAPALI ODANIN İÇİ (Sadece Odaya Girince Görünür - Kapının İyice Arkası)
+            const roomDecor = new THREE.Group(); roomDecor.position.set(0, 0, -20); // Kapıdan 20 birim geride
+
+            // ODA KUTUSU (4 Duvar + Tavan + Zemin) - clipping engeller
+            const boxGeo = new THREE.BoxGeometry(20, 15, 20); // Kapalı kutu
+            const boxMat = new THREE.MeshStandardMaterial({color: 0x111111, side: THREE.BackSide, roughness: 0.9}); // BackSide içeriden görmek için
+            const roomBox = new THREE.Mesh(boxGeo, boxMat); roomBox.position.set(0, 7.5, 0); roomDecor.add(roomBox);
             
-            // Masa
-            const deskGeo = new THREE.BoxGeometry(8, 3, 4); const desk = new THREE.Mesh(deskGeo, whiteMat); desk.position.y = 1.5; roomDecor.add(desk);
+            // Fütüristik Masa
+            const deskGeo = new THREE.BoxGeometry(10, 3, 5); const desk = new THREE.Mesh(deskGeo, wallMat); desk.position.set(0, 1.5, -4); roomDecor.add(desk);
 
-            // GÖREVLİ İNSAN (Basit Model)
-            const human = new THREE.Group(); human.position.set(0, 3, -1); // Masanın arkası
-            
-            // Gövde
-            const torsoGeo = new THREE.CylinderGeometry(0.8, 0.6, 3, 8); const torsoMat = new THREE.MeshStandardMaterial({color: 0x333333}); const torso = new THREE.Mesh(torsoGeo, torsoMat); human.add(torso);
-            
-            // Kafa
-            const headGeo = new THREE.SphereGeometry(0.6, 16, 16); const headMat = new THREE.MeshStandardMaterial({color: 0xddaa88}); const head = new THREE.Mesh(headGeo, headMat); head.position.y = 2.2; human.add(head);
-            
-            // Kollar
-            const armGeo = new THREE.CylinderGeometry(0.2, 0.2, 2.5, 8); const armMat = new THREE.MeshStandardMaterial({color: 0x333333});
-            const leftArm = new THREE.Mesh(armGeo, armMat); leftArm.position.set(-1, 0.2, 0); leftArm.rotation.z = 0.2; human.add(leftArm);
-            const rightArm = new THREE.Mesh(armGeo, armMat); rightArm.position.set(1, 0.2, 0); rightArm.rotation.z = -0.2; human.add(rightArm);
+            // Siber Görevli (Humanoid Robot)
+            const robot = new THREE.Group(); robot.position.set(0, 3, -4); // Masanın arkası
+            const headGeo = new THREE.SphereGeometry(0.6, 16, 16); const headMat = new THREE.MeshStandardMaterial({color: new THREE.Color(colorHex), emissive: new THREE.Color(colorHex), emissiveIntensity: 0.5}); const head = new THREE.Mesh(headGeo, headMat); head.position.y = 3.5; robot.add(head);
+            const torsoGeo = new THREE.CylinderGeometry(0.7, 0.5, 3, 16); const torsoMat = new THREE.MeshStandardMaterial({color: 0x333333}); const torso = new THREE.Mesh(torsoGeo, torsoMat); torso.position.y = 1.8; robot.add(torso);
+            roomDecor.add(robot);
 
-            roomDecor.add(human);
-
-            // HOLOGRAFİK PANO (Tıklanabilir - Veri Girişi İçin)
-            const panoGeo = new THREE.PlaneGeometry(5, 3); const panoTex = createTextTexture("PANO - TIKLA", colorHex, "#ffffff", true);
-            const panoMat = new THREE.MeshStandardMaterial({map: panoTex, emissive: new THREE.Color(colorHex), emissiveIntensity: 0.5, transparent: true, opacity: 0.8, side: THREE.DoubleSide});
-            const pano = new THREE.Mesh(panoGeo, panoMat); pano.position.set(-5, 6, -2); pano.rotation.y = Math.PI / 6;
+            // HOLOGRAFİK PANO (Masanın Yanında - Tıklanabilir Veri Girişi)
+            const panoGeo = new THREE.PlaneGeometry(6, 4); const panoTex = createTextTexture("HOLOGRAFİK PANO", colorHex, "#ffffff", true);
+            const panoMat = new THREE.MeshStandardMaterial({map: panoTex, emissive: new THREE.Color(colorHex), emissiveIntensity: 0.8, transparent: true, opacity: 0.7, side: THREE.DoubleSide});
+            const pano = new THREE.Mesh(panoGeo, panoMat); pano.position.set(-6, 7, -2); pano.rotation.y = Math.PI / 8;
             pano.name = doorName + "_BOARD"; // Tıklama tespiti için ID
             roomDecor.add(pano);
 
-            // Işık
-            const panoLight = new THREE.PointLight(new THREE.Color(colorHex), 1, 15); panoLight.position.set(-5, 6, -1); roomDecor.add(panoLight);
+            // Odanın iç ışığı
+            const aiLight = new THREE.PointLight(new THREE.Color(colorHex), 1, 20); aiLight.position.set(0, 7, -2); roomDecor.add(aiLight);
 
             group.add(roomDecor); scene.add(group);
         }
@@ -615,39 +615,40 @@
             const container = document.getElementById('webgl-container');
             
             scene = new THREE.Scene(); 
-            scene.background = new THREE.Color(0xf0f0f0); // Bej-Beyaz Arka Plan
-            scene.fog = new THREE.Fog(0xf0f0f0, 20, 150); // Aydınlık Sis
+            scene.background = new THREE.Color(0x020305); // Koyu Lacivert/Siyah
+            scene.fog = new THREE.Fog(0x020305, 20, 150);
 
-            // KAMERA FOV'U 45 YAPILDI (DAHA AZ GENİŞ AÇI)
-            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            // KAMERA FOV'U 40 YAPILDI (DAHA AZ GENİŞ AÇI) VE NEAR 0.1 (Clipping engeller)
+            camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
             
             renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(window.innerWidth, window.innerHeight); container.appendChild(renderer.domElement);
             controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.05; controls.enablePan = false; controls.enableZoom = false;
 
-            // Aydınlık Işıklar
-            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-            const sunLight = new THREE.DirectionalLight(0xffffff, 0.8); sunLight.position.set(10, 20, 15); scene.add(sunLight);
+            // Aydınlık Neon Işıklar
+            scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+            const sunLight = new THREE.DirectionalLight(0xffffff, 0.5); sunLight.position.set(10, 20, 15); scene.add(sunLight);
+            const blueLight = new THREE.PointLight(0x38bdf8, 1, 100); blueLight.position.set(0, 10, 0); scene.add(blueLight);
 
-            // Zemin (Açık Gri)
-            const grid = new THREE.GridHelper(200, 100, 0xd0d0d0, 0xe0e0e0); scene.add(grid);
-            const floorGeo = new THREE.PlaneGeometry(200, 200); const floorMat = new THREE.MeshStandardMaterial({color: 0xe0e0e0, roughness: 0.8}); const floor = new THREE.Mesh(floorGeo, floorMat); floor.rotation.x = -Math.PI / 2; floor.position.y = -0.01; scene.add(floor);
+            // Zemin (Açık Gri Siber Grid)
+            const grid = new THREE.GridHelper(200, 100, 0x1f222e, 0x38bdf8); grid.material.opacity = 0.2; grid.material.transparent = true; scene.add(grid);
+            const floorGeo = new THREE.PlaneGeometry(200, 200); const floorMat = new THREE.MeshStandardMaterial({color: 0x0a0b10, roughness: 0.8}); const floor = new THREE.Mesh(floorGeo, floorMat); floor.rotation.x = -Math.PI / 2; floor.position.y = -0.01; scene.add(floor);
 
-            // --- WHITE BRICK BİNA (AYDINLIK VE DOKULU) ---
-            const brickTex = createBrickTexture();
+            // --- PROFESYONEL BİNA (DIŞ KABUK) ---
+            const siberTex = createSiberTexture();
             const bGeo = new THREE.BoxGeometry(40, 20, 50);
-            const bMat = new THREE.MeshStandardMaterial({ map: brickTex, color: 0xffffff, roughness: 0.7, metalness: 0.1, side: THREE.DoubleSide });
+            const bMat = new THREE.MeshStandardMaterial({ map: siberTex, color: 0x111111, roughness: 0.7, metalness: 0.1, side: THREE.DoubleSide });
             const building = new THREE.Mesh(bGeo, bMat); building.position.y = 10; scene.add(building);
 
-            // Neon Çizgiler (Hafif Mavi)
+            // Neon Çizgiler (Mavi)
             const edges = new THREE.EdgesGeometry(bGeo); const wireframe = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.3 })); wireframe.position.y = 10; scene.add(wireframe);
 
-            // ANA GİRİŞ KAPISI
-            const mainDoorGeo = new THREE.BoxGeometry(8, 12, 1); const mainDoorTex = createTextTexture("GİRİŞ", "#10a37f", "#ffffff", true); const mainDoorMat = new THREE.MeshStandardMaterial({ map: mainDoorTex, emissive: 0x002211, roughness: 0.2 }); const mainDoor = new THREE.Mesh(mainDoorGeo, mainDoorMat); mainDoor.position.set(0, 6, 25.1); mainDoor.name = "DOOR_ENTRANCE"; scene.add(mainDoor);
+            // ANA GİRİŞ KAPISI (Yeşil Parlayan)
+            const mainDoorGeo = new THREE.BoxGeometry(8, 12, 1.5); const mainDoorTex = createTextTexture("GİRİŞ", "#10a37f", "#ffffff", true); const mainDoorMat = new THREE.MeshStandardMaterial({ map: mainDoorTex, emissive: 0x002211, emissiveIntensity: 2, roughness: 0.2 }); const mainDoor = new THREE.Mesh(mainDoorGeo, mainDoorMat); mainDoor.position.set(0, 6, 25); mainDoor.name = "DOOR_ENTRANCE"; scene.add(mainDoor);
 
-            // İÇ ODALAR ( createDoorWithRoom ile)
-            createDoorWithRoom(0, -10, 0, "ROOM_CEO", "CEO OFİSİ", "#38bdf8"); // Tam Karşı
-            createDoorWithRoom(-15, 5, Math.PI / 2, "ROOM_ADVISOR", "DANIŞMAN", "#d97757"); // Sol
-            createDoorWithRoom(15, 5, -Math.PI / 2, "ROOM_BOARD", "KURUL", "#fbbf24"); // Sağ
+            // İÇ ODALAR (createSiberDoorWithRoom ile)
+            createSiberDoorWithRoom(0, -10, 0, "ROOM_CEO", "CEO OFİSİ", "#38bdf8"); // Tam Karşı
+            createSiberDoorWithRoom(-15, 5, Math.PI / 2, "ROOM_ADVISOR", "DANIŞMAN", "#d97757"); // Sol
+            createSiberDoorWithRoom(15, 5, -Math.PI / 2, "ROOM_BOARD", "KURUL", "#fbbf24"); // Sağ
 
             raycaster = new THREE.Raycaster(); mouse = new THREE.Vector2();
             window.addEventListener('pointerdown', onDocumentPointerDown, false); 
@@ -669,7 +670,7 @@
                 if (objectName === "DOOR_ENTRANCE" && currentRoom === null) {
                     enterHallway();
                 } else if (objectName.startsWith("ROOM_") && objectName.includes("_BOARD") && isInsideBuilding) {
-                    // Odanın içindeki PANORA (Tabloya) Tıklayınca Veri Girişini Aç
+                    // Odanın içindeki HOLOGRAFİK PANORA (Tabloya) Tıklayınca Veri Girişini Aç
                     openSpecificRoomTerminal(objectName);
                 } else if (objectName.startsWith("ROOM_") && !objectName.includes("_BOARD") && currentRoom === "hallway") {
                     // Sadece koridordayken kapıya tıklayınca odaya gir
@@ -680,8 +681,8 @@
 
         function enterHallway() {
             document.getElementById('hud-instruction').innerText = "İçeri giriliyor...";
-            // Kamerayı pürüzsüzce kapının içinden koridora uçur
-            new TWEEN.Tween(camera.position).to({ x: 0, y: 6, z: 5 }, 2000).easing(TWEEN.Easing.Quadratic.InOut).start();
+            // Kamerayı pürüzsüzce kapının içinden koridora uçur (Hedef kapının tam arkası)
+            new TWEEN.Tween(camera.position).to({ x: 0, y: 6, z: 10 }, 2000).easing(TWEEN.Easing.Quadratic.InOut).start();
             new TWEEN.Tween(controls.target).to({ x: 0, y: 6, z: -10 }, 2000).easing(TWEEN.Easing.Quadratic.InOut).onComplete(() => { 
                 currentRoom = "hallway"; isInsideBuilding = true;
                 document.getElementById('hud-instruction').innerText = "Koridordasınız. Odaya girmek için kapıya tıklayın."; 
@@ -691,17 +692,17 @@
         function enterSpecificRoom(doorName) {
             let targetPos = {x: 0, y: 6, z: 0}; let lookPos = {x: 0, y: 6, z: 0};
 
-            if(doorName === "ROOM_CEO") { targetPos = {x: 0, y: 6, z: -16}; lookPos = {x: 0, y: 6, z: -25}; } 
-            else if(doorName === "ROOM_ADVISOR") { targetPos = {x: -21, y: 6, z: 5}; lookPos = {x: -30, y: 6, z: 5}; } 
-            else if(doorName === "ROOM_BOARD") { targetPos = {x: 21, y: 6, z: 5}; lookPos = {x: 30, y: 6, z: 5}; }
+            if(doorName === "ROOM_CEO") { targetPos = {x: 0, y: 6, z: -18}; lookPos = {x: 0, y: 6, z: -35}; } 
+            else if(doorName === "ROOM_ADVISOR") { targetPos = {x: -21, y: 6, z: 5}; lookPos = {x: -35, y: 6, z: 5}; } 
+            else if(doorName === "ROOM_BOARD") { targetPos = {x: 21, y: 6, z: 5}; lookPos = {x: 35, y: 6, z: 5}; }
 
             document.getElementById('hud-instruction').innerText = "Odaya giriliyor...";
             
-            // Kamerayı odanın içine (masanın önüne) uçur - Pürüzsüz
+            // Kamerayı odanın içine (masanın önüne) uçur - Pürüzsüz ve clipping engelli
             new TWEEN.Tween(camera.position).to(targetPos, 1500).easing(TWEEN.Easing.Quadratic.InOut).start();
             new TWEEN.Tween(controls.target).to(lookPos, 1500).easing(TWEEN.Easing.Quadratic.InOut).onComplete(() => {
                 currentRoom = doorName;
-                document.getElementById('hud-instruction').innerText = "Odadasınız. Veri girmek için GÖREVLİNİN ARKASINDAKİ HOLOGRAFİK PANOTA (Tabloya) tıklayın.";
+                document.getElementById('hud-instruction').innerText = "Odadasınız. Veri girmek için GÖREVLİNİN YANINDAKİ HOLOGRAFİK PANOTA (Tabloya) tıklayın.";
                 // Otomatik Terminal AÇILMIYOR
             }).start();
         }
@@ -719,10 +720,20 @@
         
         function sendDataToRoom() { 
             let val = document.getElementById('room-ui-input').value; if(!val.trim()) return alert("Lütfen komutunuzu girin."); 
-            alert(`[SİSTEM]: Veriler entegre edildi. Görevli karakter "${activeProject.title}" projesi hafızasına bu bilgiyi işledi.`); document.getElementById('room-ui-input').value = ""; exitRoomModal3D();
+            alert(`[SİSTEM]: Veriler entegre edildi. Görevli android "${activeProject.title}" projesi hafızasına bu bilgiyi işledi.`); document.getElementById('room-ui-input').value = ""; exitRoomModal3D();
         }
 
-        function animate3D(time) { requestAnimationFrame(animate3D); TWEEN.update(time); controls.update(); renderer.render(scene, camera); }
+        function animate3D(time) { 
+            requestAnimationFrame(animate3D); 
+            TWEEN.update(time); 
+            controls.update(); 
+            // Robotları ve Panoları hafifçe oynat (Animasyon)
+            scene.traverse((object) => {
+                if(object.name && object.name.includes("_BOARD")) object.rotation.y = Math.PI/8 + Math.sin(time/500)*0.05;
+                if(object.name && object.name.includes("ROOM_") && object.userData.isAvatar) object.rotation.y = time/1000;
+            });
+            renderer.render(scene, camera); 
+        }
 
         function enter3DWorld(index) {
             closeModal('projects-modal');
@@ -737,7 +748,7 @@
             // Kamerayı dışarıya, binanın önüne al
             camera.position.set(0, 10, 45); controls.target.set(0, 6, 25); controls.update(); 
             currentRoom = null; isInsideBuilding = false;
-            document.getElementById('hud-instruction').innerText = "Aydınlık binaya hoş geldiniz. Sisteme girmek için GİRİŞ kapısına tıkla.";
+            document.getElementById('hud-instruction').innerText = "Siber karargaha hoş geldiniz. Sisteme girmek için GİRİŞ kapısına tıkla.";
         }
 
         function exit3DWorld() {
