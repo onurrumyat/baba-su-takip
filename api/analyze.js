@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: "Sadece POST metodu kabul edilir." });
 
-    const { topic, boardType, revisionNote, fileText, isCrisis, isNight, isLiveDebate, history } = req.body;
+    const { topic, boardType, revisionNote, fileText, isCrisis, isNight, isLiveDebate, history, customPersona } = req.body;
     if (!topic || topic.trim().length < 2) return res.status(400).json({ error: "Geçerli bir konu girmediniz." });
 
     const OPENAI_KEY = process.env.OPENAI_API_KEY;
@@ -13,12 +13,16 @@ export default async function handler(req, res) {
         // --- 1. CANLI MÜZAKERE MODU (Voice Mode) ---
         if (isLiveDebate) {
             let chatHistory = history && history.length > 0 ? history.map(h => `${h.role.toUpperCase()}: ${h.text}`).join('\n') : "";
+            
+            // Eğer Özel Misafir seçildiyse, Claude yerine onun ismini kullanıyoruz.
+            let extraInstruction = customPersona ? `NOT: Masadaki 'Claude' koltuğunda şu an '${customPersona}' oturuyor. 'claude' kimliğiyle cevap üretirken TAMAMEN ${customPersona} gibi konuş, onun argümanlarını ve jargonunu kullan.` : "";
+
             const debateReq = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
                 body: JSON.stringify({
                     model: 'gpt-4o-mini', response_format: { type: "json_object" },
                     messages: [
-                        { role: "system", content: `Sen OpenAI, Claude ve Gemini modellerini yöneten bir zekasın. Kullanıcının söylediği konuya bu 3 farklı yapay zekanın SESLİ TARTIŞIYORMUŞ GİBİ kısa (1'er cümlelik), net cevaplar vermesini sağla. JSON Formatında dön: { "dialogue": [ {"speaker": "openai", "text": "..."}, {"speaker": "claude", "text": "..."}, {"speaker": "gemini", "text": "..."} ] }` },
+                        { role: "system", content: `Sen OpenAI, Claude ve Gemini modellerini yöneten bir zekasın. Kullanıcının söylediği konuya bu 3 farklı yapay zekanın SESLİ TARTIŞIYORMUŞ GİBİ kısa (1'er cümlelik), net cevaplar vermesini sağla. JSON Formatında dön: { "dialogue": [ {"speaker": "openai", "text": "..."}, {"speaker": "claude", "text": "..."}, {"speaker": "gemini", "text": "..."} ] } ${extraInstruction}` },
                         { role: "user", content: `GEÇMİŞ:\n${chatHistory}\n\nBAŞKAN DEDİ Kİ: "${topic}"\nCevap verin.` }
                     ]
                 })
@@ -29,10 +33,15 @@ export default async function handler(req, res) {
         }
 
         // --- 2. STANDART KURUL MODU (Karar Dosyaları ve Pitch Deck) ---
-        
-        // Rolleri belirleme
         let r1, r2, r3;
-        if (boardType === 'hukuk') { r1 = "Siber Güvenlik Uzmanı"; r2 = "Şirket Avukatı"; r3 = "Mali Müşavir"; } 
+        
+        // YENİ: Özel Misafir Modu
+        if (boardType === 'custom' && customPersona) {
+            r1 = "Pragmatik CEO"; 
+            r2 = `${customPersona} (Tamamen bu kişinin üslubu, jargonu ve vizyonuyla konuş. Bu kişinin uzmanlık alanından örnekler ver.)`; 
+            r3 = "Veri Analisti";
+        } 
+        else if (boardType === 'hukuk') { r1 = "Siber Güvenlik Uzmanı"; r2 = "Şirket Avukatı"; r3 = "Mali Müşavir"; } 
         else if (boardType === 'pazarlama') { r1 = "Growth Hacker"; r2 = "Tüketici Psikoloğu"; r3 = "Gerilla Pazarlamacı"; } 
         else if (boardType === 'dahiler') { r1 = "Steve Jobs (Mükemmeliyetçi)"; r2 = "Sun Tzu (Stratejist)"; r3 = "Machiavelli (Politikacı)"; } 
         else { r1 = "Acımasız CEO"; r2 = "Risk Avcısı"; r3 = "İnovasyon Dehası"; }
@@ -40,7 +49,6 @@ export default async function handler(req, res) {
         let toneCommand = isCrisis ? "DİKKAT: DEFCON 1 KRİZ MODU! Kurumsal jargonu bırak. Kanamayı anında durduracak acil durum taktikleri ver." : (isNight ? "Gece mesaisindeyiz. Dilini samimi, felsefi ve yoldaşça bir tona çek." : "");
         let finalContext = `Gündem: ${topic}\n${toneCommand}`;
         
-        // Bütün dosyaları bağlama dahil ediyoruz (10.000 karaktere kadar)
         if (fileText) finalContext += `\n\nMASAYA KONAN DOSYALAR:\n${fileText.substring(0, 10000)}`;
         if (revisionNote) finalContext += `\n\nREVİZYON EMRİ:\n"Bunu dikkate alarak planı baştan yap: ${revisionNote}"`;
 
@@ -75,7 +83,7 @@ export default async function handler(req, res) {
                     5) 'verimlilikSkoru': 1-100 arası başarı ihtimali.
                     6) 'zihinHaritasi': 3 anahtar kelime dizisi.
                     7) 'sunumSlaytlari': 4 elemanlı sunum dizisi.` },
-                    { role: "user", content: `${finalContext}\n\nOpenAI:\n${openaiText}\n\nClaude:\n${claudeText}\n\nGemini:\n${geminiText}` }
+                    { role: "user", content: `${finalContext}\n\nOpenAI:\n${openaiText}\n\n${r2}:\n${claudeText}\n\nGemini:\n${geminiText}` }
                 ]
             })
         });
