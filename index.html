@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Komuta Merkezi | Ultimate Edition</title>
+    <title>AI Komuta Merkezi | Executive Edition</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -25,18 +25,8 @@
             display: flex; 
             flex-direction: column; 
             overflow: hidden; 
-            transition: background 0.5s, background-image 0.5s; 
+            transition: background 0.5s; 
         }
-
-        /* ATMOSFER (BACKGROUND SWAP) MODLARI */
-        body.bg-moon { background-image: linear-gradient(rgba(10,11,16,0.85), rgba(10,11,16,0.85)), url('https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-position: center; }
-        body.bg-cyberpunk { background-image: linear-gradient(rgba(10,11,16,0.85), rgba(10,11,16,0.85)), url('https://images.unsplash.com/photo-1601042879364-f3947d3f9c16?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-position: center; }
-        body.bg-rome { background-image: linear-gradient(rgba(10,11,16,0.85), rgba(10,11,16,0.85)), url('https://images.unsplash.com/photo-1552559740-452178229ab3?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-position: center; }
-
-        /* KRİZ, GECE VE SAKİN MODLARI */
-        body.crisis-mode { background-color: #1a0505; background-image: radial-gradient(circle at 50% -20%, rgba(255, 0, 0, 0.15) 0%, transparent 70%); animation: crisisPulse 2s infinite; }
-        body.crisis-mode .board-table { box-shadow: 0 30px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,0,0,0.2); border-color: #3a1515;}
-        @keyframes crisisPulse { 0%, 100% { background-color: #1a0505; } 50% { background-color: #2a0505; } }
 
         body.night-mode { background-color: #020617; background-image: none; }
         body.night-mode .board-table { box-shadow: 0 40px 60px rgba(0,0,0,0.9), inset 0 0 30px rgba(14, 165, 233, 0.1); border-color: #0f172a;}
@@ -50,9 +40,6 @@
         #main-app { display: flex; flex-direction: column; height: 100%; width: 100%; overflow: hidden; }
         .header-panel { flex-shrink: 0; background: var(--bg-panel); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border-glass); padding: 10px 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; z-index: 10; }
         .header-left { display: flex; gap: 8px; align-items: center; flex-wrap: wrap;}
-        .tools-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); color: white; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; transition: 0.2s;}
-        .tools-btn:hover { background: rgba(255,255,255,0.1); }
-        .tools-btn.active { background: var(--c-user); color: #000; border-color: var(--c-user);}
         .projects-btn { background: rgba(56, 189, 248, 0.1); color: var(--c-user); border: 1px solid var(--c-user); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.2s; }
         .projects-btn:hover { background: var(--c-user); color: #000; }
         
@@ -60,13 +47,9 @@
         .live-btn.active { background: white; color: #c255ff; box-shadow: 0 0 15px #c255ff; }
         @keyframes pulseLive { from{box-shadow: 0 0 0px #c255ff;} to{box-shadow: 0 0 10px #c255ff;} }
 
-        .crisis-checkbox { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #ef4444; font-weight: bold; cursor: pointer;}
         .night-checkbox { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #38bdf8; font-weight: bold; cursor: pointer;}
         .relax-checkbox { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #a78bfa; font-weight: bold; cursor: pointer;}
         .board-select { width: 140px; background: #010409; color: white; border: 1px solid var(--border-glass); padding: 6px; border-radius: 6px; font-size: 11px; outline: none;}
-
-        .custom-persona-box { display: none; margin-left: 5px; }
-        .custom-persona-input { background: #010409; color: #d97757; border: 1px solid #d97757; padding: 6px; border-radius: 6px; font-size: 11px; outline: none; width: 120px; font-weight: bold;}
 
         .info-card { flex: 1; min-width: 120px; }
         .info-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
@@ -78,7 +61,6 @@
         .btn-yes { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); } .btn-yes:hover:not(:disabled) { background: #22c55e; color: white; }
         .btn-no { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); } .btn-no:hover:not(:disabled) { background: #ef4444; color: white; }
         .btn-rev { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); } .btn-rev:hover:not(:disabled) { background: #38bdf8; color: black; }
-        .btn-team { background: rgba(194, 85, 255, 0.15); color: #c255ff; border: 1px solid rgba(194, 85, 255, 0.4); display: none; } .btn-team:hover { background: #c255ff; color: white; }
         .btn-pitch { background: #64748b; color: white; display: none; } .btn-pitch:hover { background: #94a3b8; }
         .btn-pdf { background: #fbbf24; color: #000; display: none; } .btn-pdf:hover { background: #d97706; color: white; }
         .btn:disabled { opacity: 0.3; cursor: not-allowed; }
@@ -89,9 +71,6 @@
         
         .table-wrapper { position: relative; width: 100%; max-width: min(600px, 100vw - 20px); max-height: min(360px, 50vh); aspect-ratio: 2 / 1.2; transform: rotateX(15deg); transform-style: preserve-3d; margin: 0 auto; }
         .board-table { width: 100%; height: 100%; background: var(--table-surface); border: 8px solid var(--table-rim); border-radius: 500px; box-shadow: 0 25px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; position: relative; transition: 0.5s; transform-style: preserve-3d; }
-        
-        .table-wrapper.wood-mode .board-table { background: linear-gradient(135deg, #4f2e1e 0%, #2e180d 50%, #1a0c05 100%); border-color: #2b1408; box-shadow: 0 35px 60px rgba(0,0,0,0.9), inset 0 0 40px rgba(0,0,0,0.9), inset 0 0 10px rgba(255, 165, 0, 0.1); }
-        .table-wrapper.wood-mode .board-table::before { content: ''; position: absolute; inset: 0; border-radius: 500px; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px); pointer-events: none; }
 
         /* HOLO MERKEZ VE 3D GEÇİŞİ */
         .holo-center { width: 65%; height: 55%; background: rgba(56, 189, 248, 0.02); border-radius: 500px; border: 1px solid rgba(56, 189, 248, 0.1); position: relative; display: flex; justify-content: center; align-items: center; transition: 0.3s; z-index: 2; transform-style: preserve-3d;}
@@ -152,7 +131,7 @@
         .master-doc:hover { transform: translate(-50%, -50%) translateZ(50px) scale(1.15) !important; z-index: 160; }
         .master-doc.visible { opacity: 1; transform: translate(-50%, -50%) translateZ(30px) scale(1); }
 
-        /* DIŞARIDAN YÜKLENEN DOSYALARIN DİZİLECEĞİ ALAN (YAN YANA) */
+        /* DIŞARIDAN YÜKLENEN DOSYALARIN DİZİLECEĞİ ALAN */
         .uploaded-files-container { position: absolute; bottom: 8%; right: 5%; width: 180px; display: flex; gap: 8px; flex-wrap: wrap-reverse; justify-content: flex-end; z-index: 200; transform: translateZ(40px); }
         .uploaded-doc { position: relative; width: 34px; height: 46px; background: #e2e8f0; border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; box-shadow: 0 8px 20px rgba(0,0,0,0.8); border-top-right-radius: 10px; animation: dropIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
         .uploaded-doc::before { content: ''; position: absolute; top: 0; right: 0; border-width: 0 10px 10px 0; border-style: solid; border-color: #cbd5e1 transparent transparent #cbd5e1; display: block; width: 0; }
@@ -173,7 +152,7 @@
         .shake { animation: shakeScreen 0.4s; }
         @keyframes shakeScreen { 0%,100%{transform:translate(0,0);} 20%{transform:translate(-2px,0);} 40%{transform:translate(2px,-2px);} 60%{transform:translate(-2px,2px);} 80%{transform:translate(2px,2px);} }
 
-        /* ALT PANEL (GİRİŞ VE PTT TUŞU) */
+        /* ALT PANEL */
         .input-area { flex-shrink: 0; background: var(--bg-panel); backdrop-filter: blur(20px); border-top: 1px solid var(--border-glass); padding: 12px 15px; display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center; position: relative; z-index: 500;}
         .standard-inputs { display: flex; width: 100%; gap: 8px; align-items: center; justify-content: center;}
         .file-label { cursor: pointer; font-size: 16px; opacity: 0.7; transition: 0.2s;} .file-label:hover { opacity: 1; }
@@ -181,7 +160,6 @@
         .chat-input:focus { border-color: var(--c-user); }
         .send-btn { background: var(--c-user); color: #000; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; text-transform: uppercase;}
         
-        /* CANLI MÜZAKERE BUTONU (BAS-KONUŞ) */
         .ptt-container { display: none; width: 100%; justify-content: center; margin-top: 2px;}
         .ptt-btn { width: 100%; max-width: 500px; background: #c255ff; color: white; border: none; padding: 14px; border-radius: 30px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(194, 85, 255, 0.4); transition: 0.2s; text-transform: uppercase; letter-spacing: 1px;}
         .ptt-btn.recording { background: #ef4444; box-shadow: 0 0 30px rgba(239, 68, 68, 0.8); transform: scale(0.98); }
@@ -204,18 +182,6 @@
         .slide-btn { background: var(--c-user); border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;}
         @keyframes fadeIn { from{opacity:0; transform: translateY(10px);} to{opacity:1; transform: translateY(0);} }
 
-        .qr-wrapper { text-align: center; padding: 10px 0; }
-        .qr-img { width: 150px; height: 150px; border: 4px solid white; border-radius: 10px; margin-bottom: 15px; }
-        .vote-bar-container { width: 100%; height: 20px; background: #334155; border-radius: 10px; overflow: hidden; margin-top: 15px; position: relative;}
-        .vote-bar-fill { height: 100%; background: #4ade80; width: 0%; transition: width 1s ease-out; }
-        .vote-text { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: bold; color: white; text-shadow: 0 0 3px black;}
-
-        #vote-app { display: none; flex-direction: column; justify-content: center; align-items: center; height: 100vh; width: 100%; padding: 20px; text-align: center; background: #0a0b10;}
-        .vote-title { font-size: 22px; color: #fbbf24; margin-bottom: 20px;}
-        .vote-big-btn { width: 100%; padding: 20px; margin: 10px 0; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s;}
-        .vote-big-yes { background: #22c55e; color: white; } .vote-big-yes:active { transform: scale(0.95); }
-        .vote-big-no { background: #ef4444; color: white; } .vote-big-no:active { transform: scale(0.95); }
-        
         #pdf-container { display: none; background: white; color: black; padding: 40px; font-family: Arial, sans-serif; }
 
         @media (max-width: 768px) {
@@ -231,14 +197,6 @@
 
     <div class="rain-container" id="rain-container"></div>
 
-    <div id="vote-app">
-        <h3 style="color:var(--text-muted)">Ekip Oylaması</h3>
-        <div class="vote-title" id="vote-app-title">Karar Bekleniyor</div>
-        <button class="vote-big-btn vote-big-yes" onclick="submitMobileVote(true)">👍 ONAYLIYORUM</button>
-        <button class="vote-big-btn vote-big-no" onclick="submitMobileVote(false)">👎 REDDEDİYORUM</button>
-        <div id="vote-app-result" style="display:none; color:#4ade80; font-size:18px; margin-top:20px;">✅ Oyunuz sisteme iletildi. Sekmeyi kapatabilirsiniz.</div>
-    </div>
-
     <div id="main-app">
         <div class="stamp" id="stamp">ONAYLANDI</div>
 
@@ -246,27 +204,14 @@
             <div class="header-left">
                 <button class="projects-btn" onclick="openProjects()">📂 Projelerim</button>
                 <button class="live-btn" id="btn-live-debate" onclick="toggleLiveDebate()">🗣️ Canlı Müzakere</button>
-                <button class="tools-btn" id="board-toggle-btn" onclick="toggleBoardMode()">🪵 Ahşap Masa</button>
                 
-                <select class="board-select" id="atmosphereType" onchange="changeAtmosphere()" style="color:#4ade80; font-weight:bold;">
-                    <option value="standart">🌐 Merkez Üssü</option>
-                    <option value="bg-moon">🌕 Ay Üssü</option>
-                    <option value="bg-cyberpunk">🏙️ Cyberpunk</option>
-                    <option value="bg-rome">🏛️ Antik Roma</option>
-                </select>
-
-                <select class="board-select" id="boardType" onchange="checkCustomPersona()">
+                <select class="board-select" id="boardType">
                     <option value="genel">Genel Strateji</option>
                     <option value="hukuk">Hukuk & Güvenlik</option>
                     <option value="pazarlama">Pazarlama</option>
                     <option value="dahiler" style="color:#c255ff; font-weight:bold;">👑 Tarihin Dehaları</option>
-                    <option value="custom" style="color:#d97757; font-weight:bold;">🎭 Özel Misafir</option>
                 </select>
-                <div class="custom-persona-box" id="custom-persona-box">
-                    <input type="text" class="custom-persona-input" id="customPersonaInput" placeholder="Örn: Elon Musk..." oninput="updateCustomAvatar()">
-                </div>
 
-                <label class="crisis-checkbox"><input type="checkbox" id="krizModu" onchange="toggleCrisis()">🚨 KRİZ</label>
                 <label class="night-checkbox"><input type="checkbox" id="nightModu" onchange="toggleNightMode()">🌙 GECE</label>
                 <label class="relax-checkbox"><input type="checkbox" id="relaxModu" onchange="toggleRelaxMode()">☕ SAKİN</label>
             </div>
@@ -279,7 +224,6 @@
 
             <div class="vote-actions">
                 <button class="btn btn-yes" id="btn-y" disabled onclick="userVote(true)">Onayla</button>
-                <button class="btn btn-team" id="btn-team" onclick="openTeamVote()">📲 Ekibe Sor</button>
                 <button class="btn btn-rev" id="btn-rev" disabled onclick="requestRevision()">Revize</button>
                 <button class="btn btn-no" id="btn-n" disabled onclick="rejectWithShredder()">Reddet</button>
                 <button class="btn btn-pitch" id="btn-pitch" onclick="openPitchDeck()">🖥️ Sunum</button>
@@ -336,7 +280,7 @@
             
             <div class="ptt-container" id="ptt-container">
                 <button id="ptt-btn" class="ptt-btn" onmousedown="startPTT(event)" onmouseup="stopPTT(event)" ontouchstart="startPTT(event)" ontouchend="stopPTT(event)">
-                    🎙️ Basılı Tut ve Konuş (Veya Emir Ver)
+                    🎙️ Basılı Tut ve Konuş (Veya Sesli Komut Ver)
                 </button>
             </div>
         </div>
@@ -353,18 +297,6 @@
             <div class="slide-nav">
                 <button class="slide-btn" onclick="changeSlide(-1)">◀ Önceki</button>
                 <button class="slide-btn" onclick="changeSlide(1)">Sonraki ▶</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal" id="qr-modal">
-        <div class="modal-content" style="max-width: 400px; text-align: center;">
-            <span class="close-btn" onclick="closeModal('qr-modal')">&times;</span>
-            <div class="modal-title" style="color:#c255ff">Ekip Oylaması (Canlı)</div>
-            <div class="qr-wrapper">
-                <img src="" id="qr-img" class="qr-img" alt="QR Code">
-                <p style="font-size: 12px; color: #94a3b8;">Ekip üyeleri telefonuyla okutarak oylama ekranına gidebilir.</p>
-                <div class="vote-bar-container"><div class="vote-bar-fill" id="vote-bar-fill"></div><div class="vote-text" id="vote-text">Oylar Bekleniyor... %0</div></div>
             </div>
         </div>
     </div>
@@ -396,45 +328,6 @@
 
         let lofiAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3'); lofiAudio.loop = true;
 
-        // YENİ: ATMOSFER DEĞİŞTİRİCİ
-        function changeAtmosphere() {
-            let val = document.getElementById('atmosphereType').value;
-            document.body.className = ''; // Mevcut sınıfları temizle
-            
-            // UI Switch'leri de korumak için tekrar ekle
-            if(document.getElementById('krizModu').checked) document.body.classList.add('crisis-mode');
-            if(document.getElementById('nightModu').checked) document.body.classList.add('night-mode');
-            if(document.getElementById('relaxModu').checked) document.body.classList.add('relax-mode');
-            
-            if(val !== 'standart') {
-                document.body.classList.add(val);
-            }
-        }
-
-        // YENİ: ÖZEL MİSAFİR KONTROLÜ
-        function checkCustomPersona() {
-            let val = document.getElementById('boardType').value;
-            let box = document.getElementById('custom-persona-box');
-            if(val === 'custom') {
-                box.style.display = 'inline-block';
-                updateCustomAvatar();
-            } else {
-                box.style.display = 'none';
-                document.getElementById('claude-name').innerText = "Claude";
-                document.getElementById('claude-icon').innerText = "C";
-                displayNames['claude'] = "Claude";
-                icons['claude'] = "C";
-            }
-        }
-        function updateCustomAvatar() {
-            let val = document.getElementById('customPersonaInput').value.trim();
-            if(val === "") val = "Gizli Konuk";
-            document.getElementById('claude-name').innerText = val.substring(0, 15);
-            document.getElementById('claude-icon').innerText = val.charAt(0).toUpperCase();
-            displayNames['claude'] = val.substring(0, 15);
-            icons['claude'] = val.charAt(0).toUpperCase();
-        }
-
         function setTurkishVoices() {
             let voices = synthVoice.getVoices();
             turkishVoices = voices.filter(v => v.lang.includes('tr') || v.lang === 'tr-TR' || v.lang === 'tr_TR');
@@ -450,24 +343,8 @@
         window.onload = () => {
             setTurkishVoices();
             if (synthVoice.onvoiceschanged !== undefined) { synthVoice.onvoiceschanged = setTurkishVoices; }
-            
-            const params = new URLSearchParams(window.location.search);
-            if(params.get('vote')) {
-                document.getElementById('main-app').style.display = 'none';
-                document.getElementById('vote-app').style.display = 'flex';
-                document.getElementById('vote-app-title').innerText = params.get('vote');
-            }
         };
 
-        function submitMobileVote(isYes) {
-            document.querySelector('.vote-big-yes').style.display = 'none';
-            document.querySelector('.vote-big-no').style.display = 'none';
-            document.getElementById('vote-app-result').style.display = 'block';
-            document.getElementById('vote-app-result').innerText = isYes ? "✅ ONAYINIZ İLETİLDİ." : "❌ RED OYUNUZ İLETİLDİ.";
-        }
-
-        function toggleCrisis() { document.body.classList.toggle('crisis-mode'); }
-        function toggleBoardMode() { document.getElementById('table-wrapper').classList.toggle('wood-mode'); document.getElementById('board-toggle-btn').classList.toggle('active'); }
         function toggleNightMode() { if(document.getElementById('nightModu').checked) { document.body.classList.add('night-mode'); } else { document.body.classList.remove('night-mode'); } }
         function toggleRelaxMode() { 
             if(document.getElementById('relaxModu').checked) { document.body.classList.add('relax-mode'); lofiAudio.play(); createRain(); } 
@@ -534,7 +411,7 @@
                 let unlockAudio = new SpeechSynthesisUtterance(' '); unlockAudio.volume = 0; synthVoice.speak(unlockAudio);
                 btn.classList.add('active'); btn.innerText = "🛑 Toplantıyı Bitir";
                 document.getElementById('standard-inputs').style.display = 'none'; document.getElementById('ptt-container').style.display = 'flex';
-                document.getElementById('ui-status').innerText = "CANLI SESLİ TOPLANTI AKTİF. EMİR VEREBİLİR VEYA KONUŞABİLİRSİNİZ.";
+                document.getElementById('ui-status').innerText = "CANLI SESLİ TOPLANTI AKTİF. LÜTFEN KONUŞUN.";
                 conversationHistory = []; 
                 ['doc-openai', 'doc-gemini', 'doc-claude', 'doc-master'].forEach(id => document.getElementById(id).classList.remove('visible'));
             } else {
@@ -545,34 +422,21 @@
             }
         }
 
-        // YENİ: SESLİ BAŞKANLIK EMİRLERİ (VOICE COMMANDS)
+        // SESLİ KOMUT KONTROLÜ (UI Değiştirme)
         function processVoiceCommands(text) {
             let lowerText = text.toLowerCase();
             let isCommand = false;
             
-            if(lowerText.includes("kriz modunu aç") || lowerText.includes("krizi başlat")) {
-                document.getElementById('krizModu').checked = true; toggleCrisis(); isCommand = true;
-            } else if(lowerText.includes("kriz modunu kapat")) {
-                document.getElementById('krizModu').checked = false; toggleCrisis(); isCommand = true;
-            } else if(lowerText.includes("ahşap masa") || lowerText.includes("masayı değiştir")) {
-                if(!document.getElementById('table-wrapper').classList.contains('wood-mode')) toggleBoardMode(); 
-                isCommand = true;
-            } else if(lowerText.includes("sakin mod")) {
+            if(lowerText.includes("sakin mod")) {
                 document.getElementById('relaxModu').checked = true; toggleRelaxMode(); isCommand = true;
             } else if(lowerText.includes("gece mod")) {
                 document.getElementById('nightModu').checked = true; toggleNightMode(); isCommand = true;
-            } else if(lowerText.includes("cyberpunk")) {
-                document.getElementById('atmosphereType').value = 'bg-cyberpunk'; changeAtmosphere(); isCommand = true;
-            } else if(lowerText.includes("ay üssü") || lowerText.includes("uzaya çık")) {
-                document.getElementById('atmosphereType').value = 'bg-moon'; changeAtmosphere(); isCommand = true;
-            } else if(lowerText.includes("roma") || lowerText.includes("senato")) {
-                document.getElementById('atmosphereType').value = 'bg-rome'; changeAtmosphere(); isCommand = true;
             } else if(lowerText.includes("kurulu topla") || lowerText.includes("toplantıyı başlat")) {
                 isCommand = true; setTimeout(() => triggerSend(), 800);
             }
 
             if(isCommand) {
-                let utterance = new SpeechSynthesisUtterance("Emredersiniz başkanım. Sistem güncellendi.");
+                let utterance = new SpeechSynthesisUtterance("Emredersiniz başkanım. İşlem yapılıyor.");
                 utterance.lang = 'tr-TR';
                 synthVoice.speak(utterance);
                 return true;
@@ -595,7 +459,6 @@
             recognition.onend = () => {
                 let textToProcess = finalPttText.trim().length > 0 ? finalPttText : document.getElementById('topic-input').value;
                 
-                // Önce Sesli Komut mu diye bakıyoruz
                 if(textToProcess.trim().length > 0 && processVoiceCommands(textToProcess)) {
                     document.getElementById('topic-input').value = "";
                     document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; 
@@ -641,12 +504,10 @@
             hideCenterSpeaker(); 
             document.getElementById('holo-core').style.display = 'block'; document.getElementById('lasers').style.display = 'block'; 
 
-            let customPersonaName = document.getElementById('boardType').value === 'custom' ? document.getElementById('customPersonaInput').value : null;
-
             try {
                 const response = await fetch('/api/analyze', { 
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ topic: text, isLiveDebate: true, history: conversationHistory, customPersona: customPersonaName }) 
+                    body: JSON.stringify({ topic: text, isLiveDebate: true, history: conversationHistory }) 
                 });
                 if (!response.ok) throw new Error("API Yanıt Vermedi");
                 const data = await response.json();
@@ -663,7 +524,6 @@
             }
         }
 
-        // YENİ: ÖZEL KİŞİLİĞE GÖRE SES TONU AYARLAMA
         function playNextDebateLine() {
             if(currentDialogueQueue.length === 0) {
                 document.getElementById('ui-status').innerText = "SIRA SİZDE. KONUŞABİLİRSİNİZ.";
@@ -678,28 +538,12 @@
             let utterance = new SpeechSynthesisUtterance(line.text); 
             utterance.lang = 'tr-TR';
 
-            let isCustom = document.getElementById('boardType').value === 'custom';
-            let cPersona = document.getElementById('customPersonaInput').value.toLowerCase();
-
             if (speakerId === 'openai') {
                 if(maleVoice1) utterance.voice = maleVoice1;
                 utterance.pitch = 0.9; utterance.rate = 1.0;
-            } else if (speakerId === 'claude') { // Burası artık Özel Misafir koltuğu olabilir
-                if(isCustom && cPersona) {
-                    if(cPersona.includes('musk') || cPersona.includes('erkek') || cPersona.includes('ramsay')) {
-                        if(maleVoice1) utterance.voice = maleVoice1;
-                        utterance.pitch = 0.8; utterance.rate = 1.1; 
-                    } else if(cPersona.includes('kadın') || cPersona.includes('marie')) {
-                        if(femaleVoice) utterance.voice = femaleVoice;
-                        utterance.pitch = 1.4; utterance.rate = 1.0;
-                    } else {
-                        if(maleVoice2) utterance.voice = maleVoice2; 
-                        utterance.pitch = 1.0; utterance.rate = 1.15; 
-                    }
-                } else {
-                    if(femaleVoice) utterance.voice = femaleVoice;
-                    utterance.pitch = 1.3; utterance.rate = 1.05;
-                }
+            } else if (speakerId === 'claude') { 
+                if(femaleVoice) utterance.voice = femaleVoice;
+                utterance.pitch = 1.3; utterance.rate = 1.05;
             } else if (speakerId === 'gemini') {
                 if(maleVoice2) utterance.voice = maleVoice2;
                 else if(maleVoice1) utterance.voice = maleVoice1;
@@ -726,15 +570,13 @@
             
             document.querySelectorAll('.doc, .master-doc').forEach(el => el.classList.remove('visible'));
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
-            ['btn-team','btn-pitch','btn-pdf'].forEach(id => document.getElementById(id).style.display = 'none');
+            ['btn-pitch','btn-pdf'].forEach(id => document.getElementById(id).style.display = 'none');
             document.getElementById('ui-score').style.display = 'none';
 
             aiNodes.forEach(id => { let el = document.getElementById('ai-' + id); if(el) el.classList.add('thinking'); });
             document.getElementById('holo-core').style.display = 'block'; 
             document.getElementById('lasers').style.display = 'block'; 
-            document.getElementById('ui-status').innerText = document.getElementById('krizModu').checked ? "ACİL DURUM PROTOKOLÜ ÇALIŞIYOR..." : "Yapay Zeka Kurulu Analiz Yapıyor...";
-
-            let customPersonaName = document.getElementById('boardType').value === 'custom' ? document.getElementById('customPersonaInput').value : null;
+            document.getElementById('ui-status').innerText = "Yapay Zeka Kurulu Analiz Yapıyor...";
 
             try {
                 const response = await fetch('/api/analyze', {
@@ -744,10 +586,8 @@
                         boardType: document.getElementById('boardType').value, 
                         fileText: allFilesText, 
                         revisionNote: revNote, 
-                        isCrisis: document.getElementById('krizModu').checked, 
                         isNight: document.getElementById('nightModu').checked, 
-                        isLiveDebate: false,
-                        customPersona: customPersonaName
+                        isLiveDebate: false
                     })
                 });
 
@@ -784,7 +624,7 @@
                 scoreUI.innerText = `Verim: %${database['Score']}`; scoreUI.style.display = 'block';
                 
                 ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = false);
-                ['btn-team','btn-pitch'].forEach(id => document.getElementById(id).style.display = 'inline-block');
+                ['btn-pitch'].forEach(id => document.getElementById(id).style.display = 'inline-block');
             }, 1500);
         }
 
@@ -805,26 +645,11 @@
             slides[currentSlide].classList.add('active');
         }
 
-        function openTeamVote() {
-            let voteUrl = window.location.origin + window.location.pathname + "?vote=" + encodeURIComponent(database['Title']);
-            document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(voteUrl)}`;
-            document.getElementById('qr-modal').classList.add('show');
-            let bar = document.getElementById('vote-bar-fill'); let text = document.getElementById('vote-text');
-            bar.style.width = '0%'; text.innerText = "Oylar Bekleniyor... %0";
-            let percent = 0;
-            let interval = setInterval(() => {
-                percent += Math.floor(Math.random() * 15) + 5; 
-                if(percent >= 85) { percent = 85; clearInterval(interval); text.innerText = "Ekibin %85'i Onaylıyor! ✅"; }
-                else { text.innerText = `Oylar Geliyor... %${percent}`; }
-                bar.style.width = percent + '%';
-            }, 800);
-        }
-
         function rejectWithShredder() {
             document.getElementById('ui-status').innerText = "KARAR REDDEDİLDİ. Dosya imha ediliyor...";
             document.getElementById('ui-vote-title').innerText = "Plan Çöpe Atıldı.";
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
-            ['btn-team','btn-pitch','btn-pdf'].forEach(id => document.getElementById(id).style.display = 'none');
+            ['btn-pitch','btn-pdf'].forEach(id => document.getElementById(id).style.display = 'none');
             
             ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.remove('visible'));
             
@@ -886,7 +711,7 @@
                 document.getElementById('ui-status').innerText = "KARAR ONAYLANDI VE PROJELERE EKLENDİ.";
                 
                 document.getElementById('btn-pdf').style.display = 'inline-block'; 
-                ['btn-team','btn-pitch'].forEach(id => document.getElementById(id).style.display = 'none');
+                ['btn-pitch'].forEach(id => document.getElementById(id).style.display = 'none');
                 saveToProjects();
             }
             document.getElementById('doc-master').classList.remove('visible');
