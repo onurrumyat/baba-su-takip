@@ -41,7 +41,6 @@
         .header-panel { flex-shrink: 0; background: var(--bg-panel); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border-glass); padding: 10px 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; z-index: 10; }
         .header-left { display: flex; gap: 8px; align-items: center; flex-wrap: wrap;}
         
-        /* DÜZELTİLDİ: Projeler Butonu Animasyonu İçin */
         .projects-btn { background: rgba(56, 189, 248, 0.1); color: var(--c-user); border: 1px solid var(--c-user); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; z-index: 50; }
         .projects-btn:hover { background: var(--c-user); color: #000; transform: scale(1.05); }
         
@@ -163,8 +162,8 @@
         .ptt-btn { width: 100%; max-width: 500px; background: #c255ff; color: white; border: none; padding: 14px; border-radius: 30px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(194, 85, 255, 0.4); transition: 0.2s; text-transform: uppercase; letter-spacing: 1px;}
         .ptt-btn.recording { background: #ef4444; box-shadow: 0 0 30px rgba(239, 68, 68, 0.8); transform: scale(0.98); }
 
-        /* DÜZELTİLDİ: MODALLAR Z-INDEX EN ÜSTE ÇEKİLDİ */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 99999; opacity: 0; transition: 0.3s; padding: 15px; }
+        /* --- ZIRHLI MODAL (Z-INDEX 2 MİLYAR, GARANTİ ÜSTTE) --- */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 2147483647; opacity: 0; transition: opacity 0.3s; padding: 15px; }
         .modal.show { display: flex; opacity: 1; }
         .modal-content { background: #0f1117; width: 100%; max-width: 600px; border-radius: 12px; border: 1px solid var(--border-glass); padding: 25px; position: relative; max-height: 85dvh; overflow-y: auto;}
         .close-btn { position: absolute; top: 10px; right: 15px; font-size: 24px; color: var(--text-muted); cursor: pointer; }
@@ -186,7 +185,7 @@
         /* ============================================================ */
         /* --- 3D VIRTUAL OFFICE (SİMÜLASYON) SİSTEMİ CSS --- */
         /* ============================================================ */
-        .vo-overlay { position: fixed; inset: 0; background: #000; z-index: 100000; display: none; flex-direction: column; opacity: 0; transition: opacity 0.5s; font-family: 'Segoe UI', system-ui, sans-serif;}
+        .vo-overlay { position: fixed; inset: 0; background: #000; z-index: 2147483647; display: none; flex-direction: column; opacity: 0; transition: opacity 0.5s; font-family: 'Segoe UI', system-ui, sans-serif;}
         .vo-overlay.show { display: flex; opacity: 1; }
         
         .vo-header { padding: 15px 25px; background: rgba(10, 11, 16, 0.9); backdrop-filter: blur(10px); color: var(--c-user); border-bottom: 1px solid rgba(56, 189, 248, 0.2); display: flex; justify-content: space-between; align-items: center; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.5);}
@@ -338,7 +337,10 @@
     <div class="modal" id="projects-modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('projects-modal')">&times;</span>
-            <div class="modal-title" style="color:var(--c-user)">📂 Onaylanmış Projelerim</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border-glass); padding-bottom: 8px; margin-bottom: 12px;">
+                <div class="modal-title" style="color:var(--c-user); border:none; margin:0; padding:0;">📂 Onaylanmış Projelerim</div>
+                <button onclick="clearProjectsMemory()" style="background:rgba(239, 68, 68, 0.2); color:#ef4444; border:1px solid #ef4444; padding:4px 8px; border-radius:4px; font-size:10px; cursor:pointer;">Hafızayı Temizle</button>
+            </div>
             <div id="projects-list" style="max-height: 400px; overflow-y: auto;">Kayıt yok.</div>
         </div>
     </div>
@@ -560,7 +562,11 @@
             const titles = ["1. Kök Sorun", "2. Yaklaşımımız", "3. Uygulama Adımları", "4. Beklenen Getiri"]; const colors = ["#ef4444", "#38bdf8", "#fbbf24", "#4ade80"];
             slidesData.forEach((s, i) => { slides.push(`<h2 style="color:${colors[i%4]}">${titles[i]}</h2><p style="margin-top:20px; font-size:16px;">${s}</p>`); });
             let html = ""; slides.forEach((s, i) => { html += `<div class="slide ${i===0?'active':''}" id="slide-${i}">${s}</div>`; });
-            document.getElementById('slide-container').innerHTML = html; currentSlide = 0; document.getElementById('pitch-modal').classList.add('show');
+            document.getElementById('slide-container').innerHTML = html; currentSlide = 0;
+            
+            let modal = document.getElementById('pitch-modal');
+            modal.style.display = "flex";
+            setTimeout(() => modal.classList.add('show'), 10);
         }
         function changeSlide(dir) { let slides = document.querySelectorAll('.slide'); slides[currentSlide].classList.remove('active'); currentSlide += dir; if(currentSlide < 0) currentSlide = slides.length - 1; if(currentSlide >= slides.length) currentSlide = 0; slides[currentSlide].classList.add('active'); }
 
@@ -573,7 +579,7 @@
             setTimeout(() => { masterDoc.classList.remove('visible'); masterDoc.classList.remove('shredding'); document.getElementById('shredder-box').classList.remove('active'); document.getElementById('ui-status').innerText = "Masa Temizlendi. YENİ GÜNDEM BEKLENİYOR."; }, 1800);
         }
 
-        function openUploadedDoc(index) { const file = uploadedFiles[index]; document.getElementById('modal-title').style.color = "#38bdf8"; document.getElementById('modal-title').innerText = "Eklenen Dosya: " + file.name; document.getElementById('modal-text').innerText = file.text.substring(0, 5000) + (file.text.length > 5000 ? "\n\n...[Devamı Kesildi]" : ""); document.getElementById('doc-modal').classList.add('show'); }
+        function openUploadedDoc(index) { const file = uploadedFiles[index]; document.getElementById('modal-title').style.color = "#38bdf8"; document.getElementById('modal-title').innerText = "Eklenen Dosya: " + file.name; document.getElementById('modal-text').innerText = file.text.substring(0, 5000) + (file.text.length > 5000 ? "\n\n...[Devamı Kesildi]" : ""); let m = document.getElementById('doc-modal'); m.style.display = "flex"; setTimeout(() => m.classList.add('show'), 10); }
 
         function openDoc(owner) {
             let content = database[owner];
@@ -583,18 +589,23 @@
                 let el = document.getElementById('modal-text'); el.innerHTML = ""; let i = 0; clearInterval(window.typeInterval); 
                 window.typeInterval = setInterval(() => { if(i < textToType.length) { el.innerHTML += textToType.charAt(i) === '\n' ? '<br>' : textToType.charAt(i); i++; } else { clearInterval(window.typeInterval); } }, 30); 
             } else { document.getElementById('modal-title').style.color = "#fff"; document.getElementById('modal-text').innerText = content; document.getElementById('modal-title').innerText = owner + " Dosyası"; }
-            document.getElementById('doc-modal').classList.add('show');
+            let m = document.getElementById('doc-modal'); m.style.display = "flex"; setTimeout(() => m.classList.add('show'), 10);
         }
-        function closeModal(id) { document.getElementById(id).classList.remove('show'); clearInterval(window.typeInterval); }
+        
+        function closeModal(id) { 
+            let modal = document.getElementById(id);
+            modal.classList.remove('show'); 
+            setTimeout(() => { modal.style.display = "none"; }, 300); // Animasyonun bitmesini bekle
+            clearInterval(window.typeInterval); 
+        }
 
         /* ============================================================ */
-        /* --- YENİ EKLENEN: UÇUŞ ANİMASYONU --- */
+        /* --- UÇUŞ ANİMASYONU --- */
         /* ============================================================ */
         function animateApprovalToFolder() {
             let btn = document.getElementById('btn-projects-nav');
             let btnRect = btn.getBoundingClientRect();
 
-            // Uçacak Klasör İkonu Oluşturuluyor
             let flyDoc = document.createElement('div');
             flyDoc.innerHTML = "📁";
             flyDoc.style.position = "fixed";
@@ -602,12 +613,11 @@
             flyDoc.style.top = "50%";
             flyDoc.style.fontSize = "50px";
             flyDoc.style.transform = "translate(-50%, -50%) scale(1.5)";
-            flyDoc.style.zIndex = "999999";
+            flyDoc.style.zIndex = "2147483647";
             flyDoc.style.transition = "all 0.8s cubic-bezier(0.25, 1, 0.5, 1)";
             flyDoc.style.textShadow = "0 0 30px #fbbf24";
             document.body.appendChild(flyDoc);
 
-            // Anında küçülerek butonun üstüne doğru uçar
             requestAnimationFrame(() => {
                 setTimeout(() => {
                     flyDoc.style.left = (btnRect.left + (btnRect.width / 2)) + "px";
@@ -617,27 +627,28 @@
                 }, 50);
             });
 
-            // Uçuş bittiğinde hedef buton parlar
             setTimeout(() => {
                 flyDoc.remove();
-                btn.style.background = "#38bdf8";
-                btn.style.color = "#000";
-                btn.style.transform = "scale(1.1)";
-                btn.style.boxShadow = "0 0 20px #38bdf8";
-                
+                btn.style.background = "#38bdf8"; btn.style.color = "#000"; btn.style.transform = "scale(1.1)"; btn.style.boxShadow = "0 0 20px #38bdf8";
                 setTimeout(() => {
-                    btn.style.background = "rgba(56, 189, 248, 0.1)";
-                    btn.style.color = "var(--c-user)";
-                    btn.style.transform = "scale(1)";
-                    btn.style.boxShadow = "none";
+                    btn.style.background = "rgba(56, 189, 248, 0.1)"; btn.style.color = "var(--c-user)"; btn.style.transform = "scale(1)"; btn.style.boxShadow = "none";
                 }, 400);
             }, 850);
         }
 
-        /* --- ÇÖKME KORUMALI PROJE KAYIT FONKSİYONU --- */
+        /* --- ÇÖKME KORUMALI PROJE KAYIT VE SİLME FONKSİYONU --- */
+        function clearProjectsMemory() {
+            localStorage.removeItem('aiBoardProjects');
+            alert("Sistem hafızası başarıyla temizlendi.");
+            openProjects();
+        }
+
         function saveToProjects() {
             let history = [];
-            try { history = JSON.parse(localStorage.getItem('aiBoardProjects')) || []; } catch(e) {}
+            try { 
+                let parsed = JSON.parse(localStorage.getItem('aiBoardProjects'));
+                if(Array.isArray(parsed)) history = parsed;
+            } catch(e) {}
             
             let safeTopic = database['Topic'] || "Manuel Gündem";
             let safeTitle = database['Title'] || "Sentez Raporu";
@@ -647,102 +658,110 @@
             localStorage.setItem('aiBoardProjects', JSON.stringify(history));
         }
 
-        /* --- ÇÖKME KORUMALI PROJELERİ AÇMA FONKSİYONU --- */
+        /* --- ZORLA AÇILAN KUSURSUZ PROJELERİM MENÜSÜ --- */
         function openProjects() {
-            let history = [];
-            try { 
-                history = JSON.parse(localStorage.getItem('aiBoardProjects')) || []; 
-            } catch(e) { 
-                history = []; localStorage.removeItem('aiBoardProjects'); 
-            }
-            
-            let html = "";
-            if(!history || history.length === 0) {
-                html = "<div style='text-align:center; padding: 20px; color:#64748b;'>Henüz onaylanmış bir projeniz yok. Karar masasında bir planı onayladığınızda burada belirecektir.</div>";
-            } else { 
-                history.forEach((item, index) => { 
-                    let safeTitle = item.title || "İsimsiz Proje";
-                    let safeTopic = item.topic || "Gündem Yok";
-                    let safeDate = item.date || "-";
-                    let safeDecision = item.decision ? item.decision.substring(0, 100) : "Karar metni mevcut değil.";
+            try {
+                let rawData = localStorage.getItem('aiBoardProjects');
+                let history = [];
+                
+                if (rawData) {
+                    try {
+                        let parsed = JSON.parse(rawData);
+                        if (Array.isArray(parsed)) history = parsed;
+                        else localStorage.removeItem('aiBoardProjects'); // Veri bozuksa otomatik temizle
+                    } catch(e) { localStorage.removeItem('aiBoardProjects'); }
+                }
 
-                    html += `<div class="project-item">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                    <div class="project-title" style="margin:0;">${safeTitle}</div>
-                                    <button class="projects-btn" style="background:var(--c-user); color:#000; border:none; box-shadow:0 0 10px rgba(56,189,248,0.4);" onclick="enterVirtualOffice(${index})">🏢 Ofise Gir</button>
-                                </div>
-                                <div class="project-date" style="font-size:11px; margin-bottom:5px;">🗓️ ${safeDate} | 📌 ${safeTopic}</div>
-                                <div style="font-size:12px; color:#cbd5e1;">${safeDecision}...</div>
-                            </div>`; 
-                }); 
+                let html = "";
+                if (history.length === 0) {
+                    html = "<div style='text-align:center; padding: 20px; color:#64748b;'>Henüz onaylanmış bir projeniz yok. Karar masasında bir planı onayladığınızda dosyalar uçarak buraya gelecektir.</div>";
+                } else {
+                    for (let i = 0; i < history.length; i++) {
+                        let item = history[i];
+                        if (!item) continue;
+
+                        let safeTitle = item.title ? String(item.title) : "İsimsiz Proje";
+                        let safeTopic = item.topic ? String(item.topic) : "Gündem Yok";
+                        let safeDate = item.date ? String(item.date) : "-";
+                        let dec = item.decision ? String(item.decision) : "Karar metni mevcut değil.";
+                        let safeDecision = dec.length > 100 ? dec.substring(0, 100) + "..." : dec;
+
+                        html += `<div class="project-item">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                        <div class="project-title" style="margin:0;">${safeTitle}</div>
+                                        <button class="projects-btn" style="background:var(--c-user); color:#000; border:none; box-shadow:0 0 10px rgba(56,189,248,0.4);" onclick="enterVirtualOffice(${i})">🏢 Ofise Gir</button>
+                                    </div>
+                                    <div class="project-date" style="font-size:11px; margin-bottom:5px;">🗓️ ${safeDate} | 📌 ${safeTopic}</div>
+                                    <div style="font-size:12px; color:#cbd5e1;">${safeDecision}</div>
+                                </div>`;
+                    }
+                }
+
+                document.getElementById('projects-list').innerHTML = html;
+                
+                // CSS veya 3D z-index hatasını tamamen ezmek için JS üzerinden zorlama
+                let modalEl = document.getElementById('projects-modal');
+                modalEl.style.display = "flex"; 
+                setTimeout(() => { modalEl.classList.add('show'); }, 10); // Animasyonun devreye girmesi için ufak gecikme
+
+            } catch (criticalError) {
+                alert("Hafıza hatası tespit edildi. Sistem kendi kendini onarıyor...");
+                localStorage.removeItem('aiBoardProjects');
             }
-            document.getElementById('projects-list').innerHTML = html; 
-            document.getElementById('projects-modal').classList.add('show');
         }
 
         let currentActiveProject = null;
 
         function enterVirtualOffice(index) {
-            let history = JSON.parse(localStorage.getItem('aiBoardProjects')) || [];
-            currentActiveProject = history[index];
+            let raw = localStorage.getItem('aiBoardProjects');
+            let history = [];
+            if(raw) { try { history = JSON.parse(raw); } catch(e){} }
+            
+            currentActiveProject = history[index] || {};
             document.getElementById('vo-project-title').innerText = currentActiveProject.title || "Proje";
+            
             closeModal('projects-modal');
             document.getElementById('main-app').style.filter = "blur(10px)";
-            document.getElementById('vo-overlay').classList.add('show');
+            
+            let voOverlay = document.getElementById('vo-overlay');
+            voOverlay.style.display = "flex";
+            setTimeout(() => { voOverlay.classList.add('show'); }, 10);
+            
             setTimeout(() => { scrollToWall('wall-center'); }, 100);
         }
 
         function closeVirtualOffice() {
-            document.getElementById('vo-overlay').classList.remove('show');
+            let voOverlay = document.getElementById('vo-overlay');
+            voOverlay.classList.remove('show');
+            setTimeout(() => { voOverlay.style.display = "none"; }, 500);
+            
             document.getElementById('main-app').style.filter = "none";
             currentActiveProject = null;
         }
 
-        function scrollToWall(id) {
-            const wall = document.getElementById(id);
-            const viewport = document.getElementById('vo-viewport');
-            viewport.scrollTo({ left: wall.offsetLeft, behavior: 'smooth' });
-        }
+        function scrollToWall(id) { const wall = document.getElementById(id); const viewport = document.getElementById('vo-viewport'); viewport.scrollTo({ left: wall.offsetLeft, behavior: 'smooth' }); }
 
         function openRoom(type) {
-            const modal = document.getElementById('room-modal');
-            const title = document.getElementById('room-title');
-            const desc = document.getElementById('room-desc');
-            const input = document.getElementById('room-input');
-            const btn = document.getElementById('room-submit-btn');
-            
-            if(type === 'advisor') {
-                title.innerText = "Danışman Odası"; title.style.color = "var(--c-claude)";
-                desc.innerText = "Projeyi iyileştirmek için danışman modellerine spesifik taktikler veya kısıtlamalar verin.";
-                input.placeholder = "Örn: Bütçeyi %20 kısmak zorundayız, planı buna göre optimize edin.";
-                btn.style.background = "var(--c-claude)";
-            } else if(type === 'ceo') {
-                title.innerText = "CEO Ofisi (Sizin Odanız)"; title.style.color = "var(--c-user)";
-                desc.innerText = "Sistemin analiz etmesi için yeni sektörel veriler, kaynaklar veya raporlar entegre edin.";
-                input.placeholder = "Buraya ham metin, veri tablosu veya pazar notlarınızı yapıştırın...";
-                btn.style.background = "var(--c-user)";
-            } else if(type === 'board') {
-                title.innerText = "Ana Toplantı Kurulu"; title.style.color = "#fbbf24";
-                desc.innerText = "Tüm modelleri masada tekrar toplayıp konuyu yeniden tartışmaya açın.";
-                input.placeholder = "Örn: Her şey güzel ama rakip şirket X hamlesini yaparsa B planımız ne?";
-                btn.style.background = "#fbbf24";
-            }
-            modal.classList.add('active');
+            const modal = document.getElementById('room-modal'); const title = document.getElementById('room-title'); const desc = document.getElementById('room-desc'); const input = document.getElementById('room-input'); const btn = document.getElementById('room-submit-btn');
+            if(type === 'advisor') { title.innerText = "Danışman Odası"; title.style.color = "var(--c-claude)"; desc.innerText = "Projeyi iyileştirmek için danışman modellerine spesifik taktikler veya kısıtlamalar verin."; input.placeholder = "Örn: Bütçeyi %20 kısmak zorundayız, planı buna göre optimize edin."; btn.style.background = "var(--c-claude)"; } 
+            else if(type === 'ceo') { title.innerText = "CEO Ofisi (Sizin Odanız)"; title.style.color = "var(--c-user)"; desc.innerText = "Sistemin analiz etmesi için yeni sektörel veriler, kaynaklar veya raporlar entegre edin."; input.placeholder = "Buraya ham metin, veri tablosu veya pazar notlarınızı yapıştırın..."; btn.style.background = "var(--c-user)"; } 
+            else if(type === 'board') { title.innerText = "Ana Toplantı Kurulu"; title.style.color = "#fbbf24"; desc.innerText = "Tüm modelleri masada tekrar toplayıp konuyu yeniden tartışmaya açın."; input.placeholder = "Örn: Her şey güzel ama rakip şirket X hamlesini yaparsa B planımız ne?"; btn.style.background = "#fbbf24"; }
+            modal.style.display = "flex"; setTimeout(() => modal.classList.add('active'), 10);
         }
 
-        function closeRoom() { document.getElementById('room-modal').classList.remove('active'); document.getElementById('room-input').value = ''; }
+        function closeRoom() { 
+            let modal = document.getElementById('room-modal');
+            modal.classList.remove('active'); 
+            setTimeout(() => { modal.style.display = "none"; }, 400);
+            document.getElementById('room-input').value = ''; 
+        }
 
         function submitRoomData() {
-            const data = document.getElementById('room-input').value;
-            if(!data.trim()) { alert("Lütfen bir veri girin."); return; }
+            const data = document.getElementById('room-input').value; if(!data.trim()) { alert("Lütfen bir veri girin."); return; }
             let title = currentActiveProject ? currentActiveProject.title : "Bu Proje";
-            alert(`[SİSTEM MESAJI]: Veri başarıyla işleme alındı!\n\nYapay Zeka Kurmayları bu yeni bilgiyi "${title}" için analiz havuzuna ekledi.`);
-            closeRoom();
+            alert(`[SİSTEM MESAJI]: Veri başarıyla işleme alındı!\n\nYapay Zeka Kurmayları bu yeni bilgiyi "${title}" için analiz havuzuna ekledi.`); closeRoom();
         }
 
-        function requestRevision() { const note = prompt("Hangi kısmı düzeltelim?"); if(note) startProcess(true, note); }
-
-        /* GÜNCELLENDİ: ONAYLANDIĞINDA KLASÖRE UÇMA ANİMASYONU TETİKLENİYOR */
         function userVote(isYes) {
             if(isYes) {
                 document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 400);
@@ -759,15 +778,6 @@
             }
             uploadedFiles = []; renderUploadedFiles();
             ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
-        }
-
-        function downloadPDF() {
-            document.getElementById('pdf-date').innerText = new Date().toLocaleDateString('tr-TR');
-            document.getElementById('pdf-topic').innerText = database['Topic'];
-            document.getElementById('pdf-title').innerText = database['Title'];
-            document.getElementById('pdf-decision').innerText = database['Ortak Karar'];
-            const element = document.getElementById('pdf-container'); element.style.display = 'block';
-            html2pdf().from(element).set({ margin: 1, filename: 'Proje_Raporu.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).save().then(() => element.style.display = 'none');
         }
     </script>
 </body>
