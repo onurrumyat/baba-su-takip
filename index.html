@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Komuta Merkezi | Executive Edition</title>
+    <title>AI Komuta Merkezi | 3D Metaverse Edition</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -11,7 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
 
     <style>
-        /* SENİN ORİJİNAL CSS KODLARIN (HİÇBİRİNE DOKUNULMADI) */
+        /* --- ORİJİNAL ARAYÜZ CSS KODLARIN (HİÇBİR ŞEY SİLİNMEDİ) --- */
         :root {
             --bg-main: #0a0b10; --bg-panel: rgba(15, 18, 25, 0.95); --border-glass: rgba(255, 255, 255, 0.1);
             --text-light: #e2e8f0; --text-muted: #64748b;
@@ -21,45 +21,29 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body { 
-            background-color: var(--bg-main); 
-            background-image: radial-gradient(circle at 50% -20%, rgba(56, 189, 248, 0.05) 0%, transparent 70%); 
-            color: var(--text-light); 
-            font-family: 'Segoe UI', system-ui, sans-serif; 
-            height: 100dvh; 
-            width: 100%;
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
-            transition: background 0.5s; 
-        }
-
+        body { background-color: var(--bg-main); background-image: radial-gradient(circle at 50% -20%, rgba(56, 189, 248, 0.05) 0%, transparent 70%); color: var(--text-light); font-family: 'Segoe UI', system-ui, sans-serif; height: 100dvh; width: 100%; display: flex; flex-direction: column; overflow: hidden; transition: background 0.5s; }
         body.night-mode { background-color: #020617; background-image: none; }
         body.night-mode .board-table { box-shadow: 0 40px 60px rgba(0,0,0,0.9), inset 0 0 30px rgba(14, 165, 233, 0.1); border-color: #0f172a;}
-        
         .rain-container { position: absolute; inset: 0; pointer-events: none; z-index: 100; overflow: hidden; display: none; }
         body.relax-mode .rain-container { display: block; }
         .rain-drop { position: absolute; background: linear-gradient(transparent, rgba(255,255,255,0.4)); width: 1px; height: 50px; animation: rainFall linear infinite; }
         @keyframes rainFall { to { transform: translateY(100vh); } }
 
-        /* ÜST PANEL */
         #main-app { display: flex; flex-direction: column; height: 100%; width: 100%; overflow: hidden; transition: filter 0.5s; }
         .header-panel { flex-shrink: 0; background: var(--bg-panel); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border-glass); padding: 10px 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; z-index: 10; }
         .header-left { display: flex; gap: 8px; align-items: center; flex-wrap: wrap;}
         
-        .projects-btn { background: rgba(56, 189, 248, 0.1); color: var(--c-user); border: 1px solid var(--c-user); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.3s; position: relative; z-index: 50;}
-        .projects-btn:hover { background: var(--c-user); color: #000; transform: scale(1.05);}
-        
+        .projects-btn { background: rgba(56, 189, 248, 0.1); color: var(--c-user); border: 1px solid var(--c-user); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: all 0.3s; position: relative; z-index: 50; }
+        .projects-btn:hover { background: var(--c-user); color: #000; transform: scale(1.05); }
         .live-btn { background: #c255ff; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.2s; animation: pulseLive 2s infinite alternate;}
         .live-btn.active { background: white; color: #c255ff; box-shadow: 0 0 15px #c255ff; }
         @keyframes pulseLive { from{box-shadow: 0 0 0px #c255ff;} to{box-shadow: 0 0 10px #c255ff;} }
 
-        .night-checkbox { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #38bdf8; font-weight: bold; cursor: pointer;}
-        .relax-checkbox { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #a78bfa; font-weight: bold; cursor: pointer;}
+        .night-checkbox, .relax-checkbox { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: bold; cursor: pointer;}
+        .night-checkbox { color: #38bdf8; } .relax-checkbox { color: #a78bfa; }
         .board-select { width: 140px; background: #010409; color: white; border: 1px solid var(--border-glass); padding: 6px; border-radius: 6px; font-size: 11px; outline: none;}
 
-        .info-card { flex: 1; min-width: 120px; }
-        .info-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .info-card { flex: 1; min-width: 120px; } .info-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
         .vote-highlight { color: #fbbf24; font-size: 13px; text-shadow: 0 0 10px rgba(251, 191, 36, 0.3); font-weight: 700; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
         .efficiency-score { font-size: 11px; color: #4ade80; font-weight: bold; display: none; margin-top: 2px;}
         
@@ -72,16 +56,11 @@
         .btn-pdf { background: #fbbf24; color: #000; display: none; } .btn-pdf:hover { background: #d97706; color: white; }
         .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* --- ORTA ALAN: SABİT MASA --- */
         .stage { flex: 1 1 0%; min-height: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; position: relative; perspective: 1000px; padding: 10px; }
         .system-status { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); color: var(--c-user); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; z-index: 20; text-align: center; white-space:nowrap;}
-        
         .table-wrapper { position: relative; width: 100%; max-width: min(600px, 100vw - 20px); max-height: min(360px, 50vh); aspect-ratio: 2 / 1.2; transform: rotateX(15deg); transform-style: preserve-3d; margin: 0 auto; }
         .board-table { width: 100%; height: 100%; background: var(--table-surface); border: 8px solid var(--table-rim); border-radius: 500px; box-shadow: 0 25px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; position: relative; transition: 0.5s; transform-style: preserve-3d; }
-
-        /* HOLO MERKEZ */
         .holo-center { width: 65%; height: 55%; background: rgba(56, 189, 248, 0.02); border-radius: 500px; border: 1px solid rgba(56, 189, 248, 0.1); position: relative; display: flex; justify-content: center; align-items: center; transition: 0.3s; z-index: 2; transform-style: preserve-3d;}
-        
         .holo-core { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed var(--holo-color); animation: spinHolo 3s linear infinite; display: none; box-shadow: 0 0 15px var(--holo-color);}
         @keyframes spinHolo { 100% { transform: rotate(360deg); } }
         
@@ -90,55 +69,37 @@
         .center-speaker .node-name { font-size: 12px; padding: 4px 10px; background: rgba(0,0,0,0.9); border-radius: 4px; font-weight:bold; color: white;}
         @keyframes centerPop { 0% { transform: translate(-50%, -50%) translateZ(10px) scale(0); opacity: 0; } 100% { transform: translate(-50%, -50%) translateZ(60px) scale(1); opacity: 1; } }
 
-        /* 4 YÖNLÜ VERİ LAZERLERİ */
         .laser-container { position: absolute; inset: 0; pointer-events: none; display: none; z-index: 3; transform: translateZ(10px); }
         .laser-line { position: absolute; top: 50%; left: 50%; transform-origin: left center; height: 3px; opacity: 0; border-radius: 2px; }
-        
         .ll-openai { background: linear-gradient(90deg, transparent, var(--c-openai), #fff); transform: rotate(-90deg); animation: shootData 0.6s infinite; box-shadow: 0 0 10px var(--c-openai); }
         .ll-user   { background: linear-gradient(90deg, transparent, var(--c-user), #fff); transform: rotate(90deg); animation: shootData 0.9s infinite 0.2s; box-shadow: 0 0 10px var(--c-user); }
         .ll-gemini { background: linear-gradient(90deg, transparent, var(--c-gemini), #fff); transform: rotate(180deg); animation: shootData 0.7s infinite 0.4s; box-shadow: 0 0 10px var(--c-gemini); }
         .ll-claude { background: linear-gradient(90deg, transparent, var(--c-claude), #fff); transform: rotate(0deg); animation: shootData 0.8s infinite 0.1s; box-shadow: 0 0 10px var(--c-claude); }
-        
         @keyframes shootData { 0% { width: 0px; opacity: 1; left: 50%;} 50% { width: 140px; opacity: 1; } 100% { width: 240px; opacity: 0; left: 50%;} }
 
         .matrix-rain { position: absolute; inset: 0; pointer-events: none; color: #4ade80; font-family: monospace; font-size: 12px; display: none; text-shadow: 0 0 5px #4ade80; z-index: 1;}
         .matrix-drop { position: absolute; top: -20px; animation: fall linear forwards; }
         @keyframes fall { to { top: 100%; } }
 
-        /* KÜÇÜK AVATARLAR */
         .node { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 5; opacity: 0.6; transition: 0.3s; transform: translateZ(10px);}
         .node-icon { width: 35px; height: 35px; border-radius: 8px; background: #0f1117; display: flex; justify-content: center; align-items: center; font-size: 16px; font-weight: 800; border: 2px solid; box-shadow: 0 8px 15px rgba(0,0,0,0.8); transform: rotateX(-15deg); transition: 0.3s;}
         .node-name { font-size: 9px; font-weight: 800; letter-spacing: 1px; color: #fff; text-transform: uppercase; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px; transform: rotateX(-15deg); margin-top:-5px;}
-        
-        .n-openai .node-icon { border-color: var(--c-openai); color: var(--c-openai); } 
-        .n-gemini .node-icon { border-color: var(--c-gemini); color: var(--c-gemini); } 
-        .n-claude .node-icon { border-color: var(--c-claude); color: var(--c-claude); } 
-        .n-user .node-icon { border-color: var(--c-user); color: var(--c-user); }
-        
-        .n-openai { top: 0; left: 50%; transform: translate(-50%, -50%) translateZ(10px); } 
-        .n-user { top: 100%; left: 50%; transform: translate(-50%, -50%) translateZ(10px); } 
-        .n-gemini { top: 50%; left: 0; transform: translate(-50%, -50%) translateZ(10px); } 
-        .n-claude { top: 50%; left: 100%; transform: translate(-50%, -50%) translateZ(10px); } 
-        
+        .n-openai .node-icon { border-color: var(--c-openai); color: var(--c-openai); } .n-gemini .node-icon { border-color: var(--c-gemini); color: var(--c-gemini); } .n-claude .node-icon { border-color: var(--c-claude); color: var(--c-claude); } .n-user .node-icon { border-color: var(--c-user); color: var(--c-user); }
+        .n-openai { top: 0; left: 50%; transform: translate(-50%, -50%) translateZ(10px); } .n-user { top: 100%; left: 50%; transform: translate(-50%, -50%) translateZ(10px); } .n-gemini { top: 50%; left: 0; transform: translate(-50%, -50%) translateZ(10px); } .n-claude { top: 50%; left: 100%; transform: translate(-50%, -50%) translateZ(10px); } 
         .thinking .node-icon { animation: glow 1s infinite alternate; opacity: 1;}
         @keyframes glow { from { box-shadow: 0 0 5px currentColor; } to { box-shadow: 0 0 20px currentColor, inset 0 0 10px currentColor; } }
         @keyframes speakGlow { from { box-shadow: 0 0 10px currentColor; } to { box-shadow: 0 0 35px currentColor, inset 0 0 15px currentColor; } }
         .hidden-node { opacity: 0 !important; pointer-events: none; }
 
-        /* SİMETRİK DOSYALAR */
-        .doc { position: absolute; width: 26px; height: 36px; background: rgba(255,255,255,0.95); border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 8px 15px rgba(0,0,0,0.8); font-size: 13px; border-left: 3px solid #ccc; color: black; z-index: 100; transform: translate(-50%, -50%) translateZ(20px) scale(0);}
+        .doc, .master-doc { position: absolute; display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0; box-shadow: 0 8px 15px rgba(0,0,0,0.8); z-index: 100;}
+        .doc { width: 26px; height: 36px; background: rgba(255,255,255,0.95); border-radius: 3px; font-size: 13px; border-left: 3px solid #ccc; color: black; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: translate(-50%, -50%) translateZ(20px) scale(0);}
         .doc:hover { transform: translate(-50%, -50%) translateZ(40px) scale(1.3) !important; z-index: 110; }
         .doc.visible { opacity: 1; transform: translate(-50%, -50%) translateZ(20px) scale(1); }
-        
-        .d-openai { top: 22%; left: 50%; border-left-color: var(--c-openai); }
-        .d-gemini { top: 50%; left: 22%; border-left-color: var(--c-gemini); } 
-        .d-claude { top: 50%; left: 78%; border-left-color: var(--c-claude); } 
-        
-        .master-doc { position: absolute; top: 50%; left: 50%; width: 45px; height: 60px; background: linear-gradient(135deg, #fbbf24, #d97706); border-radius: 4px 8px 8px 4px; display: flex; justify-content: center; align-items: center; font-size: 22px; cursor: pointer; opacity: 0; transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 10px 30px rgba(251, 191, 36, 0.6); border-left: 5px solid #b45309; z-index: 150; transform: translate(-50%, -50%) translateZ(30px) scale(0);}
+        .d-openai { top: 22%; left: 50%; border-left-color: var(--c-openai); } .d-gemini { top: 50%; left: 22%; border-left-color: var(--c-gemini); } .d-claude { top: 50%; left: 78%; border-left-color: var(--c-claude); } 
+        .master-doc { top: 50%; left: 50%; width: 45px; height: 60px; background: linear-gradient(135deg, #fbbf24, #d97706); border-radius: 4px 8px 8px 4px; font-size: 22px; transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 10px 30px rgba(251, 191, 36, 0.6); border-left: 5px solid #b45309; transform: translate(-50%, -50%) translateZ(30px) scale(0);}
         .master-doc:hover { transform: translate(-50%, -50%) translateZ(50px) scale(1.15) !important; z-index: 160; }
         .master-doc.visible { opacity: 1; transform: translate(-50%, -50%) translateZ(30px) scale(1); }
 
-        /* DIŞARIDAN YÜKLENEN DOSYALARIN DİZİLECEĞİ ALAN */
         .uploaded-files-container { position: absolute; bottom: 8%; right: 5%; width: 180px; display: flex; gap: 8px; flex-wrap: wrap-reverse; justify-content: flex-end; z-index: 200; transform: translateZ(40px); }
         .uploaded-doc { position: relative; width: 34px; height: 46px; background: #e2e8f0; border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; box-shadow: 0 8px 20px rgba(0,0,0,0.8); border-top-right-radius: 10px; animation: dropIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
         .uploaded-doc::before { content: ''; position: absolute; top: 0; right: 0; border-width: 0 10px 10px 0; border-style: solid; border-color: #cbd5e1 transparent transparent #cbd5e1; display: block; width: 0; }
@@ -152,14 +113,12 @@
         .shredding { animation: shredDoc 1.5s forwards ease-in !important; pointer-events: none;}
         @keyframes shredDoc { 0% { top: 50%; transform: translate(-50%, -50%) translateZ(30px) scale(1); opacity: 1;} 40% { top: 75%; transform: translate(-50%, -50%) translateZ(20px) scale(0.8); opacity: 1;} 100% { top: 85%; transform: translate(-50%, -20%) translateZ(10px) scale(0.8); opacity: 0; height: 0;} }
 
-        /* MÜHÜR EFEKTİ */
         .stamp { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(5); opacity: 0; pointer-events: none; z-index: 1000; font-size: 60px; color: #ef4444; border: 6px solid #ef4444; padding: 10px 20px; border-radius: 15px; font-weight: 900; letter-spacing: 3px; text-shadow: 0 0 10px rgba(255,0,0,0.5); font-family: Impact, sans-serif; }
         .stamp.animate { animation: stampIn 0.5s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes stampIn { to { transform: translate(-50%, -50%) scale(1) rotate(-15deg); opacity: 0.9; } }
         .shake { animation: shakeScreen 0.4s; }
         @keyframes shakeScreen { 0%,100%{transform:translate(0,0);} 20%{transform:translate(-2px,0);} 40%{transform:translate(2px,-2px);} 60%{transform:translate(-2px,2px);} 80%{transform:translate(2px,2px);} }
 
-        /* ALT PANEL (GİRİŞ VE PTT TUŞU) */
         .input-area { flex-shrink: 0; background: var(--bg-panel); backdrop-filter: blur(20px); border-top: 1px solid var(--border-glass); padding: 12px 15px; display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center; position: relative; z-index: 500;}
         .standard-inputs { display: flex; width: 100%; gap: 8px; align-items: center; justify-content: center;}
         .file-label { cursor: pointer; font-size: 16px; opacity: 0.7; transition: 0.2s;} .file-label:hover { opacity: 1; }
@@ -171,7 +130,6 @@
         .ptt-btn { width: 100%; max-width: 500px; background: #c255ff; color: white; border: none; padding: 14px; border-radius: 30px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(194, 85, 255, 0.4); transition: 0.2s; text-transform: uppercase; letter-spacing: 1px;}
         .ptt-btn.recording { background: #ef4444; box-shadow: 0 0 30px rgba(239, 68, 68, 0.8); transform: scale(0.98); }
 
-        /* MODALLAR (Z-INDEX 3D MOTORUNUN ALTINDA AMA ANA SAYFANIN ÜSTÜNDE) */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 99999; opacity: 0; transition: 0.3s; padding: 15px; }
         .modal.show { display: flex; opacity: 1; }
         .modal-content { background: #0f1117; width: 100%; max-width: 600px; border-radius: 12px; border: 1px solid var(--border-glass); padding: 25px; position: relative; max-height: 85dvh; overflow-y: auto;}
@@ -199,23 +157,27 @@
             .ptt-btn { padding: 12px; font-size: 14px;}
         }
 
-        /* ========================================================= */
-        /* --- YENİ EKLENEN: 3D OYUN MOTORU (THREE.JS KAPSAYICI) --- */
-        /* ========================================================= */
+        /* ========================================================================= */
+        /* --- YENİ EKLENEN: 3D METAVERSE OFİSİ (THREE.JS CSS KODLARI) --- */
+        /* ========================================================================= */
         #webgl-container { position: fixed; inset: 0; z-index: 100000; display: none; background: #000; }
         
         #ui-3d-overlay { position: fixed; top: 0; left: 0; width: 100%; padding: 20px; display: none; justify-content: space-between; align-items: flex-start; z-index: 100001; pointer-events: none; }
         #ui-3d-overlay .hud-left { pointer-events: auto; }
         #ui-3d-overlay h2 { color: #38bdf8; margin:0; text-shadow: 0 0 10px rgba(56, 189, 248, 0.8); font-size: 24px; text-transform: uppercase;}
-        #ui-3d-overlay p { color: white; margin: 5px 0 0 0; font-size: 12px; background: rgba(0,0,0,0.6); padding: 5px; border-radius: 5px; display: inline-block;}
+        #ui-3d-overlay p { color: white; margin: 5px 0 0 0; font-size: 12px; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 5px; display: inline-block; font-weight: bold;}
         .btn-exit-3d { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; pointer-events: auto; transition: 0.3s; text-transform: uppercase; }
         .btn-exit-3d:hover { background: #ef4444; color: white; }
 
-        /* 3D Odada Sohbet Ekranı */
-        .room-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100005; display: none; justify-content: center; align-items: center; padding: 20px; }
-        .room-modal-box { background: #0f1117; border: 1px solid #38bdf8; border-radius: 10px; padding: 30px; width: 100%; max-width: 500px; text-align: center; box-shadow: 0 0 40px rgba(56, 189, 248, 0.2);}
-        .room-input { width: 100%; height: 120px; background: #010409; color: white; border: 1px solid #333; padding: 15px; margin-top: 20px; border-radius: 8px; resize: none; outline: none; font-family: monospace;}
-        .room-submit { background: #38bdf8; color: #000; font-weight: bold; border: none; padding: 12px 25px; margin-top: 20px; border-radius: 5px; cursor: pointer; width: 100%; text-transform: uppercase;}
+        /* Odalara Girince Açılan Profesyonel Terminal Arayüzü */
+        .room-terminal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100005; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(5px); }
+        .room-terminal-box { background: #0a0b10; border: 1px solid #38bdf8; border-radius: 15px; padding: 30px; width: 100%; max-width: 550px; text-align: center; box-shadow: 0 0 50px rgba(56, 189, 248, 0.3); position: relative;}
+        .room-terminal-title { font-size: 22px; font-weight: 900; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
+        .room-input { width: 100%; height: 140px; background: #010409; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2); padding: 15px; margin-top: 15px; border-radius: 8px; resize: vertical; outline: none; font-family: monospace; font-size: 14px;}
+        .room-input:focus { border-color: #38bdf8; box-shadow: inset 0 0 10px rgba(56, 189, 248, 0.2);}
+        
+        .btn-room { padding: 12px 25px; border: none; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; flex: 1;}
+        .btn-room-exit { background: rgba(255,255,255,0.1); color: white; } .btn-room-exit:hover { background: rgba(255,255,255,0.2); }
     </style>
 </head>
 <body>
@@ -346,40 +308,31 @@
         <button class="btn-exit-3d" onclick="exit3DWorld()">X Binadan Çık</button>
     </div>
 
-    <div class="room-modal" id="room-ui">
-        <div class="room-modal-box">
-            <h2 id="room-ui-title" style="color:#fff; margin-bottom: 5px;">Oda</h2>
-            <p style="color:#cbd5e1; font-size:12px;">Bu yapay zekaya özel yeni verileri buraya gir.</p>
-            <textarea class="room-input" id="room-ui-input" placeholder="Sistemin analiz etmesi için veri veya yeni taktik direktifi girin..."></textarea>
-            <div style="display:flex; gap:10px;">
-                <button class="room-submit" style="background:#ef4444; color:#fff;" onclick="close3DRoom()">İptal</button>
-                <button class="room-submit" id="room-btn-send" onclick="sendDataToRoom()">Sisteme Entegre Et</button>
+    <div class="room-terminal" id="room-ui">
+        <div class="room-terminal-box">
+            <h2 class="room-terminal-title" id="room-ui-title" style="color:#fff;">Oda</h2>
+            <p style="color:#cbd5e1; font-size:13px;">Bağlantı kuruldu. Sistemin analiz etmesi için veri, kaynak veya yeni taktik direktifi girin.</p>
+            <textarea class="room-input" id="room-ui-input" placeholder="Yapay zeka ile etkileşime geç..."></textarea>
+            
+            <div style="display:flex; gap:15px; margin-top: 25px;">
+                <button class="btn-room btn-room-exit" onclick="exitRoom3D()">◀ Koridora Çık</button>
+                <button class="btn-room" id="room-btn-send" onclick="sendDataToRoom()" style="color:#000;">Veriyi Entegre Et</button>
             </div>
         </div>
     </div>
 
-
     <script>
         // ==============================================================================
-        // --- SENİN ORİJİNAL JAVASCRIPT KODLARIN (API İSTEKLERİ, SES VE PTT DAHİL HEPSİ) ---
+        // --- SENİN ORİJİNAL JAVASCRIPT KODLARIN (API, SES, PTT, PDF HEPSİ BURADA) ---
         // ==============================================================================
         
         const database = { 'OpenAI': '', 'Gemini': '', 'Claude': '', 'Ortak Karar': '', 'Münazara': '', 'Topic': '', 'Score': '', 'Slides': [] };
         const aiNodes = ['openai', 'gemini', 'claude', 'user'];
         let uploadedFiles = []; 
 
-        let isLiveMode = false;
-        let isRecording = false;
-        let conversationHistory = [];
-        let synthVoice = window.speechSynthesis;
-        let currentDialogueQueue = [];
-        let recognition;
-        let finalPttText = "";
-
-        let turkishVoices = [];
-        let maleVoice1 = null; 
-        let femaleVoice = null; 
-        let maleVoice2 = null; 
+        let isLiveMode = false; let isRecording = false; let conversationHistory = [];
+        let synthVoice = window.speechSynthesis; let currentDialogueQueue = []; let recognition; let finalPttText = "";
+        let turkishVoices = []; let maleVoice1 = null; let femaleVoice = null; let maleVoice2 = null; 
 
         const colors = { 'openai': '#10a37f', 'claude': '#d97757', 'gemini': '#c255ff', 'user': '#38bdf8' };
         let icons = { 'openai': 'O', 'claude': 'C', 'gemini': 'G', 'user': '👤' };
@@ -388,213 +341,95 @@
         let lofiAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3'); lofiAudio.loop = true;
 
         function setTurkishVoices() {
-            let voices = synthVoice.getVoices();
-            turkishVoices = voices.filter(v => v.lang.includes('tr') || v.lang === 'tr-TR' || v.lang === 'tr_TR');
+            let voices = synthVoice.getVoices(); turkishVoices = voices.filter(v => v.lang.includes('tr') || v.lang === 'tr-TR' || v.lang === 'tr_TR');
             if(turkishVoices.length > 0) {
                 femaleVoice = turkishVoices.find(v => v.name.toLowerCase().includes('yelda') || v.name.toLowerCase().includes('emel') || v.name.toLowerCase().includes('kadın') || v.name.toLowerCase().includes('female'));
                 maleVoice1 = turkishVoices.find(v => v.name.toLowerCase().includes('cem') || v.name.toLowerCase().includes('tolga') || v.name.toLowerCase().includes('erkek') || v.name.toLowerCase().includes('male'));
-                if(!femaleVoice) femaleVoice = turkishVoices[0];
-                if(!maleVoice1) maleVoice1 = turkishVoices.length > 1 ? turkishVoices[1] : turkishVoices[0];
-                maleVoice2 = turkishVoices.length > 2 ? turkishVoices[2] : maleVoice1; 
+                if(!femaleVoice) femaleVoice = turkishVoices[0]; if(!maleVoice1) maleVoice1 = turkishVoices.length > 1 ? turkishVoices[1] : turkishVoices[0]; maleVoice2 = turkishVoices.length > 2 ? turkishVoices[2] : maleVoice1; 
             }
         }
-
-        window.onload = () => {
-            setTurkishVoices();
-            if (synthVoice.onvoiceschanged !== undefined) { synthVoice.onvoiceschanged = setTurkishVoices; }
-        };
+        window.onload = () => { setTurkishVoices(); if (synthVoice.onvoiceschanged !== undefined) { synthVoice.onvoiceschanged = setTurkishVoices; } };
 
         function toggleNightMode() { if(document.getElementById('nightModu').checked) { document.body.classList.add('night-mode'); } else { document.body.classList.remove('night-mode'); } }
-        function toggleRelaxMode() { 
-            if(document.getElementById('relaxModu').checked) { document.body.classList.add('relax-mode'); lofiAudio.play(); createRain(); } 
-            else { document.body.classList.remove('relax-mode'); lofiAudio.pause(); document.getElementById('rain-container').innerHTML = ''; } 
-        }
+        function toggleRelaxMode() { if(document.getElementById('relaxModu').checked) { document.body.classList.add('relax-mode'); lofiAudio.play(); createRain(); } else { document.body.classList.remove('relax-mode'); lofiAudio.pause(); document.getElementById('rain-container').innerHTML = ''; } }
 
-        function createRain() {
-            const rc = document.getElementById('rain-container'); rc.innerHTML = '';
-            for(let i=0; i<40; i++) { 
-                let drop = document.createElement('div'); drop.className='rain-drop'; 
-                drop.style.left = Math.random()*100 + '%'; drop.style.animationDuration = (Math.random()*0.5 + 0.5) + 's'; drop.style.animationDelay = Math.random() + 's'; rc.appendChild(drop); 
-            }
-        }
-
-        function startMatrixEffect() {
-            const mr = document.getElementById('matrix-rain'); mr.style.display = 'block'; mr.innerHTML = '';
-            for(let i=0; i<30; i++) { let drop = document.createElement('span'); drop.className = 'matrix-drop'; drop.innerText = Math.random()>0.5 ? '1':'0'; drop.style.left = Math.random()*100 + '%'; drop.style.animationDuration = (Math.random()*1 + 0.5)+'s'; mr.appendChild(drop); }
-            setTimeout(() => { mr.style.display = 'none'; }, 2500);
-        }
+        function createRain() { const rc = document.getElementById('rain-container'); rc.innerHTML = ''; for(let i=0; i<40; i++) { let drop = document.createElement('div'); drop.className='rain-drop'; drop.style.left = Math.random()*100 + '%'; drop.style.animationDuration = (Math.random()*0.5 + 0.5) + 's'; drop.style.animationDelay = Math.random() + 's'; rc.appendChild(drop); } }
+        function startMatrixEffect() { const mr = document.getElementById('matrix-rain'); mr.style.display = 'block'; mr.innerHTML = ''; for(let i=0; i<30; i++) { let drop = document.createElement('span'); drop.className = 'matrix-drop'; drop.innerText = Math.random()>0.5 ? '1':'0'; drop.style.left = Math.random()*100 + '%'; drop.style.animationDuration = (Math.random()*1 + 0.5)+'s'; mr.appendChild(drop); } setTimeout(() => { mr.style.display = 'none'; }, 2500); }
 
         function handleFileUpload(event) { 
-            const files = event.target.files; 
-            if (!files.length) return; 
-            Array.from(files).forEach(file => {
-                const reader = new FileReader(); 
-                reader.onload = function(e) { 
-                    const fileData = { name: file.name, ext: file.name.split('.').pop().toUpperCase().substring(0,4), text: e.target.result };
-                    uploadedFiles.push(fileData); renderUploadedFiles(); startMatrixEffect(); 
-                }; 
-                reader.readAsText(file); 
-            });
+            const files = event.target.files; if (!files.length) return; 
+            Array.from(files).forEach(file => { const reader = new FileReader(); reader.onload = function(e) { const fileData = { name: file.name, ext: file.name.split('.').pop().toUpperCase().substring(0,4), text: e.target.result }; uploadedFiles.push(fileData); renderUploadedFiles(); startMatrixEffect(); }; reader.readAsText(file); });
             alert(files.length + " belge masaya eklendi."); event.target.value = ''; 
         }
 
-        function renderUploadedFiles() {
-            const container = document.getElementById('uploaded-files-container');
-            container.innerHTML = '';
-            uploadedFiles.forEach((file, index) => {
-                container.innerHTML += `<div class="uploaded-doc" onclick="openUploadedDoc(${index})"><span>${file.ext}</span></div>`;
-            });
-        }
+        function renderUploadedFiles() { const container = document.getElementById('uploaded-files-container'); container.innerHTML = ''; uploadedFiles.forEach((file, index) => { container.innerHTML += `<div class="uploaded-doc" onclick="openUploadedDoc(${index})"><span>${file.ext}</span></div>`; }); }
 
         function showCenterSpeaker(id) {
-            let center = document.getElementById('center-speaker');
-            document.getElementById('holo-core').style.display = 'none';
+            let center = document.getElementById('center-speaker'); document.getElementById('holo-core').style.display = 'none';
             aiNodes.forEach(n => { let el = document.getElementById('ai-' + n); if(el) el.classList.remove('hidden-node'); });
-            let activeNode = document.getElementById('ai-' + id);
-            if(activeNode) activeNode.classList.add('hidden-node'); 
-            document.getElementById('center-speaker-icon').innerText = icons[id]; 
-            document.getElementById('center-speaker-name').innerText = displayNames[id];
-            center.style.color = colors[id]; document.getElementById('center-speaker-icon').style.borderColor = colors[id];
-            center.style.display = 'flex';
+            let activeNode = document.getElementById('ai-' + id); if(activeNode) activeNode.classList.add('hidden-node'); 
+            document.getElementById('center-speaker-icon').innerText = icons[id]; document.getElementById('center-speaker-name').innerText = displayNames[id];
+            center.style.color = colors[id]; document.getElementById('center-speaker-icon').style.borderColor = colors[id]; center.style.display = 'flex';
         }
-        function hideCenterSpeaker() {
-            document.getElementById('center-speaker').style.display = 'none';
-            aiNodes.forEach(n => { let el = document.getElementById('ai-' + n); if(el) el.classList.remove('hidden-node'); });
-        }
+        function hideCenterSpeaker() { document.getElementById('center-speaker').style.display = 'none'; aiNodes.forEach(n => { let el = document.getElementById('ai-' + n); if(el) el.classList.remove('hidden-node'); }); }
 
         function toggleLiveDebate() {
-            isLiveMode = !isLiveMode;
-            let btn = document.getElementById('btn-live-debate');
-            
+            isLiveMode = !isLiveMode; let btn = document.getElementById('btn-live-debate');
             if(isLiveMode) {
                 let unlockAudio = new SpeechSynthesisUtterance(' '); unlockAudio.volume = 0; synthVoice.speak(unlockAudio);
-                btn.classList.add('active'); btn.innerText = "🛑 Toplantıyı Bitir";
-                document.getElementById('standard-inputs').style.display = 'none'; document.getElementById('ptt-container').style.display = 'flex';
-                document.getElementById('ui-status').innerText = "CANLI SESLİ TOPLANTI AKTİF. EMİR VEREBİLİR VEYA KONUŞABİLİRSİNİZ.";
-                conversationHistory = []; 
-                ['doc-openai', 'doc-gemini', 'doc-claude', 'doc-master'].forEach(id => document.getElementById(id).classList.remove('visible'));
+                btn.classList.add('active'); btn.innerText = "🛑 Toplantıyı Bitir"; document.getElementById('standard-inputs').style.display = 'none'; document.getElementById('ptt-container').style.display = 'flex';
+                document.getElementById('ui-status').innerText = "CANLI SESLİ TOPLANTI AKTİF. EMİR VEREBİLİR VEYA KONUŞABİLİRSİNİZ."; conversationHistory = []; ['doc-openai', 'doc-gemini', 'doc-claude', 'doc-master'].forEach(id => document.getElementById(id).classList.remove('visible'));
             } else {
-                btn.classList.remove('active'); btn.innerText = "🗣️ Canlı Müzakere";
-                document.getElementById('standard-inputs').style.display = 'flex'; document.getElementById('ptt-container').style.display = 'none';
-                document.getElementById('ui-status').innerText = "Sistem Hazır. Gündemi Belirleyin.";
-                synthVoice.cancel(); hideCenterSpeaker();
+                btn.classList.remove('active'); btn.innerText = "🗣️ Canlı Müzakere"; document.getElementById('standard-inputs').style.display = 'flex'; document.getElementById('ptt-container').style.display = 'none';
+                document.getElementById('ui-status').innerText = "Sistem Hazır. Gündemi Belirleyin."; synthVoice.cancel(); hideCenterSpeaker();
             }
         }
 
         function processVoiceCommands(text) {
-            let lowerText = text.toLowerCase();
-            let isCommand = false;
+            let lowerText = text.toLowerCase(); let isCommand = false;
             if(lowerText.includes("sakin mod")) { document.getElementById('relaxModu').checked = true; toggleRelaxMode(); isCommand = true; } 
             else if(lowerText.includes("gece mod")) { document.getElementById('nightModu').checked = true; toggleNightMode(); isCommand = true; } 
             else if(lowerText.includes("kurulu topla") || lowerText.includes("toplantıyı başlat")) { isCommand = true; setTimeout(() => triggerSend(), 800); }
-
-            if(isCommand) {
-                let utterance = new SpeechSynthesisUtterance("Emredersiniz başkanım. İşlem yapılıyor.");
-                utterance.lang = 'tr-TR'; synthVoice.speak(utterance); return true;
-            }
+            if(isCommand) { let utterance = new SpeechSynthesisUtterance("Emredersiniz başkanım. İşlem yapılıyor."); utterance.lang = 'tr-TR'; synthVoice.speak(utterance); return true; }
             return false;
         }
 
         function initSpeech() {
             if (!('webkitSpeechRecognition' in window)) { alert("Tarayıcınız desteklemiyor (Chrome kullanın)."); return false; }
             recognition = new webkitSpeechRecognition(); recognition.lang = 'tr-TR'; recognition.interimResults = true; recognition.continuous = true;
-            recognition.onresult = (event) => {
-                let interimText = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) finalPttText += event.results[i][0].transcript + " ";
-                    else interimText += event.results[i][0].transcript;
-                }
-                document.getElementById('topic-input').value = finalPttText + interimText;
-            };
+            recognition.onresult = (event) => { let interimText = ''; for (let i = event.resultIndex; i < event.results.length; ++i) { if (event.results[i].isFinal) finalPttText += event.results[i][0].transcript + " "; else interimText += event.results[i][0].transcript; } document.getElementById('topic-input').value = finalPttText + interimText; };
             recognition.onerror = (e) => { stopPTT(); document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; };
-            recognition.onend = () => {
-                let textToProcess = finalPttText.trim().length > 0 ? finalPttText : document.getElementById('topic-input').value;
-                if(textToProcess.trim().length > 0 && processVoiceCommands(textToProcess)) {
-                    document.getElementById('topic-input').value = ""; document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; hideCenterSpeaker(); return;
-                }
-                if (textToProcess.trim().length > 0) sendLiveMessage(textToProcess);
-                else { document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; document.getElementById('ptt-btn').classList.remove('recording'); hideCenterSpeaker(); }
-            };
-            return true;
+            recognition.onend = () => { let textToProcess = finalPttText.trim().length > 0 ? finalPttText : document.getElementById('topic-input').value; if(textToProcess.trim().length > 0 && processVoiceCommands(textToProcess)) { document.getElementById('topic-input').value = ""; document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; hideCenterSpeaker(); return; } if (textToProcess.trim().length > 0) sendLiveMessage(textToProcess); else { document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; document.getElementById('ptt-btn').classList.remove('recording'); hideCenterSpeaker(); } }; return true;
         }
 
         function startPTT(e) {
-            if(e) { e.preventDefault(); e.stopPropagation(); }
-            if(isRecording) return;
+            if(e) { e.preventDefault(); e.stopPropagation(); } if(isRecording) return;
             if(synthVoice.speaking) { synthVoice.cancel(); currentDialogueQueue = []; document.getElementById('ui-status').innerText = "SÖZ KESİLDİ. SİZİ DİNLİYORUM..."; }
             if(!recognition) { if(!initSpeech()) return; }
-            finalPttText = ""; document.getElementById('topic-input').value = ""; isRecording = true;
-            document.getElementById('ptt-btn').classList.add('recording'); document.getElementById('ptt-btn').innerText = "🎙️ Dinliyorum... (Konuşun)";
-            showCenterSpeaker('user');
-            try { recognition.start(); } catch(err) {}
+            finalPttText = ""; document.getElementById('topic-input').value = ""; isRecording = true; document.getElementById('ptt-btn').classList.add('recording'); document.getElementById('ptt-btn').innerText = "🎙️ Dinliyorum... (Konuşun)"; showCenterSpeaker('user'); try { recognition.start(); } catch(err) {}
         }
-
-        function stopPTT(e) {
-            if(e) { e.preventDefault(); e.stopPropagation(); }
-            if(!isRecording) return;
-            isRecording = false;
-            document.getElementById('ptt-btn').classList.remove('recording'); document.getElementById('ptt-btn').innerText = "⏳ İşleniyor...";
-            try { recognition.stop(); } catch(err) {}
-        }
-
-        function triggerSend() {
-            if(isLiveMode) {
-                let text = document.getElementById('topic-input').value;
-                if(text.trim().length > 0) sendLiveMessage(text);
-            } else { startProcess(); }
-        }
+        function stopPTT(e) { if(e) { e.preventDefault(); e.stopPropagation(); } if(!isRecording) return; isRecording = false; document.getElementById('ptt-btn').classList.remove('recording'); document.getElementById('ptt-btn').innerText = "⏳ İşleniyor..."; try { recognition.stop(); } catch(err) {} }
+        function triggerSend() { if(isLiveMode) { let text = document.getElementById('topic-input').value; if(text.trim().length > 0) sendLiveMessage(text); } else { startProcess(); } }
 
         async function sendLiveMessage(text) {
             if(!text || text.trim() === "") { document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; hideCenterSpeaker(); return; }
-            document.getElementById('ui-status').innerText = "YAPAY ZEKALAR TARTIŞIYOR...";
-            hideCenterSpeaker(); 
-            document.getElementById('holo-core').style.display = 'block'; document.getElementById('lasers').style.display = 'block'; 
-
+            document.getElementById('ui-status').innerText = "YAPAY ZEKALAR TARTIŞIYOR..."; hideCenterSpeaker(); document.getElementById('holo-core').style.display = 'block'; document.getElementById('lasers').style.display = 'block'; 
             try {
-                // ORİJİNAL API İSTEĞİ (DOKUNULMADI)
-                const response = await fetch('/api/analyze', { 
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ topic: text, isLiveDebate: true, history: conversationHistory }) 
-                });
-                if (!response.ok) throw new Error("API Yanıt Vermedi");
-                const data = await response.json();
-                
-                document.getElementById('holo-core').style.display = 'none'; document.getElementById('lasers').style.display = 'none'; 
-                conversationHistory.push({role: "Başkan", text: text}); document.getElementById('topic-input').value = ''; 
-                
-                if(data.liveDialogue && data.liveDialogue.length > 0) { currentDialogueQueue = data.liveDialogue; playNextDebateLine(); } 
-                else { throw new Error("Boş veri döndü."); }
-            } catch(e) {
-                console.error(e); alert("Bağlantı Hatası: " + e.message);
-                document.getElementById('ui-status').innerText = "HATA OLUŞTU."; document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; 
-                document.getElementById('holo-core').style.display = 'none'; document.getElementById('lasers').style.display = 'none';
-            }
+                // ORİJİNAL CANLI MÜZAKERE API İSTEĞİ 
+                const response = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ topic: text, isLiveDebate: true, history: conversationHistory }) });
+                if (!response.ok) throw new Error("API Yanıt Vermedi"); const data = await response.json();
+                document.getElementById('holo-core').style.display = 'none'; document.getElementById('lasers').style.display = 'none'; conversationHistory.push({role: "Başkan", text: text}); document.getElementById('topic-input').value = ''; 
+                if(data.liveDialogue && data.liveDialogue.length > 0) { currentDialogueQueue = data.liveDialogue; playNextDebateLine(); } else { throw new Error("Boş veri döndü."); }
+            } catch(e) { console.error(e); alert("Bağlantı Hatası: " + e.message); document.getElementById('ui-status').innerText = "HATA OLUŞTU."; document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; document.getElementById('holo-core').style.display = 'none'; document.getElementById('lasers').style.display = 'none'; }
         }
 
         function playNextDebateLine() {
-            if(currentDialogueQueue.length === 0) {
-                document.getElementById('ui-status').innerText = "SIRA SİZDE. KONUŞABİLİRSİNİZ.";
-                document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; hideCenterSpeaker(); return;
-            }
+            if(currentDialogueQueue.length === 0) { document.getElementById('ui-status').innerText = "SIRA SİZDE. KONUŞABİLİRSİNİZ."; document.getElementById('ptt-btn').innerText = "🎙️ Basılı Tut ve Konuş"; hideCenterSpeaker(); return; }
             let line = currentDialogueQueue.shift(); if(!line.text) { playNextDebateLine(); return; }
-            let speakerId = line.speaker ? line.speaker.toLowerCase() : 'openai'; 
-            conversationHistory.push({role: speakerId, text: line.text});
-            
+            let speakerId = line.speaker ? line.speaker.toLowerCase() : 'openai'; conversationHistory.push({role: speakerId, text: line.text});
             document.getElementById('ui-status').innerText = `${displayNames[speakerId]} KONUŞUYOR...`; showCenterSpeaker(speakerId);
-            
-            let utterance = new SpeechSynthesisUtterance(line.text); 
-            utterance.lang = 'tr-TR';
-
-            if (speakerId === 'openai') {
-                if(maleVoice1) utterance.voice = maleVoice1; utterance.pitch = 0.9; utterance.rate = 1.0;
-            } else if (speakerId === 'claude') { 
-                if(femaleVoice) utterance.voice = femaleVoice; utterance.pitch = 1.3; utterance.rate = 1.05;
-            } else if (speakerId === 'gemini') {
-                if(maleVoice2) utterance.voice = maleVoice2; else if(maleVoice1) utterance.voice = maleVoice1; utterance.pitch = 0.6; utterance.rate = 0.95;
-            } else {
-                if(turkishVoices.length > 0) utterance.voice = turkishVoices[0];
-            }
-
+            let utterance = new SpeechSynthesisUtterance(line.text); utterance.lang = 'tr-TR';
+            if (speakerId === 'openai') { if(maleVoice1) utterance.voice = maleVoice1; utterance.pitch = 0.9; utterance.rate = 1.0; } else if (speakerId === 'claude') { if(femaleVoice) utterance.voice = femaleVoice; utterance.pitch = 1.3; utterance.rate = 1.05; } else if (speakerId === 'gemini') { if(maleVoice2) utterance.voice = maleVoice2; else if(maleVoice1) utterance.voice = maleVoice1; utterance.pitch = 0.6; utterance.rate = 0.95; } else { if(turkishVoices.length > 0) utterance.voice = turkishVoices[0]; }
             utterance.onend = () => { playNextDebateLine(); }; utterance.onerror = (e) => { console.error(e); playNextDebateLine(); }; synthVoice.speak(utterance);
         }
 
@@ -605,144 +440,76 @@
             if (!isRevision) database['Topic'] = fullText;
 
             let allFilesText = uploadedFiles.map(f => `DOSYA [${f.name}]:\n${f.text}`).join('\n\n');
-
             document.getElementById('ui-topic').innerText = "Özetleniyor..."; document.getElementById('ui-vote-title').innerText = "Analiz ediliyor...";
             if(!isRevision) document.getElementById('topic-input').value = '';
             
-            document.querySelectorAll('.doc, .master-doc').forEach(el => el.classList.remove('visible'));
-            ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
-            ['btn-pitch','btn-pdf'].forEach(id => document.getElementById(id).style.display = 'none');
-            document.getElementById('ui-score').style.display = 'none';
+            document.querySelectorAll('.doc, .master-doc').forEach(el => el.classList.remove('visible')); ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true); ['btn-pitch','btn-pdf'].forEach(id => document.getElementById(id).style.display = 'none'); document.getElementById('ui-score').style.display = 'none';
 
-            aiNodes.forEach(id => { let el = document.getElementById('ai-' + id); if(el) el.classList.add('thinking'); });
-            document.getElementById('holo-core').style.display = 'block'; document.getElementById('lasers').style.display = 'block'; 
-            document.getElementById('ui-status').innerText = "Yapay Zeka Kurulu Analiz Yapıyor...";
+            aiNodes.forEach(id => { let el = document.getElementById('ai-' + id); if(el) el.classList.add('thinking'); }); document.getElementById('holo-core').style.display = 'block'; document.getElementById('lasers').style.display = 'block'; document.getElementById('ui-status').innerText = "Yapay Zeka Kurulu Analiz Yapıyor...";
 
             try {
-                // ORİJİNAL API İSTEĞİ (DOKUNULMADI)
-                const response = await fetch('/api/analyze', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ topic: database['Topic'], boardType: document.getElementById('boardType').value, fileText: allFilesText, revisionNote: revNote, isNight: document.getElementById('nightModu').checked, isLiveDebate: false })
-                });
-                if (!response.ok) throw new Error("API Yanıt Vermedi");
-                const data = await response.json();
-
-                database['OpenAI'] = data.openai || "Yanıt alınamadı."; database['Gemini'] = data.gemini || "Yanıt alınamadı."; database['Claude'] = data.claude || "Yanıt alınamadı.";
-                database['Münazara'] = data.debate || "Münazara yapılamadı."; database['Ortak Karar'] = data.masterDecision || "Karar alınamadı."; database['Title'] = data.masterTitle || "Sentez Raporu"; database['Score'] = data.score || "85"; database['Slides'] = data.slides || []; 
+                // ORİJİNAL STANDART API İSTEĞİ
+                const response = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ topic: database['Topic'], boardType: document.getElementById('boardType').value, fileText: allFilesText, revisionNote: revNote, isNight: document.getElementById('nightModu').checked, isLiveDebate: false }) });
+                if (!response.ok) throw new Error("API Yanıt Vermedi"); const data = await response.json();
+                database['OpenAI'] = data.openai || "Yanıt alınamadı."; database['Gemini'] = data.gemini || "Yanıt alınamadı."; database['Claude'] = data.claude || "Yanıt alınamadı."; database['Münazara'] = data.debate || "Münazara yapılamadı."; database['Ortak Karar'] = data.masterDecision || "Karar alınamadı."; database['Title'] = data.masterTitle || "Sentez Raporu"; database['Score'] = data.score || "85"; database['Slides'] = data.slides || []; 
             } catch (error) {
-                console.error(error); 
-                database['OpenAI'] = "Sistem Hatası"; database['Gemini'] = "Sistem Hatası"; database['Claude'] = "Sistem Hatası"; database['Ortak Karar'] = "Bağlantı kurulamadı."; database['Title'] = "BAĞLANTI HATASI"; database['Score'] = "0"; 
+                console.error(error); database['OpenAI'] = "Sistem Hatası"; database['Gemini'] = "Sistem Hatası"; database['Claude'] = "Sistem Hatası"; database['Ortak Karar'] = "Bağlantı kurulamadı."; database['Title'] = "BAĞLANTI HATASI"; database['Score'] = "0"; 
             }
 
-            document.getElementById('holo-core').style.display = 'none'; document.getElementById('lasers').style.display = 'none';
-            aiNodes.forEach(id => { let el = document.getElementById('ai-' + id); if(el) el.classList.remove('thinking'); });
-            ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.add('visible'));
+            document.getElementById('holo-core').style.display = 'none'; document.getElementById('lasers').style.display = 'none'; aiNodes.forEach(id => { let el = document.getElementById('ai-' + id); if(el) el.classList.remove('thinking'); }); ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.add('visible'));
             
-            if (database['Title'] !== "BAĞLANTI HATASI") { document.getElementById('ui-status').innerText = "Raporlar ulaştı. Karar sentezleniyor..."; document.getElementById('ui-topic').innerText = database['Topic'].substring(0, 20) + "..."; } 
-            else { document.getElementById('ui-status').innerText = "HATA OLUŞTU."; }
+            if (database['Title'] !== "BAĞLANTI HATASI") { document.getElementById('ui-status').innerText = "Raporlar ulaştı. Karar sentezleniyor..."; document.getElementById('ui-topic').innerText = database['Topic'].substring(0, 20) + "..."; } else { document.getElementById('ui-status').innerText = "HATA OLUŞTU."; }
             
             setTimeout(() => {
                 document.getElementById('doc-master').classList.remove('shredding'); document.getElementById('doc-master').classList.add('visible');
                 if (database['Title'] !== "BAĞLANTI HATASI") { document.getElementById('ui-status').innerText = "Aksiyon planı hazır. Karar sizin."; }
-                document.getElementById('ui-vote-title').innerText = database['Title'];
-                
-                let scoreUI = document.getElementById('ui-score'); scoreUI.innerText = `Verim: %${database['Score']}`; scoreUI.style.display = 'block';
-                ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = false); ['btn-pitch'].forEach(id => document.getElementById(id).style.display = 'inline-block');
+                document.getElementById('ui-vote-title').innerText = database['Title']; let scoreUI = document.getElementById('ui-score'); scoreUI.innerText = `Verim: %${database['Score']}`; scoreUI.style.display = 'block'; ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = false); ['btn-pitch'].forEach(id => document.getElementById(id).style.display = 'inline-block');
             }, 1500);
         }
 
         let currentSlide = 0;
         function openPitchDeck() {
-            let slidesData = database['Slides'] || [];
-            let slides = [`<h1 style="color:#fbbf24">${database['Title']}</h1><p style="margin-top:20px; color:#cbd5e1;">Stratejik Aksiyon Planı</p>`];
-            const titles = ["1. Kök Sorun", "2. Yaklaşımımız", "3. Uygulama Adımları", "4. Beklenen Getiri"]; const colors = ["#ef4444", "#38bdf8", "#fbbf24", "#4ade80"];
-            slidesData.forEach((s, i) => { slides.push(`<h2 style="color:${colors[i%4]}">${titles[i]}</h2><p style="margin-top:20px; font-size:16px;">${s}</p>`); });
-            let html = ""; slides.forEach((s, i) => { html += `<div class="slide ${i===0?'active':''}" id="slide-${i}">${s}</div>`; });
-            document.getElementById('slide-container').innerHTML = html; currentSlide = 0;
-            let m = document.getElementById('pitch-modal'); m.style.display="flex"; setTimeout(()=>m.classList.add('show'), 10);
+            let slidesData = database['Slides'] || []; let slides = [`<h1 style="color:#fbbf24">${database['Title']}</h1><p style="margin-top:20px; color:#cbd5e1;">Stratejik Aksiyon Planı</p>`]; const titles = ["1. Kök Sorun", "2. Yaklaşımımız", "3. Uygulama Adımları", "4. Beklenen Getiri"]; const colors = ["#ef4444", "#38bdf8", "#fbbf24", "#4ade80"]; slidesData.forEach((s, i) => { slides.push(`<h2 style="color:${colors[i%4]}">${titles[i]}</h2><p style="margin-top:20px; font-size:16px;">${s}</p>`); }); let html = ""; slides.forEach((s, i) => { html += `<div class="slide ${i===0?'active':''}" id="slide-${i}">${s}</div>`; }); document.getElementById('slide-container').innerHTML = html; currentSlide = 0; let m = document.getElementById('pitch-modal'); m.style.display="flex"; setTimeout(()=>m.classList.add('show'), 10);
         }
         function changeSlide(dir) { let slides = document.querySelectorAll('.slide'); slides[currentSlide].classList.remove('active'); currentSlide += dir; if(currentSlide < 0) currentSlide = slides.length - 1; if(currentSlide >= slides.length) currentSlide = 0; slides[currentSlide].classList.add('active'); }
 
         function rejectWithShredder() {
-            document.getElementById('ui-status').innerText = "KARAR REDDEDİLDİ. Dosya imha ediliyor..."; document.getElementById('ui-vote-title').innerText = "Plan Çöpe Atıldı.";
-            ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true); ['btn-pitch','btn-pdf'].forEach(id => document.getElementById(id).style.display = 'none');
-            ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.remove('visible'));
-            uploadedFiles = []; renderUploadedFiles();
-            document.getElementById('shredder-box').classList.add('active'); let masterDoc = document.getElementById('doc-master'); masterDoc.classList.add('shredding');
-            setTimeout(() => { masterDoc.classList.remove('visible'); masterDoc.classList.remove('shredding'); document.getElementById('shredder-box').classList.remove('active'); document.getElementById('ui-status').innerText = "Masa Temizlendi. YENİ GÜNDEM BEKLENİYOR."; }, 1800);
+            document.getElementById('ui-status').innerText = "KARAR REDDEDİLDİ. Dosya imha ediliyor..."; document.getElementById('ui-vote-title').innerText = "Plan Çöpe Atıldı."; ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true); ['btn-pitch','btn-pdf'].forEach(id => document.getElementById(id).style.display = 'none'); ['doc-openai', 'doc-gemini', 'doc-claude'].forEach(id => document.getElementById(id).classList.remove('visible')); uploadedFiles = []; renderUploadedFiles(); document.getElementById('shredder-box').classList.add('active'); let masterDoc = document.getElementById('doc-master'); masterDoc.classList.add('shredding'); setTimeout(() => { masterDoc.classList.remove('visible'); masterDoc.classList.remove('shredding'); document.getElementById('shredder-box').classList.remove('active'); document.getElementById('ui-status').innerText = "Masa Temizlendi. YENİ GÜNDEM BEKLENİYOR."; }, 1800);
         }
 
         function openUploadedDoc(index) { const file = uploadedFiles[index]; document.getElementById('modal-title').style.color = "#38bdf8"; document.getElementById('modal-title').innerText = "Eklenen Dosya: " + file.name; document.getElementById('modal-text').innerText = file.text.substring(0, 5000) + (file.text.length > 5000 ? "\n\n...[Devamı Kesildi]" : ""); let m=document.getElementById('doc-modal'); m.style.display="flex"; setTimeout(()=>m.classList.add('show'),10); }
 
         function openDoc(owner) {
             let content = database[owner];
-            if(owner === 'Ortak Karar') {
-                document.getElementById('modal-title').style.color = "#fbbf24"; document.getElementById('modal-title').innerText = "Ortak Karar Dosyası";
-                let textToType = "MÜNAZARA:\n" + database['Münazara'] + "\n\nAKSİYON PLANI:\n" + content;
-                let el = document.getElementById('modal-text'); el.innerHTML = ""; let i = 0; clearInterval(window.typeInterval); 
-                window.typeInterval = setInterval(() => { if(i < textToType.length) { el.innerHTML += textToType.charAt(i) === '\n' ? '<br>' : textToType.charAt(i); i++; } else { clearInterval(window.typeInterval); } }, 30); 
-            } else { document.getElementById('modal-title').style.color = "#fff"; document.getElementById('modal-text').innerText = content; document.getElementById('modal-title').innerText = owner + " Dosyası"; }
+            if(owner === 'Ortak Karar') { document.getElementById('modal-title').style.color = "#fbbf24"; document.getElementById('modal-title').innerText = "Ortak Karar Dosyası"; let textToType = "MÜNAZARA:\n" + database['Münazara'] + "\n\nAKSİYON PLANI:\n" + content; let el = document.getElementById('modal-text'); el.innerHTML = ""; let i = 0; clearInterval(window.typeInterval); window.typeInterval = setInterval(() => { if(i < textToType.length) { el.innerHTML += textToType.charAt(i) === '\n' ? '<br>' : textToType.charAt(i); i++; } else { clearInterval(window.typeInterval); } }, 30); } 
+            else { document.getElementById('modal-title').style.color = "#fff"; document.getElementById('modal-text').innerText = content; document.getElementById('modal-title').innerText = owner + " Dosyası"; }
             let m = document.getElementById('doc-modal'); m.style.display="flex"; setTimeout(()=>m.classList.add('show'),10);
         }
         function closeModal(id) { let m = document.getElementById(id); m.classList.remove('show'); setTimeout(()=>m.style.display="none", 300); clearInterval(window.typeInterval); }
-
         function requestRevision() { const note = prompt("Hangi kısmı düzeltelim?"); if(note) startProcess(true, note); }
+        function downloadPDF() { document.getElementById('pdf-date').innerText = new Date().toLocaleDateString('tr-TR'); document.getElementById('pdf-topic').innerText = database['Topic']; document.getElementById('pdf-title').innerText = database['Title']; document.getElementById('pdf-decision').innerText = database['Ortak Karar']; const element = document.getElementById('pdf-container'); element.style.display = 'block'; html2pdf().from(element).set({ margin: 1, filename: 'Proje_Raporu.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).save().then(() => element.style.display = 'none'); }
 
-        function downloadPDF() {
-            document.getElementById('pdf-date').innerText = new Date().toLocaleDateString('tr-TR');
-            document.getElementById('pdf-topic').innerText = database['Topic'];
-            document.getElementById('pdf-title').innerText = database['Title'];
-            document.getElementById('pdf-decision').innerText = database['Ortak Karar'];
-            const element = document.getElementById('pdf-container'); element.style.display = 'block';
-            html2pdf().from(element).set({ margin: 1, filename: 'Proje_Raporu.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).save().then(() => element.style.display = 'none');
-        }
-
-        /* --- HARİKA KLASÖRE UÇMA ANİMASYONU --- */
+        /* --- ONAYLAMA VE UÇMA ANİMASYONU --- */
         function animateApprovalToFolder() {
-            let btn = document.getElementById('btn-projects-nav');
-            let btnRect = btn.getBoundingClientRect();
-            let flyDoc = document.createElement('div');
-            flyDoc.innerHTML = "📁"; flyDoc.style.position = "fixed"; flyDoc.style.left = "50%"; flyDoc.style.top = "50%"; flyDoc.style.fontSize = "50px"; flyDoc.style.transform = "translate(-50%, -50%) scale(1.5)"; flyDoc.style.zIndex = "2147483647"; flyDoc.style.transition = "all 0.8s cubic-bezier(0.25, 1, 0.5, 1)"; flyDoc.style.textShadow = "0 0 30px #fbbf24";
-            document.body.appendChild(flyDoc);
-
-            requestAnimationFrame(() => {
-                setTimeout(() => {
-                    flyDoc.style.left = (btnRect.left + (btnRect.width / 2)) + "px"; flyDoc.style.top = (btnRect.top + (btnRect.height / 2)) + "px"; flyDoc.style.transform = "translate(-50%, -50%) scale(0.1)"; flyDoc.style.opacity = "0";
-                }, 50);
-            });
-
-            setTimeout(() => {
-                flyDoc.remove();
-                btn.style.background = "#38bdf8"; btn.style.color = "#000"; btn.style.transform = "scale(1.1)"; btn.style.boxShadow = "0 0 20px #38bdf8";
-                setTimeout(() => { btn.style.background = "rgba(56, 189, 248, 0.1)"; btn.style.color = "var(--c-user)"; btn.style.transform = "scale(1)"; btn.style.boxShadow = "none"; }, 400);
-            }, 850);
+            let btn = document.getElementById('btn-projects-nav'); let btnRect = btn.getBoundingClientRect(); let flyDoc = document.createElement('div');
+            flyDoc.innerHTML = "📁"; flyDoc.style.position = "fixed"; flyDoc.style.left = "50%"; flyDoc.style.top = "50%"; flyDoc.style.fontSize = "50px"; flyDoc.style.transform = "translate(-50%, -50%) scale(1.5)"; flyDoc.style.zIndex = "2147483647"; flyDoc.style.transition = "all 0.8s cubic-bezier(0.25, 1, 0.5, 1)"; flyDoc.style.textShadow = "0 0 30px #fbbf24"; document.body.appendChild(flyDoc);
+            requestAnimationFrame(() => { setTimeout(() => { flyDoc.style.left = (btnRect.left + (btnRect.width / 2)) + "px"; flyDoc.style.top = (btnRect.top + (btnRect.height / 2)) + "px"; flyDoc.style.transform = "translate(-50%, -50%) scale(0.1)"; flyDoc.style.opacity = "0"; }, 50); });
+            setTimeout(() => { flyDoc.remove(); btn.style.background = "#38bdf8"; btn.style.color = "#000"; btn.style.transform = "scale(1.1)"; btn.style.boxShadow = "0 0 20px #38bdf8"; setTimeout(() => { btn.style.background = "rgba(56, 189, 248, 0.1)"; btn.style.color = "var(--c-user)"; btn.style.transform = "scale(1)"; btn.style.boxShadow = "none"; }, 400); }, 850);
         }
 
-        /* --- ONAYLAMA (UÇMA ANİMASYONU TETİKLENİR) --- */
         function userVote(isYes) {
             if(isYes) {
-                document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 400);
-                let s = document.getElementById('stamp'); s.classList.add('animate'); setTimeout(() => s.classList.remove('animate'), 2000);
-                document.getElementById('ui-status').innerText = "KARAR ONAYLANDI. PROJELERE AKTARILIYOR...";
-                document.getElementById('btn-pdf').style.display = 'inline-block'; 
-                ['btn-pitch'].forEach(id => document.getElementById(id).style.display = 'none');
-                
-                document.getElementById('doc-master').classList.remove('visible'); 
-                setTimeout(() => { animateApprovalToFolder(); }, 500); 
-
-                saveToProjects();
+                document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 400); let s = document.getElementById('stamp'); s.classList.add('animate'); setTimeout(() => s.classList.remove('animate'), 2000); document.getElementById('ui-status').innerText = "KARAR ONAYLANDI. PROJELERE AKTARILIYOR..."; document.getElementById('btn-pdf').style.display = 'inline-block'; ['btn-pitch'].forEach(id => document.getElementById(id).style.display = 'none'); document.getElementById('doc-master').classList.remove('visible'); 
+                setTimeout(() => { animateApprovalToFolder(); }, 500); saveToProjects();
             }
-            uploadedFiles = []; renderUploadedFiles();
-            ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
+            uploadedFiles = []; renderUploadedFiles(); ['btn-y','btn-n','btn-rev'].forEach(id => document.getElementById(id).disabled = true);
         }
 
-        /* --- ÇÖKME KORUMALI PROJE KAYIT/AÇMA --- */
+        /* --- PROJELERİ KAYDETME VE OKUMA --- */
         function saveToProjects() {
-            let history = [];
-            try { let parsed = JSON.parse(localStorage.getItem('aiBoardProjects')); if(Array.isArray(parsed)) history = parsed; } catch(e) {}
+            let history = []; try { let parsed = JSON.parse(localStorage.getItem('aiBoardProjects')); if(Array.isArray(parsed)) history = parsed; } catch(e) {}
             let safeTopic = database['Topic'] || "Manuel Gündem"; let safeTitle = database['Title'] || "Sentez Raporu"; let safeDecision = database['Ortak Karar'] || "Sisteme veri işlendi.";
-            history.unshift({ date: new Date().toLocaleString('tr-TR'), topic: safeTopic, title: safeTitle, decision: safeDecision });
-            localStorage.setItem('aiBoardProjects', JSON.stringify(history));
+            history.unshift({ date: new Date().toLocaleString('tr-TR'), topic: safeTopic, title: safeTitle, decision: safeDecision }); localStorage.setItem('aiBoardProjects', JSON.stringify(history));
         }
 
         function openProjects() {
@@ -773,90 +540,249 @@
         }
 
         // ==============================================================================
-        // --- SENİN İSTEDİĞİN GERÇEK 3D (THREE.JS) OYUN MOTORU ENTEGRASYONU ---
+        // --- SENİN YENİ İSTEDİĞİN GELİŞMİŞ 3D OYUN MOTORU (PROFESYONEL BİNA VE ODALAR) ---
         // ==============================================================================
         let scene, camera, renderer, controls, raycaster, mouse;
-        let is3DInitialized = false; let isInsideBuilding = false; let activeProject = null;
+        let is3DInitialized = false; 
+        let currentRoom = null; 
+        let activeProject = null;
 
-        function createTextTexture(text, bgColor, textColor) {
-            const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512; const ctx = canvas.getContext('2d');
-            ctx.fillStyle = bgColor; ctx.fillRect(0, 0, 512, 512);
-            ctx.fillStyle = textColor; ctx.font = 'bold 70px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(text, 256, 256); return new THREE.CanvasTexture(canvas);
+        function createTextTexture(text, bgColor, textColor, isSmall = false) {
+            const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = isSmall ? 128 : 512; const ctx = canvas.getContext('2d');
+            ctx.fillStyle = bgColor; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = textColor; ctx.font = isSmall ? 'bold 60px Arial' : 'bold 70px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(text, canvas.width/2, canvas.height/2); return new THREE.CanvasTexture(canvas);
+        }
+
+        function createDoorWithRoom(x, z, rotY, doorName, titleText, colorHex) {
+            const group = new THREE.Group();
+            group.position.set(x, 0, z);
+            group.rotation.y = rotY;
+
+            // 1. Kapı Kasası (Door Frame)
+            const frameGeo = new THREE.BoxGeometry(6.4, 9.4, 0.5);
+            const frameMat = new THREE.MeshStandardMaterial({color: 0x111111, metalness: 0.8});
+            const frame = new THREE.Mesh(frameGeo, frameMat);
+            frame.position.y = 4.7;
+            group.add(frame);
+
+            // 2. Kapı Paneli (Gerçekçi Kapı)
+            const doorGeo = new THREE.BoxGeometry(6, 9, 0.6);
+            const doorMat = new THREE.MeshStandardMaterial({color: 0x1e1e1e, roughness: 0.4});
+            const door = new THREE.Mesh(doorGeo, doorMat);
+            door.position.y = 4.5;
+            door.name = doorName; // Tıklama tespiti için
+            group.add(door);
+
+            // Kapı Kolu
+            const handleGeo = new THREE.BoxGeometry(0.2, 1.5, 0.8);
+            const handleMat = new THREE.MeshStandardMaterial({color: 0xaaaaaa, metalness: 1});
+            const handle = new THREE.Mesh(handleGeo, handleMat);
+            handle.position.set(2.5, 4.5, 0);
+            door.add(handle);
+
+            // 3. Kapı Tabelası (Küçük Tabela)
+            const signGeo = new THREE.PlaneGeometry(4, 1);
+            const signTex = createTextTexture(titleText, colorHex, "#ffffff", true);
+            const signMat = new THREE.MeshBasicMaterial({map: signTex});
+            const sign = new THREE.Mesh(signGeo, signMat);
+            sign.position.set(0, 10.5, 0.31);
+            group.add(sign);
+
+            // 4. Odanın İçi (Masa ve AI Çekirdeği) - Kapının arkasında yer alır
+            const roomDecor = new THREE.Group();
+            roomDecor.position.set(0, 0, -15); // Kapıdan 15 birim geride
+
+            // Masa
+            const deskGeo = new THREE.BoxGeometry(8, 3, 4);
+            const deskMat = new THREE.MeshStandardMaterial({color: 0x0f1117, metalness: 0.5});
+            const desk = new THREE.Mesh(deskGeo, deskMat);
+            desk.position.y = 1.5;
+            roomDecor.add(desk);
+
+            // AI Avatar (Holografik Çekirdek)
+            const aiGeo = new THREE.OctahedronGeometry(1.5, 0);
+            const aiMat = new THREE.MeshStandardMaterial({color: new THREE.Color(colorHex), emissive: new THREE.Color(colorHex), emissiveIntensity: 0.8, wireframe: true});
+            const aiAvatar = new THREE.Mesh(aiGeo, aiMat);
+            aiAvatar.position.set(0, 6, -2);
+            aiAvatar.userData = { isAvatar: true }; // Animasyon için
+            roomDecor.add(aiAvatar);
+
+            // Odanın iç ışığı (Avatardan yayılan)
+            const aiLight = new THREE.PointLight(new THREE.Color(colorHex), 1, 20);
+            aiLight.position.set(0, 6, -2);
+            roomDecor.add(aiLight);
+
+            group.add(roomDecor);
+            scene.add(group);
         }
 
         function init3DEngine() {
             if (is3DInitialized) return;
             const container = document.getElementById('webgl-container');
             
-            scene = new THREE.Scene(); scene.background = new THREE.Color(0x020617); scene.fog = new THREE.Fog(0x020617, 10, 100);
+            scene = new THREE.Scene(); 
+            scene.background = new THREE.Color(0x010205); 
+            scene.fog = new THREE.Fog(0x010205, 10, 150);
+
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(window.innerWidth, window.innerHeight); container.appendChild(renderer.domElement);
+            renderer = new THREE.WebGLRenderer({ antialias: true }); 
+            renderer.setSize(window.innerWidth, window.innerHeight); 
+            container.appendChild(renderer.domElement);
 
-            controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.05; controls.enablePan = false; controls.enableZoom = false;
+            controls = new THREE.OrbitControls(camera, renderer.domElement); 
+            controls.enableDamping = true; controls.dampingFactor = 0.05; 
+            controls.enablePan = false; controls.enableZoom = false;
 
-            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-            const pointLight = new THREE.PointLight(0x38bdf8, 2, 50); pointLight.position.set(0, 10, 15); scene.add(pointLight);
-            const insideLight = new THREE.PointLight(0xffffff, 1, 30); insideLight.position.set(0, 5, 0); scene.add(insideLight);
+            // Genel Işıklandırma
+            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+            const pointLight = new THREE.PointLight(0x38bdf8, 1, 100); 
+            pointLight.position.set(0, 15, 10); 
+            scene.add(pointLight);
 
-            scene.add(new THREE.GridHelper(200, 100, 0x38bdf8, 0x1f222e));
+            // Zemin
+            scene.add(new THREE.GridHelper(200, 100, 0x38bdf8, 0x0f1117));
 
-            const bGeo = new THREE.BoxGeometry(30, 15, 30);
-            const building = new THREE.Mesh(bGeo, new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9, side: THREE.DoubleSide }));
-            building.position.y = 7.5; scene.add(building);
+            // --- PROFESYONEL BİNA (DIŞ KABUK) ---
+            // Yarı saydam, yüksek teknolojili bir kabuk
+            const bGeo = new THREE.BoxGeometry(40, 20, 50);
+            const bMat = new THREE.MeshPhysicalMaterial({ color: 0x0a0b10, transparent: true, opacity: 0.9, roughness: 0.1, metalness: 0.8, side: THREE.DoubleSide });
+            const building = new THREE.Mesh(bGeo, bMat);
+            building.position.y = 10; 
+            scene.add(building);
 
-            // GİRİŞ KAPISI
-            const doorGeo = new THREE.BoxGeometry(6, 8, 1);
-            const entranceDoor = new THREE.Mesh(doorGeo, new THREE.MeshStandardMaterial({ map: createTextTexture("GİRİŞ", "#10a37f", "#ffffff"), emissive: 0x002211 }));
-            entranceDoor.position.set(0, 4, 15.1); entranceDoor.name = "DOOR_ENTRANCE"; scene.add(entranceDoor);
+            // Bina Çizgileri (Neon Hatlar)
+            const edges = new THREE.EdgesGeometry(bGeo);
+            const lineMat = new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.5 });
+            const wireframe = new THREE.LineSegments(edges, lineMat);
+            wireframe.position.y = 10;
+            scene.add(wireframe);
 
-            // İÇ ODALAR
-            const innerDoorGeo = new THREE.PlaneGeometry(8, 10);
-            const ceoDoor = new THREE.Mesh(innerDoorGeo, new THREE.MeshBasicMaterial({ map: createTextTexture("👑 CEO", "#38bdf8", "#000") }));
-            ceoDoor.position.set(0, 5, -14.9); ceoDoor.name = "ROOM_CEO"; scene.add(ceoDoor);
+            // --- ANA GİRİŞ KAPISI ---
+            const mainDoorGeo = new THREE.BoxGeometry(8, 12, 1);
+            const mainDoorTex = createTextTexture("SİSTEME GİR", "#10a37f", "#ffffff", true);
+            const mainDoorMat = new THREE.MeshStandardMaterial({ map: mainDoorTex, emissive: 0x002211, roughness: 0.2 });
+            const mainDoor = new THREE.Mesh(mainDoorGeo, mainDoorMat);
+            mainDoor.position.set(0, 6, 25.1); // Binanın en önü
+            mainDoor.name = "DOOR_ENTRANCE"; 
+            scene.add(mainDoor);
 
-            const advDoor = new THREE.Mesh(innerDoorGeo, new THREE.MeshBasicMaterial({ map: createTextTexture("🧠 DANIŞMAN", "#d97757", "#fff") }));
-            advDoor.position.set(-14.9, 5, 0); advDoor.rotation.y = Math.PI / 2; advDoor.name = "ROOM_ADVISOR"; scene.add(advDoor);
+            // --- İÇ ODALAR VE MASALAR (createDoorWithRoom fonksiyonu ile) ---
+            // CEO Odası (Tam Karşıda)
+            createDoorWithRoom(0, -10, 0, "ROOM_CEO", "CEO OFİSİ", "#38bdf8");
+            
+            // Danışman Odası (Solda)
+            createDoorWithRoom(-15, 5, Math.PI / 2, "ROOM_ADVISOR", "DANIŞMAN", "#d97757");
+            
+            // Kurul Odası (Sağda)
+            createDoorWithRoom(15, 5, -Math.PI / 2, "ROOM_BOARD", "KURUL ODASI", "#fbbf24");
 
-            const boardDoor = new THREE.Mesh(innerDoorGeo, new THREE.MeshBasicMaterial({ map: createTextTexture("⚖️ KURUL", "#fbbf24", "#000") }));
-            boardDoor.position.set(14.9, 5, 0); boardDoor.rotation.y = -Math.PI / 2; boardDoor.name = "ROOM_BOARD"; scene.add(boardDoor);
-
+            // Tıklama tespiti
             raycaster = new THREE.Raycaster(); mouse = new THREE.Vector2();
-            window.addEventListener('pointerdown', onDocumentPointerDown, false); window.addEventListener('resize', () => { if(!camera) return; camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }, false);
+            window.addEventListener('pointerdown', onDocumentPointerDown, false); 
+            window.addEventListener('resize', () => { if(!camera) return; camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }, false);
 
             is3DInitialized = true; animate3D();
         }
 
         function onDocumentPointerDown(event) {
             if(document.getElementById('webgl-container').style.display === "none") return;
-            if(document.getElementById('room-ui').style.display === "flex") return; 
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            if(document.getElementById('room-ui').style.display === "flex") return; // Terminal açıksa 3D tıklamayı iptal et
+            
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1; 
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            
             raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(scene.children);
+            const intersects = raycaster.intersectObjects(scene.children, true); // true ile iç grupları da tara
+            
             if (intersects.length > 0) {
-                const objName = intersects[0].object.name;
-                if (objName === "DOOR_ENTRANCE" && !isInsideBuilding) flyInsideBuilding();
-                else if (objName.startsWith("ROOM_") && isInsideBuilding) open3DRoomModal(objName);
+                let objectName = intersects[0].object.name;
+                
+                if (objectName === "DOOR_ENTRANCE" && currentRoom === null) {
+                    enterHallway();
+                } else if (objectName.startsWith("ROOM_") && currentRoom === "hallway") {
+                    enterSpecificRoom(objectName);
+                }
             }
         }
 
-        function flyInsideBuilding() {
+        function enterHallway() {
             document.getElementById('hud-instruction').innerText = "İçeri giriliyor...";
-            new TWEEN.Tween(camera.position).to({ x: 0, y: 5, z: 0 }, 2000).easing(TWEEN.Easing.Cubic.InOut).start();
-            new TWEEN.Tween(controls.target).to({ x: 0, y: 5, z: -10 }, 2000).easing(TWEEN.Easing.Cubic.InOut).onComplete(() => { isInsideBuilding = true; document.getElementById('hud-instruction').innerText = "İçeridesin. Etrafa bakmak için ekranı kaydır. Odalara girmek için kapılara tıkla."; }).start();
+            // Kamerayı ana kapıdan içeri koridorun ortasına uçur
+            new TWEEN.Tween(camera.position).to({ x: 0, y: 6, z: 5 }, 2000).easing(TWEEN.Easing.Cubic.InOut).start();
+            new TWEEN.Tween(controls.target).to({ x: 0, y: 6, z: -10 }, 2000).easing(TWEEN.Easing.Cubic.InOut).onComplete(() => { 
+                currentRoom = "hallway"; 
+                document.getElementById('hud-instruction').innerText = "Koridordasınız. Etrafa bakın ve girmek istediğiniz odanın kapısına tıklayın."; 
+            }).start();
         }
 
-        function open3DRoomModal(roomName) {
-            let ui = document.getElementById('room-ui'); let title = document.getElementById('room-ui-title'); let btn = document.getElementById('room-btn-send');
-            if (roomName === "ROOM_CEO") { title.innerText = "CEO Ofisi (Senin Odan)"; title.style.color = "#38bdf8"; btn.style.background = "#38bdf8"; }
-            else if (roomName === "ROOM_ADVISOR") { title.innerText = "Danışman Odası"; title.style.color = "#d97757"; btn.style.background = "#d97757"; }
-            else if (roomName === "ROOM_BOARD") { title.innerText = "Toplantı Kurulu"; title.style.color = "#fbbf24"; btn.style.background = "#fbbf24"; }
-            document.getElementById('room-ui-input').value = ""; ui.style.display = "flex";
-        }
-        function close3DRoom() { document.getElementById('room-ui').style.display = "none"; }
-        function sendDataToRoom() { let val = document.getElementById('room-ui-input').value; if(!val.trim()) return alert("Bir şeyler yazın."); alert(`[SİSTEM]: Veri "${activeProject.title}" projesi için entegre edildi.`); close3DRoom(); }
+        function enterSpecificRoom(roomName) {
+            let targetPos = {x: 0, y: 6, z: 0};
+            let lookPos = {x: 0, y: 6, z: 0};
+            let roomColor = "";
+            let roomTitle = "";
 
-        function animate3D(time) { requestAnimationFrame(animate3D); TWEEN.update(time); controls.update(); renderer.render(scene, camera); }
+            if(roomName === "ROOM_CEO") {
+                targetPos = {x: 0, y: 6, z: -16}; // Kapıyı geçip içeri gir
+                lookPos = {x: 0, y: 6, z: -25}; // Masaya bak
+                roomTitle = "CEO Ofisi (Senin Odan)"; roomColor = "#38bdf8";
+            } else if(roomName === "ROOM_ADVISOR") {
+                targetPos = {x: -21, y: 6, z: 5};
+                lookPos = {x: -30, y: 6, z: 5}; 
+                roomTitle = "Danışman Odası"; roomColor = "#d97757";
+            } else if(roomName === "ROOM_BOARD") {
+                targetPos = {x: 21, y: 6, z: 5};
+                lookPos = {x: 30, y: 6, z: 5}; 
+                roomTitle = "Kurul Odası"; roomColor = "#fbbf24";
+            }
+
+            document.getElementById('hud-instruction').innerText = "Odaya giriliyor...";
+            
+            // Kamerayı odanın içine uçur
+            new TWEEN.Tween(camera.position).to(targetPos, 1500).easing(TWEEN.Easing.Quadratic.InOut).start();
+            new TWEEN.Tween(controls.target).to(lookPos, 1500).easing(TWEEN.Easing.Quadratic.InOut).onComplete(() => {
+                currentRoom = roomName;
+                document.getElementById('hud-instruction').innerText = "Odadasınız.";
+                
+                // Odaya girince Terminal Arayüzünü Aç
+                let ui = document.getElementById('room-ui'); 
+                document.getElementById('room-ui-title').innerText = roomTitle; 
+                document.getElementById('room-ui-title').style.color = roomColor;
+                document.getElementById('room-btn-send').style.background = roomColor;
+                document.getElementById('room-ui-input').value = ""; 
+                ui.style.display = "flex";
+            }).start();
+        }
+
+        function exitRoom3D() {
+            // Terminali kapat ve koridora geri çık
+            document.getElementById('room-ui').style.display = "none";
+            enterHallway(); // Kamerayı tekrar koridora alır
+        }
+
+        function sendDataToRoom() { 
+            let val = document.getElementById('room-ui-input').value; 
+            if(!val.trim()) return alert("Lütfen komutunuzu girin."); 
+            alert(`[SİSTEM]: Veriler işlendi. AI Avatar bu bilgiyi "${activeProject.title}" projesine başarıyla entegre etti.`); 
+            // Veri gönderdikten sonra terminalde kalabilir veya çıkabilirsin. Şimdilik temizliyoruz.
+            document.getElementById('room-ui-input').value = "";
+        }
+
+        function animate3D(time) { 
+            requestAnimationFrame(animate3D); 
+            TWEEN.update(time); 
+            controls.update(); 
+            
+            // AI Avatarları (Hologramları) Döndür
+            scene.traverse((object) => {
+                if (object.userData.isAvatar) {
+                    object.rotation.y += 0.02;
+                    object.rotation.x += 0.01;
+                }
+            });
+            
+            renderer.render(scene, camera); 
+        }
 
         function enter3DWorld(index) {
             closeModal('projects-modal');
@@ -869,14 +795,19 @@
             document.getElementById('ui-3d-overlay').style.display = "flex";
 
             init3DEngine();
-            camera.position.set(0, 5, 35); controls.target.set(0, 5, 15); controls.update(); isInsideBuilding = false;
+            
+            // Kamerayı dışarıya, binanın önüne al
+            camera.position.set(0, 10, 45); 
+            controls.target.set(0, 6, 25); 
+            controls.update(); 
+            currentRoom = null;
             document.getElementById('hud-instruction').innerText = "Ekrana basılı tutarak etrafa bak. İçeri girmek için GİRİŞ kapısına tıkla.";
         }
 
         function exit3DWorld() {
             document.getElementById('webgl-container').style.display = "none";
             document.getElementById('ui-3d-overlay').style.display = "none";
-            close3DRoom();
+            document.getElementById('room-ui').style.display = "none";
             document.getElementById('main-app').style.display = "flex";
         }
     </script>
