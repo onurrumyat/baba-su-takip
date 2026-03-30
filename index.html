@@ -183,46 +183,39 @@
         #pdf-container { display: none; background: white; color: black; padding: 40px; font-family: Arial, sans-serif; }
 
         /* ============================================================ */
-        /* --- YENİ EKLENEN: 3D VIRTUAL OFFICE (SİMÜLASYON) SİSTEMİ --- */
+        /* --- 3D VIRTUAL OFFICE (SİMÜLASYON) SİSTEMİ CSS --- */
         /* ============================================================ */
         
         .vo-overlay { position: fixed; inset: 0; background: #000; z-index: 3000; display: none; flex-direction: column; opacity: 0; transition: opacity 0.5s; font-family: 'Segoe UI', system-ui, sans-serif;}
         .vo-overlay.show { display: flex; opacity: 1; }
         
-        /* Simülasyon Üst Bilgi */
         .vo-header { padding: 15px 25px; background: rgba(10, 11, 16, 0.9); backdrop-filter: blur(10px); color: var(--c-user); border-bottom: 1px solid rgba(56, 189, 248, 0.2); display: flex; justify-content: space-between; align-items: center; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.5);}
         .vo-header h2 { font-size: 18px; text-transform: uppercase; letter-spacing: 1px; margin: 0;}
         .vo-close { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s;}
         .vo-close:hover { background: #ef4444; color: white; }
         
-        /* 3D Panoramik Kaydırma Alanı */
         .vo-viewport { flex: 1; perspective: 1200px; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; display: flex; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
         .vo-viewport::-webkit-scrollbar { display: none; }
         
-        /* Odalar/Duvarlar */
         .vo-wall { min-width: 100vw; height: 100%; display: flex; justify-content: center; align-items: center; scroll-snap-align: center; position: relative; transform-style: preserve-3d; border-right: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 0 150px rgba(0,0,0,0.9);}
         
-        /* Duvar Arkaplanları (Siberpunk/Ofis Hissi) */
         .vo-wall-advisor { background: radial-gradient(circle at center, #1e1b4b 0%, #020617 100%); }
         .vo-wall-center { background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); }
         .vo-wall-ceo { background: radial-gradient(circle at center, #312e81 0%, #020617 100%); }
         
-        /* Etkileşimli Kapılar/Objeler */
         .vo-door-container { transform: translateZ(50px); text-align: center; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
         .vo-door-container:hover { transform: translateZ(120px) scale(1.05); }
         
         .vo-door { width: 200px; height: 350px; border: 2px solid rgba(255,255,255,0.1); border-radius: 10px 10px 0 0; background: rgba(255,255,255,0.03); backdrop-filter: blur(15px); position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: inset 0 0 40px rgba(0,0,0,0.8), 0 20px 40px rgba(0,0,0,0.9); transition: 0.3s;}
         .vo-door:hover { background: rgba(255,255,255,0.08); box-shadow: inset 0 0 40px rgba(0,0,0,0.6), 0 20px 50px rgba(0,0,0,1); }
-        .vo-door::after { content:''; position: absolute; right: 15px; top: 50%; width: 8px; height: 35px; background: rgba(255,255,255,0.3); border-radius: 4px; box-shadow: 2px 2px 5px rgba(0,0,0,0.5);} /* Kapı Kolu */
+        .vo-door::after { content:''; position: absolute; right: 15px; top: 50%; width: 8px; height: 35px; background: rgba(255,255,255,0.3); border-radius: 4px; box-shadow: 2px 2px 5px rgba(0,0,0,0.5);} 
         
         .vo-label { font-size: 20px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-top: 25px; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 5px; border: 1px solid;}
         
-        /* Navigasyon Okları */
         .vo-nav { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; z-index: 10; }
         .vo-nav-btn { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 12px 25px; border-radius: 30px; cursor: pointer; backdrop-filter: blur(5px); transition: 0.3s; font-weight: bold; text-transform: uppercase; font-size: 12px; letter-spacing: 1px;}
         .vo-nav-btn:hover { background: var(--c-user); color: #000; border-color: var(--c-user); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(56, 189, 248, 0.4);}
 
-        /* Odanın İçi (Veri Yükleme Terminali) */
         .vo-room-modal { position: absolute; inset: 0; background: rgba(10, 11, 16, 0.98); z-index: 20; display: none; flex-direction: column; padding: 30px; align-items: center; justify-content: center; transform: scale(0.95); opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .vo-room-modal.active { display: flex; transform: scale(1); opacity: 1; }
         
@@ -666,29 +659,51 @@
         }
         function closeModal(id) { document.getElementById(id).classList.remove('show'); clearInterval(window.typeInterval); }
 
+        /* --- ÇÖKME KORUMALI PROJE KAYIT FONKSİYONU --- */
         function saveToProjects() {
-            let history = JSON.parse(localStorage.getItem('aiBoardProjects')) || [];
-            history.unshift({ date: new Date().toLocaleString('tr-TR'), topic: database['Topic'], title: database['Title'], decision: database['Ortak Karar'] });
+            let history = [];
+            try { history = JSON.parse(localStorage.getItem('aiBoardProjects')) || []; } catch(e) {}
+            
+            let safeTopic = database['Topic'] || "Konu belirtilmedi";
+            let safeTitle = database['Title'] || "Sentez Raporu";
+            let safeDecision = database['Ortak Karar'] || "Karar verisi bulunamadı.";
+            
+            history.unshift({ date: new Date().toLocaleString('tr-TR'), topic: safeTopic, title: safeTitle, decision: safeDecision });
             localStorage.setItem('aiBoardProjects', JSON.stringify(history));
         }
 
-        // --- GÜNCELLENEN: PROJELERİM GÖRÜNÜMÜ VE SİMÜLASYON ENTEGRASYONU ---
+        /* --- ÇÖKME KORUMALI PROJELERİ AÇMA FONKSİYONU --- */
         function openProjects() {
-            let history = JSON.parse(localStorage.getItem('aiBoardProjects')) || []; let html = "";
-            if(history.length === 0) html = "Henüz onaylanmış bir projeniz yok.";
-            else { 
+            let history = [];
+            try { 
+                history = JSON.parse(localStorage.getItem('aiBoardProjects')) || []; 
+            } catch(e) { 
+                history = []; 
+                localStorage.removeItem('aiBoardProjects'); 
+            }
+            
+            let html = "";
+            if(!history || history.length === 0) {
+                html = "Henüz onaylanmış bir projeniz yok.";
+            } else { 
                 history.forEach((item, index) => { 
+                    let safeTitle = item.title || "İsimsiz Proje";
+                    let safeTopic = item.topic || "Gündem Yok";
+                    let safeDate = item.date || "-";
+                    let safeDecision = item.decision ? item.decision.substring(0, 100) : "Karar metni mevcut değil.";
+
                     html += `<div class="project-item">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                    <div class="project-title" style="margin:0;">${item.title}</div>
+                                    <div class="project-title" style="margin:0;">${safeTitle}</div>
                                     <button class="projects-btn" style="background:var(--c-user); color:#000; border:none; box-shadow:0 0 10px rgba(56,189,248,0.4);" onclick="enterVirtualOffice(${index})">🏢 Ofise Gir</button>
                                 </div>
-                                <div class="project-date" style="font-size:11px; margin-bottom:5px;">🗓️ ${item.date} | 📌 ${item.topic}</div>
-                                <div style="font-size:12px; color:#cbd5e1;">${item.decision.substring(0, 100)}...</div>
+                                <div class="project-date" style="font-size:11px; margin-bottom:5px;">🗓️ ${safeDate} | 📌 ${safeTopic}</div>
+                                <div style="font-size:12px; color:#cbd5e1;">${safeDecision}...</div>
                             </div>`; 
                 }); 
             }
-            document.getElementById('projects-list').innerHTML = html; document.getElementById('projects-modal').classList.add('show');
+            document.getElementById('projects-list').innerHTML = html; 
+            document.getElementById('projects-modal').classList.add('show');
         }
 
         let currentActiveProject = null;
@@ -696,11 +711,10 @@
         function enterVirtualOffice(index) {
             let history = JSON.parse(localStorage.getItem('aiBoardProjects')) || [];
             currentActiveProject = history[index];
-            document.getElementById('vo-project-title').innerText = currentActiveProject.title;
+            document.getElementById('vo-project-title').innerText = currentActiveProject.title || "Proje";
             closeModal('projects-modal');
             document.getElementById('main-app').style.filter = "blur(10px)";
             document.getElementById('vo-overlay').classList.add('show');
-            // Başlangıçta ana kurula kaydır
             setTimeout(() => { scrollToWall('wall-center'); }, 100);
         }
 
@@ -752,11 +766,9 @@
         function submitRoomData() {
             const data = document.getElementById('room-input').value;
             if(!data.trim()) { alert("Lütfen bir veri girin."); return; }
-            let title = document.getElementById('room-title').innerText;
+            let title = currentActiveProject ? currentActiveProject.title : "Bu Proje";
             
-            // Burada API bağlantını tetikleyebilir veya arka plana veri atabilirsin.
-            // Şimdilik görsel bir simülasyon mesajı veriyoruz.
-            alert(`[SİSTEM MESAJI]: Veri başarıyla işleme alındı!\n\nYapay Zeka Kurmayları bu yeni bilgiyi "${currentActiveProject.title}" projesi için analiz havuzuna ekledi.`);
+            alert(`[SİSTEM MESAJI]: Veri başarıyla işleme alındı!\n\nYapay Zeka Kurmayları bu yeni bilgiyi "${title}" için analiz havuzuna ekledi.`);
             closeRoom();
         }
 
