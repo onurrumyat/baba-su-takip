@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: "Sadece POST metodu kabul edilir." });
 
-    const { topic, boardType, revisionNote, fileText, isCrisis, isNight, isLiveDebate, history, customPersona } = req.body;
+    const { topic, boardType, revisionNote, fileText, isNight, isLiveDebate, history } = req.body;
     if (!topic || topic.trim().length < 2) return res.status(400).json({ error: "Geçerli bir konu girmediniz." });
 
     const OPENAI_KEY = process.env.OPENAI_API_KEY;
@@ -10,19 +10,16 @@ export default async function handler(req, res) {
     if (!OPENAI_KEY || !CLAUDE_KEY) return res.status(500).json({ error: "API Anahtarları eksik." });
 
     try {
-        // --- 1. CANLI MÜZAKERE MODU (Voice Mode) ---
+        // --- 1. CANLI MÜZAKERE MODU ---
         if (isLiveDebate) {
             let chatHistory = history && history.length > 0 ? history.map(h => `${h.role.toUpperCase()}: ${h.text}`).join('\n') : "";
-            
-            // Eğer Özel Misafir seçildiyse, Claude yerine onun ismini kullanıyoruz.
-            let extraInstruction = customPersona ? `NOT: Masadaki 'Claude' koltuğunda şu an '${customPersona}' oturuyor. 'claude' kimliğiyle cevap üretirken TAMAMEN ${customPersona} gibi konuş, onun argümanlarını ve jargonunu kullan.` : "";
 
             const debateReq = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
                 body: JSON.stringify({
                     model: 'gpt-4o-mini', response_format: { type: "json_object" },
                     messages: [
-                        { role: "system", content: `Sen OpenAI, Claude ve Gemini modellerini yöneten bir zekasın. Kullanıcının söylediği konuya bu 3 farklı yapay zekanın SESLİ TARTIŞIYORMUŞ GİBİ kısa (1'er cümlelik), net cevaplar vermesini sağla. JSON Formatında dön: { "dialogue": [ {"speaker": "openai", "text": "..."}, {"speaker": "claude", "text": "..."}, {"speaker": "gemini", "text": "..."} ] } ${extraInstruction}` },
+                        { role: "system", content: `Sen OpenAI, Claude ve Gemini modellerini yöneten bir zekasın. Kullanıcının söylediği konuya bu 3 farklı yapay zekanın SESLİ TARTIŞIYORMUŞ GİBİ kısa (1'er cümlelik), net, YARATICI ve SIRA DIŞI taktikler vererek cevaplamasını sağla. Asla yuvarlak cümle kurmasınlar. JSON Formatında dön: { "dialogue": [ {"speaker": "openai", "text": "..."}, {"speaker": "claude", "text": "..."}, {"speaker": "gemini", "text": "..."} ] }` },
                         { role: "user", content: `GEÇMİŞ:\n${chatHistory}\n\nBAŞKAN DEDİ Kİ: "${topic}"\nCevap verin.` }
                     ]
                 })
@@ -32,58 +29,71 @@ export default async function handler(req, res) {
             return res.status(200).json({ liveDialogue: parsedDebate.dialogue });
         }
 
-        // --- 2. STANDART KURUL MODU (Karar Dosyaları ve Pitch Deck) ---
-        let r1, r2, r3;
-        
-        // YENİ: Özel Misafir Modu
-        if (boardType === 'custom' && customPersona) {
-            r1 = "Pragmatik CEO"; 
-            r2 = `${customPersona} (Tamamen bu kişinin üslubu, jargonu ve vizyonuyla konuş. Bu kişinin uzmanlık alanından örnekler ver.)`; 
-            r3 = "Veri Analisti";
-        } 
-        else if (boardType === 'hukuk') { r1 = "Siber Güvenlik Uzmanı"; r2 = "Şirket Avukatı"; r3 = "Mali Müşavir"; } 
-        else if (boardType === 'pazarlama') { r1 = "Growth Hacker"; r2 = "Tüketici Psikoloğu"; r3 = "Gerilla Pazarlamacı"; } 
-        else if (boardType === 'dahiler') { r1 = "Steve Jobs (Mükemmeliyetçi)"; r2 = "Sun Tzu (Stratejist)"; r3 = "Machiavelli (Politikacı)"; } 
-        else { r1 = "Acımasız CEO"; r2 = "Risk Avcısı"; r3 = "İnovasyon Dehası"; }
-
-        let toneCommand = isCrisis ? "DİKKAT: DEFCON 1 KRİZ MODU! Kurumsal jargonu bırak. Kanamayı anında durduracak acil durum taktikleri ver." : (isNight ? "Gece mesaisindeyiz. Dilini samimi, felsefi ve yoldaşça bir tona çek." : "");
+        // --- 2. STANDART KURUL MODU (GELİŞMİŞ PROMPT MÜHENDİSLİĞİ) ---
+        let toneCommand = isNight ? "Gece mesaisindeyiz. Dilini samimi, felsefi ve yoldaşça bir tona çek ancak kararlar çok keskin olsun." : "";
         let finalContext = `Gündem: ${topic}\n${toneCommand}`;
         
         if (fileText) finalContext += `\n\nMASAYA KONAN DOSYALAR:\n${fileText.substring(0, 10000)}`;
         if (revisionNote) finalContext += `\n\nREVİZYON EMRİ:\n"Bunu dikkate alarak planı baştan yap: ${revisionNote}"`;
 
+        // 1. OpenAI (Stratejist)
         const openAiReq = fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
-            body: JSON.stringify({ model: 'gpt-4o-mini', messages: [{ role: "system", content: `Sen '${r1}' rolündesin. Ezber laf kullanma. Sadece işe yarayan 3 spesifik, vurucu taktik ver. Madde işareti (-) kullan.` }, { role: "user", content: finalContext }]})
+            body: JSON.stringify({ 
+                model: 'gpt-4o-mini', 
+                messages: [
+                    { role: "system", content: "Sen dünyanın en pragmatik ve sonuç odaklı CEO'susun. Klişe, yuvarlak veya 'daha iyi pazarlama yapın', 'analiz edin' gibi ezber laflar KESİNLİKLE KULLANMA. Gündemi çözmek veya büyütmek için sahada hemen uygulanabilecek, rakiplerin aklına gelmeyecek, yaratıcı ve nokta atışı 3 gerilla taktiği ver. Sadece madde işareti (-) kullan." }, 
+                    { role: "user", content: finalContext }
+                ]
+            })
         });
 
+        // 2. Claude (Risk & Güvenlik Analisti)
         const claudeReq = fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': CLAUDE_KEY, 'anthropic-version': '2023-06-01' },
-            body: JSON.stringify({ model: 'claude-3-haiku-20240307', max_tokens: 300, system: `Sen '${r2}' rolündesin. Felsefe yapma. Net, nokta atışı 3 koruyucu ve stratejik önlem üret. Madde işareti (-) kullan.`, messages: [{ role: "user", content: finalContext }]})
+            body: JSON.stringify({ 
+                model: 'claude-3-haiku-20240307', 
+                max_tokens: 300, 
+                system: "Sen acımasız ve detaya inen bir Risk Yöneticisisin. Yüzeysel öğütler verme. Bu plandaki/gündemdeki en büyük güvenlik açığını, potansiyel iflas sebebini veya veri problemini bul. Bunu kökünden çözmek için teknik ve %100 işe yarayacak 3 spesifik, keskin önlem yaz. Madde işareti (-) kullan.", 
+                messages: [{ role: "user", content: finalContext }]
+            })
         });
 
-        const [openAiRes, claudeRes] = await Promise.all([openAiReq, claudeReq]);
+        // 3. Gemini Simülasyonu (İnovasyon & Teknoloji)
+        const geminiReq = fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
+            body: JSON.stringify({ 
+                model: 'gpt-4o-mini', 
+                messages: [
+                    { role: "system", content: "Sen Google'ın yapay zekası Gemini'sin. Teknoloji, verimlilik, otomasyon ve geleceğin trendleri konusunda dâhisin. İnsanların saatlerce yapacağı işi saniyelere indirecek, sistemi tamamen dijitalleştirecek veya mevcut iş modelini 'Disrupt' (yıkıp baştan yapacak) 3 yenilikçi teknoloji/yazılım taktiği ver. Ezber laflar etme, vizyoner ol. Madde işareti (-) kullan." }, 
+                    { role: "user", content: finalContext }
+                ]
+            })
+        });
+
+        const [openAiRes, claudeRes, geminiRes] = await Promise.all([openAiReq, claudeReq, geminiReq]);
         const openAiData = await openAiRes.json();
         const claudeData = await claudeRes.json();
+        const geminiData = await geminiRes.json();
 
         const openaiText = openAiData.choices?.[0]?.message?.content || "Fikir üretilemedi.";
         const claudeText = claudeData.content?.[0]?.text || "Fikir üretilemedi.";
-        const geminiText = `- Sektör standartlarını çöpe at. Süreci tamamen rakiplerin beklemediği bir modele taşı.\n- Müşteri/Personel direncini kırmak için manipülatif bir teşvik sistemi kur.\n- Maliyeti dış kaynak veya otomasyon ile sıfırla.`;
+        const geminiText = geminiData.choices?.[0]?.message?.content || "Fikir üretilemedi.";
 
+        // Master Karar Verici (Sentez)
         const masterReq = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
             body: JSON.stringify({
                 model: 'gpt-4o-mini', response_format: { type: "json_object" }, 
                 messages: [
-                    { role: "system", content: `Sen yönetim kurulu başkanısın. Format: JSON. Şunları üret: 
-                    1) 'ozetKonu': Vurucu 3-4 kelimelik özet. 
-                    2) 'protokolBasligi': Kararın havalı ismi. 
-                    3) 'munazara': Uzmanların kısa çatışması. 
-                    4) 'ortakKarar': 3-4 maddelik net Aksiyon Planı.
-                    5) 'verimlilikSkoru': 1-100 arası başarı ihtimali.
-                    6) 'zihinHaritasi': 3 anahtar kelime dizisi.
-                    7) 'sunumSlaytlari': 4 elemanlı sunum dizisi.` },
-                    { role: "user", content: `${finalContext}\n\nOpenAI:\n${openaiText}\n\n${r2}:\n${claudeText}\n\nGemini:\n${geminiText}` }
+                    { role: "system", content: `Sen kusursuz bir Yönetim Kurulu Başkanısın. SANA VERİLEN 3 RAPORDAKİ FİKİRLERİ (OpenAI, Claude, Gemini) HARMANLA. Asla şirket jargonu, boş laflar veya yuvarlak cümleler kurma. JSON Formatında dön: 
+                    1) 'ozetKonu': Vurucu 3-4 kelimelik gündem özeti. 
+                    2) 'protokolBasligi': Aksiyon planının akılda kalıcı havalı ismi. 
+                    3) 'munazara': 3 modelin fikirlerinin 2 cümlelik acımasız sentezi. 
+                    4) 'ortakKarar': Harfiyen uygulanacak, çok spesifik, somut ve vurucu 3-4 maddelik Aksiyon Planı (Gerçekçi adımlar).
+                    5) 'verimlilikSkoru': Planın uygulanabilirliği (1-100 arası sadece sayı).
+                    6) 'sunumSlaytlari': Planı yatırımcılara veya ekibe sunmak için net, kısa ve etkileyici 4 elemanlı dizi (Sorun, Yaklaşım, Uygulama, Sonuç).` },
+                    { role: "user", content: `${finalContext}\n\nOpenAI:\n${openaiText}\n\nClaude:\n${claudeText}\n\nGemini:\n${geminiText}` }
                 ]
             })
         });
@@ -98,7 +108,6 @@ export default async function handler(req, res) {
             debate: synthesis.munazara || "Münazara yapılamadı.",
             masterDecision: synthesis.ortakKarar || "Aksiyon planı çıkarılamadı.",
             score: synthesis.verimlilikSkoru || "85",
-            mindMap: synthesis.zihinHaritasi || ["Analiz", "Strateji", "Uygulama"],
             slides: synthesis.sunumSlaytlari || ["Sorun", "Yaklaşım", "Uygulama", "Sonuç"]
         });
 
