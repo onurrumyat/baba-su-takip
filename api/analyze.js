@@ -19,7 +19,7 @@ export default async function handler(req, res) {
                 body: JSON.stringify({
                     model: 'gpt-4o-mini', response_format: { type: "json_object" },
                     messages: [
-                        { role: "system", content: `Sen OpenAI, Claude ve Gemini modellerini yöneten bir zekasın. Kullanıcının söylediği konuya bu 3 farklı yapay zekanın SESLİ TARTIŞIYORMUŞ GİBİ kısa (1'er cümlelik), net, YARATICI ve SIRA DIŞI taktikler vererek cevaplamasını sağla. Asla yuvarlak veya klişe cümle ("analiz etmeliyiz" vb.) kurmasınlar. Herkes birbirinin fikrine meydan okuyabilir. JSON Formatında dön: { "dialogue": [ {"speaker": "openai", "text": "..."}, {"speaker": "claude", "text": "..."}, {"speaker": "gemini", "text": "..."} ] }` },
+                        { role: "system", content: `Sen OpenAI, Claude ve Gemini modellerini yöneten bir zekasın. Kullanıcının söylediği konuya bu 3 farklı yapay zekanın SESLİ TARTIŞIYORMUŞ GİBİ çok kısa (1'er cümlelik), net, YARATICI ve DOĞRUDAN İŞE YARAYACAK taktikler vererek cevaplamasını sağla. Asla 'durumu analiz etmeliyiz' gibi klişe kurumsal laflar kurmasınlar. JSON Formatında dön: { "dialogue": [ {"speaker": "openai", "text": "..."}, {"speaker": "claude", "text": "..."}, {"speaker": "gemini", "text": "..."} ] }` },
                         { role: "user", content: `GEÇMİŞ:\n${chatHistory}\n\nBAŞKAN DEDİ Kİ: "${topic}"\nCevap verin.` }
                     ]
                 })
@@ -33,44 +33,44 @@ export default async function handler(req, res) {
         let r1, r2, r3;
         if (boardType === 'hukuk') { r1 = "Siber Güvenlik Uzmanı"; r2 = "Şirket Avukatı"; r3 = "Mali Müşavir"; } 
         else if (boardType === 'pazarlama') { r1 = "Growth Hacker"; r2 = "Tüketici Psikoloğu"; r3 = "Gerilla Pazarlamacı"; } 
-        else { r1 = "Acımasız CEO"; r2 = "Risk Avcısı"; r3 = "İnovasyon Dehası"; }
+        else { r1 = "Dünyanın En Pragmatik CEO'su"; r2 = "Acımasız Risk Analisti"; r3 = "Teknoloji ve İnovasyon Dehası"; }
 
-        let toneCommand = isNight ? "Gece mesaisindeyiz. Dilini samimi, felsefi ve yoldaşça bir tona çek ancak kararlar çok keskin olsun." : "";
+        let toneCommand = isNight ? "Gece mesaisindeyiz. Dilini felsefi ve soğukkanlı bir tona çek ancak kararlar bıçak gibi keskin olsun." : "";
         let finalContext = `Gündem: ${topic}\n${toneCommand}`;
         
         if (fileText) finalContext += `\n\nMASAYA KONAN DOSYALAR:\n${fileText.substring(0, 10000)}`;
         if (revisionNote) finalContext += `\n\nREVİZYON EMRİ:\n"Bunu dikkate alarak planı baştan yap: ${revisionNote}"`;
 
-        // 1. OpenAI
+        // 1. OpenAI (Pragmatik CEO)
         const openAiReq = fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
             body: JSON.stringify({ 
                 model: 'gpt-4o-mini', 
                 messages: [
-                    { role: "system", content: `Sen '${r1}' rolündesin. Klişe, yuvarlak veya 'daha iyi pazarlama yapın', 'analiz edin' gibi genel geçer laflar KESİNLİKLE KULLANMA. Gündemi çözmek veya büyütmek için sahada hemen uygulanabilecek, rakiplerin aklına gelmeyecek, pragmatik, yaratıcı ve nokta atışı 3 taktik ver. Doğrudan aksiyona odaklan. Sadece madde işareti (-) kullan.` }, 
+                    { role: "system", content: `Sen '${r1}' rolündesin. Klişe, yuvarlak veya 'daha iyi pazarlama yapın', 'stratejiyi gözden geçirin' gibi ezber ve içi boş laflar KESİNLİKLE KULLANMA. Gündemi çözmek veya büyütmek için sahada hemen sabah uygulanabilecek, rakiplerin aklına gelmeyecek, çok spesifik ve nokta atışı 3 taktik ver. Doğrudan aksiyona ve paraya odaklan. Sadece madde işareti (-) kullan.` }, 
                     { role: "user", content: finalContext }
                 ]
             })
         });
 
-        // 2. Claude
+        // 2. Claude (Risk Yöneticisi)
         const claudeReq = fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': CLAUDE_KEY, 'anthropic-version': '2023-06-01' },
             body: JSON.stringify({ 
                 model: 'claude-3-haiku-20240307', 
                 max_tokens: 300, 
-                system: `Sen '${r2}' rolündesin. Yüzeysel öğütler verme. Bu plandaki/gündemdeki en büyük açığı, hatayı veya büyüme fırsatını bul. Bunu kökünden çözmek için teknik ve %100 işe yarayacak 3 spesifik, keskin önlem/aksiyon yaz. Sadece eyleme geçirilebilir adımlar ver. Madde işareti (-) kullan.`, 
+                system: `Sen '${r2}' rolündesin. Yüzeysel öğütler veya standart şirket prosedürleri anlatma. Bu plandaki veya gündemdeki bizi iflas ettirecek en büyük kör noktayı, hatayı veya gizli krizi bul. Bunu kökünden çözmek için teknik ve %100 işe yarayacak 3 spesifik, keskin aksiyon yaz. Madde işareti (-) kullan.`, 
                 messages: [{ role: "user", content: finalContext }]
             })
         });
 
-        // 3. Gemini (Dinamik)
+        // 3. Gemini (Teknoloji Dehası)
         const geminiReq = fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
             body: JSON.stringify({ 
                 model: 'gpt-4o-mini', 
                 messages: [
-                    { role: "system", content: `Sen '${r3}' rolündesin. İnsanların saatlerce yapacağı işi saniyelere indirecek, sistemi tamamen otomatize edecek veya mevcut iş modelini 'Disrupt' (yıkıp baştan yapacak) 3 acımasız ve yenilikçi taktik ver. Ezber laflar etme, maliyeti sıfırlamaya ve maksimum etkiye odaklan. Sadece madde işareti (-) kullan.` }, 
+                    { role: "system", content: `Sen '${r3}' rolündesin. İnsanların saatlerce yapacağı işi saniyelere indirecek, sistemi tamamen otomatize edecek veya mevcut iş modelini kökten değiştirecek 3 inovatif ve acımasız taktik ver. 'Yapay zekayı entegre edelim' gibi sığ laflar etme, hangi yazılımın/teknolojinin nasıl kullanılacağını tam olarak söyle. Maliyeti sıfırlamaya ve etkiyi maksimize etmeye odaklan. Madde işareti (-) kullan.` }, 
                     { role: "user", content: finalContext }
                 ]
             })
@@ -91,11 +91,11 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 model: 'gpt-4o-mini', response_format: { type: "json_object" }, 
                 messages: [
-                    { role: "system", content: `Sen kusursuz ve acımasız bir Yönetim Kurulu Başkanısın. SANA VERİLEN 3 RAPORDAKİ FİKİRLERİ HARMANLA. Asla şirket jargonu, boş laflar, "durumu gözden geçirmeliyiz" gibi yuvarlak cümleler kurma. Kararlar bıçak gibi keskin ve hemen uygulanabilir olmalı. JSON Formatında dön: 
+                    { role: "system", content: `Sen kusursuz, acımasız ve pragmatik bir Yönetim Kurulu Başkanısın. SANA VERİLEN 3 RAPORDAKİ FİKİRLERİ HARMANLA. Asla şirket jargonu, boş laflar, "durumu gözden geçirmeliyiz" gibi yuvarlak cümleler kurma. Kararlar bıçak gibi keskin ve harfiyen uygulanabilir olmalı. JSON Formatında dön: 
                     1) 'ozetKonu': Vurucu 3-4 kelimelik gündem özeti. 
                     2) 'protokolBasligi': Aksiyon planının akılda kalıcı havalı ismi. 
-                    3) 'munazara': 3 modelin fikirlerinin 2 cümlelik acımasız sentezi. 
-                    4) 'ortakKarar': Harfiyen uygulanacak, çok spesifik, somut ve vurucu 3-4 maddelik Aksiyon Planı (Gerçekçi adımlar).
+                    3) 'munazara': 3 modelin fikirlerinin 2 cümlelik acımasız çatışması/sentezi. 
+                    4) 'ortakKarar': Harfiyen uygulanacak, çok spesifik ve somut 3-4 maddelik Aksiyon Planı (Gerçekçi adımlar, asla yuvarlak söz yok).
                     5) 'verimlilikSkoru': Planın uygulanabilirliği (1-100 arası sadece sayı).
                     6) 'sunumSlaytlari': Planı ekibe sunmak için net, kısa ve etkileyici 4 elemanlı dizi (Sorun, Yaklaşım, Uygulama, Sonuç).` },
                     { role: "user", content: `${finalContext}\n\nOpenAI Raporu:\n${openaiText}\n\nClaude Raporu:\n${claudeText}\n\nGemini Raporu:\n${geminiText}` }
