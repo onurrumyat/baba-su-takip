@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Komuta Merkezi | Lüks Kurumsal Edition</title>
+    <title>AI Komuta Merkezi | Ahşap Kurumsal Edition</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -152,37 +152,37 @@
         }
 
         /* ========================================================================= */
-        /* --- YENİ EKLENEN: 3D MODERN AYDINLIK KURUMSAL LOBİ (THREE.JS CSS) --- */
+        /* --- YENİ EKLENEN: 3D AHŞAP KURUMSAL LOBİ VE BEYAZ KAPILAR (THREE.JS) --- */
         /* ========================================================================= */
-        #webgl-container { position: fixed; inset: 0; z-index: 100000; display: none; background: #e2e8f0; }
+        #webgl-container { position: fixed; inset: 0; z-index: 100000; display: none; background: #87ceeb; } /* Dışarısı açık gökyüzü */
         
         #ui-3d-overlay { position: fixed; top: 0; left: 0; width: 100%; padding: 20px; display: none; justify-content: space-between; align-items: flex-start; z-index: 100001; pointer-events: none; }
         #ui-3d-overlay .hud-left { pointer-events: auto; }
-        #ui-3d-overlay h2 { color: #0f172a; margin:0; text-shadow: 0 1px 2px rgba(255,255,255,0.8); font-size: 26px; font-weight: 900;}
-        #ui-3d-overlay p { color: #334155; margin: 8px 0 0 0; font-size: 13px; background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.1); padding: 8px 15px; border-radius: 6px; display: inline-block; font-weight:bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
+        #ui-3d-overlay h2 { color: #ffffff; margin:0; text-shadow: 0 2px 5px rgba(0,0,0,0.9); font-size: 26px; font-family: 'Segoe UI', sans-serif; font-weight: 900;}
+        #ui-3d-overlay p { color: #f8fafc; margin: 8px 0 0 0; font-size: 13px; background: rgba(62, 39, 35, 0.9); border: 1px solid rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 6px; display: inline-block; font-weight:bold; box-shadow: 0 4px 10px rgba(0,0,0,0.5);}
         
         .btn-exit-3d { background: #ef4444; border: none; color: white; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; pointer-events: auto; transition: 0.2s; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); text-transform: uppercase; letter-spacing: 1px; }
         .btn-exit-3d:hover { background: #dc2626; transform: translateY(-2px); }
 
         /* PANOYA TIKLANINCA AÇILAN TERMİNALLER (VERİ / GEÇMİŞ) */
-        .room-terminal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); z-index: 100005; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(10px); }
-        .room-terminal-box { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 35px; width: 100%; max-width: 600px; box-shadow: 0 25px 50px rgba(0,0,0,0.4); position: relative;}
-        .room-terminal-title { font-size: 22px; font-weight: 900; color: #0f172a; margin-bottom: 8px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; text-transform: uppercase;}
-        .room-input { width: 100%; height: 140px; background: #f8fafc; color: #0f172a; border: 1px solid #cbd5e1; padding: 15px; margin-top: 15px; border-radius: 8px; resize: vertical; outline: none; font-family: 'Segoe UI', sans-serif; font-size: 15px; line-height: 1.5;}
-        .room-input:focus { border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);}
+        .room-terminal { position: fixed; inset: 0; background: rgba(30, 20, 15, 0.85); z-index: 100005; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(10px); }
+        .room-terminal-box { background: #ffffff; border: 1px solid #d7ccc8; border-radius: 12px; padding: 35px; width: 100%; max-width: 600px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); position: relative;}
+        .room-terminal-title { font-size: 22px; font-weight: 900; color: #3e2723; margin-bottom: 8px; border-bottom: 2px solid #d7ccc8; padding-bottom: 12px; text-transform: uppercase;}
+        .room-input { width: 100%; height: 140px; background: #fdfbf7; color: #3e2723; border: 1px solid #bcaaa4; padding: 15px; margin-top: 15px; border-radius: 8px; resize: vertical; outline: none; font-family: 'Segoe UI', sans-serif; font-size: 15px; line-height: 1.5;}
+        .room-input:focus { border-color: #8b5a2b; box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.2);}
         
         .btn-room-group { display:flex; gap:12px; margin-top: 25px; }
         .btn-room { padding: 14px 25px; border: none; border-radius: 6px; font-weight: 800; font-size: 13px; cursor: pointer; transition: 0.2s; flex: 1; text-transform: uppercase; letter-spacing: 1px;}
-        .btn-room-exit { background: #e2e8f0; color: #0f172a; } .btn-room-exit:hover { background: #cbd5e1; }
+        .btn-room-exit { background: #d7ccc8; color: #3e2723; } .btn-room-exit:hover { background: #bcaaa4; }
 
         /* GEÇMİŞ VERİLER PANOSU MODALI */
         #history-ui { display: none; }
         .history-list { max-height: 300px; overflow-y: auto; margin-top: 15px; text-align: left; padding-right: 5px;}
-        .history-list::-webkit-scrollbar { width: 6px; } .history-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        .history-item { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
-        .history-item-text { font-size: 14px; color: #334155; margin-bottom: 10px; line-height: 1.5; font-weight: 500;}
-        .history-item-date { font-size: 11px; color: #94a3b8; font-weight: bold;}
-        .history-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; border-top: 1px solid #e2e8f0; padding-top: 10px;}
+        .history-list::-webkit-scrollbar { width: 6px; } .history-list::-webkit-scrollbar-thumb { background: #bcaaa4; border-radius: 3px; }
+        .history-item { background: #fdfbf7; border: 1px solid #d7ccc8; padding: 15px; border-radius: 8px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
+        .history-item-text { font-size: 14px; color: #4e342e; margin-bottom: 10px; line-height: 1.5; font-weight: 500;}
+        .history-item-date { font-size: 11px; color: #8d6e63; font-weight: bold;}
+        .history-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; border-top: 1px solid #d7ccc8; padding-top: 10px;}
         .btn-hist { border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s;}
         .btn-hist-edit { background: #fef08a; color: #b45309; } .btn-hist-edit:hover { background: #fde047; }
         .btn-hist-del { background: #fecaca; color: #b91c1c; } .btn-hist-del:hover { background: #fca5a5; }
@@ -303,12 +303,12 @@
     <div class="room-terminal" id="room-ui">
         <div class="room-terminal-box">
             <h2 class="room-terminal-title" id="room-ui-title">Sistem Terminali</h2>
-            <p style="color:#64748b; font-size:14px; margin-bottom:10px;">Sistemin analiz etmesi için yeni verileri veya taktik direktiflerini aşağıya girin.</p>
+            <p style="color:#8d6e63; font-size:14px; margin-bottom:10px;">Sistemin analiz etmesi için yeni verileri veya taktik direktiflerini aşağıya girin.</p>
             <textarea class="room-input" id="room-ui-input" placeholder="Örn: Bütçeyi %20 kıstık, planı buna göre tekrar optimize et..."></textarea>
             
             <div class="btn-room-group">
                 <button class="btn-room btn-room-exit" onclick="close3DModals()">İptal Et</button>
-                <button class="btn-room" id="room-btn-send" onclick="sendDataToRoom()" style="background:#38bdf8; color:#000;">Plana Entegre Et</button>
+                <button class="btn-room" id="room-btn-send" onclick="sendDataToRoom()" style="background:#8b5a2b; color:#fff;">Plana Entegre Et</button>
             </div>
         </div>
     </div>
@@ -316,7 +316,7 @@
     <div class="room-terminal" id="history-ui">
         <div class="room-terminal-box">
             <h2 class="room-terminal-title" style="color:#fbbf24;">Geçmiş Veriler ve Direktifler</h2>
-            <p style="color:#64748b; font-size:14px;">Bu projeye daha önce girdiğiniz özel parametreler.</p>
+            <p style="color:#8d6e63; font-size:14px;">Bu projeye daha önce girdiğiniz özel parametreler.</p>
             
             <div class="history-list" id="history-list-container">
                 </div>
@@ -511,7 +511,6 @@
         /* --- PROJELERİ KAYDETME VE OKUMA --- */
         function saveToProjects() {
             let history = []; try { let parsed = JSON.parse(localStorage.getItem('aiBoardProjects')); if(Array.isArray(parsed)) history = parsed; } catch(e) {}
-            // Her proje için boş bir "roomData" (oda geçmişi) array'i oluşturuyoruz
             let safeTopic = database['Topic'] || "Manuel Gündem"; let safeTitle = database['Title'] || "Sentez Raporu"; let safeDecision = database['Ortak Karar'] || "Sisteme veri işlendi.";
             history.unshift({ date: new Date().toLocaleString('tr-TR'), topic: safeTopic, title: safeTitle, decision: safeDecision, roomData: [] }); 
             localStorage.setItem('aiBoardProjects', JSON.stringify(history));
@@ -545,7 +544,7 @@
         }
 
         // ==============================================================================
-        // --- YENİ EKLENEN: KUSURSUZ MODERN 3D OFİS LOBİSİ (THREE.JS CSS KODLARI) ---
+        // --- YENİ EKLENEN: KUSURSUZ AHŞAP KURUMSAL LOBİ VE BEYAZ KAPILAR ---
         // ==============================================================================
         let scene, camera, renderer, controls, raycaster, mouse;
         let is3DInitialized = false; let currentRoom = "outside"; let activeProject = null; let activeProjectIndex = -1;
@@ -594,48 +593,63 @@
             return humanGroup;
         }
 
-        // KUSURSUZ DEV LOBİ VE ODALAR
+        // KUSURSUZ DEV AHŞAP LOBİ VE BEYAZ KAPILAR
         function buildCorporateInterior() {
             // --- 1. DEV LOBİ / KORİDOR (HALLWAY) ---
-            // Lobinin kendisi 60x60 devasa bir alan. BackSide kullanılarak içeriden görünür yapılıyor.
-            const hallBox = new THREE.Mesh(new THREE.BoxGeometry(59.8, 14.8, 59.8), new THREE.MeshStandardMaterial({color: 0xf8fafc, side: THREE.BackSide, roughness: 0.8}));
+            // Duvarlar Ahşap Rengi (Wood Brown: 0x6d4c41)
+            const hallBox = new THREE.Mesh(new THREE.BoxGeometry(59.8, 14.8, 59.8), new THREE.MeshStandardMaterial({color: 0x6d4c41, side: THREE.BackSide, roughness: 0.9}));
             hallBox.position.set(0, 7.5, 0); scene.add(hallBox);
 
-            // Lobi Zemini (Ahşap / Parke rengi)
-            const hFloor = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.MeshStandardMaterial({color: 0x8a7258, roughness: 0.6}));
+            // Lobi Zemini (Daha Koyu Ahşap Parke Rengi)
+            const hFloor = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.MeshStandardMaterial({color: 0x3e2723, roughness: 0.6}));
             hFloor.rotation.x = -Math.PI / 2; hFloor.position.set(0, 0.01, 0); scene.add(hFloor);
 
             // --- İÇERİDEKİ ÇIKIŞ KAPISI (Tam Girişin arkasında) ---
             const mainDoorGrp = new THREE.Group(); mainDoorGrp.position.set(0, 0, 29.8); mainDoorGrp.rotation.y = Math.PI; // İçeriye doğru bakar
-            const mDoor = new THREE.Mesh(new THREE.BoxGeometry(6, 9, 0.5), new THREE.MeshStandardMaterial({map: createTextTexture("ÇIKIŞ", "#ef4444", "#ffffff", true)}));
-            mDoor.position.y = 4.5; mDoor.name = "DOOR_EXIT"; mainDoorGrp.add(mDoor); scene.add(mainDoorGrp);
+            
+            // Koyu kahve çıkış kapısı kasası
+            const eFrame = new THREE.Mesh(new THREE.BoxGeometry(8.4, 12.4, 0.5), new THREE.MeshStandardMaterial({color: 0x3e2723}));
+            eFrame.position.y = 6; mainDoorGrp.add(eFrame);
+            // BEYAZ KAPI
+            const eDoor = new THREE.Mesh(new THREE.BoxGeometry(8, 12, 0.6), new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.2}));
+            eDoor.position.y = 6; eDoor.name = "DOOR_EXIT"; mainDoorGrp.add(eDoor);
+            // Çıkış Tabelası
+            const eSign = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.5), new THREE.MeshBasicMaterial({map: createTextTexture("ÇIKIŞ", "#ef4444", "#ffffff", true)}));
+            eSign.position.set(0, 10, 0.31); mainDoorGrp.add(eSign);
+            scene.add(mainDoorGrp);
 
             // --- 2. ODALARI OLUŞTURMA FONKSİYONU ---
             function createRoom(x, z, rotY, doorName, titleText, themeColor) {
                 const group = new THREE.Group(); group.position.set(x, 0, z); group.rotation.y = rotY;
 
-                // KAPI KASASI VE KAPI (Lobiye bakan yüz)
-                const frame = new THREE.Mesh(new THREE.BoxGeometry(6.4, 9.4, 1), new THREE.MeshStandardMaterial({color: 0x334155})); frame.position.set(0, 4.7, 0); group.add(frame);
-                const door = new THREE.Mesh(new THREE.BoxGeometry(6, 9, 0.4), new THREE.MeshStandardMaterial({color: 0x0f172a})); door.position.set(0, 4.5, 0); door.name = doorName; group.add(door);
-                const handle = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.5, 0.6), new THREE.MeshStandardMaterial({color: 0x94a3b8})); handle.position.set(2.5, 4.5, 0.3); door.add(handle);
+                // KAPI KASASI (Koyu Ahşap) VE KAPI (BEYAZ)
+                const frame = new THREE.Mesh(new THREE.BoxGeometry(6.4, 9.4, 1), new THREE.MeshStandardMaterial({color: 0x3e2723})); 
+                frame.position.set(0, 4.7, 0); group.add(frame);
+                
+                const door = new THREE.Mesh(new THREE.BoxGeometry(6, 9, 0.4), new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.1})); 
+                door.position.set(0, 4.5, 0); door.name = doorName; group.add(door);
+                
+                const handle = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.5, 0.6), new THREE.MeshStandardMaterial({color: 0xaaaaaa})); 
+                handle.position.set(2.5, 4.5, 0.3); door.add(handle);
 
                 // ŞIK METALİK TABELA (Kapı Üzeri)
                 const sign = new THREE.Mesh(new THREE.PlaneGeometry(4, 1), new THREE.MeshBasicMaterial({map: createTextTexture(titleText, "#1e293b", themeColor, true)}));
                 sign.position.set(0, 10.5, 0.51); group.add(sign);
 
-                // ODA KUTUSU (Tamamen Kapalı, Duvardan taşmaz)
-                // Odalar lobinin dışına taşar (z = -10 merkezli). Boyutları 20x12x20.
-                const roomBox = new THREE.Mesh(new THREE.BoxGeometry(20, 12, 20), new THREE.MeshStandardMaterial({color: 0xf1f5f9, side: THREE.BackSide}));
+                // ODA KUTUSU (Tamamen Kapalı, Ahşap Duvarlar)
+                const roomBox = new THREE.Mesh(new THREE.BoxGeometry(20, 12, 20), new THREE.MeshStandardMaterial({color: 0x6d4c41, side: THREE.BackSide}));
                 roomBox.position.set(0, 6, -10); group.add(roomBox);
                 
-                // ODA ZEMİNİ (Açık renk halı/beton)
-                const rFloor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({color: 0xcbd5e1, roughness:0.9})); rFloor.rotation.x = -Math.PI/2; rFloor.position.set(0, 0.02, -10); group.add(rFloor);
+                // ODA ZEMİNİ (Koyu Ahşap)
+                const rFloor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({color: 0x3e2723, roughness:0.6})); 
+                rFloor.rotation.x = -Math.PI/2; rFloor.position.set(0, 0.02, -10); group.add(rFloor);
 
-                // MASA VE GÖREVLİ (Tam Arka Duvara Yapışık: Odanın derinliği -20'ye kadar uzanır. Masa -16'da)
-                const desk = new THREE.Mesh(new THREE.BoxGeometry(10, 3, 4), new THREE.MeshStandardMaterial({color: 0x334155})); desk.position.set(0, 1.5, -16); group.add(desk);
+                // MASA VE GÖREVLİ (Tam Arka Duvara Yapışık)
+                const desk = new THREE.Mesh(new THREE.BoxGeometry(10, 3, 4), new THREE.MeshStandardMaterial({color: 0x222222})); 
+                desk.position.set(0, 1.5, -16); group.add(desk);
                 
-                // Takım elbiseli gerçekçi insan modeli (Masanın tam arkası -18.5'ta durur)
-                const human = createHuman(0x0f172a); human.position.set(0, 0, -18.5); group.add(human);
+                // Takım elbiseli insan modeli (Masanın tam arkası)
+                const human = createHuman(0x111111); human.position.set(0, 0, -18.5); group.add(human);
 
                 // SOL PANO (Veri Girişi - Tıklanabilir)
                 const board1 = new THREE.Mesh(new THREE.PlaneGeometry(5, 3), new THREE.MeshStandardMaterial({map: createTextTexture("VERİ GİRİŞİ", themeColor, "#000000"), emissive: new THREE.Color(themeColor), emissiveIntensity: 0.1, side: THREE.DoubleSide}));
@@ -666,7 +680,7 @@
             const container = document.getElementById('webgl-container');
             
             scene = new THREE.Scene(); 
-            scene.background = new THREE.Color(0xdbeafe); // Dışarısı ferah açık mavi/beyaz
+            scene.background = new THREE.Color(0x87ceeb); // Dışarısı açık gökyüzü
 
             // KAMERA FOV'U 45 (Doğal), NEAR 0.1 (Kesilme önleyici)
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -684,13 +698,19 @@
             scene.add(new THREE.AmbientLight(0xffffff, 0.8));
             const dLight = new THREE.DirectionalLight(0xffffff, 0.5); dLight.position.set(10, 20, 15); scene.add(dLight);
 
-            // Dış Bina (60x20x60 Devasa Lobi)
-            const building = new THREE.Mesh(new THREE.BoxGeometry(60, 15, 60), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, metalness: 0.5 })); 
+            // Dış Bina (Ahşap kahve - 60x20x60 Devasa Lobi)
+            const building = new THREE.Mesh(new THREE.BoxGeometry(60, 15, 60), new THREE.MeshStandardMaterial({ color: 0x6d4c41, roughness: 0.8, metalness: 0.1 })); 
             building.position.y = 7.5; scene.add(building);
 
-            // DIŞ GİRİŞ KAPISI (z=30 duvarında)
-            const mainDoor = new THREE.Mesh(new THREE.BoxGeometry(8, 12, 1.5), new THREE.MeshStandardMaterial({ map: createTextTexture("SİSTEME GİR", "#10a37f", "#ffffff", true), emissive: 0x001100, roughness: 0.2 })); 
-            mainDoor.position.set(0, 6, 30); mainDoor.name = "DOOR_ENTRANCE"; scene.add(mainDoor);
+            // DIŞ GİRİŞ KAPISI GRUBU (BEYAZ KAPI + ŞIK TABELA)
+            const mainDoorGrp = new THREE.Group(); mainDoorGrp.position.set(0, 0, 30);
+            // Kasa
+            const mFrame = new THREE.Mesh(new THREE.BoxGeometry(8.4, 12.4, 1), new THREE.MeshStandardMaterial({color: 0x3e2723})); mFrame.position.y = 6; mainDoorGrp.add(mFrame);
+            // Beyaz Kapı
+            const mDoor = new THREE.Mesh(new THREE.BoxGeometry(8, 12, 1.2), new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.1})); mDoor.position.y = 6; mDoor.name = "DOOR_ENTRANCE"; mainDoorGrp.add(mDoor);
+            // Tabela
+            const mSign = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.5), new THREE.MeshBasicMaterial({map: createTextTexture("SİSTEME GİR", "#10a37f", "#ffffff", true)})); mSign.position.set(0, 10, 0.61); mainDoorGrp.add(mSign);
+            scene.add(mainDoorGrp);
 
             // İÇ MEKANI OLUŞTUR
             buildCorporateInterior();
@@ -735,14 +755,14 @@
             new TWEEN.Tween(camera.position).to({ x: 0, y: 5, z: 15 }, 2000).easing(TWEEN.Easing.Quadratic.InOut).start();
             new TWEEN.Tween(controls.target).to({ x: 0, y: 5, z: 0 }, 2000).easing(TWEEN.Easing.Quadratic.InOut).onComplete(() => { 
                 currentRoom = "hallway"; 
-                document.getElementById('hud-instruction').innerHTML = "Devasa Holding Lobisindesiniz. Etrafınıza bakın ve girmek istediğiniz odanın kapısına tıklayın.<br><br>Arkanızdaki kapıya tıklayarak veya aşağıdaki butondan çıkabilirsiniz."; 
+                document.getElementById('hud-instruction').innerHTML = "Devasa Holding Lobisindesiniz. Etrafınıza bakın ve girmek istediğiniz beyaz kapıya tıklayın.<br><br>Arkanızdaki kapıya tıklayarak veya aşağıdaki butondan çıkabilirsiniz."; 
             }).start();
         }
 
         function enterSpecificRoom(doorName) {
             let targetPos = {x: 0, y: 5, z: 0}; let lookPos = {x: 0, y: 5, z: 0};
             
-            // Lobi çok büyük olduğu için, odaya girmek için kamerayı o odanın merkezine (-40 gibi) itiyoruz. 
+            // Lobi çok büyük olduğu için, odaya girmek için kamerayı o odanın merkezine (-38 gibi) itiyoruz. 
             // Odaların arka duvarları z=-20 derinliğinde. Masalar -16'da.
             if(doorName === "ROOM_CEO") { targetPos = {x: 0, y: 5, z: -38}; lookPos = {x: 0, y: 5, z: -48}; } 
             else if(doorName === "ROOM_ADVISOR") { targetPos = {x: -38, y: 5, z: 0}; lookPos = {x: -48, y: 5, z: 0}; } 
@@ -752,7 +772,7 @@
             new TWEEN.Tween(camera.position).to(targetPos, 1500).easing(TWEEN.Easing.Quadratic.InOut).start();
             new TWEEN.Tween(controls.target).to(lookPos, 1500).easing(TWEEN.Easing.Quadratic.InOut).onComplete(() => {
                 currentRoom = doorName;
-                document.getElementById('hud-instruction').innerHTML = "Odadasınız.<br>Görevlinin yanındaki SOL PANOYA (Veri Girişi) veya SAĞ PANOYA (Geçmiş) tıklayın.<br><br><button onclick='returnToHallway()' style='background:#ef4444;color:white;border:none;padding:5px 10px;border-radius:3px;cursor:pointer;font-weight:bold;'>Koridora Dön</button>";
+                document.getElementById('hud-instruction').innerHTML = "Odadasınız.<br>Görevlinin arkasındaki SOL PANOYA (Veri Girişi) veya SAĞ PANOYA (Geçmiş) tıklayın.<br><br><button onclick='returnToHallway()' style='background:#ef4444;color:white;border:none;padding:5px 10px;border-radius:3px;cursor:pointer;font-weight:bold;'>Koridora Dön</button>";
             }).start();
         }
 
@@ -761,7 +781,7 @@
             new TWEEN.Tween(camera.position).to({ x: 0, y: 5, z: 15 }, 1500).easing(TWEEN.Easing.Quadratic.InOut).start();
             new TWEEN.Tween(controls.target).to({ x: 0, y: 5, z: 0 }, 1500).easing(TWEEN.Easing.Quadratic.InOut).onComplete(() => {
                 currentRoom = "hallway";
-                document.getElementById('hud-instruction').innerHTML = "Holding Lobisindesiniz. Odaya girmek için kapıya tıklayın.";
+                document.getElementById('hud-instruction').innerHTML = "Holding Lobisindesiniz. Odaya girmek için beyaz kapılara tıklayın.";
             }).start();
         }
 
