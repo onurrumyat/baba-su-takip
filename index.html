@@ -14,9 +14,6 @@
             <div class="logo" id="logo-btn">🌍 UniLoop</div>
         </div>
         
-        <div class="search-bar">
-            <input type="text" id="global-search" placeholder="Öğrenci, eşya, kitap veya fakülte ara...">
-        </div>
         <div class="user-menu">
             <button id="profile-btn">👤 Profilim</button>
         </div>
@@ -25,29 +22,36 @@
     <div class="container">
         
         <aside class="sidebar" id="sidebar">
-            <h3>Navigasyon</h3>
-            <div class="menu-item active" data-target="home">🏠 Ana Sayfa</div>
-            <div class="menu-item" data-target="market">🛒 Kampüs Market</div>
-            <div class="menu-item" data-target="housing">🔑 Ev Arkadaşı & Yurt</div>
-            <div class="menu-item" data-target="confessions">🤫 Anonim Kampüs</div>
-            <br>
-            <h3>Bana Özel</h3>
-            <div class="menu-item" data-target="messages">💬 Mesajlarım (2)</div>
-            <div class="menu-item" onclick="openModal('Ayarlar', '<p>Dil ve bölge ayarları yakında eklenecek.</p>')">⚙️ Ayarlar</div>
-            
-            <div class="mobile-only-communities">
-                <br>
-                <h3>🏢 Fakülteler</h3>
-                <div class="menu-item community-link" data-name="Tıp Fakültesi" data-icon="🩺" data-color="linear-gradient(135deg, #EF4444, #B91C1C)">🩺 Tıp Fakültesi</div>
-                <div class="menu-item community-link" data-name="Bilgisayar Fakültesi" data-icon="💻" data-color="linear-gradient(135deg, #3B82F6, #2563EB)">💻 Bilgisayar Fakültesi</div>
-                <div class="menu-item community-link" data-name="Diş Hekimliği" data-icon="🦷" data-color="linear-gradient(135deg, #06B6D4, #0891B2)">🦷 Diş Hekimliği</div>
+            <div class="sidebar-top">
+                <h3>Navigasyon</h3>
+                <div class="menu-item active" data-target="home">🏠 Ana Sayfa</div>
+                <div class="menu-item" data-target="market">🛒 Kampüs Market</div>
+                <div class="menu-item" data-target="housing">🔑 Ev Arkadaşı & Yurt</div>
+                <div class="menu-item" data-target="confessions">🤫 Anonim Kampüs</div>
                 
-                <div id="mobile-more-faculties" style="display: none;">
-                    <div class="menu-item community-link" data-name="Hukuk Fakültesi" data-icon="⚖️" data-color="linear-gradient(135deg, #8B5CF6, #6D28D9)">⚖️ Hukuk Fakültesi</div>
-                    <div class="menu-item community-link" data-name="Mimarlık Fakültesi" data-icon="📐" data-color="linear-gradient(135deg, #F59E0B, #D97706)">📐 Mimarlık Fakültesi</div>
-                    <div class="menu-item community-link" data-name="Eğitim Fakültesi" data-icon="📖" data-color="linear-gradient(135deg, #10B981, #059669)">📖 Eğitim Fakültesi</div>
+                <br>
+                <h3>Bana Özel</h3>
+                <div class="menu-item" data-target="messages">💬 Mesajlarım (2)</div>
+                <div id="my-joined-faculties"></div>
+                
+                <div class="mobile-only-communities">
+                    <br>
+                    <h3>🏢 Fakülteler</h3>
+                    <div class="menu-item community-link" data-name="Tıp Fakültesi" data-icon="🩺" data-color="linear-gradient(135deg, #EF4444, #B91C1C)">🩺 Tıp Fakültesi</div>
+                    <div class="menu-item community-link" data-name="Bilgisayar Fakültesi" data-icon="💻" data-color="linear-gradient(135deg, #3B82F6, #2563EB)">💻 Bilgisayar Fakültesi</div>
+                    <div class="menu-item community-link" data-name="Diş Hekimliği" data-icon="🦷" data-color="linear-gradient(135deg, #06B6D4, #0891B2)">🦷 Diş Hekimliği</div>
+                    
+                    <div id="mobile-more-faculties" style="display: none;">
+                        <div class="menu-item community-link" data-name="Hukuk Fakültesi" data-icon="⚖️" data-color="linear-gradient(135deg, #8B5CF6, #6D28D9)">⚖️ Hukuk Fakültesi</div>
+                        <div class="menu-item community-link" data-name="Mimarlık Fakültesi" data-icon="📐" data-color="linear-gradient(135deg, #F59E0B, #D97706)">📐 Mimarlık Fakültesi</div>
+                        <div class="menu-item community-link" data-name="Eğitim Fakültesi" data-icon="📖" data-color="linear-gradient(135deg, #10B981, #059669)">📖 Eğitim Fakültesi</div>
+                    </div>
+                    <button class="action-btn" id="mobile-show-more-btn" style="margin-top: 10px;">Daha Fazla Göster</button>
                 </div>
-                <button class="action-btn" id="mobile-show-more-btn" style="margin-top: 10px;">Daha Fazla Göster</button>
+            </div>
+            
+            <div class="sidebar-bottom">
+                <div class="menu-item" onclick="openModal('Ayarlar', '<p>Dil ve bölge ayarları yakında eklenecek.</p>')">⚙️ Ayarlar</div>
             </div>
         </aside>
 
