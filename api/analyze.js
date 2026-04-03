@@ -39,7 +39,7 @@ module.exports = async function handler(req, res) {
           ],
         },
       ],
-      max_tokens: 300, // Token sınırını düşürerek uzun cevap vermesini engelledik
+      max_tokens: 300,
     });
 
     return res.status(200).json({ result: response.choices[0].message.content });
