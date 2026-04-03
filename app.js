@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const mainContent = document.getElementById('main-content');
     const searchInput = document.getElementById('global-search');
     
-    // Kullanıcı Profil Objesi (Global Üniversite Ağı)
+    // Kullanıcı Profil Objesi
     let userProfile = {
         name: "Ege",
         surname: "Yılmaz",
@@ -13,16 +13,21 @@ document.addEventListener("DOMContentLoaded", () => {
         bio: "Kampüs hayatını ve teknolojiyi seviyorum. Yeni insanlarla tanışmaya açığım."
     };
 
-    // Arama ve Listeleme İçin Sahte Veritabanı (Otomobil/Ulaşım Silindi, Global Öğrenci İhtiyaçları Eklendi)
+    // Arama ve Listeleme İçin Sahte Veritabanı
     const database = [
         { id: 1, type: "market", title: "IKEA Çalışma Masası", desc: "Mezun olduğum için satıyorum. Çok az kullanıldı, çiziksiz.", price: "$45", img: "🪑" },
         { id: 2, type: "market", title: "Anatomi Atlası (Netter 7. Baskı)", desc: "Tıp öğrencileri için tertemiz kitap. İhtiyacım kalmadı.", price: "$30", img: "📚" },
         { id: 3, type: "market", title: "Veri Yapıları ve Algoritmalar PDF Notları", desc: "Geçen senenin tüm ders notları, sınavlarda çok işe yarıyor.", price: "$5", img: "📝" },
         { id: 4, type: "market", title: "Mini Buzdolabı", desc: "Yurt odası için ideal boyutta. Sorunsuz çalışıyor.", price: "$80", img: "❄️" },
-        { id: 5, type: "market", title: "Fizik 101 Çıkmış Sorular", desc: "Hocanın son 5 yılda sorduğu tüm sorular ve çözümleri.", price: "$10", img: "📄" },
-        { id: 6, type: "housing", title: "Kampüse 5dk - 2 Kişilik Odaya Arkadaş", desc: "Sakin, sigara içmeyen bir ev arkadaşı arıyorum. Faturalar dahil.", price: "$400/Ay", img: "🏠" },
-        { id: 7, type: "housing", title: "Şehir Merkezi 1+1 Stüdyo Daire", desc: "Sadece öğrencilere kiralık, eşyalı ve fiber internetli.", price: "$850/Ay", img: "🏢" },
-        { id: 8, type: "housing", title: "Yurt Devri (Kız Öğrenci)", desc: "Dönem ortasında ayrıldığım için sözleşmemi devrediyorum.", price: "$300/Ay", img: "🛏️" }
+        { id: 5, type: "housing", title: "Kampüse 5dk - 2 Kişilik Odaya Arkadaş", desc: "Sakin, sigara içmeyen bir ev arkadaşı arıyorum. Faturalar dahil.", price: "$400/Ay", img: "🏠" },
+        { id: 6, type: "housing", title: "Şehir Merkezi 1+1 Stüdyo Daire", desc: "Sadece öğrencilere kiralık, eşyalı ve fiber internetli.", price: "$850/Ay", img: "🏢" }
+    ];
+
+    // ANONİM İTİRAFLAR VERİTABANI
+    let confessionsDB = [
+        { id: 1, avatar: "👻", user: "Anonim #482", time: "2 saat önce", text: "İlk yılım ve henüz hiç arkadaş bulamadım. Kütüphanede sürekli tek başıma oturuyorum. Benim gibi hisseden var mı?" },
+        { id: 2, avatar: "🎭", user: "Anonim #911", time: "5 saat önce", text: "Fizik 101 hocası gerçekten çok zorluyor. Vizeden 20 aldım, geçebilen nasıl geçiyor bu dersi?" },
+        { id: 3, avatar: "👽", user: "Anonim #104", time: "1 gün önce", text: "Yemekhanedeki vegan seçenekler son günlerde çok iyi, aşçı değişti galiba. Denemeyenlere tavsiye ederim." }
     ];
 
     // MODAL YÖNETİMİ
@@ -36,9 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
         modalBody.innerHTML = contentHTML;
         modal.classList.add('active');
     }
-    window.closeModal = function() {
-        modal.classList.remove('active');
-    }
+    window.closeModal = function() { modal.classList.remove('active'); }
     closeModalBtn.addEventListener('click', closeModal);
     window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
@@ -74,9 +77,9 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h2>Hızlı Bakış</h2>
-                    <button class="action-btn" style="width:auto;" onclick="document.querySelector('[data-target=\\'market\\']').click()">Market'e Git</button>
+                    <button class="action-btn" style="width:auto;" onclick="document.querySelector('[data-target=\\'confessions\\']').click()">İtiraflara Git</button>
                 </div>
-                <p>Kullanmadığın ders kitaplarını, notlarını veya eşyalarını UniLoop'ta satarak diğer öğrencilere yardımcı olabilir, döngüye katılabilirsin.</p>
+                <p>Kampüsün anonim sesini dinle. İnsanlar ne konuşuyor, neleri dert ediyor öğrenmek için Anonim Kampüs'e göz at.</p>
             </div>
         `;
     }
@@ -108,6 +111,85 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         html += `</div></div>`;
         return html;
+    }
+
+    // ANONİM KAMPÜS YÖNETİMİ VE AI MODERASYON SİSTEMİ
+    function renderConfessions() {
+        let html = `
+            <div class="card">
+                <h2>🤫 Anonim Kampüs & İtiraflar</h2>
+                <p style="font-size:12px; color:var(--text-gray); margin-bottom: 15px;">Paylaşımların isimsizdir. AI moderatörümüz kampüs kuralları ve güvenliğiniz için yazılanları analiz eder.</p>
+                
+                <div style="background: #F3F4F6; padding: 15px; border-radius: 10px; margin-bottom: 25px;">
+                    <textarea id="new-confession-text" class="form-group" style="width:100%; height:80px; background:white; border:none;" placeholder="Aklından ne geçiyor? Tamamen anonim olarak paylaş..."></textarea>
+                    <div style="text-align: right;">
+                        <button class="btn-primary" style="width:auto;" id="post-confession-btn">Gönder</button>
+                    </div>
+                </div>
+                <div id="confession-feed">
+        `;
+        
+        confessionsDB.forEach(post => {
+            html += `
+                <div class="confession-post">
+                    <div class="confession-avatar">${post.avatar}</div>
+                    <div class="confession-content">
+                        <div class="confession-header">
+                            <span class="confession-user">${post.user}</span>
+                            <span class="confession-time">${post.time}</span>
+                        </div>
+                        <div class="confession-text">${post.text}</div>
+                        <div class="confession-actions">
+                            <span onclick="alert('Beğenildi!')">👍 Beğen</span>
+                            <span onclick="alert('Yanıt bölümü açılıyor...')">💬 Yanıtla</span>
+                            <span onclick="alert('Şikayet edildi.')">🚩 Bildir</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `</div></div>`;
+        mainContent.innerHTML = html;
+
+        // Yeni İtiraf Gönderme ve AI Kontrolü
+        document.getElementById('post-confession-btn').addEventListener('click', () => {
+            const textInput = document.getElementById('new-confession-text').value;
+            if(textInput.trim() === '') return;
+
+            // AI MODERATÖR KELİME LİSTESİ (Zorbalık, Nefret Söylemi, İntihar)
+            const toxicWords = ["intihar", "ölmek", "ölmek istiyorum", "depresyon", "hayattan bıktım", "aptal", "çirkin", "nefret", "salak"];
+            
+            const isToxic = toxicWords.some(word => textInput.toLowerCase().includes(word));
+
+            if(isToxic) {
+                // AI MÜDAHALESİ: Gönderiyi engelle ve yardım teklif et
+                openModal('⚠️ AI Moderatör Uyarısı', `
+                    <div style="text-align:center;">
+                        <h1 style="font-size:40px; margin-bottom:10px;">🛡️</h1>
+                        <p style="color:#DC2626; font-weight:bold; margin-bottom:10px;">Gönderiniz durduruldu.</p>
+                        <p style="font-size:14px; margin-bottom:15px;">Sistemimiz yazdıklarınızda zor zamanlar geçirdiğinize dair kelimeler veya topluluk kurallarına aykırı bir dil tespit etti.</p>
+                        <div style="background:#FEF2F2; padding:15px; border-radius:8px; border: 1px solid #FCA5A5;">
+                            <p style="font-weight:bold; color:#991B1B;">Yalnız değilsin.</p>
+                            <p style="font-size:13px; color:#7F1D1D; margin-top:5px;">Kampüs psikolojik destek merkezi her zaman seninle konuşmaya hazır. Lütfen destek almaktan çekinme.</p>
+                            <button class="btn-primary" style="margin-top:10px; background:#DC2626;" onclick="window.open('https://pdrc.neu.edu.tr/', '_blank')">Destek Merkezine Ulaş</button>
+                        </div>
+                    </div>
+                `);
+            } else {
+                // Temiz içerik, akışa ekle
+                const newPost = {
+                    id: Date.now(),
+                    avatar: ["🦊", "🐼", "🐯", "🐸", "🐵"][Math.floor(Math.random() * 5)], // Rastgele anonim avatar
+                    user: "Anonim #" + Math.floor(Math.random() * 999),
+                    time: "Şimdi",
+                    text: textInput
+                };
+                confessionsDB.unshift(newPost); // En üste ekle
+                renderConfessions(); // Sayfayı yenile
+                openModal('Başarılı', '<p>Anonim mesajınız kampüs akışında yayınlandı!</p>');
+            }
+        });
     }
 
     // PROFİL SAYFASI
@@ -199,6 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (pageName === 'home') mainContent.innerHTML = getHomeContent();
         else if (pageName === 'market') mainContent.innerHTML = renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz', 'Ürün Detayı');
         else if (pageName === 'housing') mainContent.innerHTML = renderListings('housing', '🔑 Ev Arkadaşı & Yurt İlanları', 'İletişime Geç', 'Ev Sahibiyle Görüş');
+        else if (pageName === 'confessions') renderConfessions(); // Yeni Modül Yükleniyor
         
         if(window.innerWidth <= 1024) sidebar.classList.remove('open');
     }
