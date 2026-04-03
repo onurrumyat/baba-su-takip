@@ -2,110 +2,154 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FixLens | Smart Repair</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FixCheck AI | Global Repair Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col font-sans">
+<body class="bg-gray-50 min-h-screen text-gray-800">
 
-    <nav class="bg-white px-4 py-3 shadow-sm shrink-0 sticky top-0 z-50">
-        <div class="max-w-md mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-1.5">
-                <i class="fa-solid fa-camera-retro text-blue-600 text-xl"></i>
-                <span class="font-black text-xl tracking-tight">Fix<span class="text-blue-600">Lens</span></span>
+    <nav class="bg-white border-b border-gray-200 px-4 py-3 shadow-sm sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-screwdriver-wrench text-blue-600 text-xl"></i>
+                <span class="font-black text-xl tracking-tight text-gray-900">FixCheck<span class="text-blue-600">.ai</span></span>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 md:gap-4">
                 <div class="relative">
-                    <select id="regionSelect" class="appearance-none bg-gray-100 text-gray-700 text-xs rounded-md px-2 py-2 pr-6 font-medium focus:outline-none focus:ring-2 focus:ring-blue-100">
-                        <option value="United States">🇺🇸 USA</option>
-                        <option value="United Kingdom">🇬🇧 UK</option>
-                        <option value="Germany">🇩🇪 GER</option>
-                        <option value="France">🇫🇷 FRA</option>
-                        <option value="Spain">🇪🇸 ESP</option>
-                        <option value="Turkey">🇹🇷 TUR</option>
+                    <select id="regionSelect" class="appearance-none bg-gray-100 border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-3 py-2 pr-8 cursor-pointer font-medium">
+                        <option value="United States">📍 United States</option>
+                        <option value="United Kingdom">📍 United Kingdom</option>
+                        <option value="Germany">📍 Germany (Deutschland)</option>
+                        <option value="France">📍 France</option>
+                        <option value="Spain">📍 Spain (España)</option>
+                        <option value="Turkey">📍 Turkey (Türkiye)</option>
                     </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1 text-gray-500">
-                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
                     </div>
                 </div>
 
                 <div class="relative">
-                    <select id="langSelect" onchange="changeLanguage()" class="appearance-none bg-white border border-gray-200 text-gray-700 text-xs rounded-md px-2 py-2 pr-6 font-medium focus:outline-none focus:ring-2 focus:ring-blue-100 shadow-sm">
-                        <option value="en">EN</option>
-                        <option value="fr">FR</option>
-                        <option value="es">ES</option>
-                        <option value="tr">TR</option>
+                    <select id="langSelect" onchange="changeLanguage()" class="appearance-none bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-3 py-2 pr-8 cursor-pointer font-medium shadow-sm">
+                        <option value="en">🇺🇸 EN</option>
+                        <option value="fr">🇫🇷 FR</option>
+                        <option value="es">🇪🇸 ES</option>
+                        <option value="tr">🇹🇷 TR</option>
                     </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1 text-gray-500">
-                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
                     </div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <main class="flex-1 w-full max-w-md mx-auto p-5 flex flex-col mt-2">
+    <main class="max-w-md mx-auto p-6 mt-6">
         
-        <header class="text-center mb-6 shrink-0">
-            <h1 id="txt-title" class="text-2xl font-black text-gray-900 mb-1">Snap the damage.</h1>
-            <p id="txt-subtitle" class="text-gray-500 text-sm">AI finds the problem & realistic cost.</p>
+        <header class="text-center mb-8">
+            <h1 id="txt-title" class="text-3xl font-black text-gray-900 mb-2">Snap the damage.</h1>
+            <p id="txt-subtitle" class="text-gray-500 text-sm">Upload a photo, let AI diagnose the problem and estimate costs.</p>
         </header>
 
-        <div id="dropZone" class="bg-white border-2 border-dashed border-gray-300 rounded-2xl p-4 text-center cursor-pointer active:bg-blue-50 transition-colors shadow-sm relative" onclick="document.getElementById('fileInput').click()">
+        <div id="dropZone" class="bg-white border-4 border-dashed border-gray-300 rounded-3xl p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all shadow-sm group" onclick="document.getElementById('fileInput').click()">
             <input type="file" id="fileInput" class="hidden" accept="image/*">
             
-            <div id="previewBox" class="hidden relative">
-                <img id="imagePreview" src="" class="rounded-lg mx-auto max-h-[40vh] object-contain w-full bg-gray-50">
-                <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-lg opacity-0 hover:opacity-100 transition-opacity text-white text-sm font-bold">
-                    <i class="fa-solid fa-pen mr-2"></i> Edit Photo
+            <div id="previewBox" class="hidden mb-4 relative">
+                <img id="imagePreview" src="" class="rounded-xl mx-auto max-h-64 shadow-md object-cover w-full">
+                <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-xl opacity-0 hover:opacity-100 transition-opacity text-white font-bold">
+                    <i class="fa-solid fa-pen mr-2"></i> Change Photo
                 </div>
             </div>
             
-            <div id="uploadUI" class="py-8">
-                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <div id="uploadUI">
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                     <i class="fa-solid fa-cloud-arrow-up text-2xl text-blue-600"></i>
                 </div>
-                <p id="txt-upload" class="font-bold text-gray-800 text-base">Tap to Upload Photo</p>
+                <p id="txt-upload" class="font-bold text-gray-800">Tap to Upload Photo</p>
+                <p class="text-xs text-gray-400 mt-2">JPG, PNG, HEIC</p>
             </div>
         </div>
 
-        <button id="analyzeBtn" class="w-full bg-blue-600 active:bg-blue-700 text-white font-black py-4 rounded-xl mt-5 shadow-lg shadow-blue-200 hidden flex justify-center items-center gap-2 shrink-0 text-lg transition-transform transform active:scale-95">
-            <span id="txt-analyze">ANALYZE NOW</span> <i class="fa-solid fa-bolt"></i>
+        <button id="analyzeBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl mt-6 shadow-lg shadow-blue-200 transition-all hidden flex justify-center items-center gap-2">
+            <span id="txt-analyze">ANALYZE NOW</span> <i class="fa-solid fa-wand-magic-sparkles"></i>
         </button>
 
-        <div id="loader" class="hidden text-center py-10">
-            <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-blue-100 border-t-blue-600 mb-3"></div>
-            <p id="txt-loading" class="text-gray-600 font-medium">Scanning damage...</p>
+        <div id="loader" class="hidden text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-blue-200 border-t-blue-600 mb-4"></div>
+            <p id="txt-loading" class="text-gray-600 font-medium">AI is inspecting the damage...</p>
         </div>
 
-        <div id="resultBox" class="hidden mt-6 pb-8">
-            <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-100 mb-4">
-                <h3 id="txt-report" class="font-black text-gray-900 mb-3 flex items-center border-b pb-3 text-sm">
-                    <i class="fa-solid fa-check-double text-green-500 mr-2 text-lg"></i> REPORT
+        <div id="resultBox" class="hidden mt-8">
+            <div class="bg-white p-6 rounded-3xl shadow-xl border border-gray-100 mb-4">
+                <h3 id="txt-report" class="font-black text-gray-900 mb-4 flex items-center border-b pb-3">
+                    <i class="fa-solid fa-clipboard-check text-green-500 mr-2 text-xl"></i> DIAGNOSIS REPORT
                 </h3>
                 <div id="aiResponse" class="text-gray-700 leading-relaxed text-sm whitespace-pre-line font-medium"></div>
             </div>
 
-            <button onclick="orderSupplier()" class="w-full bg-black active:bg-gray-800 text-white font-bold py-4 rounded-xl shadow-md flex justify-center items-center gap-2 text-base transition-transform transform active:scale-95">
-                <i class="fa-solid fa-bag-shopping"></i> <span id="txt-order">Order Parts</span>
+            <button id="orderBtn" onclick="orderSupplier()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 rounded-2xl shadow-lg transition-all flex justify-center items-center gap-2 text-lg">
+                <i class="fa-solid fa-cart-shopping"></i> <span id="txt-order">Order Required Parts</span>
             </button>
 
-            <button onclick="location.reload()" class="w-full mt-4 text-sm text-gray-400 font-semibold py-2">
-                <i class="fa-solid fa-rotate-right mr-1"></i> <span id="txt-new">Scan Another Item</span>
+            <button onclick="location.reload()" class="w-full mt-4 text-sm text-gray-500 hover:text-gray-800 font-medium py-2">
+                <i class="fa-solid fa-rotate-right mr-1"></i> <span id="txt-new">Analyze New Photo</span>
             </button>
         </div>
     </main>
 
     <script>
+        // --- MULTI-LANGUAGE DICTIONARY ---
         const i18n = {
-            en: { title: "Snap the damage.", subtitle: "AI finds the problem & cost.", upload: "Tap to Upload Photo", analyze: "ANALYZE NOW", loading: "Scanning damage...", report: "REPORT", order: "Order Parts", new: "Scan Another Item", langName: "English" },
-            fr: { title: "Prenez les dégâts.", subtitle: "L'IA trouve le problème et le prix.", upload: "Appuyez pour télécharger", analyze: "ANALYSER", loading: "Analyse en cours...", report: "RAPPORT", order: "Commander", new: "Nouvelle Photo", langName: "French" },
-            es: { title: "Fotografía el daño.", subtitle: "La IA encuentra el problema y costo.", upload: "Toca para subir foto", analyze: "ANALIZAR AHORA", loading: "Escaneando...", report: "REPORTE", order: "Comprar Piezas", new: "Escanear Otra", langName: "Spanish" },
-            tr: { title: "Arızayı çekin.", subtitle: "Yapay zeka teşhis edip fiyatlasın.", upload: "Fotoğraf Yüklemek İçin Dokun", analyze: "ANALİZ ET", loading: "Hasar inceleniyor...", report: "TEŞHİS RAPORU", order: "Parçaları Sipariş Et", new: "Yeni Fotoğraf Çek", langName: "Turkish" }
+            en: {
+                title: "Snap the damage.",
+                subtitle: "Upload a photo, let AI diagnose the problem and estimate costs.",
+                upload: "Tap to Upload Photo",
+                analyze: "ANALYZE NOW",
+                loading: "AI is inspecting the damage...",
+                report: "DIAGNOSIS REPORT",
+                order: "Order Required Parts",
+                new: "Analyze New Photo",
+                langName: "English"
+            },
+            fr: {
+                title: "Prenez les dégâts en photo.",
+                subtitle: "Téléchargez une photo, l'IA diagnostique le problème et estime le coût.",
+                upload: "Appuyez pour télécharger",
+                analyze: "ANALYSER MAINTENANT",
+                loading: "L'IA inspecte les dégâts...",
+                report: "RAPPORT DE DIAGNOSTIC",
+                order: "Commander les Pièces",
+                new: "Analyser une Nouvelle Photo",
+                langName: "French"
+            },
+            es: {
+                title: "Fotografía el daño.",
+                subtitle: "Sube una foto, deja que la IA diagnostique el problema y estime costos.",
+                upload: "Toca para subir foto",
+                analyze: "ANALIZAR AHORA",
+                loading: "La IA está inspeccionando...",
+                report: "REPORTE DE DIAGNÓSTICO",
+                order: "Ordenar Piezas",
+                new: "Analizar Nueva Foto",
+                langName: "Spanish"
+            },
+            tr: {
+                title: "Arızayı fotoğraflayın.",
+                subtitle: "Fotoğraf yükleyin, yapay zeka sorunu bulsun ve maliyeti hesaplasın.",
+                upload: "Fotoğraf Yüklemek İçin Dokun",
+                analyze: "ANALİZ ET",
+                loading: "Yapay zeka hasarı inceliyor...",
+                report: "TEŞHİS RAPORU",
+                order: "Gerekli Parçaları Sipariş Et",
+                new: "Yeni Fotoğraf Analiz Et",
+                langName: "Turkish"
+            }
         };
 
+        // --- LANGUAGE CHANGER LOGIC ---
         function changeLanguage() {
             const lang = document.getElementById('langSelect').value;
             document.getElementById('txt-title').innerText = i18n[lang].title;
@@ -113,21 +157,25 @@
             document.getElementById('txt-upload').innerText = i18n[lang].upload;
             document.getElementById('txt-analyze').innerText = i18n[lang].analyze;
             document.getElementById('txt-loading').innerText = i18n[lang].loading;
-            document.getElementById('txt-report').innerHTML = `<i class="fa-solid fa-check-double text-green-500 mr-2 text-lg"></i> ${i18n[lang].report}`;
+            document.getElementById('txt-report').innerHTML = `<i class="fa-solid fa-clipboard-check text-green-500 mr-2 text-xl"></i> ${i18n[lang].report}`;
             document.getElementById('txt-order').innerText = i18n[lang].order;
             document.getElementById('txt-new').innerText = i18n[lang].new;
         }
 
+        // --- E-COMMERCE REDIRECT LOGIC ---
         function orderSupplier() {
             const region = document.getElementById('regionSelect').value;
-            let searchUrl = "https://www.google.com/search?tbm=shop&q=home+repair+parts";
-            if (region === "United States") searchUrl = "https://www.amazon.com/s?k=home+repair+parts";
+            // You can customize routing based on region here. Defaulting to a global search.
+            let searchUrl = "https://www.google.com/search?tbm=shop&q=home+repair+parts+supplies";
+            
+            if (region === "United States") searchUrl = "https://www.amazon.com/s?k=home+repair+replacement+parts";
             else if (region === "Turkey") searchUrl = "https://www.trendyol.com/sr?q=yapi+market+tamirat";
-            else if (region === "Germany") searchUrl = "https://www.amazon.de/s?k=ersatzteile";
-            else if (region === "United Kingdom") searchUrl = "https://www.amazon.co.uk/s?k=repair+parts";
+            else if (region === "Germany") searchUrl = "https://www.amazon.de/s?k=reparatur+ersatzteile";
+            
             window.open(searchUrl, '_blank');
         }
 
+        // --- IMAGE HANDLING & API CALL ---
         const fileInput = document.getElementById('fileInput');
         const analyzeBtn = document.getElementById('analyzeBtn');
         const imagePreview = document.getElementById('imagePreview');
@@ -141,7 +189,7 @@
                     img.src = event.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 600; 
+                        const MAX_WIDTH = 800; 
                         const scale = Math.min(MAX_WIDTH / img.width, 1);
                         canvas.width = img.width * scale;
                         canvas.height = img.height * scale;
@@ -161,11 +209,6 @@
                 document.getElementById('previewBox').classList.remove('hidden');
                 document.getElementById('uploadUI').classList.add('hidden');
                 analyzeBtn.classList.remove('hidden');
-                
-                // Kullanıcı fotoğraf seçtiğinde sayfanın altına hafifçe kaydır ki butonu net görsün
-                setTimeout(() => {
-                    analyzeBtn.scrollIntoView({ behavior: "smooth", block: "center" });
-                }, 100);
             }
         };
 
@@ -175,7 +218,7 @@
             document.getElementById('loader').classList.remove('hidden');
             
             const selectedLang = document.getElementById('langSelect').value;
-            const fullLangName = i18n[selectedLang].langName;
+            const fullLangName = i18n[selectedLang].langName; // Send English name of language to AI
             const selectedRegion = document.getElementById('regionSelect').value;
 
             try {
@@ -193,15 +236,14 @@
                 
                 document.getElementById('loader').classList.add('hidden');
                 document.getElementById('resultBox').classList.remove('hidden');
-                
-                const cleanText = data.result ? data.result.replace(/\*\*/g, '') : "Error generating diagnosis.";
-                document.getElementById('aiResponse').innerText = cleanText;
+                document.getElementById('aiResponse').innerText = data.result || "Error: No diagnosis generated.";
             } catch (err) {
-                alert("Connection failed! Please check your internet connection.");
+                alert("Connection failed. Please check your network.");
                 location.reload();
             }
         };
 
+        // Initialize default texts on load
         changeLanguage();
     </script>
 </body>
