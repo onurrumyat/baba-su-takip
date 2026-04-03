@@ -1,247 +1,254 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // --- 1. SİSTEM DEĞİŞKENLERİ VE KULLANICI VERİSİ ---
     const menuItems = document.querySelectorAll('.menu-item[data-target]');
     const mainContent = document.getElementById('main-content');
-    const logoBtn = document.getElementById('logo-btn');
+    const searchInput = document.getElementById('global-search');
+    
+    // Kullanıcı Profil Objensi (Sistemin Hafızası)
+    let userProfile = {
+        name: "Ege",
+        surname: "Yılmaz",
+        age: 21,
+        faculty: "Bilgisayar Mühendisliği",
+        year: "2. Sınıf",
+        bio: "Yazılım geliştirmeyi ve kahve içmeyi severim. Ada hayatına alışmaya çalışıyorum."
+    };
 
-    // 1. ANA SAYFA İÇERİĞİ
-    const homeContent = `
-        <div class="card" style="background: linear-gradient(135deg, #4F46E5, #818CF8); color: white;">
-            <h2>Hoş Geldin, Ege! 👋</h2>
-            <p>Profilini %80 tamamladın. KKTC'deki yeni hayatına başlamak için doğru yerdesin. Sistemimiz bölümüne ve ilgi alanlarına göre sana özel öneriler hazırladı.</p>
-        </div>
+    // Arama Çubuğu İçin Sahte Veritabanı
+    const database = [
+        { id: 1, type: "market", title: "IKEA Çift Kişilik Yatak", desc: "Mezun oluyorum, acil satılık. Gönyeli.", price: "2.500 TL", img: "🛏️" },
+        { id: 2, type: "market", title: "M1 Macbook Air 8GB", desc: "Yazılım için kullandım, garantisi bitti.", price: "18.000 TL", img: "💻" },
+        { id: 3, type: "market", title: "Tıp Fak. Anatomi Atlası", desc: "Netter 7. Baskı. Çizik yok.", price: "800 TL", img: "📚" },
+        { id: 4, type: "housing", title: "Lefkoşa/Ortaköy - 3+1 Eve 3. Arkadaş", desc: "Sigara içmeyen öğrenci arıyoruz.", price: "£150/Ay", img: "🏠" },
+        { id: 5, type: "housing", title: "Girne Merkez 1+1 Kiralık", desc: "Otobüs durağına yakın, eşyalı.", price: "£450/Ay", img: "🏢" },
+        { id: 6, type: "transport", title: "Gönyeli ➔ Kampüs (Yolculuk)", desc: "Aracımda 3 kişilik boş yer var. Sürücü: Ali K.", price: "20 TL", img: "🚘" },
+        { id: 7, type: "transport", title: "2015 Ford Fiesta", desc: "Seyrüsefer ödendi, ideal öğrenci aracı.", price: "£4.200", img: "🚙" }
+    ];
 
-        <div class="card">
-            <h2>✨ AI Önerisi: Seninle Aynı Fakültedekiler</h2>
-            <div class="match-grid">
-                <div class="match-card">
-                    <div class="avatar">👨‍💻</div>
-                    <h4>Ahmet Y.</h4>
-                    <p>Bilgisayar Müh. • 2. Sınıf</p>
-                    <button class="btn-connect" onclick="alert('Ahmet\\'e bağlantı isteği gönderildi!')">Tanış</button>
-                </div>
-                <div class="match-card">
-                    <div class="avatar">👩‍⚕️</div>
-                    <h4>Ayşe B.</h4>
-                    <p>Tıp Fak. • 1. Sınıf</p>
-                    <button class="btn-connect" onclick="alert('Ayşe ile mesajlaşma başlatıldı.')">Mesaj At</button>
-                </div>
-                <div class="match-card">
-                    <div class="avatar">👨‍⚖️</div>
-                    <h4>Caner K.</h4>
-                    <p>Hukuk Fak. • 3. Sınıf</p>
-                    <button class="btn-connect" onclick="alert('Bağlantı isteği gönderildi!')">Tanış</button>
-                </div>
-            </div>
-        </div>
+    // --- 2. MODAL (AÇILIR PENCERE) YÖNETİMİ ---
+    const modal = document.getElementById('app-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    const closeModalBtn = document.getElementById('modal-close');
 
-        <div class="card">
-            <h2>🛒 Kampüs İkinci El Pazarı <span style="font-size: 14px; color: var(--primary); cursor:pointer;" onclick="alert('İlan Verme Formu Açılır')">+ Yeni İlan Ver</span></h2>
-            
-            <div class="market-item">
-                <div class="market-img">🛏️</div>
-                <div class="market-info">
-                    <h4>IKEA Çift Kişilik Yatak (Az Kullanılmış)</h4>
-                    <p style="color: var(--text-gray); font-size: 14px;">Mezun oluyorum, acil satılık. Nakliyeye yardımcı olurum.</p>
-                    <p style="font-size: 12px; margin-top: 5px;">Satıcı: <strong>Mehmet (İşletme 4.Sınıf)</strong></p>
-                    <div class="market-price">2.500 TL</div>
-                </div>
-            </div>
-
-            <div class="market-item">
-                <div class="market-img">🚗</div>
-                <div class="market-info">
-                    <h4>2015 Ford Fiesta - Öğrenciden</h4>
-                    <p style="color: var(--text-gray); font-size: 14px;">Motor sorunsuz, evrakları tam. Girne içi görülebilir.</p>
-                    <p style="font-size: 12px; margin-top: 5px;">Satıcı: <strong>Zeynep (Mimarlık 3.Sınıf)</strong></p>
-                    <div class="market-price">£4.200 (Sterlin)</div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // 2. KAPSAMLI MARKET SAYFASI
-    const marketContent = `
-        <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-                <h2>🛒 2. El Kampüs Marketi</h2>
-                <button class="btn-primary" onclick="alert('İlan Formu')">+ İlan Ver</button>
-            </div>
-            <p style="color: var(--text-gray); font-size: 14px;">Öğrenciden öğrenciye güvenli alışveriş ağı. Tüm ilanlar öğrenci belgesi onaylıdır.</p>
-            
-            <div class="grid-2col">
-                <div class="item-card">
-                    <div class="item-img-large">🛏️</div>
-                    <div class="item-details">
-                        <div class="item-title">IKEA Çift Kişilik Yatak</div>
-                        <div class="item-desc">Mezun oluyorum, acil satılık. Nakliyeye yardımcı olurum. Gönyeli.</div>
-                        <div class="item-footer">
-                            <span class="item-price-large">2.500 TL</span>
-                            <button class="action-btn">Satıcıya Yaz</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="item-card">
-                    <div class="item-img-large">💻</div>
-                    <div class="item-details">
-                        <div class="item-title">M1 Macbook Air 8GB</div>
-                        <div class="item-desc">Yazılım için kullandım, tertemiz. Garantisi bitti. Pili %88.</div>
-                        <div class="item-footer">
-                            <span class="item-price-large">18.000 TL</span>
-                            <button class="action-btn">Satıcıya Yaz</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="item-card">
-                    <div class="item-img-large">📚</div>
-                    <div class="item-details">
-                        <div class="item-title">Tıp Fak. Anatomi Atlası</div>
-                        <div class="item-desc">Netter Anatomi 7. Baskı. Çizik yok, jelatinli.</div>
-                        <div class="item-footer">
-                            <span class="item-price-large">800 TL</span>
-                            <button class="action-btn">Satıcıya Yaz</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="item-card">
-                    <div class="item-img-large">❄️</div>
-                    <div class="item-details">
-                        <div class="item-title">Beko Mini Buzdolabı</div>
-                        <div class="item-desc">Yurt odası için birebir. Sorunsuz soğutuyor.</div>
-                        <div class="item-footer">
-                            <span class="item-price-large">1.200 TL</span>
-                            <button class="action-btn">Satıcıya Yaz</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // 3. KAPSAMLI EV ARKADAŞI / KİRALIK SAYFASI
-    const housingContent = `
-        <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-                <h2>🔑 Ev Arkadaşı & Kiralık Daireler</h2>
-                <button class="btn-primary">İlan Ver / Arıyorum De</button>
-            </div>
-            <p style="margin-bottom: 15px; color: var(--text-gray); font-size: 14px;">Yapay Zeka, yaşam tarzı anketine (sigara, uyku düzeni, bütçe) göre sana en uygun ev arkadaşlarını listeliyor.</p>
-            
-            <div class="grid-2col">
-                <div class="item-card">
-                    <div class="item-img-large" style="background:#fce7f3; font-size: 24px; font-weight:bold; color: #db2777;">🏠 AI %90 Eşleşme</div>
-                    <div class="item-details">
-                        <div class="item-title">Lefkoşa/Ortaköy - 3+1 Eve 3. Arkadaş</div>
-                        <div class="item-desc">Sigara içmeyen, temizliğe dikkat eden öğrenci arıyoruz. Elektrik/Su ortak.</div>
-                        <div class="item-footer">
-                            <span class="item-price-large">£150 / Ay</span>
-                            <button class="action-btn">Evi Gör</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="item-card">
-                    <div class="item-img-large" style="background:#e0e7ff; font-size: 24px; font-weight:bold; color: #4F46E5;">🏢 Kiralık Daire</div>
-                    <div class="item-details">
-                        <div class="item-title">Girne Merkez 1+1 Eşyalı</div>
-                        <div class="item-desc">Üniversite otobüs durağına 2 dk yürüme mesafesinde, aidat dahil, yeni bina.</div>
-                        <div class="item-footer">
-                            <span class="item-price-large">£450 / Ay</span>
-                            <button class="action-btn">Emlakçıya Yaz</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="item-card">
-                    <div class="item-img-large" style="background:#fce7f3; font-size: 24px; font-weight:bold; color: #db2777;">🏠 AI %75 Eşleşme</div>
-                    <div class="item-details">
-                        <div class="item-title">Gönyeli - 2+1 Eve Arkadaş</div>
-                        <div class="item-desc">Evcil hayvan kabul edilir. Sadece faturaları bölüşecek birini arıyorum.</div>
-                        <div class="item-footer">
-                            <span class="item-price-large">£200 / Ay</span>
-                            <button class="action-btn">Evi Gör</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // 4. KAPSAMLI ULAŞIM SAYFASI
-    const transportContent = `
-        <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-                <h2>🚗 Ulaşım & Araç Ağı</h2>
-                <div>
-                    <button class="btn-primary">Araç Sat/Al</button>
-                </div>
-            </div>
-            
-            <div style="background: #EEF2FF; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                <h3 style="font-size:16px; margin-bottom: 10px; color: var(--primary);">📍 Günlük Yolculuk Paylaşımı (Carpooling)</h3>
-                <div style="display:flex; justify-content:space-between; align-items:center; background: white; padding: 15px; border-radius: 8px;">
-                    <div style="display:flex; align-items:center; gap: 15px;">
-                        <div class="avatar" style="margin:0;">🚘</div>
-                        <div>
-                            <div class="item-title" style="margin-bottom:3px;">Gönyeli ➔ Kampüs (Sabah 08:30)</div>
-                            <div class="item-desc" style="margin-bottom:0;">Aracımda 3 kişilik boş yer var. Benzin masrafı bölüşülecek. Sürücü: Ali K.</div>
-                        </div>
-                    </div>
-                    <button class="btn-primary">Koltuk Ayırt (20 TL)</button>
-                </div>
-            </div>
-
-            <h3 style="font-size:16px; margin-bottom: 10px;">🏷️ Öğrenciden Satılık Araçlar</h3>
-            <div class="grid-2col">
-                <div class="item-card">
-                    <div class="item-img-large">🚙</div>
-                    <div class="item-details">
-                        <div class="item-title">2015 Ford Fiesta (Otomatik)</div>
-                        <div class="item-desc">Evrakları tam, seyrüsefer ödendi. Ada içi ideal öğrenci aracı.</div>
-                        <div class="item-footer">
-                            <span class="item-price-large">£4.200</span>
-                            <button class="action-btn">İletişime Geç</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="item-card">
-                    <div class="item-img-large">🏍️</div>
-                    <div class="item-details">
-                        <div class="item-title">Honda PCX 125cc Motor</div>
-                        <div class="item-desc">Trafik derdi yok. 2 kask hediye. Kuryelik yapmadım, temiz.</div>
-                        <div class="item-footer">
-                            <span class="item-price-large">£1.800</span>
-                            <button class="action-btn">İletişime Geç</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Sayfa yükleme fonksiyonu
-    function loadPage(pageName) {
-        if (pageName === 'home') mainContent.innerHTML = homeContent;
-        else if (pageName === 'market') mainContent.innerHTML = marketContent;
-        else if (pageName === 'housing') mainContent.innerHTML = housingContent;
-        else if (pageName === 'transport') mainContent.innerHTML = transportContent;
+    window.openModal = function(title, contentHTML) {
+        modalTitle.innerText = title;
+        modalBody.innerHTML = contentHTML;
+        modal.classList.add('active');
     }
 
-    // Menü tıklama olayları
+    window.closeModal = function() {
+        modal.classList.remove('active');
+    }
+
+    closeModalBtn.addEventListener('click', closeModal);
+    window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    // --- 3. MOBİL MENÜ YÖNETİMİ ---
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const sidebar = document.getElementById('sidebar');
+
+    mobileMenuBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+    });
+
+    // --- 4. SAYFA ŞABLONLARI OLUŞTURUCULARI ---
+
+    function getHomeContent() {
+        return `
+            <div class="card" style="background: linear-gradient(135deg, #4F46E5, #818CF8); color: white;">
+                <h2>Hoş Geldin, ${userProfile.name}! 👋</h2>
+                <p>${userProfile.faculty} - ${userProfile.year} öğrencisi olarak KKTC'deki yeni hayatına başlamak için doğru yerdesin.</p>
+            </div>
+            <div class="card">
+                <h2>✨ AI Önerisi: Seninle Aynı Fakültedekiler</h2>
+                <div class="match-grid">
+                    <div class="match-card">
+                        <div class="avatar">👨‍💻</div><h4>Ahmet Y.</h4><p>${userProfile.faculty} • 2. Sınıf</p>
+                        <button class="action-btn" onclick="openModal('Bağlantı Kur', '<p>Ahmet kişisine bağlantı isteği gönderildi!</p>')">Tanış</button>
+                    </div>
+                    <div class="match-card">
+                        <div class="avatar">👩‍⚕️</div><h4>Ayşe B.</h4><p>Tıp Fak. • 1. Sınıf</p>
+                        <button class="action-btn" onclick="openModal('Mesaj At', '<textarea class=\\'form-group\\' style=\\'width:100%; height:80px;\\' placeholder=\\'Mesajınızı yazın...\\'></textarea><button class=\\'btn-primary\\' onclick=\\'closeModal()\\'>Gönder</button>')">Mesaj At</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h2>Hızlı Bakış</h2>
+                    <button class="action-btn" style="width:auto;" onclick="document.querySelector('[data-target=\\'market\\']').click()">Tümünü Gör</button>
+                </div>
+                <p>Uygulamada dolaşmak için sol menüyü (telefondaysanız sol üstteki ☰ butonunu) kullanın.</p>
+            </div>
+        `;
+    }
+
+    function renderListings(type, title, buttonText, buttonActionTitle) {
+        const filteredData = database.filter(item => item.type === type);
+        let html = `
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                    <h2>${title}</h2>
+                    <button class="btn-primary" style="width:auto;" onclick="openModal('Yeni İlan Ver', '<div class=\\'form-group\\'><label>İlan Başlığı</label><input type=\\'text\\'></div><div class=\\'form-group\\'><label>Fiyat</label><input type=\\'text\\'></div><button class=\\'btn-primary\\' onclick=\\'closeModal()\\'>İlanı Kaydet</button>')">+ İlan Ver</button>
+                </div>
+                <div class="grid-2col">
+        `;
+        filteredData.forEach(item => {
+            html += `
+                <div class="item-card">
+                    <div class="item-img-large">${item.img}</div>
+                    <div class="item-details">
+                        <div class="item-title">${item.title}</div>
+                        <div class="item-desc">${item.desc}</div>
+                        <div class="item-footer">
+                            <span class="item-price-large">${item.price}</span>
+                            <button class="action-btn" style="width:auto;" onclick="openModal('${buttonActionTitle}', '<p>${item.title} ile ilgili işlem başlatılıyor...</p><button class=\\'btn-primary\\' onclick=\\'closeModal()\\'>Onayla</button>')">${buttonText}</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += `</div></div>`;
+        return html;
+    }
+
+    // --- 5. PROFİL SAYFASI VE KAYIT MANTIĞI ---
+    function loadProfilePage() {
+        const profileHTML = `
+            <div class="card">
+                <h2>👤 Profil Bilgilerim</h2>
+                <div style="background: #F3F4F6; padding: 20px; border-radius: 10px;">
+                    <div class="form-group">
+                        <label>Ad</label>
+                        <input type="text" id="prof-name" value="${userProfile.name}">
+                    </div>
+                    <div class="form-group">
+                        <label>Soyad</label>
+                        <input type="text" id="prof-surname" value="${userProfile.surname}">
+                    </div>
+                    <div class="form-group">
+                        <label>Yaş</label>
+                        <input type="number" id="prof-age" value="${userProfile.age}">
+                    </div>
+                    <div class="form-group">
+                        <label>Fakülte</label>
+                        <select id="prof-faculty">
+                            <option value="Bilgisayar Mühendisliği" ${userProfile.faculty === 'Bilgisayar Mühendisliği' ? 'selected' : ''}>Bilgisayar Mühendisliği</option>
+                            <option value="Tıp Fakültesi" ${userProfile.faculty === 'Tıp Fakültesi' ? 'selected' : ''}>Tıp Fakültesi</option>
+                            <option value="Hukuk Fakültesi" ${userProfile.faculty === 'Hukuk Fakültesi' ? 'selected' : ''}>Hukuk Fakültesi</option>
+                            <option value="Mimarlık" ${userProfile.faculty === 'Mimarlık' ? 'selected' : ''}>Mimarlık</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Sınıf</label>
+                        <select id="prof-year">
+                            <option value="Hazırlık" ${userProfile.year === 'Hazırlık' ? 'selected' : ''}>Hazırlık</option>
+                            <option value="1. Sınıf" ${userProfile.year === '1. Sınıf' ? 'selected' : ''}>1. Sınıf</option>
+                            <option value="2. Sınıf" ${userProfile.year === '2. Sınıf' ? 'selected' : ''}>2. Sınıf</option>
+                            <option value="3. Sınıf" ${userProfile.year === '3. Sınıf' ? 'selected' : ''}>3. Sınıf</option>
+                            <option value="4. Sınıf" ${userProfile.year === '4. Sınıf' ? 'selected' : ''}>4. Sınıf</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Kendinden Bahset (Bio)</label>
+                        <textarea id="prof-bio" rows="3">${userProfile.bio}</textarea>
+                    </div>
+                    <button class="btn-primary" id="save-profile-btn">Değişiklikleri Kaydet</button>
+                </div>
+            </div>
+        `;
+        mainContent.innerHTML = profileHTML;
+
+        // Kaydet butonunu dinle
+        document.getElementById('save-profile-btn').addEventListener('click', () => {
+            userProfile.name = document.getElementById('prof-name').value;
+            userProfile.surname = document.getElementById('prof-surname').value;
+            userProfile.age = document.getElementById('prof-age').value;
+            userProfile.faculty = document.getElementById('prof-faculty').value;
+            userProfile.year = document.getElementById('prof-year').value;
+            userProfile.bio = document.getElementById('prof-bio').value;
+            
+            openModal('Başarılı', '<p>Profil bilgileriniz başarıyla güncellendi!</p>');
+        });
+    }
+
+    document.getElementById('profile-btn').addEventListener('click', () => {
+        menuItems.forEach(m => m.classList.remove('active')); // Sol menü seçimini temizle
+        loadProfilePage();
+        if(window.innerWidth <= 1024) sidebar.classList.remove('open'); // Mobilde menüyü kapat
+    });
+
+    // --- 6. ARAMA MOTORU FONKSİYONU ---
+    searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        
+        if(term.length === 0) {
+            // Arama silindiyse ana sayfaya dön
+            document.querySelector('[data-target="home"]').click();
+            return;
+        }
+
+        // Aramaya uyanları filtrele
+        const results = database.filter(item => 
+            item.title.toLowerCase().includes(term) || 
+            item.desc.toLowerCase().includes(term)
+        );
+
+        let searchHTML = `<div class="card"><h2>Arama Sonuçları: "${e.target.value}"</h2>`;
+        
+        if(results.length === 0) {
+            searchHTML += `<p>Aradığınız kritere uygun sonuç bulunamadı.</p></div>`;
+        } else {
+            searchHTML += `<div class="grid-2col">`;
+            results.forEach(item => {
+                searchHTML += `
+                    <div class="item-card">
+                        <div class="item-img-large">${item.img}</div>
+                        <div class="item-details">
+                            <div class="item-title">${item.title}</div>
+                            <div class="item-desc">${item.desc}</div>
+                            <div class="item-footer">
+                                <span class="item-price-large">${item.price}</span>
+                                <button class="action-btn" style="width:auto;" onclick="openModal('İletişim', 'Satıcıya mesaj gönderiliyor...')">İncele</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            searchHTML += `</div></div>`;
+        }
+        
+        // Sol menü aktifliklerini kaldırıp sonuçları göster
+        menuItems.forEach(m => m.classList.remove('active'));
+        mainContent.innerHTML = searchHTML;
+    });
+
+    // --- 7. SAYFA GEÇİŞ SİSTEMİ (ROUTING) ---
+    function loadPage(pageName) {
+        searchInput.value = ''; // Sayfa değişince aramayı temizle
+        if (pageName === 'home') mainContent.innerHTML = getHomeContent();
+        else if (pageName === 'market') mainContent.innerHTML = renderListings('market', '🛒 2. El Kampüs Marketi', 'Satıcıya Yaz', 'Mesaj Ekranı');
+        else if (pageName === 'housing') mainContent.innerHTML = renderListings('housing', '🔑 Ev Arkadaşı & Kiralık Daireler', 'İletişime Geç', 'Ev Sahibiyle Görüş');
+        else if (pageName === 'transport') mainContent.innerHTML = renderListings('transport', '🚗 Araç & Ulaşım Ağı', 'Koltuk/Araç Ayırt', 'Rezervasyon');
+        
+        // Mobilde bir menüye tıklanınca menüyü otomatik kapat
+        if(window.innerWidth <= 1024) {
+            sidebar.classList.remove('open');
+        }
+    }
+
     menuItems.forEach(item => {
         item.addEventListener('click', (e) => {
-            // Aktif sınıfını güncelle
             menuItems.forEach(m => m.classList.remove('active'));
             e.currentTarget.classList.add('active');
-
-            // Hedef sayfayı yükle
-            const targetPage = e.currentTarget.getAttribute('data-target');
-            loadPage(targetPage);
+            loadPage(e.currentTarget.getAttribute('data-target'));
         });
     });
 
-    // Logoya tıklayınca Ana Sayfaya dön
-    logoBtn.addEventListener('click', () => {
+    document.getElementById('logo-btn').addEventListener('click', () => {
         document.querySelector('[data-target="home"]').click();
     });
 
-    // İlk açılışta ana sayfayı yükle
+    // İlk açılış
     loadPage('home');
 });
