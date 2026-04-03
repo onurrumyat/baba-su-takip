@@ -10,7 +10,6 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // Frontend'den gelen resim, dil ve ülke verilerini alıyoruz
     const { image, language, region } = req.body;
 
     if (!image) {
@@ -19,16 +18,19 @@ module.exports = async function handler(req, res) {
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
+      response_format: { type: "json_object" }, 
       messages: [
         {
           role: "user",
           content: [
             { 
               type: "text", 
-              // AI'a seçilen ülke ve dile göre dinamik talimat veriyoruz
-              text: `You are an expert home repair assistant. Analyze the image. The user is located in ${region}. 
-                     Provide a short diagnosis, list the required parts, and give an estimated total cost including labor in the local currency of ${region}. 
-                     IMPORTANT: Write your entire response in ${language}. Keep it professional and well-formatted.` 
+              text: `You are an expert repair estimator in ${region}. Analyze the image.
+                     You MUST respond strictly in JSON format with these exact keys:
+                     "diagnosis": A short 1-2 sentence diagnosis in ${language}.
+                     "parts": An array of strings detailing exact parts needed and realistic CHEAPEST to AVERAGE retail prices in the local currency of ${region}. (Write in ${language}).
+                     "total_cost": Estimated total cost including labor in ${language}.
+                     "search_keywords": 2-3 highly optimized English keywords to find these exact parts on Amazon (e.g., "35mm ceramic faucet cartridge").` 
             },
             {
               type: "image_url",
@@ -37,10 +39,16 @@ module.exports = async function handler(req, res) {
           ],
         },
       ],
-      max_tokens: 500,
+      max_tokens: 350,
     });
 
-    return res.status(200).json({ result: response.choices[0].message.content });
+    // OpenAI bazen JSON'u markdown (```json ... ```) içine alır, bunu temizliyoruz
+    let rawContent = response.choices[0].message.content;
+    rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
+
+    const aiData = JSON.parse(rawContent);
+    return res.status(200).json(aiData);
+
   } catch (error) {
     console.error("OpenAI API Error:", error);
     return res.status(500).json({ error: "AI analysis failed.", details: error.message });
