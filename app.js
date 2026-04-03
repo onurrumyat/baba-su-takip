@@ -3,8 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const mainContent = document.getElementById('main-content');
     
     let userProfile = { name: "Ege", surname: "Yılmaz", university: "Global University", faculty: "Bilgisayar Mühendisliği", year: "2. Sınıf", bio: "Kampüs hayatını ve teknolojiyi seviyorum." };
-
-    // SİSTEM HAFIZASI: Katılınan Fakülteler
     let joinedFaculties = [];
 
     const database = [
@@ -20,16 +18,23 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 3, avatar: "👽", color: "#D1FAE5", user: "Anonim #104", time: "1 gün önce", text: "Yemekhanedeki vegan menü harika olmuş!" }
     ];
 
+    // WHATSAPP MANTIĞI: CHAT VERİTABANI
     let chatsDB = [
         { 
             id: "chat1", name: "Sarah B.", avatar: "👩‍⚕️", role: "Tıp Fakültesi",
             messages: [
                 { type: "received", text: "Merhaba Ege, Anatomi atlası duruyor mu?" },
-                { type: "sent", text: "Selam Sarah, evet duruyor." }
+                { type: "sent", text: "Selam Sarah, evet duruyor. Ne zaman istersen alabilirsin." },
+                { type: "received", text: "Harika! Kampüsteysen yarın 14:00'te kütüphanenin önünde buluşalım mı?" }
+            ]
+        },
+        { 
+            id: "chat2", name: "John D.", avatar: "👨‍💻", role: "Aynı Sınıf",
+            messages: [
+                { type: "received", text: "Dostum dünkü algoritma ödevini yapabildin mi? Ben pointer kısmında takıldım." }
             ]
         }
     ];
-    let currentChatId = "chat1";
 
     // --- MODAL YÖNETİMİ ---
     const modal = document.getElementById('app-modal');
@@ -46,11 +51,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('modal-close').addEventListener('click', closeModal);
     window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
-    // --- MOBİL MENÜ YÖNETİMİ ---
+    // --- MOBİL MENÜ ---
     const sidebar = document.getElementById('sidebar');
     document.getElementById('mobile-menu-btn').addEventListener('click', () => { sidebar.classList.toggle('open'); });
 
-    // --- DAHA FAZLA GÖSTER MANTIĞI ---
+    // --- DAHA FAZLA GÖSTER ---
     const setupShowMore = (btnId, containerId) => {
         const btn = document.getElementById(btnId);
         const container = document.getElementById(containerId);
@@ -64,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupShowMore('desktop-show-more-btn', 'desktop-more-faculties');
     setupShowMore('mobile-show-more-btn', 'mobile-more-faculties');
 
-    // --- 1. ANA SAYFA ---
+    // --- ANA SAYFA ---
     function getHomeContent() {
         return `
             <div class="card" style="background: linear-gradient(135deg, #4F46E5, #818CF8); color: white;">
@@ -74,14 +79,14 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="card">
                 <h2>✨ AI Kampüs Eşleşmeleri</h2>
                 <div class="match-grid">
-                    <div class="match-card"><div class="avatar">👨‍💻</div><h4>John D.</h4><p>Aynı Sınıf</p><button class="action-btn" onclick="openModal('Bağlantı Kur', '<p>İstek gönderildi!</p>')">Bağlan</button></div>
+                    <div class="match-card"><div class="avatar">👨‍💻</div><h4>John D.</h4><p>Aynı Sınıf</p><button class="action-btn" onclick="document.querySelector('[data-target=\\'messages\\']').click()">Mesaj At</button></div>
                     <div class="match-card"><div class="avatar">👩‍⚕️</div><h4>Sarah B.</h4><p>Tıp Fakültesi</p><button class="action-btn" onclick="document.querySelector('[data-target=\\'messages\\']').click()">Mesaj At</button></div>
                 </div>
             </div>
         `;
     }
 
-    // --- 2. İLAN LİSTELEYİCİ (AKILLI ARAMA ÇUBUĞUYLA) ---
+    // --- İLAN SAYFASI (AKILLI ARAMA) ---
     function renderListings(type, title, buttonText) {
         let html = `
             <div class="card">
@@ -114,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
         searchInput.addEventListener('input', (e) => drawGrid(e.target.value.toLowerCase())); 
     }
 
-    // --- 3. ANONİM KAMPÜS (KARE TASARIM) ---
+    // --- ANONİM KAMPÜS ---
     function renderConfessions() {
         let html = `
             <div class="card">
@@ -141,12 +146,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if(text.trim() === '') return;
         const pastelColors = ["#FEF3C7", "#E0E7FF", "#D1FAE5", "#FCE7F3", "#F3E8FF"];
         confessionsDB.unshift({ 
-            id: Date.now(), 
-            avatar: ["👻","👽","🤖","🦊","🎭"][Math.floor(Math.random()*5)], 
-            color: pastelColors[Math.floor(Math.random()*5)],
-            user: "Anonim #"+Math.floor(Math.random()*999), 
-            time: "Şimdi", 
-            text: text 
+            id: Date.now(), avatar: "👻", color: pastelColors[Math.floor(Math.random()*5)],
+            user: "Anonim #"+Math.floor(Math.random()*999), time: "Şimdi", text: text 
         });
         closeModal();
         drawConfessionsGrid();
@@ -156,15 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const feed = document.getElementById('conf-feed');
         let html = '';
         confessionsDB.forEach((post, index) => {
-            html += `
-                <div class="confession-square" style="background:${post.color};" onclick="openConfessionDetail(${index})">
-                    <div class="confession-square-header">
-                        <div class="confession-square-avatar">${post.avatar}</div>
-                        <div class="confession-square-time">${post.time}</div>
-                    </div>
-                    <div class="confession-square-text">${post.text}</div>
-                </div>
-            `;
+            html += `<div class="confession-square" style="background:${post.color};" onclick="openConfessionDetail(${index})"><div class="confession-square-header"><div class="confession-square-avatar">${post.avatar}</div><div class="confession-square-time">${post.time}</div></div><div class="confession-square-text">${post.text}</div></div>`;
         });
         feed.innerHTML = html;
     }
@@ -172,24 +165,17 @@ document.addEventListener("DOMContentLoaded", () => {
     window.openConfessionDetail = function(index) {
         const post = confessionsDB[index];
         openModal(post.user + ' Diyor ki:', `
-            <div style="background:${post.color}; padding: 25px; border-radius: 12px; font-size: 18px; line-height: 1.6; margin-bottom: 20px;">
-                ${post.text}
-            </div>
-            <div style="display:flex; gap:10px;">
-                <button class="action-btn" onclick="alert('Beğenildi!')">👍 Beğen</button>
-                <button class="action-btn" onclick="alert('Yanıt bölümü açılıyor...')">💬 Yanıtla</button>
-            </div>
+            <div style="background:${post.color}; padding: 25px; border-radius: 12px; font-size: 18px; line-height: 1.6; margin-bottom: 20px;">${post.text}</div>
+            <div style="display:flex; gap:10px;"><button class="action-btn" onclick="alert('Beğenildi!')">👍 Beğen</button><button class="action-btn" onclick="alert('Yanıt bölümü açılıyor...')">💬 Yanıtla</button></div>
         `);
     }
 
-    // --- 4. FAKÜLTE KATILIM (GATEKEEPING) SİSTEMİ ---
+    // --- FAKÜLTE KATILIM (GATEKEEPING) SİSTEMİ ---
     function updateMyFacultiesSidebar() {
         const container = document.getElementById('my-joined-faculties');
         let html = '';
         joinedFaculties.forEach(fac => {
-            html += `<div class="menu-item community-link" data-name="${fac.name}" data-icon="${fac.icon}" data-color="${fac.color}">
-                        ${fac.icon} ${fac.name}
-                     </div>`;
+            html += `<div class="menu-item community-link" data-name="${fac.name}" data-icon="${fac.icon}" data-color="${fac.color}">${fac.icon} ${fac.name}</div>`;
         });
         container.innerHTML = html;
     }
@@ -202,11 +188,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     window.loadFacultyFeed = function(name, icon, bgColor) {
+        // Yeni tasarıma göre Yuvarlak avatarlar tamamen silindi, temiz dikdörtgen oldu.
         let html = `
             <div class="card" style="padding:0; border:none; box-shadow:none; background:transparent;">
                 <div class="community-banner" style="background: ${bgColor};">
                     <h1>${icon} ${name}</h1>
-                    <div class="community-stats">👥 1,240 Öğrenci • 🟢 42 Çevrimiçi</div>
+                    <div class="community-stats">👥 1,240 Öğrenci &nbsp;•&nbsp; 🟢 42 Çevrimiçi</div>
                 </div>
                 <div class="card" style="margin-bottom:20px;">
                     <div style="display:flex; gap:10px;">
@@ -240,7 +227,7 @@ document.addEventListener("DOMContentLoaded", () => {
             mainContent.innerHTML = `
                 <div class="join-faculty-box">
                     <div class="icon">${icon}</div>
-                    <h2>${name} Topluluğuna Hoş Geldin</h2>
+                    <h2>${name} Ağına Hoş Geldin</h2>
                     <p>Bu fakülte ağı kapalı bir topluluktur. Katılarak bölümündeki diğer öğrencilerle tanışabilir ve duyuruları takip edebilirsin.</p>
                     <button class="btn-primary" style="max-width:250px;" onclick="joinFaculty('${name}', '${icon}', '${bgColor}')">Fakülteye Katıl</button>
                 </div>
@@ -249,7 +236,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Modern Tıklama Dinleyicisi (Event Delegation) -> Kodu çökertmez!
     document.body.addEventListener('click', (e) => {
         const link = e.target.closest('.community-link');
         if(link) {
@@ -260,46 +246,91 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 5. MESAJLAŞMA SİSTEMİ ---
+    // --- YENİ WHATSAPP MANTIĞI: MESAJLAŞMA ---
     function renderMessages() {
-        let html = `<div class="card" style="padding:0; overflow:hidden;"><div class="chat-layout"><div class="chat-sidebar"><div style="padding:15px; font-weight:bold; border-bottom:1px solid #E5E7EB;">Sohbetler</div>`;
+        let html = `
+            <div class="card" style="padding:0; overflow:hidden;">
+                <div class="chat-layout" id="chat-layout-container">
+                    <div class="chat-sidebar">
+                        <div class="chat-sidebar-header">Sohbetler</div>
+        `;
+        
         chatsDB.forEach(chat => {
             const lastMsg = chat.messages[chat.messages.length - 1].text;
-            const isActive = chat.id === currentChatId ? 'active' : '';
-            html += `<div class="chat-contact ${isActive}" data-id="${chat.id}"><div class="avatar">${chat.avatar}</div><div class="chat-contact-info"><div class="chat-contact-name">${chat.name}</div><div class="chat-contact-last">${lastMsg}</div></div></div>`;
+            html += `<div class="chat-contact" data-id="${chat.id}"><div class="avatar">${chat.avatar}</div><div class="chat-contact-info"><div class="chat-contact-name">${chat.name}</div><div class="chat-contact-last">${lastMsg}</div></div></div>`;
         });
-        html += `</div><div class="chat-main" id="chat-box-container"></div></div></div>`;
+        
+        html += `
+                    </div>
+                    <div class="chat-main" id="chat-main-view">
+                        <div style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--text-gray);">Mesajlaşmaya başlamak için bir kişi seçin.</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
         mainContent.innerHTML = html;
 
         document.querySelectorAll('.chat-contact').forEach(contact => {
-            contact.addEventListener('click', (e) => { currentChatId = e.currentTarget.getAttribute('data-id'); renderMessages(); });
+            contact.addEventListener('click', (e) => { 
+                const chatId = e.currentTarget.getAttribute('data-id');
+                openChatView(chatId);
+            });
         });
-        renderActiveChat();
     }
 
-    function renderActiveChat() {
-        const activeChat = chatsDB.find(c => c.id === currentChatId);
-        const container = document.getElementById('chat-box-container');
-        let chatHTML = `<div class="chat-header"><div class="avatar" style="width:35px; height:35px; font-size:16px;">${activeChat.avatar}</div><div><div>${activeChat.name}</div><div style="font-size:11px; color:var(--text-gray); font-weight:normal;">${activeChat.role}</div></div></div><div class="chat-messages" id="chat-messages-scroll">`;
+    function openChatView(chatId) {
+        const activeChat = chatsDB.find(c => c.id === chatId);
+        const container = document.getElementById('chat-main-view');
+        const layoutContainer = document.getElementById('chat-layout-container');
+        
+        // Mobilde sohbet kutusunu göstermek için chat-active sınıfını ekle
+        layoutContainer.classList.add('chat-active');
+
+        let chatHTML = `
+            <div class="chat-header">
+                <button class="back-btn" id="back-to-chats">←</button>
+                <div class="avatar" style="width:40px; height:40px; font-size:20px; margin:0 15px 0 0;">${activeChat.avatar}</div>
+                <div style="flex:1;">
+                    <div style="font-weight:bold; font-size:15px; color:#111B21;">${activeChat.name}</div>
+                    <div style="font-size:12px; color:var(--text-gray);">${activeChat.role}</div>
+                </div>
+            </div>
+            <div class="chat-messages" id="chat-messages-scroll">
+        `;
+        
         activeChat.messages.forEach(msg => { chatHTML += `<div class="bubble ${msg.type}">${msg.text}</div>`; });
-        chatHTML += `</div><div class="chat-input-area"><input type="text" id="chat-input-field" placeholder="Mesaj yaz..."><button id="chat-send-btn">➤</button></div>`;
+        
+        chatHTML += `
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input-field" placeholder="Bir mesaj yazın">
+                <button id="chat-send-btn">➤</button>
+            </div>
+        `;
+        
         container.innerHTML = chatHTML;
         
         const scrollBox = document.getElementById('chat-messages-scroll');
         scrollBox.scrollTop = scrollBox.scrollHeight;
 
+        // Geri Dön Butonu (Sadece Mobilde Görünür CSS ile)
+        document.getElementById('back-to-chats').addEventListener('click', () => {
+            layoutContainer.classList.remove('chat-active');
+        });
+
         const sendMsg = () => {
             const input = document.getElementById('chat-input-field');
             if(input.value.trim() !== '') {
                 activeChat.messages.push({ type: 'sent', text: input.value });
-                renderActiveChat(); 
+                openChatView(chatId); // Sadece ekranı yenile
             }
         };
         document.getElementById('chat-send-btn').addEventListener('click', sendMsg);
         document.getElementById('chat-input-field').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMsg(); });
     }
 
-    // --- 6. SAYFA YÖNETİMİ ---
+    // --- SAYFA YÖNETİMİ ---
     function loadPage(pageName) {
         if (pageName === 'home') mainContent.innerHTML = getHomeContent();
         else if (pageName === 'market') renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
