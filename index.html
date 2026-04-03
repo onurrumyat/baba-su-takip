@@ -32,7 +32,7 @@
             <div class="menu-item" data-target="confessions">🤫 Anonim Kampüs</div>
             <br>
             <h3>Bana Özel</h3>
-            <div class="menu-item" onclick="openModal('Mesaj Kutusu', '<p>Henüz yeni mesajınız yok.</p>')">💬 Mesajlarım (0)</div>
+            <div class="menu-item" data-target="messages">💬 Mesajlarım (2)</div>
             <div class="menu-item" onclick="openModal('Ayarlar', '<p>Dil ve bölge ayarları yakında eklenecek.</p>')">⚙️ Ayarlar</div>
         </aside>
 
@@ -43,10 +43,10 @@
             <div class="card">
                 <h2>🏷️ İlgi Alanların</h2>
                 <ul class="community-list">
-                    <li onclick="openModal('Topluluk', 'Müzik ve Sanat kulübüne hoş geldin!')">🎸 Müzik ve Sanat</li>
-                    <li onclick="openModal('Topluluk', 'Yazılım kulübü etkinlikleri listeleniyor...')">💻 Teknoloji ve AI Kulübü</li>
-                    <li onclick="openModal('Topluluk', 'Gönüllülük kulübü toplantı notları...')">🤝 Sosyal Sorumluluk Grubu</li>
-                    <li onclick="openModal('Topluluk', 'Kendi fakülte grubuna giriliyor...')">📚 Fakülte Ağı</li>
+                    <li class="community-link" data-name="Müzik ve Sanat" data-icon="🎸" data-color="linear-gradient(135deg, #F59E0B, #D97706)">🎸 Müzik ve Sanat</li>
+                    <li class="community-link" data-name="Teknoloji ve AI Kulübü" data-icon="💻" data-color="linear-gradient(135deg, #3B82F6, #2563EB)">💻 Teknoloji ve AI Kulübü</li>
+                    <li class="community-link" data-name="Sosyal Sorumluluk" data-icon="🤝" data-color="linear-gradient(135deg, #10B981, #059669)">🤝 Sosyal Sorumluluk Grubu</li>
+                    <li class="community-link" data-name="Fakülte Ağı" data-icon="📚" data-color="linear-gradient(135deg, #8B5CF6, #6D28D9)">📚 Fakülte Ağı</li>
                 </ul>
                 <button class="action-btn" style="margin-top: 15px;" onclick="openModal('Yeni Topluluk', '<p>Yeni ilgi alanları keşfetme ekranı</p>')">Daha Fazla Keşfet</button>
             </div>
@@ -68,9 +68,7 @@
                 <h3 id="modal-title">Başlık</h3>
                 <span class="close-btn" id="modal-close">&times;</span>
             </div>
-            <div class="modal-body" id="modal-body">
-                İçerik buraya gelecek
-            </div>
+            <div class="modal-body" id="modal-body"></div>
         </div>
     </div>
 
