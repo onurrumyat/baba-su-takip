@@ -1,16 +1,16 @@
 document.addEventListener("DOMContentLoaded", () => {
     
-    // --- 🌟 KULLANICI PROFİLİ (GÜNCELLENDİ) 🌟 ---
+    // --- 🌟 KULLANICI PROFİLİ 🌟 ---
     let userProfile = { 
         name: "Ege", 
         surname: "Yılmaz", 
         email: "ege.yilmaz@uniloop.edu", 
         age: 21,
         faculty: "Bilgisayar Fakültesi", 
-        year: "2. Sınıf", 
+        year: "2. Sınıf", // Artık serbest metin girişi
         bio: "Kampüs hayatını ve teknolojiyi seviyorum." 
     };
-    let joinedFaculties = []; // Fakülte Katılım Hafızası
+    let joinedFaculties = [];
 
     // --- SİSTEM DEĞİŞKENLERİ VE VERİTABANLARI ---
     const authScreen = document.getElementById('auth-screen');
@@ -46,13 +46,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('login-btn').addEventListener('click', () => {
         authScreen.style.display = 'none';
         appScreen.style.display = 'block';
-        loadPage('home'); // Ana sayfayı yükle
+        loadPage('home');
     });
 
     window.logout = function() {
         appScreen.style.display = 'none';
         authScreen.style.display = 'flex';
-        // Gerçek bir sistemde burada session temizlenir
     };
 
     // --- MODAL YÖNETİMİ ---
@@ -98,14 +97,14 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="card">
                 <h2>✨ AI Kampüs Eşleşmeleri</h2>
                 <div class="match-grid">
-                    <div class="match-card"><div class="avatar">👨‍💻</div><h4>John D.</h4><p>Aynı Sınıf</p><button class="action-btn" onclick="openModal('Bağlantı Kur', '<p>İstek gönderildi!</p>')">Bağlan</button></div>
+                    <div class="match-card"><div class="avatar">👨‍💻</div><h4>John D.</h4><p>${userProfile.year}</p><button class="action-btn" onclick="openModal('Bağlantı Kur', '<p>İstek gönderildi!</p>')">Bağlan</button></div>
                     <div class="match-card"><div class="avatar">👩‍⚕️</div><h4>Sarah B.</h4><p>Tıp Fakültesi</p><button class="action-btn" onclick="document.querySelector('[data-target=\\'messages\\']').click()">Mesaj At</button></div>
                 </div>
             </div>
         `;
     }
 
-    // --- 2. İLAN LİSTELEYİCİ (AKILLI ARAMA ÇUBUĞUYLA) ---
+    // --- 2. İLAN LİSTELEYİCİ ---
     function renderListings(type, title, buttonText) {
         let html = `
             <div class="card">
@@ -138,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
         searchInput.addEventListener('input', (e) => drawGrid(e.target.value.toLowerCase())); 
     }
 
-    // --- 3. ANONİM KAMPÜS (KARE TASARIM) ---
+    // --- 3. ANONİM KAMPÜS ---
     function renderConfessions() {
         let html = `
             <div class="card">
@@ -200,7 +199,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     window.joinFaculty = function(name, icon, bgColor) {
-        // Zaten katılındıysa tekrar ekleme
         if(!joinedFaculties.some(f => f.name === name)) {
             joinedFaculties.push({name: name, icon: icon, color: bgColor});
         }
@@ -350,7 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('chat-input-field').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMsg(); });
     }
 
-    // --- 🌟 6. PROFİL VE AYARLAR EKRANI (YENİ) 🌟 ---
+    // --- 🌟 6. PROFİL VE AYARLAR EKRANI (GÜNCELLENDİ) 🌟 ---
     function renderProfile() {
         mainContent.innerHTML = `
             <div class="card">
@@ -367,16 +365,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                     <div class="grid-2col" style="margin-top:0;">
                         <div class="form-group"><label>Yaş</label><input type="number" id="prof-age" value="${userProfile.age}"></div>
+                        
                         <div class="form-group">
-                            <label>Sınıf</label>
-                            <select id="prof-year">
-                                <option value="Hazırlık" ${userProfile.year === 'Hazırlık' ? 'selected' : ''}>Hazırlık</option>
-                                <option value="1. Sınıf" ${userProfile.year === '1. Sınıf' ? 'selected' : ''}>1. Sınıf</option>
-                                <option value="2. Sınıf" ${userProfile.year === '2. Sınıf' ? 'selected' : ''}>2. Sınıf</option>
-                                <option value="3. Sınıf" ${userProfile.year === '3. Sınıf' ? 'selected' : ''}>3. Sınıf</option>
-                                <option value="4. Sınıf" ${userProfile.year === '4. Sınıf' ? 'selected' : ''}>4. Sınıf</option>
-                                <option value="Mezun" ${userProfile.year === 'Mezun' ? 'selected' : ''}>Mezun</option>
-                            </select>
+                            <label>Sınıf / Yıl</label>
+                            <input type="text" id="prof-year" value="${userProfile.year}" placeholder="Örn: 3. Sınıf, Hazırlık, Mezun">
                         </div>
                     </div>
                     <div class="form-group">
@@ -404,7 +396,7 @@ document.addEventListener("DOMContentLoaded", () => {
             userProfile.surname = document.getElementById('prof-surname').value;
             userProfile.age = document.getElementById('prof-age').value;
             userProfile.faculty = document.getElementById('prof-faculty').value;
-            userProfile.year = document.getElementById('prof-year').value;
+            userProfile.year = document.getElementById('prof-year').value; // Artık serbest inputtan okunuyor
             userProfile.bio = document.getElementById('prof-bio').value;
             openModal('Başarılı', '<p>Profilin güncellendi!</p>');
         });
@@ -445,7 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (pageName === 'housing') renderListings('housing', '🔑 Ev Arkadaşı & Yurt', 'İletişime Geç');
         else if (pageName === 'confessions') renderConfessions();
         else if (pageName === 'messages') renderMessages(); 
-        else if (pageName === 'settings') renderSettings(); // Yeni sayfa eklendi
+        else if (pageName === 'settings') renderSettings();
         
         if(window.innerWidth <= 1024) sidebar.classList.remove('open');
         window.scrollTo(0,0);
