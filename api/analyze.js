@@ -10,7 +10,6 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // Frontend'den gelen resim, dil ve ülke verilerini alıyoruz
     const { image, language, region } = req.body;
 
     if (!image) {
@@ -25,10 +24,13 @@ module.exports = async function handler(req, res) {
           content: [
             { 
               type: "text", 
-              // AI'a seçilen ülke ve dile göre dinamik talimat veriyoruz
-              text: `You are an expert home repair assistant. Analyze the image. The user is located in ${region}. 
-                     Provide a short diagnosis, list the required parts, and give an estimated total cost including labor in the local currency of ${region}. 
-                     IMPORTANT: Write your entire response in ${language}. Keep it professional and well-formatted.` 
+              text: `You are a strict, expert repair estimator. The user is in ${region}.
+                     RULES:
+                     1. DIAGNOSIS: Maximum 2 short sentences.
+                     2. PARTS: List exact parts needed.
+                     3. REALISTIC PRICES: Give highly realistic, current retail market prices for parts and labor in the local currency of ${region}. Do not give vague ranges.
+                     4. FORMAT: Use a very short, clean bulleted list.
+                     5. LANGUAGE: You MUST write your entire response in ${language}. No exceptions.` 
             },
             {
               type: "image_url",
@@ -37,7 +39,7 @@ module.exports = async function handler(req, res) {
           ],
         },
       ],
-      max_tokens: 500,
+      max_tokens: 300, // Token sınırını düşürerek uzun cevap vermesini engelledik
     });
 
     return res.status(200).json({ result: response.choices[0].message.content });
