@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 2, avatar: "🎭", user: "Anonim #911", time: "5 saat önce", text: "Fizik 101 hocası gerçekten çok zorluyor." }
     ];
 
-    // CHAT VERİTABANI
     let chatsDB = [
         { 
             id: "chat1", name: "Sarah B.", avatar: "👩‍⚕️", role: "Tıp Fakültesi",
@@ -50,6 +49,35 @@ document.addEventListener("DOMContentLoaded", () => {
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const sidebar = document.getElementById('sidebar');
     mobileMenuBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); });
+
+    // --- DAHA FAZLA GÖSTER (FAKÜLTELER) MANTIĞI ---
+    const desktopShowMoreBtn = document.getElementById('desktop-show-more-btn');
+    const desktopMoreFaculties = document.getElementById('desktop-more-faculties');
+    if (desktopShowMoreBtn) {
+        desktopShowMoreBtn.addEventListener('click', () => {
+            if (desktopMoreFaculties.style.display === 'none') {
+                desktopMoreFaculties.style.display = 'block';
+                desktopShowMoreBtn.innerText = 'Daha Az Göster';
+            } else {
+                desktopMoreFaculties.style.display = 'none';
+                desktopShowMoreBtn.innerText = 'Daha Fazla Göster';
+            }
+        });
+    }
+
+    const mobileShowMoreBtn = document.getElementById('mobile-show-more-btn');
+    const mobileMoreFaculties = document.getElementById('mobile-more-faculties');
+    if (mobileShowMoreBtn) {
+        mobileShowMoreBtn.addEventListener('click', () => {
+            if (mobileMoreFaculties.style.display === 'none') {
+                mobileMoreFaculties.style.display = 'block';
+                mobileShowMoreBtn.innerText = 'Daha Az Göster';
+            } else {
+                mobileMoreFaculties.style.display = 'none';
+                mobileShowMoreBtn.innerText = 'Daha Fazla Göster';
+            }
+        });
+    }
 
     // 1. ANA SAYFA VE İLANLAR
     function getHomeContent() {
@@ -134,7 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('chat-input-field').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMsg(); });
     }
 
-    // 3. TOPLULUK SAYFASI
+    // 3. FAKÜLTE/TOPLULUK SAYFASI
     window.loadCommunity = function(name, icon, bgColor) {
         menuItems.forEach(m => m.classList.remove('active'));
         if(window.innerWidth <= 1024) sidebar.classList.remove('open');
@@ -143,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="card" style="padding:0; border:none; box-shadow:none; background:transparent;">
                 <div class="community-banner" style="background: ${bgColor};">
                     <h1>${icon} ${name}</h1>
-                    <div class="community-stats">👥 1,240 Üye • 🟢 14 Çevrimiçi</div>
+                    <div class="community-stats">👥 1,240 Öğrenci • 🟢 14 Çevrimiçi</div>
                     <div class="member-avatars">
                         <div class="avatar">👨‍💻</div><div class="avatar">👩‍⚕️</div>
                         <div class="avatar">👨‍🎨</div><div class="avatar" style="background:#f3f4f6; color:#000; font-size:12px;">+1K</div>
@@ -169,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
         window.scrollTo(0,0);
     }
 
-    // Topluluk linklerini dinle (Mobil menüdeki ve Sağ paneldeki tüm linkleri yakalar)
+    // Fakülte linklerini dinle (Mobil ve Sağ paneldeki tüm linkleri yakalar)
     document.querySelectorAll('.community-link').forEach(link => {
         link.addEventListener('click', (e) => {
             const name = e.currentTarget.getAttribute('data-name');
@@ -193,7 +221,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     menuItems.forEach(item => {
         item.addEventListener('click', (e) => {
-            // Sadece tıklanan öğede 'data-target' varsa çalışsın (Topluluk linkleriyle çakışmaması için)
             if(e.currentTarget.getAttribute('data-target')) {
                 menuItems.forEach(m => m.classList.remove('active'));
                 e.currentTarget.classList.add('active');
