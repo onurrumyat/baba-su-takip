@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 2, avatar: "🎭", user: "Anonim #911", time: "5 saat önce", text: "Fizik 101 hocası gerçekten çok zorluyor." }
     ];
 
-    // 💬 MESAJLAŞMA (CHAT) VERİTABANI
+    // CHAT VERİTABANI
     let chatsDB = [
         { 
             id: "chat1", name: "Sarah B.", avatar: "👩‍⚕️", role: "Tıp Fakültesi",
@@ -33,8 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ]
         }
     ];
-
-    let currentChatId = "chat1"; // Varsayılan açık sohbet
+    let currentChatId = "chat1";
 
     // MODAL YÖNETİMİ
     const modal = document.getElementById('app-modal');
@@ -47,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
     closeModalBtn.addEventListener('click', closeModal);
     window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
-    // MOBİL MENÜ
+    // MOBİL MENÜ YÖNETİMİ
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const sidebar = document.getElementById('sidebar');
     mobileMenuBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); });
@@ -78,7 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return html + `</div></div>`;
     }
 
-    // 2. ANONİM İTİRAFLAR
     function renderConfessions() {
         let html = `<div class="card"><h2>🤫 Anonim Kampüs</h2><div style="background: #F3F4F6; padding: 15px; border-radius: 10px; margin-bottom: 20px;"><textarea id="new-conf-text" class="form-group" style="width:100%; height:60px; border:none;" placeholder="Aklından ne geçiyor?"></textarea><div style="text-align: right;"><button class="btn-primary" style="width:auto;" id="post-conf-btn">Gönder</button></div></div><div id="conf-feed">`;
         confessionsDB.forEach(post => {
@@ -94,94 +92,51 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 🌟 3. YENİ: MESAJLAŞMA SİSTEMİ (1:1 CHAT)
+    // 2. MESAJLAŞMA SİSTEMİ
     function renderMessages() {
-        let html = `
-            <div class="card" style="padding:0; overflow:hidden;">
-                <div class="chat-layout">
-                    <div class="chat-sidebar">
-                        <div style="padding:15px; font-weight:bold; border-bottom:1px solid #E5E7EB;">Sohbetler</div>
-        `;
-        
+        let html = `<div class="card" style="padding:0; overflow:hidden;"><div class="chat-layout"><div class="chat-sidebar"><div style="padding:15px; font-weight:bold; border-bottom:1px solid #E5E7EB;">Sohbetler</div>`;
         chatsDB.forEach(chat => {
             const lastMsg = chat.messages[chat.messages.length - 1].text;
             const isActive = chat.id === currentChatId ? 'active' : '';
-            html += `
-                <div class="chat-contact ${isActive}" data-id="${chat.id}">
-                    <div class="avatar">${chat.avatar}</div>
-                    <div class="chat-contact-info">
-                        <div class="chat-contact-name">${chat.name}</div>
-                        <div class="chat-contact-last">${lastMsg}</div>
-                    </div>
-                </div>
-            `;
+            html += `<div class="chat-contact ${isActive}" data-id="${chat.id}"><div class="avatar">${chat.avatar}</div><div class="chat-contact-info"><div class="chat-contact-name">${chat.name}</div><div class="chat-contact-last">${lastMsg}</div></div></div>`;
         });
-
         html += `</div><div class="chat-main" id="chat-box-container"></div></div></div>`;
         mainContent.innerHTML = html;
 
-        // Kişi listesi tıklama olayları
         document.querySelectorAll('.chat-contact').forEach(contact => {
             contact.addEventListener('click', (e) => {
                 currentChatId = e.currentTarget.getAttribute('data-id');
-                renderMessages(); // Ekranı yeni kişiye göre yenile
+                renderMessages(); 
             });
         });
-
         renderActiveChat();
     }
 
     function renderActiveChat() {
         const activeChat = chatsDB.find(c => c.id === currentChatId);
         const container = document.getElementById('chat-box-container');
-        
-        let chatHTML = `
-            <div class="chat-header">
-                <div class="avatar" style="width:35px; height:35px; font-size:16px;">${activeChat.avatar}</div>
-                <div>
-                    <div>${activeChat.name}</div>
-                    <div style="font-size:11px; color:var(--text-gray); font-weight:normal;">${activeChat.role}</div>
-                </div>
-            </div>
-            <div class="chat-messages" id="chat-messages-scroll">
-        `;
-
-        activeChat.messages.forEach(msg => {
-            chatHTML += `<div class="bubble ${msg.type}">${msg.text}</div>`;
-        });
-
-        chatHTML += `
-            </div>
-            <div class="chat-input-area">
-                <input type="text" id="chat-input-field" placeholder="Mesaj yaz...">
-                <button id="chat-send-btn">➤</button>
-            </div>
-        `;
-        
+        let chatHTML = `<div class="chat-header"><div class="avatar" style="width:35px; height:35px; font-size:16px;">${activeChat.avatar}</div><div><div>${activeChat.name}</div><div style="font-size:11px; color:var(--text-gray); font-weight:normal;">${activeChat.role}</div></div></div><div class="chat-messages" id="chat-messages-scroll">`;
+        activeChat.messages.forEach(msg => { chatHTML += `<div class="bubble ${msg.type}">${msg.text}</div>`; });
+        chatHTML += `</div><div class="chat-input-area"><input type="text" id="chat-input-field" placeholder="Mesaj yaz..."><button id="chat-send-btn">➤</button></div>`;
         container.innerHTML = chatHTML;
         
-        // Scroll'u en alta al
         const scrollBox = document.getElementById('chat-messages-scroll');
         scrollBox.scrollTop = scrollBox.scrollHeight;
 
-        // Mesaj Gönderme İşlemi
         const sendMsg = () => {
             const input = document.getElementById('chat-input-field');
             if(input.value.trim() !== '') {
                 activeChat.messages.push({ type: 'sent', text: input.value });
-                renderActiveChat(); // Sadece chat kutusunu yenile
+                renderActiveChat(); 
             }
         };
-
         document.getElementById('chat-send-btn').addEventListener('click', sendMsg);
-        document.getElementById('chat-input-field').addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') sendMsg();
-        });
+        document.getElementById('chat-input-field').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMsg(); });
     }
 
-    // 🌟 4. YENİ: TOPLULUK (GRUP) SAYFASI SİSTEMİ
+    // 3. TOPLULUK SAYFASI
     window.loadCommunity = function(name, icon, bgColor) {
-        menuItems.forEach(m => m.classList.remove('active')); // Sol menü seçimini kaldır
+        menuItems.forEach(m => m.classList.remove('active'));
         if(window.innerWidth <= 1024) sidebar.classList.remove('open');
 
         let html = `
@@ -194,14 +149,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="avatar">👨‍🎨</div><div class="avatar" style="background:#f3f4f6; color:#000; font-size:12px;">+1K</div>
                     </div>
                 </div>
-                
                 <div class="card" style="margin-bottom:20px;">
                     <div style="display:flex; gap:10px;">
                         <input type="text" class="form-group" style="flex:1; margin:0;" placeholder="${name} grubunda bir şeyler paylaş...">
                         <button class="btn-primary" style="width:auto;" onclick="alert('Gönderi paylaşıldı!')">Paylaş</button>
                     </div>
                 </div>
-
                 <div class="confession-post">
                     <div class="confession-avatar">👨‍🎨</div>
                     <div class="confession-content">
@@ -216,7 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
         window.scrollTo(0,0);
     }
 
-    // Sağ paneldeki topluluk linklerini dinle
+    // Topluluk linklerini dinle (Mobil menüdeki ve Sağ paneldeki tüm linkleri yakalar)
     document.querySelectorAll('.community-link').forEach(link => {
         link.addEventListener('click', (e) => {
             const name = e.currentTarget.getAttribute('data-name');
@@ -233,16 +186,19 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (pageName === 'market') mainContent.innerHTML = renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
         else if (pageName === 'housing') mainContent.innerHTML = renderListings('housing', '🔑 Ev Arkadaşı & Yurt İlanları', 'İletişime Geç');
         else if (pageName === 'confessions') renderConfessions();
-        else if (pageName === 'messages') renderMessages(); // Yeni Sayfa
+        else if (pageName === 'messages') renderMessages(); 
         
         if(window.innerWidth <= 1024) sidebar.classList.remove('open');
     }
 
     menuItems.forEach(item => {
         item.addEventListener('click', (e) => {
-            menuItems.forEach(m => m.classList.remove('active'));
-            e.currentTarget.classList.add('active');
-            loadPage(e.currentTarget.getAttribute('data-target'));
+            // Sadece tıklanan öğede 'data-target' varsa çalışsın (Topluluk linkleriyle çakışmaması için)
+            if(e.currentTarget.getAttribute('data-target')) {
+                menuItems.forEach(m => m.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                loadPage(e.currentTarget.getAttribute('data-target'));
+            }
         });
     });
 
@@ -252,6 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('profile-btn').addEventListener('click', () => {
         menuItems.forEach(m => m.classList.remove('active'));
         mainContent.innerHTML = `<div class="card"><h2>👤 Profilim</h2><p>Profil ayarları alanı...</p></div>`;
+        if(window.innerWidth <= 1024) sidebar.classList.remove('open');
     });
 
     // İlk açılış
