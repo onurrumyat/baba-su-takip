@@ -10,7 +10,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
 body { background-color: var(--bg-color); color: var(--text-dark); overflow-x: hidden; }
 
-/* 🌟 GİRİŞ EKRANI (AUTH SCREEN) STİLLERİ 🌟 */
+/* 🌟 GİRİŞ EKRANI (AUTH SCREEN) 🌟 */
 #auth-screen {
     height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center;
     background: linear-gradient(135deg, var(--primary), #818CF8); position: fixed; top: 0; left: 0; z-index: 9999;
@@ -28,17 +28,20 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
 .logo-area { display: flex; align-items: center; gap: 15px; }
 .logo { font-size: 24px; font-weight: 800; color: var(--primary); cursor: pointer; }
 #mobile-menu-btn { display: none; font-size: 24px; cursor: pointer; color: var(--text-dark); }
-
 .user-menu button { background-color: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: 600; }
 
 .container { display: grid; grid-template-columns: 250px 1fr 300px; gap: 20px; padding: 20px 5%; max-width: 1400px; margin: 0 auto; position: relative; }
 
-/* SİDEBAR & SAĞ PANEL */
-.sidebar { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: calc(100vh - 100px); display: flex; flex-direction: column; justify-content: space-between; position: sticky; top: 90px; overflow-y: auto; }
+/* 🌟 SIDEBAR GÜNCELLEMESİ (COMPACT & STICKY) 🌟 */
+.sidebar { 
+    background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+    height: fit-content; /* Ekranın sonuna kadar uzamasını engeller */
+    position: sticky; top: 90px; 
+}
 .sidebar h3 { margin-bottom: 15px; font-size: 16px; color: var(--text-gray); }
 .menu-item { padding: 12px 15px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; font-weight: 500; }
 .menu-item:hover, .menu-item.active { background-color: #EEF2FF; color: var(--primary); }
-.sidebar-bottom { margin-top: auto; padding-top: 20px; border-top: 1px solid #E5E7EB; }
+.sidebar-bottom { margin-top: 20px; padding-top: 20px; border-top: 1px solid #E5E7EB; }
 
 .mobile-only-communities { display: none; }
 
@@ -84,7 +87,7 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
 .local-search-bar { width: 100%; padding: 15px 20px; border: 2px solid #EEF2FF; border-radius: 30px; font-size: 16px; outline: none; margin-bottom: 20px; transition: 0.3s; background: #F9FAFB; }
 .local-search-bar:focus { border-color: var(--primary); background: white; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.1); }
 
-/* ANONİM KAMPÜS (KARE TASARIMI) */
+/* ANONİM KAMPÜS */
 .confessions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
 .confession-square { border-radius: 16px; padding: 20px; height: 200px; display: flex; flex-direction: column; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
 .confession-square:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
@@ -135,11 +138,11 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
     .container { grid-template-columns: 1fr; padding: 15px 5%; }
     .right-panel { display: none; }
     .mobile-only-communities { display: block; } 
-    
     header { gap: 15px; }
     #mobile-menu-btn { display: block; }
     
-    .sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 280px; max-height: 100vh; z-index: 999; transform: translateX(-100%); border-radius: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.2); background: white; padding-bottom: 20px;}
+    /* Mobil menüde Ayarların en altta durabilmesi için Flex ve height:100vh kullanılır */
+    .sidebar { position: fixed; top: 0; left: 0; height: 100vh; max-height: 100vh; z-index: 999; transform: translateX(-100%); border-radius: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.2); background: white; padding-bottom: 20px; display: flex; flex-direction: column; justify-content: space-between;}
     .sidebar.open { transform: translateX(0); }
     
     .grid-2col { grid-template-columns: 1fr; }
