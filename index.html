@@ -2,61 +2,75 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>UniKıbrıs - Kampüs Ağı & Market</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <header>
-        <div class="logo" id="logo-btn">🎓 UniKıbrıs</div>
+        <div class="logo-area">
+            <div id="mobile-menu-btn">☰</div>
+            <div class="logo" id="logo-btn">🎓 UniKıbrıs</div>
+        </div>
+        
         <div class="search-bar">
-            <input type="text" placeholder="Öğrenci, eşya veya topluluk ara...">
+            <input type="text" id="global-search" placeholder="Öğrenci, eşya veya ilan ara...">
         </div>
         <div class="user-menu">
-            <button onclick="alert('Profil Ayarları Sayfasına Gider')">👤 Profilim</button>
+            <button id="profile-btn">👤 Profilim</button>
         </div>
     </header>
 
     <div class="container">
         
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <h3>Navigasyon</h3>
             <div class="menu-item active" data-target="home">🏠 Ana Sayfa</div>
             <div class="menu-item" data-target="market">🛒 2. El Market</div>
             <div class="menu-item" data-target="housing">🔑 Ev Arkadaşı / Kiralık</div>
-            <div class="menu-item" data-target="transport">🚗 Araba & Ulaşım Ağı</div>
+            <div class="menu-item" data-target="transport">🚗 Araba & Ulaşım</div>
             <br>
             <h3>Bana Özel</h3>
-            <div class="menu-item">💬 Mesajlarım (3 Yeni)</div>
-            <div class="menu-item">⚙️ Ayarlar</div>
+            <div class="menu-item" onclick="openModal('Mesaj Kutusu', '<p>Henüz yeni mesajınız yok.</p>')">💬 Mesajlarım (0)</div>
+            <div class="menu-item" onclick="openModal('Ayarlar', '<p>Sistem ayarları yakında eklenecek.</p>')">⚙️ Ayarlar</div>
         </aside>
 
         <main class="main-feed" id="main-content">
-        </main>
+            </main>
 
         <aside class="right-panel">
             <div class="card">
                 <h2>🏷️ Toplulukların</h2>
                 <ul class="community-list">
-                    <li>🐾 Kampüs Hayvanseverleri</li>
-                    <li>💻 Yazılım ve AI Kulübü</li>
-                    <li>📚 Tıp Fakültesi Not Paylaşımı</li>
-                    <li>🎮 E-Spor Topluluğu</li>
+                    <li onclick="openModal('Topluluk', '🐾 Kampüs Hayvanseverleri grubuna hoş geldin!')">🐾 Kampüs Hayvanseverleri</li>
+                    <li onclick="openModal('Topluluk', '💻 Yazılım kulübü etkinlikleri listeleniyor...')">💻 Yazılım ve AI Kulübü</li>
+                    <li onclick="openModal('Topluluk', 'Tıp fakültesi notları yükleniyor...')">📚 Tıp Fakültesi Not Paylaşımı</li>
                 </ul>
-                <button style="width: 100%; margin-top: 15px; padding: 10px; background: #E5E7EB; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">Topluluk Keşfet</button>
+                <button class="action-btn" style="margin-top: 15px;" onclick="openModal('Yeni Topluluk', '<p>Yeni topluluk keşfetme ekranı</p>')">Topluluk Keşfet</button>
             </div>
 
             <div class="card">
                 <h2>📌 Faydalı Linkler</h2>
                 <ul class="community-list" style="font-size: 14px;">
-                    <li>📄 Muhaceret Nasıl Alınır?</li>
-                    <li>🚌 Otobüs Saatleri</li>
-                    <li>🏥 Nöbetçi Eczaneler</li>
+                    <li onclick="window.open('https://icisleri.gov.ct.tr/', '_blank')">📄 Muhaceret Nasıl Alınır?</li>
+                    <li onclick="openModal('Otobüs Saatleri', '<p>Gönyeli: 08:30, 09:30, 10:30...</p>')">🚌 Otobüs Saatleri</li>
+                    <li onclick="openModal('Nöbetçi Eczaneler', '<p>Bugün Gönyeli bölgesinde nöbetçi: X Eczanesi</p>')">🏥 Nöbetçi Eczaneler</li>
                 </ul>
             </div>
         </aside>
+    </div>
 
+    <div id="app-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Başlık</h3>
+                <span class="close-btn" id="modal-close">&times;</span>
+            </div>
+            <div class="modal-body" id="modal-body">
+                İçerik buraya gelecek
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>
