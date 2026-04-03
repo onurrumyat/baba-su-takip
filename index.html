@@ -7,19 +7,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Fotoğraf her zaman ekrana sığsın ve kırpılmasın */
         .perfect-fit-img {
-            max-height: 25vh; /* Ekranın sadece %25'ini kaplar */
+            max-height: 25vh; 
             width: 100%; 
             object-fit: contain; 
             border-radius: 0.5rem;
         }
-        /* Gizli Scrollbar ama kaydırma çalışır */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 h-[100dvh] flex flex-col font-sans overflow-hidden">
+<body class="bg-gray-50 text-gray-800 h-[100dvh] flex flex-col font-sans overflow-hidden selection:bg-blue-200">
 
     <nav class="bg-white px-4 py-3 shadow-sm shrink-0 border-b border-gray-200 z-50">
         <div class="max-w-md mx-auto flex justify-between items-center">
@@ -87,19 +85,26 @@
         <div id="resultBox" class="hidden mt-2 pb-6">
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 mb-4">
                 
-                <div class="mb-5">
-                    <h4 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-1"><i class="fa-solid fa-stethoscope mr-1"></i> Diagnosis</h4>
-                    <p id="resDiagnosis" class="text-gray-900 font-semibold text-sm leading-relaxed"></p>
+                <div class="mb-4">
+                    <h4 class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> <span id="lbl-problem">PROBLEM</span></h4>
+                    <p id="resProblem" class="text-gray-900 font-bold text-sm leading-snug"></p>
                 </div>
 
-                <div class="mb-5 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                    <h4 class="text-xs font-black text-blue-600 uppercase tracking-wider mb-2"><i class="fa-solid fa-screwdriver-wrench mr-1"></i> Required Parts</h4>
-                    <ul id="resParts" class="list-disc list-inside text-sm font-semibold text-blue-900 space-y-1.5"></ul>
+                <div class="mb-4">
+                    <h4 class="text-[10px] font-black text-green-500 uppercase tracking-widest mb-1"><i class="fa-solid fa-lightbulb mr-1"></i> <span id="lbl-solution">SOLUTION</span></h4>
+                    <p id="resSolution" class="text-gray-700 font-medium text-sm leading-snug"></p>
                 </div>
 
-                <div class="border-t border-gray-200 pt-4 flex justify-between items-center">
-                    <span class="text-xs font-black text-gray-400 uppercase tracking-wider">Est. Total:</span>
-                    <span id="resTotal" class="text-xl font-black text-green-600"></span>
+                <div class="mb-4 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                    <h4 class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2"><i class="fa-solid fa-box-open mr-1"></i> <span id="lbl-parts">PARTS & PRICES</span></h4>
+                    <ul id="resParts" class="list-disc list-inside text-sm font-semibold text-gray-800 space-y-1"></ul>
+                </div>
+
+                <div class="border-t border-gray-200 pt-3 flex justify-between items-center bg-blue-50/50 p-3 rounded-xl">
+                    <span class="text-xs font-black text-gray-600 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-user-gear text-blue-500"></i> <span id="lbl-labor">LABOR COST:</span>
+                    </span>
+                    <span id="resLabor" class="text-lg font-black text-gray-900"></span>
                 </div>
             </div>
 
@@ -117,10 +122,10 @@
         let currentSearchQuery = "";
 
         const i18n = {
-            en: { title: "Snap the damage.", subtitle: "AI finds the problem & realistic cost.", upload: "Tap to Upload Photo", analyze: "ANALYZE NOW", loading: "Scanning market prices...", order: "Find Parts Online", new: "Scan Another Item", langName: "English" },
-            fr: { title: "Prenez les dégâts.", subtitle: "L'IA trouve le problème et le prix.", upload: "Appuyez pour télécharger", analyze: "ANALYSER", loading: "Recherche des prix...", order: "Trouver les Pièces", new: "Nouvelle Photo", langName: "French" },
-            es: { title: "Fotografía el daño.", subtitle: "La IA encuentra problema y costo real.", upload: "Toca para subir foto", analyze: "ANALIZAR AHORA", loading: "Buscando precios...", order: "Buscar en Amazon", new: "Escanear Otra", langName: "Spanish" },
-            tr: { title: "Arızayı çekin.", subtitle: "Yapay zeka teşhis edip gerçek fiyatı bulsun.", upload: "Fotoğraf Yüklemek İçin Dokun", analyze: "ANALİZ ET", loading: "Piyasa taranıyor...", order: "Parçaları İnternette Bul", new: "Yeni Fotoğraf Çek", langName: "Turkish" }
+            en: { title: "Snap the damage.", subtitle: "AI finds the problem & realistic cost.", upload: "Tap to Upload Photo", analyze: "ANALYZE NOW", loading: "Scanning market prices...", order: "Find Parts Online", new: "Scan Another Item", lblProblem: "PROBLEM", lblSolution: "HOW TO FIX IT", lblParts: "PARTS & PRODUCT PRICES", lblLabor: "EST. LABOR COST:", langName: "English" },
+            fr: { title: "Prenez les dégâts.", subtitle: "L'IA trouve le problème et le prix.", upload: "Appuyez pour télécharger", analyze: "ANALYSER", loading: "Recherche des prix...", order: "Trouver les Pièces", new: "Nouvelle Photo", lblProblem: "PROBLÈME", lblSolution: "SOLUTION", lblParts: "PIÈCES ET PRIX", lblLabor: "MAIN D'ŒUVRE:", langName: "French" },
+            es: { title: "Fotografía el daño.", subtitle: "La IA encuentra problema y costo.", upload: "Toca para subir foto", analyze: "ANALIZAR AHORA", loading: "Buscando precios...", order: "Buscar en Amazon", new: "Escanear Otra", lblProblem: "PROBLEMA", lblSolution: "CÓMO SOLUCIONARLO", lblParts: "PIEZAS Y PRECIOS", lblLabor: "MANO DE OBRA:", langName: "Spanish" },
+            tr: { title: "Arızayı çekin.", subtitle: "Yapay zeka teşhis edip fiyatlasın.", upload: "Fotoğraf Yüklemek İçin Dokun", analyze: "ANALİZ ET", loading: "Piyasa taranıyor...", order: "Parçaları İnternette Bul", new: "Yeni Fotoğraf Çek", lblProblem: "PROBLEM", lblSolution: "ÇÖZÜM YOLU", lblParts: "GEREKLİ PARÇALAR VE FİYATI", lblLabor: "İŞÇİLİK ÜCRETİ:", langName: "Turkish" }
         };
 
         function changeLanguage() {
@@ -132,11 +137,16 @@
             document.getElementById('txt-loading').innerText = i18n[lang].loading;
             document.getElementById('txt-order').innerText = i18n[lang].order;
             document.getElementById('txt-new').innerText = i18n[lang].new;
+            
+            document.getElementById('lbl-problem').innerText = i18n[lang].lblProblem;
+            document.getElementById('lbl-solution').innerText = i18n[lang].lblSolution;
+            document.getElementById('lbl-parts').innerText = i18n[lang].lblParts;
+            document.getElementById('lbl-labor').innerText = i18n[lang].lblLabor;
         }
 
         function orderSupplier() {
             const region = document.getElementById('regionSelect').value;
-            const query = encodeURIComponent(currentSearchQuery || "home repair replacement parts");
+            const query = encodeURIComponent(currentSearchQuery || "home repair parts");
             let searchUrl = `https://www.google.com/search?tbm=shop&q=${query}`;
             
             if (region === "United States") searchUrl = `https://www.amazon.com/s?k=${query}`;
@@ -184,7 +194,6 @@
         };
 
         analyzeBtn.onclick = async () => {
-            // Yükleme ekranını tamamen gizle ki analiz sonucu tüm ekrana yayılabilsin
             document.getElementById('uploadContainer').classList.add('hidden');
             document.getElementById('loader').classList.remove('hidden');
             document.getElementById('loader').classList.add('flex');
@@ -206,8 +215,9 @@
 
                 const data = await response.json();
                 
-                if(data.diagnosis) {
-                    document.getElementById('resDiagnosis').innerText = data.diagnosis;
+                if(data.problem) {
+                    document.getElementById('resProblem').innerText = data.problem;
+                    document.getElementById('resSolution').innerText = data.solution;
                     
                     const partsList = document.getElementById('resParts');
                     partsList.innerHTML = '';
@@ -219,7 +229,7 @@
                         });
                     }
                     
-                    document.getElementById('resTotal').innerText = data.total_cost || "-";
+                    document.getElementById('resLabor').innerText = data.labor_cost || "-";
                     currentSearchQuery = data.search_keywords;
                     
                     document.getElementById('loader').classList.add('hidden');
