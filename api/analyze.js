@@ -1,13 +1,13 @@
-import { OpenAI } from "openai";
+const { OpenAI } = require("openai");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // Sadece POST isteklerine izin ver
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Yöntem İzin Verilmiyor. Lütfen POST kullanın.' });
+    return res.status(405).json({ error: 'Sadece POST istekleri kabul edilir.' });
   }
 
   try {
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ result: response.choices[0].message.content });
   } catch (error) {
-    console.error("OpenAI Hatası:", error);
-    return res.status(500).json({ error: "Analiz başarısız oldu.", details: error.message });
+    console.error("OpenAI API Hatası:", error);
+    return res.status(500).json({ error: "Yapay zeka analizi başarısız oldu.", details: error.message });
   }
-}
+};
