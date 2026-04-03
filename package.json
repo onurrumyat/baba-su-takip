@@ -1,0 +1,11 @@
+{
+  "name": "akilli-komsu-ai",
+  "version": "1.0.0",
+  "description": "Yapay Zeka Ev Tamirat Asistanı",
+  "scripts": {
+    "start": "node"
+  },
+  "dependencies": {
+    "openai": "^4.28.0"
+  }
+}
