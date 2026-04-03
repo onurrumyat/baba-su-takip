@@ -1,18 +1,18 @@
 document.addEventListener("DOMContentLoaded", () => {
     
-    // --- 🌟 KULLANICI PROFİLİ 🌟 ---
     let userProfile = { 
         name: "Ege", 
         surname: "Yılmaz", 
         email: "ege.yilmaz@uniloop.edu", 
         age: 21,
-        faculty: "Bilgisayar Fakültesi", 
-        year: "2. Sınıf", // Artık serbest metin girişi
+        faculty: "Henüz Fakülte Seçilmedi", 
+        year: "2. Sınıf", 
         bio: "Kampüs hayatını ve teknolojiyi seviyorum." 
     };
-    let joinedFaculties = [];
+    
+    // SİSTEM HAFIZASI: Sadece 1 Fakülte Tutulur
+    let joinedFaculties = []; 
 
-    // --- SİSTEM DEĞİŞKENLERİ VE VERİTABANLARI ---
     const authScreen = document.getElementById('auth-screen');
     const appScreen = document.getElementById('app-screen');
     const menuItems = document.querySelectorAll('.menu-item[data-target]');
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
     let currentChatId = "chat1";
 
-    // --- 🌟 GİRİŞ / ÇIKIŞ (AUTH) SİSTEMİ 🌟 ---
+    // --- GİRİŞ / ÇIKIŞ ---
     document.getElementById('login-btn').addEventListener('click', () => {
         authScreen.style.display = 'none';
         appScreen.style.display = 'block';
@@ -58,22 +58,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const modal = document.getElementById('app-modal');
     const modalTitle = document.getElementById('modal-title');
     const modalBody = document.getElementById('modal-body');
-    
-    window.openModal = function(title, contentHTML) { 
-        modalTitle.innerText = title; 
-        modalBody.innerHTML = contentHTML; 
-        modal.classList.add('active'); 
-    }
+    window.openModal = function(title, contentHTML) { modalTitle.innerText = title; modalBody.innerHTML = contentHTML; modal.classList.add('active'); }
     window.closeModal = function() { modal.classList.remove('active'); }
-    
     document.getElementById('modal-close').addEventListener('click', closeModal);
     window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
-    // --- MOBİL MENÜ YÖNETİMİ ---
+    // --- MOBİL MENÜ ---
     const sidebar = document.getElementById('sidebar');
     document.getElementById('mobile-menu-btn').addEventListener('click', () => { sidebar.classList.toggle('open'); });
 
-    // --- DAHA FAZLA GÖSTER MANTIĞI ---
+    // --- DAHA FAZLA GÖSTER ---
     const setupShowMore = (btnId, containerId) => {
         const btn = document.getElementById(btnId);
         const container = document.getElementById(containerId);
@@ -87,12 +81,12 @@ document.addEventListener("DOMContentLoaded", () => {
     setupShowMore('desktop-show-more-btn', 'desktop-more-faculties');
     setupShowMore('mobile-show-more-btn', 'mobile-more-faculties');
 
-    // --- 1. ANA SAYFA ---
+    // --- ANA SAYFA ---
     function getHomeContent() {
         return `
             <div class="card" style="background: linear-gradient(135deg, #4F46E5, #818CF8); color: white;">
                 <h2>Hoş Geldin, ${userProfile.name}! 👋</h2>
-                <p>Global UniLoop ağına bağlandın. ${userProfile.faculty} duyurularını ve pazar yerini keşfet.</p>
+                <p>Global UniLoop ağına bağlandın. Eşyalarını sat, ev bul veya anonim kampüse katıl.</p>
             </div>
             <div class="card">
                 <h2>✨ AI Kampüs Eşleşmeleri</h2>
@@ -104,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     }
 
-    // --- 2. İLAN LİSTELEYİCİ ---
+    // --- İLAN LİSTELEYİCİ (AKILLI ARAMA ÇUBUĞUYLA) ---
     function renderListings(type, title, buttonText) {
         let html = `
             <div class="card">
@@ -137,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
         searchInput.addEventListener('input', (e) => drawGrid(e.target.value.toLowerCase())); 
     }
 
-    // --- 3. ANONİM KAMPÜS ---
+    // --- ANONİM KAMPÜS (KARE TASARIM) ---
     function renderConfessions() {
         let html = `
             <div class="card">
@@ -188,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `);
     }
 
-    // --- 4. FAKÜLTE KATILIM (GATEKEEPING) SİSTEMİ ---
+    // --- FAKÜLTE KATILIM (SADECE 1 FAKÜLTE KURALI EKLENDİ) ---
     function updateMyFacultiesSidebar() {
         const container = document.getElementById('my-joined-faculties');
         let html = '';
@@ -199,9 +193,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     window.joinFaculty = function(name, icon, bgColor) {
-        if(!joinedFaculties.some(f => f.name === name)) {
-            joinedFaculties.push({name: name, icon: icon, color: bgColor});
-        }
+        // Yeni Kural: Sadece 1 fakülteye girilebilir. Eski varsa üzerine yaz.
+        joinedFaculties = [{name: name, icon: icon, color: bgColor}];
+        userProfile.faculty = name; // Profildeki fakülteyi de otomatik güncelle
         closeModal();
         updateMyFacultiesSidebar();
         loadFacultyFeed(name, icon, bgColor);
@@ -248,13 +242,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="icon">${icon}</div>
                     <h2>${name} Ağına Hoş Geldin</h2>
                     <p>Bu fakülte ağı kapalı bir topluluktur. Katılarak bölümündeki diğer öğrencilerle tanışabilir ve duyuruları takip edebilirsin.</p>
-                    <button class="btn-primary" style="max-width:250px;" onclick="joinFaculty('${name}', '${icon}', '${bgColor}')">Fakülteye Katıl</button>
+                    <p style="font-size:12px; color:var(--primary); font-weight:bold;">Not: Sisteme sadece 1 fakülte ile kayıt olabilirsin.</p>
+                    <button class="btn-primary" style="max-width:250px; margin-top:10px;" onclick="joinFaculty('${name}', '${icon}', '${bgColor}')">Fakülteye Katıl</button>
                 </div>
             `;
             window.scrollTo(0,0);
         }
     }
 
+    // Event Delegation for Community Links
     document.body.addEventListener('click', (e) => {
         const link = e.target.closest('.community-link');
         if(link) {
@@ -265,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 5. MESAJLAŞMA SİSTEMİ (WHATSAPP STİLİ) ---
+    // --- WHATSAPP STİLİ MESAJLAŞMA ---
     function renderMessages() {
         let html = `
             <div class="card" style="padding:0; overflow:hidden;">
@@ -276,7 +272,8 @@ document.addEventListener("DOMContentLoaded", () => {
         
         chatsDB.forEach(chat => {
             const lastMsg = chat.messages[chat.messages.length - 1].text;
-            html += `<div class="chat-contact" data-id="${chat.id}"><div class="avatar">${chat.avatar}</div><div class="chat-contact-info"><div class="chat-contact-name">${chat.name}</div><div class="chat-contact-last">${lastMsg}</div></div></div>`;
+            const isActive = chat.id === currentChatId ? 'active' : '';
+            html += `<div class="chat-contact ${isActive}" data-id="${chat.id}"><div class="avatar">${chat.avatar}</div><div class="chat-contact-info"><div class="chat-contact-name">${chat.name}</div><div class="chat-contact-last">${lastMsg}</div></div></div>`;
         });
         
         html += `
@@ -333,9 +330,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const scrollBox = document.getElementById('chat-messages-scroll');
         scrollBox.scrollTop = scrollBox.scrollHeight;
 
-        document.getElementById('back-to-chats').addEventListener('click', () => {
-            layoutContainer.classList.remove('chat-active');
-        });
+        document.getElementById('back-to-chats').addEventListener('click', () => { layoutContainer.classList.remove('chat-active'); });
 
         const sendMsg = () => {
             const input = document.getElementById('chat-input-field');
@@ -348,39 +343,23 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('chat-input-field').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMsg(); });
     }
 
-    // --- 🌟 6. PROFİL VE AYARLAR EKRANI (GÜNCELLENDİ) 🌟 ---
+    // --- PROFİL VE AYARLAR ---
     function renderProfile() {
         mainContent.innerHTML = `
             <div class="card">
                 <h2>👤 Profil Bilgilerim</h2>
-                <p style="color:var(--text-gray); margin-bottom:20px;">Hesap bilgilerini ve okul durumunu buradan güncelleyebilirsin.</p>
                 <div style="background: #F3F4F6; padding: 20px; border-radius: 10px;">
                     <div class="grid-2col" style="margin-top:0;">
                         <div class="form-group"><label>Ad</label><input type="text" id="prof-name" value="${userProfile.name}"></div>
                         <div class="form-group"><label>Soyad</label><input type="text" id="prof-surname" value="${userProfile.surname}"></div>
                     </div>
                     <div class="form-group">
-                        <label>Okul E-posta Adresi (Değiştirilemez)</label>
+                        <label>Okul E-posta Adresi</label>
                         <input type="email" disabled value="${userProfile.email}" style="background:#E5E7EB; cursor:not-allowed;">
                     </div>
                     <div class="grid-2col" style="margin-top:0;">
                         <div class="form-group"><label>Yaş</label><input type="number" id="prof-age" value="${userProfile.age}"></div>
-                        
-                        <div class="form-group">
-                            <label>Sınıf / Yıl</label>
-                            <input type="text" id="prof-year" value="${userProfile.year}" placeholder="Örn: 3. Sınıf, Hazırlık, Mezun">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Bağlı Olduğun Fakülte</label>
-                        <select id="prof-faculty">
-                            <option value="Tıp Fakültesi" ${userProfile.faculty === 'Tıp Fakültesi' ? 'selected' : ''}>Tıp Fakültesi</option>
-                            <option value="Bilgisayar Fakültesi" ${userProfile.faculty === 'Bilgisayar Fakültesi' ? 'selected' : ''}>Bilgisayar Fakültesi</option>
-                            <option value="Diş Hekimliği" ${userProfile.faculty === 'Diş Hekimliği' ? 'selected' : ''}>Diş Hekimliği</option>
-                            <option value="Hukuk Fakültesi" ${userProfile.faculty === 'Hukuk Fakültesi' ? 'selected' : ''}>Hukuk Fakültesi</option>
-                            <option value="Mimarlık Fakültesi" ${userProfile.faculty === 'Mimarlık Fakültesi' ? 'selected' : ''}>Mimarlık Fakültesi</option>
-                            <option value="Eğitim Fakültesi" ${userProfile.faculty === 'Eğitim Fakültesi' ? 'selected' : ''}>Eğitim Fakültesi</option>
-                        </select>
+                        <div class="form-group"><label>Sınıf / Yıl</label><input type="text" id="prof-year" value="${userProfile.year}" placeholder="Örn: 3. Sınıf, Hazırlık, Mezun"></div>
                     </div>
                     <div class="form-group">
                         <label>Kampüs Bio'n</label>
@@ -395,8 +374,7 @@ document.addEventListener("DOMContentLoaded", () => {
             userProfile.name = document.getElementById('prof-name').value;
             userProfile.surname = document.getElementById('prof-surname').value;
             userProfile.age = document.getElementById('prof-age').value;
-            userProfile.faculty = document.getElementById('prof-faculty').value;
-            userProfile.year = document.getElementById('prof-year').value; // Artık serbest inputtan okunuyor
+            userProfile.year = document.getElementById('prof-year').value;
             userProfile.bio = document.getElementById('prof-bio').value;
             openModal('Başarılı', '<p>Profilin güncellendi!</p>');
         });
@@ -408,29 +386,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 <h2>⚙️ Uygulama Ayarları</h2>
                 <div style="background: #F3F4F6; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
                     <div class="form-group">
-                        <label>Dil Seçimi (Language)</label>
-                        <select>
-                            <option>Türkçe</option>
-                            <option>English</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Bildirim Tercihleri</label>
-                        <select>
-                            <option>Tüm Bildirimleri Aç</option>
-                            <option>Sadece Mesajları Bildir</option>
-                            <option>Sessiz Mod</option>
-                        </select>
+                        <label>Dil Seçimi</label>
+                        <select><option>Türkçe</option><option>English</option></select>
                     </div>
                 </div>
-                
-                <h3 style="margin-bottom:15px; color:var(--text-gray); font-size:14px;">Hesap İşlemleri</h3>
                 <button class="btn-danger" onclick="logout()">🚪 Güvenli Çıkış Yap</button>
             </div>
         `;
     }
 
-    // --- 7. SAYFA GEÇİŞ SİSTEMİ (ROUTING) ---
+    // --- SAYFA GEÇİŞ SİSTEMİ ---
     function loadPage(pageName) {
         if (pageName === 'home') mainContent.innerHTML = getHomeContent();
         else if (pageName === 'market') renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
