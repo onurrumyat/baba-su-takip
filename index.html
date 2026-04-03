@@ -7,18 +7,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-gray-50 text-gray-800 min-h-[100dvh] flex flex-col overflow-hidden">
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col font-sans">
 
-    <nav class="bg-white px-3 py-3 shadow-sm shrink-0">
+    <nav class="bg-white px-4 py-3 shadow-sm shrink-0 sticky top-0 z-50">
         <div class="max-w-md mx-auto flex justify-between items-center">
             <div class="flex items-center gap-1.5">
-                <i class="fa-solid fa-camera-retro text-blue-600 text-lg"></i>
-                <span class="font-black text-lg tracking-tight">Fix<span class="text-blue-600">Lens</span></span>
+                <i class="fa-solid fa-camera-retro text-blue-600 text-xl"></i>
+                <span class="font-black text-xl tracking-tight">Fix<span class="text-blue-600">Lens</span></span>
             </div>
 
             <div class="flex items-center gap-2">
                 <div class="relative">
-                    <select id="regionSelect" class="appearance-none bg-gray-100 text-gray-700 text-xs rounded-md px-2 py-1.5 pr-6 font-medium focus:outline-none">
+                    <select id="regionSelect" class="appearance-none bg-gray-100 text-gray-700 text-xs rounded-md px-2 py-2 pr-6 font-medium focus:outline-none focus:ring-2 focus:ring-blue-100">
                         <option value="United States">🇺🇸 USA</option>
                         <option value="United Kingdom">🇬🇧 UK</option>
                         <option value="Germany">🇩🇪 GER</option>
@@ -32,7 +32,7 @@
                 </div>
 
                 <div class="relative">
-                    <select id="langSelect" onchange="changeLanguage()" class="appearance-none bg-white border border-gray-200 text-gray-700 text-xs rounded-md px-2 py-1.5 pr-6 font-medium focus:outline-none shadow-sm">
+                    <select id="langSelect" onchange="changeLanguage()" class="appearance-none bg-white border border-gray-200 text-gray-700 text-xs rounded-md px-2 py-2 pr-6 font-medium focus:outline-none focus:ring-2 focus:ring-blue-100 shadow-sm">
                         <option value="en">EN</option>
                         <option value="fr">FR</option>
                         <option value="es">ES</option>
@@ -46,61 +46,63 @@
         </div>
     </nav>
 
-    <main class="flex-1 max-w-md mx-auto w-full p-4 flex flex-col justify-center overflow-y-auto">
+    <main class="flex-1 w-full max-w-md mx-auto p-5 flex flex-col mt-2">
         
         <header class="text-center mb-6 shrink-0">
             <h1 id="txt-title" class="text-2xl font-black text-gray-900 mb-1">Snap the damage.</h1>
-            <p id="txt-subtitle" class="text-gray-500 text-xs">AI will find the problem & realistic cost.</p>
+            <p id="txt-subtitle" class="text-gray-500 text-sm">AI finds the problem & realistic cost.</p>
         </header>
 
         <div id="dropZone" class="bg-white border-2 border-dashed border-gray-300 rounded-2xl p-4 text-center cursor-pointer active:bg-blue-50 transition-colors shadow-sm relative" onclick="document.getElementById('fileInput').click()">
             <input type="file" id="fileInput" class="hidden" accept="image/*">
             
             <div id="previewBox" class="hidden relative">
-                <img id="imagePreview" src="" class="rounded-lg mx-auto h-40 object-cover w-full">
-                <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg opacity-0 hover:opacity-100 text-white text-sm font-bold">
-                    <i class="fa-solid fa-pen mr-2"></i> Edit
+                <img id="imagePreview" src="" class="rounded-lg mx-auto max-h-[40vh] object-contain w-full bg-gray-50">
+                <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-lg opacity-0 hover:opacity-100 transition-opacity text-white text-sm font-bold">
+                    <i class="fa-solid fa-pen mr-2"></i> Edit Photo
                 </div>
             </div>
             
-            <div id="uploadUI" class="py-6">
-                <i class="fa-solid fa-cloud-arrow-up text-3xl text-blue-500 mb-2"></i>
-                <p id="txt-upload" class="font-bold text-gray-800 text-sm">Tap to Upload Photo</p>
+            <div id="uploadUI" class="py-8">
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-cloud-arrow-up text-2xl text-blue-600"></i>
+                </div>
+                <p id="txt-upload" class="font-bold text-gray-800 text-base">Tap to Upload Photo</p>
             </div>
         </div>
 
-        <button id="analyzeBtn" class="w-full bg-blue-600 active:bg-blue-700 text-white font-black py-3 rounded-xl mt-4 shadow-md hidden flex justify-center items-center gap-2 shrink-0">
-            <span id="txt-analyze">ANALYZE</span> <i class="fa-solid fa-bolt"></i>
+        <button id="analyzeBtn" class="w-full bg-blue-600 active:bg-blue-700 text-white font-black py-4 rounded-xl mt-5 shadow-lg shadow-blue-200 hidden flex justify-center items-center gap-2 shrink-0 text-lg transition-transform transform active:scale-95">
+            <span id="txt-analyze">ANALYZE NOW</span> <i class="fa-solid fa-bolt"></i>
         </button>
 
-        <div id="loader" class="hidden text-center py-8">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-200 border-t-blue-600 mb-2"></div>
-            <p id="txt-loading" class="text-gray-600 text-sm font-medium">Scanning damage...</p>
+        <div id="loader" class="hidden text-center py-10">
+            <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-blue-100 border-t-blue-600 mb-3"></div>
+            <p id="txt-loading" class="text-gray-600 font-medium">Scanning damage...</p>
         </div>
 
-        <div id="resultBox" class="hidden mt-4 shrink-0 pb-4">
-            <div class="bg-white p-4 rounded-xl shadow-md border border-gray-100 mb-3">
-                <h3 id="txt-report" class="font-black text-gray-900 mb-2 text-sm flex items-center border-b pb-2">
-                    <i class="fa-solid fa-check-double text-green-500 mr-2"></i> REPORT
+        <div id="resultBox" class="hidden mt-6 pb-8">
+            <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-100 mb-4">
+                <h3 id="txt-report" class="font-black text-gray-900 mb-3 flex items-center border-b pb-3 text-sm">
+                    <i class="fa-solid fa-check-double text-green-500 mr-2 text-lg"></i> REPORT
                 </h3>
-                <div id="aiResponse" class="text-gray-700 leading-snug text-sm whitespace-pre-line font-medium"></div>
+                <div id="aiResponse" class="text-gray-700 leading-relaxed text-sm whitespace-pre-line font-medium"></div>
             </div>
 
-            <button onclick="orderSupplier()" class="w-full bg-black active:bg-gray-800 text-white font-bold py-3 rounded-xl shadow-md flex justify-center items-center gap-2 text-sm">
+            <button onclick="orderSupplier()" class="w-full bg-black active:bg-gray-800 text-white font-bold py-4 rounded-xl shadow-md flex justify-center items-center gap-2 text-base transition-transform transform active:scale-95">
                 <i class="fa-solid fa-bag-shopping"></i> <span id="txt-order">Order Parts</span>
             </button>
 
-            <button onclick="location.reload()" class="w-full mt-3 text-xs text-gray-400 font-medium py-2">
-                <span id="txt-new">Scan Another Item</span>
+            <button onclick="location.reload()" class="w-full mt-4 text-sm text-gray-400 font-semibold py-2">
+                <i class="fa-solid fa-rotate-right mr-1"></i> <span id="txt-new">Scan Another Item</span>
             </button>
         </div>
     </main>
 
     <script>
         const i18n = {
-            en: { title: "Snap the damage.", subtitle: "AI finds the problem & cost.", upload: "Tap to Upload Photo", analyze: "ANALYZE", loading: "Scanning damage...", report: "REPORT", order: "Order Parts", new: "Scan Another Item", langName: "English" },
+            en: { title: "Snap the damage.", subtitle: "AI finds the problem & cost.", upload: "Tap to Upload Photo", analyze: "ANALYZE NOW", loading: "Scanning damage...", report: "REPORT", order: "Order Parts", new: "Scan Another Item", langName: "English" },
             fr: { title: "Prenez les dégâts.", subtitle: "L'IA trouve le problème et le prix.", upload: "Appuyez pour télécharger", analyze: "ANALYSER", loading: "Analyse en cours...", report: "RAPPORT", order: "Commander", new: "Nouvelle Photo", langName: "French" },
-            es: { title: "Fotografía el daño.", subtitle: "La IA encuentra el problema y costo.", upload: "Toca para subir foto", analyze: "ANALIZAR", loading: "Escaneando...", report: "REPORTE", order: "Comprar Piezas", new: "Escanear Otra", langName: "Spanish" },
+            es: { title: "Fotografía el daño.", subtitle: "La IA encuentra el problema y costo.", upload: "Toca para subir foto", analyze: "ANALIZAR AHORA", loading: "Escaneando...", report: "REPORTE", order: "Comprar Piezas", new: "Escanear Otra", langName: "Spanish" },
             tr: { title: "Arızayı çekin.", subtitle: "Yapay zeka teşhis edip fiyatlasın.", upload: "Fotoğraf Yüklemek İçin Dokun", analyze: "ANALİZ ET", loading: "Hasar inceleniyor...", report: "TEŞHİS RAPORU", order: "Parçaları Sipariş Et", new: "Yeni Fotoğraf Çek", langName: "Turkish" }
         };
 
@@ -111,7 +113,7 @@
             document.getElementById('txt-upload').innerText = i18n[lang].upload;
             document.getElementById('txt-analyze').innerText = i18n[lang].analyze;
             document.getElementById('txt-loading').innerText = i18n[lang].loading;
-            document.getElementById('txt-report').innerHTML = `<i class="fa-solid fa-check-double text-green-500 mr-2"></i> ${i18n[lang].report}`;
+            document.getElementById('txt-report').innerHTML = `<i class="fa-solid fa-check-double text-green-500 mr-2 text-lg"></i> ${i18n[lang].report}`;
             document.getElementById('txt-order').innerText = i18n[lang].order;
             document.getElementById('txt-new').innerText = i18n[lang].new;
         }
@@ -139,7 +141,7 @@
                     img.src = event.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 600; // Biraz daha küçülttük ki daha hızlı işlensin
+                        const MAX_WIDTH = 600; 
                         const scale = Math.min(MAX_WIDTH / img.width, 1);
                         canvas.width = img.width * scale;
                         canvas.height = img.height * scale;
@@ -159,6 +161,11 @@
                 document.getElementById('previewBox').classList.remove('hidden');
                 document.getElementById('uploadUI').classList.add('hidden');
                 analyzeBtn.classList.remove('hidden');
+                
+                // Kullanıcı fotoğraf seçtiğinde sayfanın altına hafifçe kaydır ki butonu net görsün
+                setTimeout(() => {
+                    analyzeBtn.scrollIntoView({ behavior: "smooth", block: "center" });
+                }, 100);
             }
         };
 
@@ -187,11 +194,10 @@
                 document.getElementById('loader').classList.add('hidden');
                 document.getElementById('resultBox').classList.remove('hidden');
                 
-                // Markdown listelerini düzgün göstermek için ufak bir temizlik
-                const cleanText = data.result ? data.result.replace(/\*\*/g, '') : "Error.";
+                const cleanText = data.result ? data.result.replace(/\*\*/g, '') : "Error generating diagnosis.";
                 document.getElementById('aiResponse').innerText = cleanText;
             } catch (err) {
-                alert("Connection failed!");
+                alert("Connection failed! Please check your internet connection.");
                 location.reload();
             }
         };
