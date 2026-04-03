@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>UniKıbrıs - Kampüs Ağı & Market</title>
+    <title>UniSphere - Global Campus Network</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,11 +11,11 @@
     <header>
         <div class="logo-area">
             <div id="mobile-menu-btn">☰</div>
-            <div class="logo" id="logo-btn">🎓 UniKıbrıs</div>
+            <div class="logo" id="logo-btn">🌍 UniSphere</div>
         </div>
         
         <div class="search-bar">
-            <input type="text" id="global-search" placeholder="Öğrenci, eşya veya ilan ara...">
+            <input type="text" id="global-search" placeholder="Öğrenci, eşya, kitap veya topluluk ara...">
         </div>
         <div class="user-menu">
             <button id="profile-btn">👤 Profilim</button>
@@ -27,13 +27,12 @@
         <aside class="sidebar" id="sidebar">
             <h3>Navigasyon</h3>
             <div class="menu-item active" data-target="home">🏠 Ana Sayfa</div>
-            <div class="menu-item" data-target="market">🛒 2. El Market</div>
-            <div class="menu-item" data-target="housing">🔑 Ev Arkadaşı / Kiralık</div>
-            <div class="menu-item" data-target="transport">🚗 Araba & Ulaşım</div>
+            <div class="menu-item" data-target="market">🛒 Kampüs Market (Eşya & Not)</div>
+            <div class="menu-item" data-target="housing">🔑 Ev Arkadaşı & Yurt</div>
             <br>
             <h3>Bana Özel</h3>
             <div class="menu-item" onclick="openModal('Mesaj Kutusu', '<p>Henüz yeni mesajınız yok.</p>')">💬 Mesajlarım (0)</div>
-            <div class="menu-item" onclick="openModal('Ayarlar', '<p>Sistem ayarları yakında eklenecek.</p>')">⚙️ Ayarlar</div>
+            <div class="menu-item" onclick="openModal('Ayarlar', '<p>Dil ve bölge ayarları yakında eklenecek.</p>')">⚙️ Ayarlar</div>
         </aside>
 
         <main class="main-feed" id="main-content">
@@ -41,21 +40,22 @@
 
         <aside class="right-panel">
             <div class="card">
-                <h2>🏷️ Toplulukların</h2>
+                <h2>🏷️ İlgi Alanların</h2>
                 <ul class="community-list">
-                    <li onclick="openModal('Topluluk', '🐾 Kampüs Hayvanseverleri grubuna hoş geldin!')">🐾 Kampüs Hayvanseverleri</li>
-                    <li onclick="openModal('Topluluk', '💻 Yazılım kulübü etkinlikleri listeleniyor...')">💻 Yazılım ve AI Kulübü</li>
-                    <li onclick="openModal('Topluluk', 'Tıp fakültesi notları yükleniyor...')">📚 Tıp Fakültesi Not Paylaşımı</li>
+                    <li onclick="openModal('Topluluk', 'Müzik ve Sanat kulübüne hoş geldin!')">🎸 Müzik ve Sanat</li>
+                    <li onclick="openModal('Topluluk', 'Yazılım kulübü etkinlikleri listeleniyor...')">💻 Teknoloji ve AI Kulübü</li>
+                    <li onclick="openModal('Topluluk', 'Otomobil tutkunları forumuna giriliyor...')">🏎️ Otomobil Tutkunları</li>
+                    <li onclick="openModal('Topluluk', 'Tıp fakültesi notları yükleniyor...')">📚 Tıp Fakültesi Ağı</li>
                 </ul>
-                <button class="action-btn" style="margin-top: 15px;" onclick="openModal('Yeni Topluluk', '<p>Yeni topluluk keşfetme ekranı</p>')">Topluluk Keşfet</button>
+                <button class="action-btn" style="margin-top: 15px;" onclick="openModal('Yeni Topluluk', '<p>Yeni ilgi alanları keşfetme ekranı</p>')">Daha Fazla Keşfet</button>
             </div>
 
             <div class="card">
-                <h2>📌 Faydalı Linkler</h2>
+                <h2>📌 Kampüs Linkleri</h2>
                 <ul class="community-list" style="font-size: 14px;">
-                    <li onclick="window.open('https://icisleri.gov.ct.tr/', '_blank')">📄 Muhaceret Nasıl Alınır?</li>
-                    <li onclick="openModal('Otobüs Saatleri', '<p>Gönyeli: 08:30, 09:30, 10:30...</p>')">🚌 Otobüs Saatleri</li>
-                    <li onclick="openModal('Nöbetçi Eczaneler', '<p>Bugün Gönyeli bölgesinde nöbetçi: X Eczanesi</p>')">🏥 Nöbetçi Eczaneler</li>
+                    <li onclick="openModal('Kütüphane', '<p>Kütüphane çalışma odası rezervasyon sistemi yükleniyor...</p>')">📚 Kütüphane Rezervasyonu</li>
+                    <li onclick="openModal('Kampüs Haritası', '<p>Etkileşimli kampüs haritası açılıyor...</p>')">🗺️ Kampüs Haritası</li>
+                    <li onclick="openModal('Yemekhane', '<p>Günün Menüsü: Vegan seçenekler, Makarna, Çorba</p>')">🍽️ Yemekhane Menüsü</li>
                 </ul>
             </div>
         </aside>
