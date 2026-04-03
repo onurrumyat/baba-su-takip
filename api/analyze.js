@@ -27,9 +27,10 @@ module.exports = async function handler(req, res) {
               type: "text", 
               text: `You are an expert repair estimator in ${region}. Analyze the image.
                      You MUST respond strictly in JSON format with these exact keys:
-                     "diagnosis": A short 1-2 sentence diagnosis in ${language}.
-                     "parts": An array of strings detailing exact parts needed and realistic CHEAPEST to AVERAGE retail prices in the local currency of ${region}. (Write in ${language}).
-                     "total_cost": Estimated total cost including labor in ${language}.
+                     "problem": A short 1 sentence diagnosis of the issue in ${language}.
+                     "solution": A short 1-2 sentence explanation of how to fix it in ${language}.
+                     "parts": An array of strings detailing exact parts needed and their realistic CHEAPEST to AVERAGE retail prices in the local currency of ${region}. (Write in ${language}).
+                     "labor_cost": Estimated labor fee (only the worker's fee, NO parts included) in the local currency of ${region}. (Write in ${language}).
                      "search_keywords": 2-3 highly optimized English keywords to find these exact parts on Amazon (e.g., "35mm ceramic faucet cartridge").` 
             },
             {
@@ -39,10 +40,9 @@ module.exports = async function handler(req, res) {
           ],
         },
       ],
-      max_tokens: 350,
+      max_tokens: 400,
     });
 
-    // OpenAI bazen JSON'u markdown (```json ... ```) içine alır, bunu temizliyoruz
     let rawContent = response.choices[0].message.content;
     rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
 
