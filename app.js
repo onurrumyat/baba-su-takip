@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const mainContent = document.getElementById('main-content');
     const searchInput = document.getElementById('global-search');
     
-    // Kullanıcı Profil Objesi (Global)
+    // Kullanıcı Profil Objesi (Global Üniversite Ağı)
     let userProfile = {
         name: "Ege",
         surname: "Yılmaz",
@@ -13,15 +13,16 @@ document.addEventListener("DOMContentLoaded", () => {
         bio: "Kampüs hayatını ve teknolojiyi seviyorum. Yeni insanlarla tanışmaya açığım."
     };
 
-    // Arama ve Listeleme İçin Sahte Veritabanı (Ulaşım çıkarıldı, Kitap/Not Eklendi)
+    // Arama ve Listeleme İçin Sahte Veritabanı (Otomobil/Ulaşım Silindi, Global Öğrenci İhtiyaçları Eklendi)
     const database = [
         { id: 1, type: "market", title: "IKEA Çalışma Masası", desc: "Mezun olduğum için satıyorum. Çok az kullanıldı, çiziksiz.", price: "$45", img: "🪑" },
         { id: 2, type: "market", title: "Anatomi Atlası (Netter 7. Baskı)", desc: "Tıp öğrencileri için tertemiz kitap. İhtiyacım kalmadı.", price: "$30", img: "📚" },
         { id: 3, type: "market", title: "Veri Yapıları ve Algoritmalar PDF Notları", desc: "Geçen senenin tüm ders notları, sınavlarda çok işe yarıyor.", price: "$5", img: "📝" },
         { id: 4, type: "market", title: "Mini Buzdolabı", desc: "Yurt odası için ideal boyutta. Sorunsuz çalışıyor.", price: "$80", img: "❄️" },
-        { id: 5, type: "housing", title: "Kampüse 5dk - 2 Kişilik Odaya Arkadaş", desc: "Sakin, sigara içmeyen bir ev arkadaşı arıyorum. Faturalar dahil.", price: "$400/Ay", img: "🏠" },
-        { id: 6, type: "housing", title: "Şehir Merkezi 1+1 Stüdyo Daire", desc: "Sadece öğrencilere kiralık, eşyalı ve fiber internetli.", price: "$850/Ay", img: "🏢" },
-        { id: 7, type: "housing", title: "Yurt Devri (Kız Öğrenci)", desc: "Dönem ortasında ayrıldığım için sözleşmemi devrediyorum.", price: "$300/Ay", img: "🛏️" }
+        { id: 5, type: "market", title: "Fizik 101 Çıkmış Sorular", desc: "Hocanın son 5 yılda sorduğu tüm sorular ve çözümleri.", price: "$10", img: "📄" },
+        { id: 6, type: "housing", title: "Kampüse 5dk - 2 Kişilik Odaya Arkadaş", desc: "Sakin, sigara içmeyen bir ev arkadaşı arıyorum. Faturalar dahil.", price: "$400/Ay", img: "🏠" },
+        { id: 7, type: "housing", title: "Şehir Merkezi 1+1 Stüdyo Daire", desc: "Sadece öğrencilere kiralık, eşyalı ve fiber internetli.", price: "$850/Ay", img: "🏢" },
+        { id: 8, type: "housing", title: "Yurt Devri (Kız Öğrenci)", desc: "Dönem ortasında ayrıldığım için sözleşmemi devrediyorum.", price: "$300/Ay", img: "🛏️" }
     ];
 
     // MODAL YÖNETİMİ
@@ -51,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return `
             <div class="card" style="background: linear-gradient(135deg, #4F46E5, #818CF8); color: white;">
                 <h2>Hoş Geldin, ${userProfile.name}! 👋</h2>
-                <p>${userProfile.university} - ${userProfile.faculty} öğrencisi olarak kampüs ağındasın. Bugün neler oluyor?</p>
+                <p>${userProfile.university} - ${userProfile.faculty} öğrencisi olarak UniLoop ağındasın. Bugün kampüste neler oluyor?</p>
             </div>
             <div class="card">
                 <h2>✨ AI Kampüs Eşleşmeleri</h2>
@@ -64,6 +65,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="avatar">👩‍⚕️</div><h4>Sarah B.</h4><p>Tıp Fakültesi</p>
                         <button class="action-btn" onclick="openModal('Mesaj At', '<textarea class=\\'form-group\\' style=\\'width:100%; height:80px;\\' placeholder=\\'Mesajınızı yazın...\\'></textarea><button class=\\'btn-primary\\' onclick=\\'closeModal()\\'>Gönder</button>')">Mesaj At</button>
                     </div>
+                    <div class="match-card">
+                        <div class="avatar">👨‍🎨</div><h4>Alex M.</h4><p>Güzel Sanatlar</p>
+                        <button class="action-btn" onclick="openModal('Bağlantı Kur', '<p>Alex kişisine bağlantı isteği gönderildi!</p>')">Bağlan</button>
+                    </div>
                 </div>
             </div>
             <div class="card">
@@ -71,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <h2>Hızlı Bakış</h2>
                     <button class="action-btn" style="width:auto;" onclick="document.querySelector('[data-target=\\'market\\']').click()">Market'e Git</button>
                 </div>
-                <p>Kullanmadığın ders kitaplarını veya notlarını satarak diğer öğrencilere yardımcı olabilirsin.</p>
+                <p>Kullanmadığın ders kitaplarını, notlarını veya eşyalarını UniLoop'ta satarak diğer öğrencilere yardımcı olabilir, döngüye katılabilirsin.</p>
             </div>
         `;
     }
@@ -82,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
                     <h2>${title}</h2>
-                    <button class="btn-primary" style="width:auto;" onclick="openModal('Yeni İlan Ver', '<div class=\\'form-group\\'><label>İlan Başlığı</label><input type=\\'text\\' placeholder=\\'Örn: Fizik 101 Notları\\'></div><div class=\\'form-group\\'><label>Fiyat / Takas</label><input type=\\'text\\' placeholder=\\'Örn: $10 veya Kahve ısmarla\\'></div><button class=\\'btn-primary\\' onclick=\\'closeModal()\\'>İlanı Yayınla</button>')">+ İlan Ver</button>
+                    <button class="btn-primary" style="width:auto;" onclick="openModal('Yeni İlan Ver', '<div class=\\'form-group\\'><label>İlan Başlığı</label><input type=\\'text\\' placeholder=\\'Örn: Fizik 101 Notları veya Çalışma Masası\\'></div><div class=\\'form-group\\'><label>Fiyat / Takas</label><input type=\\'text\\' placeholder=\\'Örn: $10 veya Kahve ısmarla\\'></div><button class=\\'btn-primary\\' onclick=\\'closeModal()\\'>İlanı Yayınla</button>')">+ İlan Ver</button>
                 </div>
                 <div class="grid-2col">
         `;
@@ -95,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="item-desc">${item.desc}</div>
                         <div class="item-footer">
                             <span class="item-price-large">${item.price}</span>
-                            <button class="action-btn" style="width:auto;" onclick="openModal('${buttonActionTitle}', '<p>Satıcı ile iletişim başlatılıyor...</p><button class=\\'btn-primary\\' onclick=\\'closeModal()\\'>Mesaj Gönder</button>')">${buttonText}</button>
+                            <button class="action-btn" style="width:auto;" onclick="openModal('${buttonActionTitle}', '<p>İlan sahibi ile güvenli mesajlaşma başlatılıyor...</p><button class=\\'btn-primary\\' onclick=\\'closeModal()\\'>Mesaj Gönder</button>')">${buttonText}</button>
                         </div>
                     </div>
                 </div>
@@ -128,6 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <option value="1. Sınıf" ${userProfile.year === '1. Sınıf' ? 'selected' : ''}>1. Sınıf</option>
                                 <option value="2. Sınıf" ${userProfile.year === '2. Sınıf' ? 'selected' : ''}>2. Sınıf</option>
                                 <option value="3. Sınıf" ${userProfile.year === '3. Sınıf' ? 'selected' : ''}>3. Sınıf</option>
+                                <option value="4. Sınıf" ${userProfile.year === '4. Sınıf' ? 'selected' : ''}>4. Sınıf</option>
                                 <option value="Mezun" ${userProfile.year === 'Mezun' ? 'selected' : ''}>Mezun</option>
                             </select>
                         </div>
@@ -191,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function loadPage(pageName) {
         searchInput.value = '';
         if (pageName === 'home') mainContent.innerHTML = getHomeContent();
-        else if (pageName === 'market') mainContent.innerHTML = renderListings('market', '🛒 Kampüs Market (Eşya, Kitap & Not)', 'Satıcıya Yaz', 'Ürün Detayı');
+        else if (pageName === 'market') mainContent.innerHTML = renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz', 'Ürün Detayı');
         else if (pageName === 'housing') mainContent.innerHTML = renderListings('housing', '🔑 Ev Arkadaşı & Yurt İlanları', 'İletişime Geç', 'Ev Sahibiyle Görüş');
         
         if(window.innerWidth <= 1024) sidebar.classList.remove('open');
