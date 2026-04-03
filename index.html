@@ -1,252 +1,371 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SnapFix AI | Scan & Repair</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniKıbrıs - Kampüs Ağı & Market</title>
     <style>
-        .perfect-fit-img {
-            max-height: 25vh; 
-            width: 100%; 
-            object-fit: contain; 
-            border-radius: 0.5rem;
+        /* Modern ve temiz bir tasarım için temel ayarlar */
+        :root {
+            --primary: #4F46E5; /* Dinamik bir mor/mavi */
+            --primary-hover: #4338CA;
+            --bg-color: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text-dark: #1F2937;
+            --text-gray: #6B7280;
         }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+        }
+
+        /* Üst Menü (Navbar) */
+        header {
+            background-color: var(--card-bg);
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        .search-bar input {
+            padding: 10px 15px;
+            width: 300px;
+            border: 1px solid #D1D5DB;
+            border-radius: 20px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-bar input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+
+        .user-menu button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Ana Düzen (Grid Layout) */
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr 300px;
+            gap: 20px;
+            padding: 20px 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Sol Menü (Sidebar) */
+        .sidebar {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: var(--text-gray);
+        }
+
+        .menu-item {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background-color: #EEF2FF;
+            color: var(--primary);
+        }
+
+        /* Orta Akış (Main Feed) */
+        .main-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Eşleşme Önerileri Alanı */
+        .match-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .match-card {
+            border: 1px solid #E5E7EB;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .match-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            background-color: #D1D5DB;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .match-card h4 {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .match-card p {
+            font-size: 12px;
+            color: var(--text-gray);
+            margin-bottom: 10px;
+        }
+
+        .btn-connect {
+            background: #EEF2FF;
+            color: var(--primary);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        /* Market Alanı */
+        .market-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .market-item:last-child {
+            border-bottom: none;
+        }
+
+        .market-img {
+            width: 100px;
+            height: 100px;
+            background-color: #E5E7EB;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .market-info h4 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .market-price {
+            color: #10B981; /* Yeşil renk */
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        /* Sağ Panel (Topluluklar & Mesajlar) */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .community-list {
+            list-style: none;
+        }
+
+        .community-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #F3F4F6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .community-list li:hover {
+            color: var(--primary);
+        }
+
+        /* Mobil Uyum (Responsive) */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar, .right-panel {
+                display: none; /* Mobilde menüler gizlenip hamburger menüye alınmalı (ileriki aşama) */
+            }
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 h-[100dvh] flex flex-col font-sans overflow-hidden selection:bg-blue-200">
+<body>
 
-    <nav class="bg-white px-4 py-3 shadow-sm shrink-0 border-b border-gray-200 z-50">
-        <div class="max-w-md mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-1.5">
-                <i class="fa-solid fa-camera-retro text-blue-600 text-xl"></i>
-                <span class="font-black text-xl tracking-tight text-gray-900">Snap<span class="text-blue-600">Fix</span></span>
-            </div>
-
-            <div class="flex items-center gap-2">
-                <select id="regionSelect" class="appearance-none bg-gray-100 text-gray-700 text-xs rounded-md px-2 py-1.5 font-bold focus:outline-none">
-                    <option value="United States">🇺🇸 USA</option>
-                    <option value="United Kingdom">🇬🇧 UK</option>
-                    <option value="Germany">🇩🇪 GER</option>
-                    <option value="France">🇫🇷 FRA</option>
-                    <option value="Spain">🇪🇸 ESP</option>
-                    <option value="Turkey">🇹🇷 TUR</option>
-                </select>
-
-                <select id="langSelect" onchange="changeLanguage()" class="appearance-none bg-white border border-gray-200 text-gray-700 text-xs rounded-md px-2 py-1.5 font-bold focus:outline-none shadow-sm">
-                    <option value="en">EN</option>
-                    <option value="fr">FR</option>
-                    <option value="es">ES</option>
-                    <option value="tr">TR</option>
-                </select>
-            </div>
+    <header>
+        <div class="logo">🎓 UniKıbrıs</div>
+        <div class="search-bar">
+            <input type="text" placeholder="Öğrenci, eşya veya topluluk ara...">
         </div>
-    </nav>
+        <div class="user-menu">
+            <button onclick="alert('Profil Ayarları Sayfasına Gider')">👤 Profilim</button>
+        </div>
+    </header>
 
-    <main class="flex-1 w-full max-w-md mx-auto p-4 flex flex-col overflow-y-auto no-scrollbar">
+    <div class="container">
         
-        <div id="uploadContainer" class="flex flex-col h-full justify-center">
-            <header class="text-center mb-6 shrink-0">
-                <h1 id="txt-title" class="text-3xl font-black text-gray-900 mb-1 tracking-tight">Snap the damage.</h1>
-                <p id="txt-subtitle" class="text-gray-500 text-sm font-medium">AI finds the problem & realistic cost.</p>
-            </header>
+        <aside class="sidebar">
+            <h3>Navigasyon</h3>
+            <div class="menu-item active">🏠 Ana Sayfa</div>
+            <div class="menu-item" onclick="alert('İkinci El İlanları Yükleniyor...')">🛒 2. El Market</div>
+            <div class="menu-item">🔑 Ev Arkadaşı / Kiralık</div>
+            <div class="menu-item">🚗 Araba & Ulaşım Ağı</div>
+            <br>
+            <h3>Bana Özel</h3>
+            <div class="menu-item">💬 Mesajlarım (3 Yeni)</div>
+            <div class="menu-item">⚙️ Ayarlar</div>
+        </aside>
 
-            <div id="dropZone" class="bg-white border-2 border-dashed border-gray-300 rounded-3xl p-3 text-center cursor-pointer shadow-sm relative" onclick="document.getElementById('fileInput').click()">
-                <input type="file" id="fileInput" class="hidden" accept="image/*">
-                
-                <div id="previewBox" class="hidden relative bg-gray-50 rounded-xl p-2">
-                    <img id="imagePreview" src="" class="perfect-fit-img shadow-sm">
-                    <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-xl opacity-0 hover:opacity-100 text-white font-bold transition">
-                        <i class="fa-solid fa-rotate mr-2"></i> Change
+        <main class="main-feed">
+            
+            <div class="card" style="background: linear-gradient(135deg, #4F46E5, #818CF8); color: white;">
+                <h2>Hoş Geldin, Ege! 👋</h2>
+                <p>Profilini %80 tamamladın. KKTC'deki yeni hayatına başlamak için doğru yerdesin. Sistemimiz bölümüne ve ilgi alanlarına göre sana özel öneriler hazırladı.</p>
+            </div>
+
+            <div class="card">
+                <h2>✨ AI Önerisi: Seninle Aynı Fakültedekiler</h2>
+                <div class="match-grid">
+                    <div class="match-card">
+                        <div class="avatar">👨‍💻</div>
+                        <h4>Ahmet Y.</h4>
+                        <p>Bilgisayar Müh. • 2. Sınıf</p>
+                        <button class="btn-connect" onclick="alert('Ahmet\'e bağlantı isteği gönderildi!')">Tanış</button>
+                    </div>
+                    <div class="match-card">
+                        <div class="avatar">👩‍⚕️</div>
+                        <h4>Ayşe B.</h4>
+                        <p>Tıp Fak. • 1. Sınıf</p>
+                        <button class="btn-connect" onclick="alert('Ayşe ile mesajlaşma başlatıldı.')">Mesaj At</button>
+                    </div>
+                    <div class="match-card">
+                        <div class="avatar">👨‍⚖️</div>
+                        <h4>Caner K.</h4>
+                        <p>Hukuk Fak. • 3. Sınıf</p>
+                        <button class="btn-connect" onclick="alert('Bağlantı isteği gönderildi!')">Tanış</button>
                     </div>
                 </div>
+            </div>
+
+            <div class="card">
+                <h2>🛒 Kampüs İkinci El Pazarı <span style="font-size: 14px; color: var(--primary); cursor:pointer;" onclick="alert('İlan Verme Formu Açılır')">+ Yeni İlan Ver</span></h2>
                 
-                <div id="uploadUI" class="py-10">
-                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 text-blue-600">
-                        <i class="fa-solid fa-cloud-arrow-up text-3xl"></i>
+                <div class="market-item">
+                    <div class="market-img">🛏️</div>
+                    <div class="market-info">
+                        <h4>IKEA Çift Kişilik Yatak (Az Kullanılmış)</h4>
+                        <p style="color: var(--text-gray); font-size: 14px;">Mezun oluyorum, acil satılık. Nakliyeye yardımcı olurum.</p>
+                        <p style="font-size: 12px; margin-top: 5px;">Satıcı: <strong>Mehmet (İşletme 4.Sınıf)</strong></p>
+                        <div class="market-price">2.500 TL</div>
                     </div>
-                    <p id="txt-upload" class="font-bold text-gray-800 text-lg">Tap to Upload Photo</p>
+                </div>
+
+                <div class="market-item">
+                    <div class="market-img">🚗</div>
+                    <div class="market-info">
+                        <h4>2015 Ford Fiesta - Öğrenciden</h4>
+                        <p style="color: var(--text-gray); font-size: 14px;">Motor sorunsuz, evrakları tam. Girne içi görülebilir.</p>
+                        <p style="font-size: 12px; margin-top: 5px;">Satıcı: <strong>Zeynep (Mimarlık 3.Sınıf)</strong></p>
+                        <div class="market-price">£4.200 (Sterlin)</div>
+                    </div>
                 </div>
             </div>
 
-            <button id="analyzeBtn" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl mt-5 shadow-lg hidden flex justify-center items-center gap-2 text-lg active:scale-95 transition-transform">
-                <span id="txt-analyze">ANALYZE NOW</span> <i class="fa-solid fa-bolt"></i>
-            </button>
-        </div>
+        </main>
 
-        <div id="loader" class="hidden flex-col items-center justify-center h-full text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-blue-600 mb-4"></div>
-            <p id="txt-loading" class="text-gray-700 font-bold text-lg">Scanning market prices...</p>
-        </div>
-
-        <div id="resultBox" class="hidden mt-2 pb-6">
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 mb-4">
-                
-                <div class="mb-4">
-                    <h4 class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> <span id="lbl-problem">PROBLEM</span></h4>
-                    <p id="resProblem" class="text-gray-900 font-bold text-sm leading-snug"></p>
-                </div>
-
-                <div class="mb-4">
-                    <h4 class="text-[10px] font-black text-green-500 uppercase tracking-widest mb-1"><i class="fa-solid fa-lightbulb mr-1"></i> <span id="lbl-solution">SOLUTION</span></h4>
-                    <p id="resSolution" class="text-gray-700 font-medium text-sm leading-snug"></p>
-                </div>
-
-                <div class="mb-4 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <h4 class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2"><i class="fa-solid fa-box-open mr-1"></i> <span id="lbl-parts">PARTS & PRICES</span></h4>
-                    <ul id="resParts" class="list-disc list-inside text-sm font-semibold text-gray-800 space-y-1"></ul>
-                </div>
-
-                <div class="border-t border-gray-200 pt-3 flex justify-between items-center bg-blue-50/50 p-3 rounded-xl">
-                    <span class="text-xs font-black text-gray-600 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-user-gear text-blue-500"></i> <span id="lbl-labor">LABOR COST:</span>
-                    </span>
-                    <span id="resLabor" class="text-lg font-black text-gray-900"></span>
-                </div>
+        <aside class="right-panel">
+            <div class="card">
+                <h2>🏷️ Toplulukların</h2>
+                <ul class="community-list">
+                    <li>🐾 Kampüs Hayvanseverleri</li>
+                    <li>💻 Yazılım ve AI Kulübü</li>
+                    <li>📚 Tıp Fakültesi Not Paylaşımı</li>
+                    <li>🎮 E-Spor Topluluğu</li>
+                </ul>
+                <button style="width: 100%; margin-top: 15px; padding: 10px; background: #E5E7EB; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">Topluluk Keşfet</button>
             </div>
 
-            <button onclick="orderSupplier()" class="w-full bg-[#ff9900] active:bg-[#e68a00] text-white font-black py-4 rounded-xl shadow-md flex justify-center items-center gap-2 text-lg transition-transform active:scale-95 mb-3">
-                <i class="fa-brands fa-amazon text-2xl"></i> <span id="txt-order">Find Parts Online</span>
-            </button>
+            <div class="card">
+                <h2>📌 Faydalı Linkler</h2>
+                <ul class="community-list" style="font-size: 14px;">
+                    <li>📄 Muhaceret Nasıl Alınır?</li>
+                    <li>🚌 Otobüs Saatleri</li>
+                    <li>🏥 Nöbetçi Eczaneler</li>
+                </ul>
+            </div>
+        </aside>
 
-            <button onclick="location.reload()" class="w-full text-sm text-gray-500 font-bold py-3 bg-white border border-gray-200 rounded-xl active:bg-gray-50 transition-colors">
-                <i class="fa-solid fa-rotate-right mr-1"></i> <span id="txt-new">Scan Another Item</span>
-            </button>
-        </div>
-    </main>
+    </div>
 
-    <script>
-        let currentSearchQuery = "";
-
-        const i18n = {
-            en: { title: "Snap the damage.", subtitle: "AI finds the problem & realistic cost.", upload: "Tap to Upload Photo", analyze: "ANALYZE NOW", loading: "Scanning market prices...", order: "Find Parts Online", new: "Scan Another Item", lblProblem: "PROBLEM", lblSolution: "HOW TO FIX IT", lblParts: "PARTS & PRODUCT PRICES", lblLabor: "EST. LABOR COST:", langName: "English" },
-            fr: { title: "Prenez les dégâts.", subtitle: "L'IA trouve le problème et le prix.", upload: "Appuyez pour télécharger", analyze: "ANALYSER", loading: "Recherche des prix...", order: "Trouver les Pièces", new: "Nouvelle Photo", lblProblem: "PROBLÈME", lblSolution: "SOLUTION", lblParts: "PIÈCES ET PRIX", lblLabor: "MAIN D'ŒUVRE:", langName: "French" },
-            es: { title: "Fotografía el daño.", subtitle: "La IA encuentra problema y costo.", upload: "Toca para subir foto", analyze: "ANALIZAR AHORA", loading: "Buscando precios...", order: "Buscar en Amazon", new: "Escanear Otra", lblProblem: "PROBLEMA", lblSolution: "CÓMO SOLUCIONARLO", lblParts: "PIEZAS Y PRECIOS", lblLabor: "MANO DE OBRA:", langName: "Spanish" },
-            tr: { title: "Arızayı çekin.", subtitle: "Yapay zeka teşhis edip fiyatlasın.", upload: "Fotoğraf Yüklemek İçin Dokun", analyze: "ANALİZ ET", loading: "Piyasa taranıyor...", order: "Parçaları İnternette Bul", new: "Yeni Fotoğraf Çek", lblProblem: "PROBLEM", lblSolution: "ÇÖZÜM YOLU", lblParts: "GEREKLİ PARÇALAR VE FİYATI", lblLabor: "İŞÇİLİK ÜCRETİ:", langName: "Turkish" }
-        };
-
-        function changeLanguage() {
-            const lang = document.getElementById('langSelect').value;
-            document.getElementById('txt-title').innerText = i18n[lang].title;
-            document.getElementById('txt-subtitle').innerText = i18n[lang].subtitle;
-            document.getElementById('txt-upload').innerText = i18n[lang].upload;
-            document.getElementById('txt-analyze').innerText = i18n[lang].analyze;
-            document.getElementById('txt-loading').innerText = i18n[lang].loading;
-            document.getElementById('txt-order').innerText = i18n[lang].order;
-            document.getElementById('txt-new').innerText = i18n[lang].new;
-            
-            document.getElementById('lbl-problem').innerText = i18n[lang].lblProblem;
-            document.getElementById('lbl-solution').innerText = i18n[lang].lblSolution;
-            document.getElementById('lbl-parts').innerText = i18n[lang].lblParts;
-            document.getElementById('lbl-labor').innerText = i18n[lang].lblLabor;
-        }
-
-        function orderSupplier() {
-            const region = document.getElementById('regionSelect').value;
-            const query = encodeURIComponent(currentSearchQuery || "home repair parts");
-            let searchUrl = `https://www.google.com/search?tbm=shop&q=${query}`;
-            
-            if (region === "United States") searchUrl = `https://www.amazon.com/s?k=${query}`;
-            else if (region === "Turkey") searchUrl = `https://www.trendyol.com/sr?q=${query}`;
-            else if (region === "Germany") searchUrl = `https://www.amazon.de/s?k=${query}`;
-            else if (region === "United Kingdom") searchUrl = `https://www.amazon.co.uk/s?k=${query}`;
-            
-            window.open(searchUrl, '_blank');
-        }
-
-        const fileInput = document.getElementById('fileInput');
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        const imagePreview = document.getElementById('imagePreview');
-        
-        function resizeImage(file) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 600; 
-                        const scale = Math.min(MAX_WIDTH / img.width, 1);
-                        canvas.width = img.width * scale;
-                        canvas.height = img.height * scale;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.8));
-                    };
-                };
-            });
-        }
-
-        fileInput.onchange = async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const resized = await resizeImage(file);
-                imagePreview.src = resized;
-                document.getElementById('previewBox').classList.remove('hidden');
-                document.getElementById('uploadUI').classList.add('hidden');
-                analyzeBtn.classList.remove('hidden');
-            }
-        };
-
-        analyzeBtn.onclick = async () => {
-            document.getElementById('uploadContainer').classList.add('hidden');
-            document.getElementById('loader').classList.remove('hidden');
-            document.getElementById('loader').classList.add('flex');
-            
-            const selectedLang = document.getElementById('langSelect').value;
-            const fullLangName = i18n[selectedLang].langName;
-            const selectedRegion = document.getElementById('regionSelect').value;
-
-            try {
-                const response = await fetch('/api/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        image: imagePreview.src,
-                        language: fullLangName,
-                        region: selectedRegion
-                    })
-                });
-
-                const data = await response.json();
-                
-                if(data.problem) {
-                    document.getElementById('resProblem').innerText = data.problem;
-                    document.getElementById('resSolution').innerText = data.solution;
-                    
-                    const partsList = document.getElementById('resParts');
-                    partsList.innerHTML = '';
-                    if(data.parts && data.parts.length > 0) {
-                        data.parts.forEach(part => {
-                            const li = document.createElement('li');
-                            li.innerText = part;
-                            partsList.appendChild(li);
-                        });
-                    }
-                    
-                    document.getElementById('resLabor').innerText = data.labor_cost || "-";
-                    currentSearchQuery = data.search_keywords;
-                    
-                    document.getElementById('loader').classList.add('hidden');
-                    document.getElementById('loader').classList.remove('flex');
-                    document.getElementById('resultBox').classList.remove('hidden');
-                } else {
-                    throw new Error("Invalid format");
-                }
-
-            } catch (err) {
-                console.error(err);
-                alert("Connection failed! Please check your internet connection.");
-                location.reload();
-            }
-        };
-
-        changeLanguage();
-    </script>
 </body>
 </html>
