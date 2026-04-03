@@ -34,13 +34,22 @@
             <h3>Bana Özel</h3>
             <div class="menu-item" data-target="messages">💬 Mesajlarım (2)</div>
             <div class="menu-item" onclick="openModal('Ayarlar', '<p>Dil ve bölge ayarları yakında eklenecek.</p>')">⚙️ Ayarlar</div>
+            
+            <div class="mobile-only-communities">
+                <br>
+                <h3>🏷️ Toplulukların</h3>
+                <div class="menu-item community-link" data-name="Müzik ve Sanat" data-icon="🎸" data-color="linear-gradient(135deg, #F59E0B, #D97706)">🎸 Müzik ve Sanat</div>
+                <div class="menu-item community-link" data-name="Teknoloji ve AI" data-icon="💻" data-color="linear-gradient(135deg, #3B82F6, #2563EB)">💻 Teknoloji ve AI</div>
+                <div class="menu-item community-link" data-name="Sosyal Sorumluluk" data-icon="🤝" data-color="linear-gradient(135deg, #10B981, #059669)">🤝 Sosyal Sorumluluk</div>
+                <div class="menu-item community-link" data-name="Fakülte Ağı" data-icon="📚" data-color="linear-gradient(135deg, #8B5CF6, #6D28D9)">📚 Fakülte Ağı</div>
+            </div>
         </aside>
 
         <main class="main-feed" id="main-content">
             </main>
 
         <aside class="right-panel">
-            <div class="card">
+            <div class="card sticky-card">
                 <h2>🏷️ İlgi Alanların</h2>
                 <ul class="community-list">
                     <li class="community-link" data-name="Müzik ve Sanat" data-icon="🎸" data-color="linear-gradient(135deg, #F59E0B, #D97706)">🎸 Müzik ve Sanat</li>
@@ -49,15 +58,6 @@
                     <li class="community-link" data-name="Fakülte Ağı" data-icon="📚" data-color="linear-gradient(135deg, #8B5CF6, #6D28D9)">📚 Fakülte Ağı</li>
                 </ul>
                 <button class="action-btn" style="margin-top: 15px;" onclick="openModal('Yeni Topluluk', '<p>Yeni ilgi alanları keşfetme ekranı</p>')">Daha Fazla Keşfet</button>
-            </div>
-
-            <div class="card">
-                <h2>📌 Kampüs Linkleri</h2>
-                <ul class="community-list" style="font-size: 14px;">
-                    <li onclick="openModal('Kütüphane', '<p>Kütüphane çalışma odası rezervasyon sistemi yükleniyor...</p>')">📚 Kütüphane Rezervasyonu</li>
-                    <li onclick="openModal('Kampüs Haritası', '<p>Etkileşimli kampüs haritası açılıyor...</p>')">🗺️ Kampüs Haritası</li>
-                    <li onclick="openModal('Yemekhane', '<p>Günün Menüsü: Vegan seçenekler, Makarna, Çorba</p>')">🍽️ Yemekhane Menüsü</li>
-                </ul>
             </div>
         </aside>
     </div>
