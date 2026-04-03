@@ -14,12 +14,10 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
 .logo-area { display: flex; align-items: center; gap: 15px; }
 .logo { font-size: 24px; font-weight: 800; color: var(--primary); cursor: pointer; }
 #mobile-menu-btn { display: none; font-size: 24px; cursor: pointer; color: var(--text-dark); }
-
 .user-menu button { background-color: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: 600; }
 
 .container { display: grid; grid-template-columns: 250px 1fr 300px; gap: 20px; padding: 20px 5%; max-width: 1400px; margin: 0 auto; position: relative; }
 
-/* SİDEBAR & SAĞ PANEL */
 .sidebar { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: calc(100vh - 100px); display: flex; flex-direction: column; justify-content: space-between; position: sticky; top: 90px; overflow-y: auto; }
 .sidebar h3 { margin-bottom: 15px; font-size: 16px; color: var(--text-gray); }
 .menu-item { padding: 12px 15px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; font-weight: 500; }
@@ -27,19 +25,16 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
 .sidebar-bottom { margin-top: auto; padding-top: 20px; border-top: 1px solid #E5E7EB; }
 
 .mobile-only-communities { display: none; }
-
 .right-panel { display: flex; flex-direction: column; gap: 20px; }
 .sticky-card { position: sticky; top: 90px; }
 .community-list { list-style: none; }
 .community-list li { padding: 10px 0; border-bottom: 1px solid #F3F4F6; cursor: pointer; display: flex; align-items: center; gap: 10px; font-weight: 500; transition: 0.2s;}
 .community-list li:hover { color: var(--primary); transform: translateX(5px); }
 
-/* ORTA ALAN */
 .main-feed { display: flex; flex-direction: column; gap: 20px; min-height: 80vh; }
 .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
 .card h2 { font-size: 18px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
 
-/* İLAN KARTLARI */
 .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;}
 .match-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
 .match-card { border: 1px solid #E5E7EB; padding: 15px; border-radius: 10px; text-align: center; }
@@ -63,11 +58,9 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
 .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
 .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #D1D5DB; border-radius: 8px; outline: none; resize: vertical; }
 
-/* LOKAL ARAMA ÇUBUĞU */
 .local-search-bar { width: 100%; padding: 15px 20px; border: 2px solid #EEF2FF; border-radius: 30px; font-size: 16px; outline: none; margin-bottom: 20px; transition: 0.3s; background: #F9FAFB; }
 .local-search-bar:focus { border-color: var(--primary); background: white; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.1); }
 
-/* ANONİM KAMPÜS (KARE TASARIMI) */
 .confessions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
 .confession-square { border-radius: 16px; padding: 20px; height: 200px; display: flex; flex-direction: column; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
 .confession-square:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
@@ -76,35 +69,37 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
 .confession-square-time { font-size: 11px; opacity: 0.7; font-weight: bold; }
 .confession-square-text { font-size: 14px; line-height: 1.5; font-weight: 500; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; }
 
-/* CHAT ARAYÜZÜ */
-.chat-layout { display: flex; height: 70vh; background: var(--card-bg); border-radius: 12px; border: 1px solid #E5E7EB; overflow: hidden; }
-.chat-sidebar { width: 35%; border-right: 1px solid #E5E7EB; overflow-y: auto; background: #fff; }
+/* 🌟 WHATSAPP STİLİ CHAT ARAYÜZÜ 🌟 */
+.chat-layout { display: flex; height: 75vh; background: var(--card-bg); border-radius: 12px; border: 1px solid #E5E7EB; overflow: hidden; }
+.chat-sidebar { width: 35%; border-right: 1px solid #E5E7EB; overflow-y: auto; background: #fff; display: block; }
+.chat-sidebar-header { padding: 15px; font-weight: bold; background: #F0F2F5; border-bottom: 1px solid #E5E7EB; }
 .chat-contact { padding: 15px; border-bottom: 1px solid #F3F4F6; cursor: pointer; display: flex; gap: 15px; align-items: center; transition: 0.2s; }
-.chat-contact:hover, .chat-contact.active { background: #EEF2FF; }
-.chat-contact .avatar { width: 45px; height: 45px; font-size: 20px; margin: 0; flex-shrink: 0;}
+.chat-contact:hover, .chat-contact.active { background: #F0F2F5; }
+.chat-contact .avatar { width: 45px; height: 45px; font-size: 20px; margin: 0; flex-shrink: 0; background: #D1D5DB; }
 .chat-contact-info { flex: 1; overflow: hidden; }
-.chat-contact-name { font-weight: bold; font-size: 14px; margin-bottom: 3px; }
-.chat-contact-last { font-size: 12px; color: var(--text-gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.chat-main { flex: 1; display: flex; flex-direction: column; background: #F9FAFB; }
-.chat-header { padding: 15px 20px; background: white; border-bottom: 1px solid #E5E7EB; font-weight: bold; display: flex; align-items: center; gap: 15px; }
-.chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-.bubble { max-width: 75%; padding: 10px 15px; border-radius: 15px; font-size: 14px; line-height: 1.4; position: relative; }
-.bubble.received { background: white; border: 1px solid #E5E7EB; align-self: flex-start; border-bottom-left-radius: 2px; }
-.bubble.sent { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-.chat-input-area { padding: 15px; background: white; border-top: 1px solid #E5E7EB; display: flex; gap: 10px; }
-.chat-input-area input { flex: 1; padding: 12px 15px; border: 1px solid #D1D5DB; border-radius: 25px; outline: none; }
+.chat-contact-name { font-weight: bold; font-size: 15px; margin-bottom: 3px; color: #111B21; }
+.chat-contact-last { font-size: 13px; color: var(--text-gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.chat-main { flex: 1; display: flex; flex-direction: column; background: #efeae2; }
+.chat-header { padding: 10px 15px; background: #F0F2F5; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; }
+.back-btn { display: none; background: none; border: none; font-size: 24px; font-weight: bold; cursor: pointer; margin-right: 15px; color: var(--text-gray); }
+.chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.bubble { max-width: 75%; padding: 8px 12px; border-radius: 8px; font-size: 14px; line-height: 1.4; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+.bubble.received { background: white; align-self: flex-start; border-top-left-radius: 0; }
+.bubble.sent { background: #D9FDD3; align-self: flex-end; border-top-right-radius: 0; }
+.chat-input-area { padding: 12px 15px; background: #F0F2F5; display: flex; gap: 10px; align-items: center; }
+.chat-input-area input { flex: 1; padding: 12px 15px; border: none; border-radius: 8px; outline: none; font-size: 15px; }
 .chat-input-area button { background: var(--primary); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 18px; }
 
-/* FAKÜLTE KATILIM / KAPAK ARAYÜZÜ */
-.community-banner { color: white; padding: 50px 20px 20px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; flex-direction: column; justify-content: flex-end; position: relative; overflow: hidden; }
-.community-banner h1 { font-size: 32px; position: relative; z-index: 2; margin-bottom: 10px; }
-.community-stats { font-size: 14px; opacity: 0.9; position: relative; z-index: 2; display: flex; gap: 15px; }
+/* 🌟 DÜZELTİLMİŞ FAKÜLTE KAPAK TASARIMI 🌟 */
+.community-banner { background-size: cover; padding: 30px 25px; border-radius: 12px; margin-bottom: 20px; display: flex; flex-direction: column; justify-content: center; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.community-banner h1 { font-size: 26px; margin: 0 0 10px 0; }
+.community-stats { font-size: 15px; font-weight: 500; opacity: 0.95; }
 .join-faculty-box { text-align: center; padding: 60px 20px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
 .join-faculty-box .icon { font-size: 70px; margin-bottom: 20px; }
 .join-faculty-box h2 { font-size: 24px; margin-bottom: 10px; }
 .join-faculty-box p { color: var(--text-gray); margin-bottom: 25px; line-height: 1.6; }
 
-/* MODAL YENİLEMESİ */
 .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; backdrop-filter: blur(5px); }
 .modal.active { display: flex; }
 .modal-content { background-color: #fff; padding: 25px; border-radius: 16px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; animation: slideDown 0.3s ease-out; }
@@ -117,7 +112,6 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
     .container { grid-template-columns: 1fr; padding: 15px 5%; }
     .right-panel { display: none; }
     .mobile-only-communities { display: block; } 
-    
     header { gap: 15px; }
     #mobile-menu-btn { display: block; }
     
@@ -125,7 +119,12 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
     .sidebar.open { transform: translateX(0); }
     
     .grid-2col { grid-template-columns: 1fr; }
-    .chat-layout { flex-direction: column; height: 80vh; }
-    .chat-sidebar { width: 100%; height: 30%; border-right: none; border-bottom: 1px solid #E5E7EB; }
-    .chat-main { height: 70%; }
+    
+    /* Mobil Chat Uyum Togglesi */
+    .chat-layout { height: 80vh; border:none; }
+    .chat-sidebar { width: 100%; border-right: none; }
+    .chat-main { display: none; width: 100%; }
+    .chat-layout.chat-active .chat-sidebar { display: none; }
+    .chat-layout.chat-active .chat-main { display: flex; }
+    .back-btn { display: block !important; }
 }
