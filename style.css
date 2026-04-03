@@ -31,7 +31,7 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
 .mobile-only-communities { display: none; }
 
 .right-panel { display: flex; flex-direction: column; gap: 20px; }
-.sticky-card { position: sticky; top: 120px; margin-top: 30px; } /* Kart aşağı kaydırıldı */
+.sticky-card { position: sticky; top: 120px; margin-top: 30px; }
 .community-list { list-style: none; }
 .community-list li { padding: 10px 0; border-bottom: 1px solid #F3F4F6; cursor: pointer; display: flex; align-items: center; gap: 10px; font-weight: 500; transition: 0.2s;}
 .community-list li:hover { color: var(--primary); transform: translateX(5px); }
@@ -90,7 +90,7 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
 .chat-input-area input { flex: 1; padding: 12px 15px; border: 1px solid #D1D5DB; border-radius: 25px; outline: none; }
 .chat-input-area button { background: var(--primary); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 18px; }
 
-/* TOPLULUK ARAYÜZÜ */
+/* TOPLULUK/FAKÜLTE ARAYÜZÜ */
 .community-banner { color: white; padding: 40px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; flex-direction: column; justify-content: flex-end; position: relative; overflow: hidden; }
 .community-banner h1 { font-size: 28px; position: relative; z-index: 2; margin-bottom: 10px; }
 .community-stats { font-size: 14px; opacity: 0.9; position: relative; z-index: 2; display: flex; gap: 15px; }
@@ -105,11 +105,11 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
 .close-btn { font-size: 24px; font-weight: bold; cursor: pointer; color: var(--text-gray); }
 @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-/* MOBİL GÖRÜNÜM (TELEFON UYUMU) */
+/* MOBİL GÖRÜNÜM */
 @media (max-width: 1024px) {
     .container { grid-template-columns: 1fr; padding: 15px 5%; }
-    .right-panel { display: none; } /* Sağ paneli gizle */
-    .mobile-only-communities { display: block; } /* Sol menüde toplulukları göster */
+    .right-panel { display: none; }
+    .mobile-only-communities { display: block; } 
     
     header { flex-wrap: wrap; gap: 15px; }
     .search-bar { order: 3; width: 100%; padding: 0; }
