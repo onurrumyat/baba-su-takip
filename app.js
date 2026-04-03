@@ -31,20 +31,26 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
     let currentChatId = "chat1";
 
-    // MODAL YÖNETİMİ
+    // --- MODAL YÖNETİMİ ---
     const modal = document.getElementById('app-modal');
     const modalTitle = document.getElementById('modal-title');
     const modalBody = document.getElementById('modal-body');
-    window.openModal = function(title, contentHTML) { modalTitle.innerText = title; modalBody.innerHTML = contentHTML; modal.classList.add('active'); }
+    
+    window.openModal = function(title, contentHTML) { 
+        modalTitle.innerText = title; 
+        modalBody.innerHTML = contentHTML; 
+        modal.classList.add('active'); 
+    }
     window.closeModal = function() { modal.classList.remove('active'); }
+    
     document.getElementById('modal-close').addEventListener('click', closeModal);
     window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
-    // MOBİL MENÜ YÖNETİMİ
+    // --- MOBİL MENÜ YÖNETİMİ ---
     const sidebar = document.getElementById('sidebar');
     document.getElementById('mobile-menu-btn').addEventListener('click', () => { sidebar.classList.toggle('open'); });
 
-    // DAHA FAZLA GÖSTER MANTIĞI
+    // --- DAHA FAZLA GÖSTER MANTIĞI ---
     const setupShowMore = (btnId, containerId) => {
         const btn = document.getElementById(btnId);
         const container = document.getElementById(containerId);
@@ -58,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupShowMore('desktop-show-more-btn', 'desktop-more-faculties');
     setupShowMore('mobile-show-more-btn', 'mobile-more-faculties');
 
-    // 1. ANA SAYFA
+    // --- 1. ANA SAYFA ---
     function getHomeContent() {
         return `
             <div class="card" style="background: linear-gradient(135deg, #4F46E5, #818CF8); color: white;">
@@ -75,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     }
 
-    // 2. SAYFA İÇİ ARAMALI İLAN LİSTELEYİCİ
+    // --- 2. İLAN LİSTELEYİCİ (AKILLI ARAMA ÇUBUĞUYLA) ---
     function renderListings(type, title, buttonText) {
         let html = `
             <div class="card">
@@ -84,7 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     <button class="btn-primary" style="width:auto;">+ İlan Ver</button>
                 </div>
                 <input type="text" id="local-search-input" class="local-search-bar" placeholder="${title} içinde ara...">
-                
                 <div class="grid-2col" id="listings-grid-container"></div>
             </div>
         `;
@@ -105,11 +110,11 @@ document.addEventListener("DOMContentLoaded", () => {
             container.innerHTML = gridHtml;
         };
 
-        drawGrid(); // İlk çizim
-        searchInput.addEventListener('input', (e) => drawGrid(e.target.value.toLowerCase())); // Arama dinleyici
+        drawGrid(); 
+        searchInput.addEventListener('input', (e) => drawGrid(e.target.value.toLowerCase())); 
     }
 
-    // 3. ANONİM KAMPÜS (KARE TASARIM & MODAL DETAY)
+    // --- 3. ANONİM KAMPÜS (KARE TASARIM) ---
     function renderConfessions() {
         let html = `
             <div class="card">
@@ -164,7 +169,6 @@ document.addEventListener("DOMContentLoaded", () => {
         feed.innerHTML = html;
     }
 
-    // Kareye Tıklanınca Büyüyen Modal
     window.openConfessionDetail = function(index) {
         const post = confessionsDB[index];
         openModal(post.user + ' Diyor ki:', `
@@ -178,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `);
     }
 
-    // 4. FAKÜLTE KATILIM (GATEKEEPING) VE SAYFA SİSTEMİ
+    // --- 4. FAKÜLTE KATILIM (GATEKEEPING) SİSTEMİ ---
     function updateMyFacultiesSidebar() {
         const container = document.getElementById('my-joined-faculties');
         let html = '';
@@ -188,15 +192,13 @@ document.addEventListener("DOMContentLoaded", () => {
                      </div>`;
         });
         container.innerHTML = html;
-        // Yeni eklenen linkleri de dinlemek için tekrar tetikle
-        bindCommunityLinks(); 
     }
 
     window.joinFaculty = function(name, icon, bgColor) {
         joinedFaculties.push({name: name, icon: icon, color: bgColor});
         closeModal();
         updateMyFacultiesSidebar();
-        loadFacultyFeed(name, icon, bgColor); // Katıldıktan sonra direkt akışa gir
+        loadFacultyFeed(name, icon, bgColor);
     }
 
     window.loadFacultyFeed = function(name, icon, bgColor) {
@@ -205,10 +207,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="community-banner" style="background: ${bgColor};">
                     <h1>${icon} ${name}</h1>
                     <div class="community-stats">👥 1,240 Öğrenci • 🟢 42 Çevrimiçi</div>
-                    <div class="member-avatars">
-                        <div class="avatar">👨‍💻</div><div class="avatar">👩‍⚕️</div>
-                        <div class="avatar">👨‍🎨</div><div class="avatar" style="background:#f3f4f6; color:#000; font-size:12px;">+1K</div>
-                    </div>
                 </div>
                 <div class="card" style="margin-bottom:20px;">
                     <div style="display:flex; gap:10px;">
@@ -220,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="confession-avatar">👨‍🏫</div>
                     <div class="confession-content">
                         <div class="confession-header"><span class="confession-user">Fakülte Temsilcisi</span><span class="confession-time">10 dk önce</span></div>
-                        <div class="confession-text">Arkadaşlar bu hafta sonu yapılacak olan tanışma toplantısı amfi 4'e alınmıştır. Lütfen not alalım.</div>
+                        <div class="confession-text">Amfi 4'teki ders iptal olmuştur, duyurulur.</div>
                         <div class="confession-actions"><span onclick="alert('Beğenildi')">👍 Beğen (120)</span></div>
                     </div>
                 </div>
@@ -234,18 +232,16 @@ document.addEventListener("DOMContentLoaded", () => {
         menuItems.forEach(m => m.classList.remove('active'));
         if(window.innerWidth <= 1024) sidebar.classList.remove('open');
 
-        // Kullanıcı bu fakülteye katılmış mı?
         const isJoined = joinedFaculties.some(f => f.name === name);
 
         if(isJoined) {
             loadFacultyFeed(name, icon, bgColor);
         } else {
-            // Katılma Ekranı
             mainContent.innerHTML = `
                 <div class="join-faculty-box">
                     <div class="icon">${icon}</div>
                     <h2>${name} Topluluğuna Hoş Geldin</h2>
-                    <p>Bu fakülte ağı kapalı bir topluluktur. Katılarak bölümündeki diğer öğrencilerle tanışabilir, özel notları görebilir ve duyuruları takip edebilirsin.</p>
+                    <p>Bu fakülte ağı kapalı bir topluluktur. Katılarak bölümündeki diğer öğrencilerle tanışabilir ve duyuruları takip edebilirsin.</p>
                     <button class="btn-primary" style="max-width:250px;" onclick="joinFaculty('${name}', '${icon}', '${bgColor}')">Fakülteye Katıl</button>
                 </div>
             `;
@@ -253,22 +249,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function bindCommunityLinks() {
-        document.querySelectorAll('.community-link').forEach(link => {
-            // Çoklu event eklenmesini önlemek için eski eventi kaldır-ekle yapısı
-            const clone = link.cloneNode(true);
-            link.parentNode.replaceChild(clone, link);
-            clone.addEventListener('click', (e) => {
-                const name = e.currentTarget.getAttribute('data-name');
-                const icon = e.currentTarget.getAttribute('data-icon');
-                const color = e.currentTarget.getAttribute('data-color');
-                handleFacultyClick(name, icon, color);
-            });
-        });
-    }
-    bindCommunityLinks(); // İlk çalıştırma
+    // Modern Tıklama Dinleyicisi (Event Delegation) -> Kodu çökertmez!
+    document.body.addEventListener('click', (e) => {
+        const link = e.target.closest('.community-link');
+        if(link) {
+            const name = link.getAttribute('data-name');
+            const icon = link.getAttribute('data-icon');
+            const color = link.getAttribute('data-color');
+            handleFacultyClick(name, icon, color);
+        }
+    });
 
-    // 5. MESAJLAŞMA SİSTEMİ
+    // --- 5. MESAJLAŞMA SİSTEMİ ---
     function renderMessages() {
         let html = `<div class="card" style="padding:0; overflow:hidden;"><div class="chat-layout"><div class="chat-sidebar"><div style="padding:15px; font-weight:bold; border-bottom:1px solid #E5E7EB;">Sohbetler</div>`;
         chatsDB.forEach(chat => {
@@ -307,11 +299,11 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('chat-input-field').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMsg(); });
     }
 
-    // SAYFA GEÇİŞ (ROUTING)
+    // --- 6. SAYFA YÖNETİMİ ---
     function loadPage(pageName) {
         if (pageName === 'home') mainContent.innerHTML = getHomeContent();
         else if (pageName === 'market') renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
-        else if (pageName === 'housing') renderListings('housing', '🔑 Ev Arkadaşı & Yurt İlanları', 'İletişime Geç');
+        else if (pageName === 'housing') renderListings('housing', '🔑 Ev Arkadaşı & Yurt', 'İletişime Geç');
         else if (pageName === 'confessions') renderConfessions();
         else if (pageName === 'messages') renderMessages(); 
         
@@ -330,13 +322,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById('logo-btn').addEventListener('click', () => document.querySelector('[data-target="home"]').click());
     
-    // Profil Yükleme
     document.getElementById('profile-btn').addEventListener('click', () => {
         menuItems.forEach(m => m.classList.remove('active'));
         mainContent.innerHTML = `<div class="card"><h2>👤 Profilim</h2><p>Profil ayarları alanı...</p></div>`;
         if(window.innerWidth <= 1024) sidebar.classList.remove('open');
     });
 
-    // İlk açılış
     loadPage('home');
 });
