@@ -134,7 +134,7 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
 .chat-send-btn { background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 16px; transition: 0.2s; box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3); }
 .chat-send-btn:hover { transform: scale(1.05); background: var(--primary-hover); }
 
-/* FAKÜLTE AĞI (PREMIUM GÖNDERİLER) */
+/* FAKÜLTE AĞI (PREMIUM) */
 .community-banner { background: linear-gradient(135deg, #1E3A8A, #4F46E5); padding: 40px 30px; border-radius: 16px; margin-bottom: 24px; color: white; display: flex; justify-content: space-between; align-items: flex-end; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
 .comm-banner-left h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 .comm-banner-left p { font-size: 15px; font-weight: 500; opacity: 0.9; }
@@ -157,11 +157,13 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
 .cp-post-btn { background: var(--primary); color: white; border: none; padding: 8px 24px; border-radius: 20px; font-weight: 700; cursor: pointer; transition: 0.2s; }
 .cp-post-btn:hover { background: var(--primary-hover); }
 
-.premium-post { background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border-color); padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+/* 🌟 YENİ EKLENEN SORU-CEVAP STİLLERİ 🌟 */
+.premium-post { background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border-color); padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: 0.2s;}
+.premium-post:hover { box-shadow: 0 4px 6px rgba(0,0,0,0.05); transform: translateY(-1px); }
 .pp-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
 .pp-user-info { display: flex; gap: 12px; align-items: center; }
 .pp-user-info .avatar { width: 48px; height: 48px; margin: 0; font-size: 20px; border: none;}
-.pp-name { font-weight: 700; font-size: 15px; color: var(--text-dark); line-height: 1.2; }
+.pp-name { font-weight: 700; font-size: 15px; color: var(--text-dark); line-height: 1.2; display: flex; align-items: center; }
 .pp-role { font-size: 13px; color: var(--text-gray); margin-bottom: 2px;}
 .pp-time { font-size: 12px; color: #9CA3AF; font-weight: 500;}
 .pp-options { color: var(--text-gray); cursor: pointer; font-weight: bold; font-size: 18px; padding: 0 8px; }
