@@ -9,9 +9,10 @@
 <body>
 
     <div id="auth-screen">
-        <div class="auth-card">
+        
+        <div class="auth-card" id="login-card">
             <div class="auth-logo">🌍 UniLoop</div>
-            <p class="auth-subtitle">Kampüs ağına katıl, döngüde kal.</p>
+            <p class="auth-subtitle">Kampüs ağına giriş yap, döngüde kal.</p>
             
             <div class="form-group">
                 <input type="email" id="login-email" placeholder="Okul E-posta Adresin (.edu uzantılı)" value="ege@uniloop.edu">
@@ -21,10 +22,36 @@
             </div>
             
             <button class="btn-primary" id="login-btn" style="margin-bottom: 10px; padding: 12px; font-size: 16px;">Giriş Yap</button>
-            <button class="action-btn" style="padding: 12px; font-size: 16px;" onclick="alert('Hesap oluşturma ekranı yakında eklenecek.')">Yeni Hesap Oluştur</button>
+            <button class="action-btn" id="show-register-btn" style="padding: 12px; font-size: 16px;">Yeni Hesap Oluştur</button>
             
             <p style="font-size: 12px; color: var(--text-gray); margin-top: 20px;">Sadece onaylı üniversite öğrencileri katılabilir.</p>
         </div>
+
+        <div class="auth-card" id="register-card" style="display: none;">
+            <div class="auth-logo" style="font-size: 28px;">🌍 Ağa Katıl</div>
+            <p class="auth-subtitle" style="margin-bottom: 20px;">Üniversiteni seç ve kendi kampüs ağına bağlan.</p>
+            
+            <div class="grid-2col" style="margin-top: 0; margin-bottom: 0;">
+                <div class="form-group"><input type="text" id="reg-name" placeholder="Ad"></div>
+                <div class="form-group"><input type="text" id="reg-surname" placeholder="Soyad"></div>
+            </div>
+            
+            <div class="form-group autocomplete">
+                <input type="text" id="reg-uni" placeholder="Üniversiteni Ara (Örn: Stanford, ODTÜ...)" autocomplete="off">
+                <div id="uni-autocomplete-list" class="autocomplete-items"></div>
+            </div>
+
+            <div class="form-group">
+                <input type="email" id="reg-email" placeholder="Öğrenci E-posta Adresin (.edu)">
+            </div>
+            <div class="form-group">
+                <input type="password" id="reg-password" placeholder="Güçlü Bir Şifre Belirle">
+            </div>
+            
+            <button class="btn-primary" id="register-btn" style="margin-bottom: 10px; padding: 12px; font-size: 16px;">Hesabımı Oluştur</button>
+            <button class="action-btn" id="show-login-btn" style="padding: 12px; font-size: 16px; background: transparent; border: 1px solid var(--border-color);">Zaten hesabım var</button>
+        </div>
+
     </div>
 
     <div id="app-screen" style="display: none;">
@@ -33,14 +60,12 @@
                 <div id="mobile-menu-btn">☰</div>
                 <div class="logo" id="logo-btn">🌍 UniLoop</div>
             </div>
-            
             <div class="user-menu">
                 <button id="profile-btn">👤 Profilim</button>
             </div>
         </header>
 
         <div class="container">
-            
             <aside class="sidebar" id="sidebar">
                 <div class="sidebar-top">
                     <h3>Navigasyon</h3>
