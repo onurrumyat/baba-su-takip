@@ -4,7 +4,7 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, setDoc, getDoc, updateDoc, arrayUnion, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, setDoc, getDoc, updateDoc, arrayUnion, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 // --- FIREBASE YAPILANDIRMASI ---
@@ -551,7 +551,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window.deleteListing = async function(docId) {
         if(confirm("Bu ilanı tamamen silmek istediğinize emin misiniz?")) {
             try {
-                // Not: Storage'daki fotoğrafları silmek için ekstra backend kodu gerekir, şimdilik sadece Firestore'dan siliyoruz.
                 await deleteDoc(doc(db, "listings", docId));
                 alert("İlan başarıyla silindi!");
             } catch(e) {
@@ -596,20 +595,17 @@ document.addEventListener("DOMContentLoaded", () => {
             <p id="upload-status" style="font-size:12px; color:var(--primary); text-align:center; margin-top:10px; display:none;">Fotoğraflar Yükleniyor, lütfen bekleyin...</p>
         `);
 
-        // DOM yüklendikten sonra File Listener'ı çalıştırır
         setTimeout(() => {
             const photoBtn = document.getElementById('photo-trigger-btn');
             const photoInput = document.getElementById('new-item-photo');
             
             if(photoBtn && photoInput) {
-                // Butona tıklandığında gizli input'u tetikle
                 photoBtn.addEventListener('click', () => {
                     photoInput.click();
                 });
 
-                // Dosya seçildiğinde önizleme oluştur
                 photoInput.addEventListener('change', function(e) {
-                    const files = Array.from(e.target.files).slice(0, 3); // Max 3 fotoğraf
+                    const files = Array.from(e.target.files).slice(0, 3);
                     const previewContainer = document.getElementById('preview-container');
                     previewContainer.innerHTML = ''; 
                     
@@ -625,24 +621,41 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 100);
     }
 
-    // İLANI FIREBASE'E KAYDETME
+    // İLANI FIREBASE'E KAYDETME (TAM DÜZELTİLDİ)
     window.submitListing = async function(type) {
-        const title = document.getElementById('new-item-title').value.trim();
-        const price = document.getElementById('new-item-price').value.trim();
-        const desc = document.getElementById('new-item-desc').value.trim();
+        // DOM Elemanlarını seçme
+        const titleEl = document.getElementById('new-item-title');
+        const priceEl = document.getElementById('new-item-price');
+        const descEl = document.getElementById('new-item-desc');
         const photoInput = document.getElementById('new-item-photo');
         const statusEl = document.getElementById('upload-status');
         const btn = document.getElementById('publish-listing-btn');
 
-        if(!title || !price || !desc) return alert("Lütfen başlık, fiyat ve açıklama girin.");
+        // Elemanlar ekranda yoksa işlemi durdur
+        if (!titleEl || !priceEl || !descEl) {
+            console.error("DOM elemanları okunamadı.");
+            return;
+        }
+
+        const title = titleEl.value.trim();
+        const price = priceEl.value.trim();
+        const desc = descEl.value.trim();
+
+        // Değerlerin dolu olup olmadığını kesin kontrol et
+        if (title === "" || price === "" || desc === "") {
+            return alert("Lütfen başlık, fiyat ve açıklama alanlarını eksiksiz doldurun.");
+        }
 
         let files = [];
         if(photoInput && photoInput.files && photoInput.files.length > 0) {
             files = Array.from(photoInput.files).slice(0, 3);
         }
 
-        if(files.length === 0) return alert("Lütfen en az 1 fotoğraf seçin veya çekin.");
+        if(files.length === 0) {
+            return alert("Lütfen en az 1 fotoğraf seçin veya çekin.");
+        }
 
+        // Yükleme sırasında butonu kilitle
         btn.disabled = true;
         statusEl.style.display = 'block';
 
@@ -651,7 +664,6 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             // 1. Fotoğrafları Storage'a Yükle
             for (let file of files) {
-                // Dosya ismini benzersiz yapıyoruz
                 const fileName = Date.now() + '_' + file.name.replace(/\s/g, ''); 
                 const storageRef = ref(storage, 'listings/' + window.userProfile.uid + '/' + fileName);
                 await uploadBytes(storageRef, file);
