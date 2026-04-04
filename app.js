@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- 🌟 KULLANICI PROFİLİ 🌟 ---
     let userProfile = { 
         name: "Ege", surname: "Yılmaz", email: "ege.yilmaz@uniloop.edu", age: 21,
+        university: "Global University", // Kayıt olunca otomatik değişecek
         faculty: "Henüz Fakülte Seçilmedi", year: "2. Sınıf", 
         bio: "Kampüs hayatını ve teknolojiyi seviyorum.", avatar: "👨‍🎓"
     };
@@ -10,8 +11,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const authScreen = document.getElementById('auth-screen');
     const appScreen = document.getElementById('app-screen');
+    const loginCard = document.getElementById('login-card');
+    const registerCard = document.getElementById('register-card');
     const menuItems = document.querySelectorAll('.menu-item[data-target]');
     const mainContent = document.getElementById('main-content');
+
+    // --- MOCK VERİTABANLARI ---
+    const globalUniversities = [
+        "Yakın Doğu Üniversitesi (NEU)", "Doğu Akdeniz Üniversitesi (EMU)", "Girne Amerikan Üniversitesi (GAU)", "Uluslararası Kıbrıs Üniversitesi (CIU)",
+        "Orta Doğu Teknik Üniversitesi (ODTÜ)", "Boğaziçi Üniversitesi", "İstanbul Teknik Üniversitesi (İTÜ)", "Bilkent Üniversitesi", "Koç Üniversitesi",
+        "Stanford University", "Massachusetts Institute of Technology (MIT)", "Harvard University", "University of Oxford", "University of Cambridge",
+        "Technical University of Munich (TUM)", "ETH Zurich", "University of Toronto", "UCL (University College London)", "UCLA", "Yale University"
+    ];
 
     const database = [
         { id: 1, type: "market", title: "IKEA Çalışma Masası", desc: "Çok az kullanıldı, çiziksiz.", price: "$45", img: "🪑" },
@@ -26,7 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 3, avatar: "👽", color: "#D1FAE5", user: "Anonim #104", time: "1 gün önce", text: "Yemekhanedeki vegan menü harika olmuş!" }
     ];
 
-    // 🌟 YENİ WHATSAPP VERİTABANI (SAATLER EKLENDİ) 🌟
     let chatsDB = [
         { 
             id: "chat1", name: "Sarah B.", avatar: "👩‍⚕️", role: "Tıp Fakültesi • 3. Sınıf",
@@ -45,8 +55,73 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
     let currentChatId = "chat1";
 
-    // --- GİRİŞ / ÇIKIŞ ---
+    // --- 🌟 GİRİŞ / KAYIT SİSTEMİ VE AUTOCOMPLETE 🌟 ---
+    document.getElementById('show-register-btn').addEventListener('click', () => {
+        loginCard.style.display = 'none';
+        registerCard.style.display = 'block';
+    });
+
+    document.getElementById('show-login-btn').addEventListener('click', () => {
+        registerCard.style.display = 'none';
+        loginCard.style.display = 'block';
+    });
+
     document.getElementById('login-btn').addEventListener('click', () => {
+        // Mevcut Profili Kullan (Demo)
+        authScreen.style.display = 'none';
+        appScreen.style.display = 'block';
+        loadPage('home');
+    });
+
+    // Üniversite Autocomplete (Arama Çubuğu) Mantığı
+    const uniInput = document.getElementById('reg-uni');
+    const uniList = document.getElementById('uni-autocomplete-list');
+
+    uniInput.addEventListener('input', function() {
+        const val = this.value;
+        uniList.innerHTML = '';
+        if (!val) return false;
+        
+        const matches = globalUniversities.filter(u => u.toLowerCase().includes(val.toLowerCase()));
+        
+        matches.forEach(match => {
+            const div = document.createElement('div');
+            // Eşleşen kısmı kalın yap
+            const regex = new RegExp(`(${val})`, "gi");
+            div.innerHTML = match.replace(regex, "<strong>$1</strong>");
+            
+            div.addEventListener('click', function() {
+                uniInput.value = match; // Tıklananı inputa yaz
+                uniList.innerHTML = ''; // Listeyi temizle
+            });
+            uniList.appendChild(div);
+        });
+    });
+
+    // Dışarı tıklayınca listeyi kapat
+    document.addEventListener('click', (e) => {
+        if(e.target !== uniInput) uniList.innerHTML = '';
+    });
+
+    // Kayıt Ol Butonu
+    document.getElementById('register-btn').addEventListener('click', () => {
+        const name = document.getElementById('reg-name').value;
+        const surname = document.getElementById('reg-surname').value;
+        const uni = document.getElementById('reg-uni').value;
+        const email = document.getElementById('reg-email').value;
+
+        if(!name || !uni || !email) {
+            alert("Lütfen ad, üniversite ve e-posta alanlarını doldurun.");
+            return;
+        }
+
+        // Profili Güncelle
+        userProfile.name = name;
+        userProfile.surname = surname;
+        userProfile.university = uni;
+        userProfile.email = email;
+
+        // Uygulamaya Gir
         authScreen.style.display = 'none';
         appScreen.style.display = 'block';
         loadPage('home');
@@ -55,6 +130,8 @@ document.addEventListener("DOMContentLoaded", () => {
     window.logout = function() {
         appScreen.style.display = 'none';
         authScreen.style.display = 'flex';
+        loginCard.style.display = 'block';
+        registerCard.style.display = 'none';
     };
 
     // --- MODAL YÖNETİMİ ---
@@ -89,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return `
             <div class="card" style="background: linear-gradient(135deg, #1E3A8A, #4F46E5); color: white; border:none;">
                 <h2 style="font-size:24px; margin-bottom:8px;">Hoş Geldin, ${userProfile.name}! 👋</h2>
-                <p style="opacity:0.9; font-size:15px;">Global UniLoop ağına bağlandın. Eşyalarını sat, ev bul veya topluluklara katıl.</p>
+                <p style="opacity:0.9; font-size:15px;"><strong style="color:#D9FDD3;">${userProfile.university}</strong> ağındasın. Kendi kampüsünün ilanlarını ve itiraflarını keşfet.</p>
             </div>
             <div class="card">
                 <h2>✨ AI Kampüs Eşleşmeleri</h2>
@@ -134,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
         searchInput.addEventListener('input', (e) => drawGrid(e.target.value.toLowerCase())); 
     }
 
-    // --- 3. ANONİM KAMPÜS (KARE TASARIM) ---
+    // --- 3. ANONİM KAMPÜS ---
     function renderConfessions() {
         let html = `
             <div class="card">
@@ -185,7 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `);
     }
 
-    // --- 4. FAKÜLTE KATILIM SİSTEMİ (PREMIUM TASARIM) ---
+    // --- 4. FAKÜLTE KATILIM SİSTEMİ ---
     function updateMyFacultiesSidebar() {
         const container = document.getElementById('my-joined-faculties');
         let html = '';
@@ -209,7 +286,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="community-banner" style="background: ${bgColor};">
                     <div class="comm-banner-left">
                         <h1>${icon} ${name}</h1>
-                        <p>Resmi Öğrenci ve Mezun Ağı</p>
+                        <p>${userProfile.university} Ağındasın</p>
                     </div>
                     <div class="comm-banner-right">
                         <div class="member-avatars">
@@ -247,7 +324,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="pp-options">•••</div>
                     </div>
                     <div class="pp-content">
-                        Değerli ${name} öğrencileri,<br><br>Bu hafta sonu gerçekleştirilecek olan "Sektör Buluşmaları" etkinliğimiz Amfi 4'e alınmıştır. Yoklama alınacaktır, katılımınız önemlidir.
+                        Değerli ${name} öğrencileri,<br><br>Bu hafta sonu gerçekleştirilecek olan etkinlik Amfi 4'e alınmıştır. Katılımınız önemlidir.
                     </div>
                     <div class="pp-stats">
                         <span>👍 128 Beğeni</span>
@@ -257,32 +334,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         <button class="pp-btn" onclick="this.classList.toggle('active');">👍 Beğen</button>
                         <button class="pp-btn">💬 Yorum Yap</button>
                         <button class="pp-btn">🔗 Paylaş</button>
-                    </div>
-                </div>
-                
-                <div class="premium-post">
-                    <div class="pp-header">
-                        <div class="pp-user-info">
-                            <div class="avatar" style="background:#FCE7F3;">👩‍🎓</div>
-                            <div>
-                                <div class="pp-name">Ayşe K.</div>
-                                <div class="pp-role">3. Sınıf Temsilcisi</div>
-                                <div class="pp-time">5 saat önce</div>
-                            </div>
-                        </div>
-                        <div class="pp-options">•••</div>
-                    </div>
-                    <div class="pp-content">
-                        Geçmiş yılların çıkmış sorularını PDF olarak drive'a yükledim. İhtiyacı olanlar bana mesaj atabilir! Başarılar herkese ✌️
-                    </div>
-                    <div class="pp-stats">
-                        <span>👍 45 Beğeni</span>
-                        <span>💬 3 Yorum</span>
-                    </div>
-                    <div class="pp-actions">
-                        <button class="pp-btn" onclick="this.classList.toggle('active');">👍 Beğen</button>
-                        <button class="pp-btn">💬 Yorum Yap</button>
-                        <button class="pp-btn" onclick="document.querySelector('[data-target=\\'messages\\']').click()">✉️ Mesaj At</button>
                     </div>
                 </div>
             </div>
@@ -322,12 +373,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 5. PREMIUM MESAJLAŞMA SİSTEMİ (WHATSAPP STİLİ) ---
+    // --- 5. PREMIUM MESAJLAŞMA SİSTEMİ ---
     function renderMessages() {
         let html = `
             <div class="card" style="padding:0; border:none;">
                 <div class="chat-layout" id="chat-layout-container">
-                    
                     <div class="chat-sidebar">
                         <div class="chat-sidebar-header">Mesajlar</div>
         `;
@@ -340,10 +390,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="chat-contact ${isActive}" data-id="${chat.id}">
                     <div class="avatar">${chat.avatar}</div>
                     <div class="chat-contact-info">
-                        <div class="chat-contact-top">
-                            <span class="chat-contact-name">${chat.name}</span>
-                            <span class="chat-contact-time">${time}</span>
-                        </div>
+                        <div class="chat-contact-top"><span class="chat-contact-name">${chat.name}</span><span class="chat-contact-time">${time}</span></div>
                         <div class="chat-contact-last">${lastMsg}</div>
                     </div>
                 </div>
@@ -352,7 +399,6 @@ document.addEventListener("DOMContentLoaded", () => {
         
         html += `
                     </div>
-                    
                     <div class="chat-main" id="chat-main-view">
                         <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--text-gray); opacity:0.7;">
                             <div style="font-size:48px; margin-bottom:10px;">💬</div>
@@ -372,7 +418,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
         
-        // İlk sohbeti otomatik aç (Sadece Masaüstünde)
         if(window.innerWidth > 1024) openChatView(chatsDB[0].id);
     }
 
@@ -394,7 +439,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
                 <div class="chat-header-actions">⋮</div>
             </div>
-            
             <div class="chat-messages" id="chat-messages-scroll">
                 <div style="text-align:center; margin-bottom: 20px;">
                     <span style="background: rgba(0,0,0,0.05); padding: 4px 12px; border-radius: 12px; font-size:11px; font-weight:600; color:var(--text-gray);">Bugün</span>
@@ -403,12 +447,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         activeChat.messages.forEach(msg => { 
             const ticks = msg.type === 'sent' ? '<span class="ticks">✓✓</span>' : '';
-            chatHTML += `
-                <div class="bubble ${msg.type}">
-                    <div class="msg-text">${msg.text}</div>
-                    <div class="msg-time">${msg.time} ${ticks}</div>
-                </div>
-            `; 
+            chatHTML += `<div class="bubble ${msg.type}"><div class="msg-text">${msg.text}</div><div class="msg-time">${msg.time} ${ticks}</div></div>`; 
         });
         
         chatHTML += `
@@ -442,7 +481,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('chat-input-field').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMsg(); });
     }
 
-    // --- 6. PROFİL VE AYARLAR ---
+    // --- 6. PROFİL VE AYARLAR EKRANI ---
     function renderProfile() {
         mainContent.innerHTML = `
             <div class="card">
@@ -451,6 +490,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="grid-2col" style="margin-top:0;">
                         <div class="form-group"><label>Ad</label><input type="text" id="prof-name" value="${userProfile.name}"></div>
                         <div class="form-group"><label>Soyad</label><input type="text" id="prof-surname" value="${userProfile.surname}"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Bağlı Olduğun Üniversite</label>
+                        <input type="text" disabled value="${userProfile.university}" style="background:#E5E7EB; cursor:not-allowed; opacity:0.7;">
                     </div>
                     <div class="form-group">
                         <label>Okul E-posta Adresi <span style="color:var(--text-gray); font-size:11px;">(Onaylı)</span></label>
