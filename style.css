@@ -136,7 +136,7 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
 .chat-send-btn { background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 16px; transition: 0.2s; box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3); }
 .chat-send-btn:hover { transform: scale(1.05); background: var(--primary-hover); }
 
-/* FAKÜLTE / TOPLULUK AĞI */
+/* FAKÜLTE AĞI (PREMIUM GÖNDERİLER) */
 .community-banner { background: linear-gradient(135deg, #1E3A8A, #4F46E5); padding: 40px 30px; border-radius: 16px; margin-bottom: 24px; color: white; display: flex; justify-content: space-between; align-items: flex-end; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
 .comm-banner-left h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 .comm-banner-left p { font-size: 15px; font-weight: 500; opacity: 0.9; }
