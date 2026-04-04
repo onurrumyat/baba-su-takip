@@ -1,215 +1,77 @@
-// 🌟 YENİ: FIREBASE KÜTÜPHANELERİ (Type="module" olarak çağrılmalı) 🌟
+// ============================================================================
+// 🌟 UNILOOP - GLOBAL CAMPUS NETWORK | CORE ENGINE (FIREBASE) 🌟
+// ============================================================================
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, setDoc, getDoc, updateDoc, arrayUnion, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-// 🌟 SENİN FIREBASE YAPILANDIRMAN (Sistemin Kalbi) 🌟
+// --- FIREBASE YAPILANDIRMASI ---
 const firebaseConfig = {
   apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
   authDomain: "voice2post-9e8ca.firebaseapp.com",
   projectId: "voice2post-9e8ca",
   storageBucket: "voice2post-9e8ca.firebasestorage.app",
   messagingSenderId: "511446656614",
-  appId: "1:511446656614:web:32101ee70299543c716fa7",
-  measurementId: "G-36ZHRLMK5T"
+  appId: "1:511446656614:web:32101ee70299543c716fa7"
 };
 
-// Firebase'i Başlat
+// Firebase Servislerini Başlat
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
 document.addEventListener("DOMContentLoaded", () => {
     
-    // --- 🛡️ DEFENSIVE PROGRAMMING (ZIRHLI BAĞLAMA) ---
-    const bind = (id, event, callback) => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener(event, callback);
-    };
+    const bind = (id, event, callback) => { const el = document.getElementById(id); if (el) el.addEventListener(event, callback); };
 
-    // --- 🌟 KULLANICI PROFİLİ VE SİSTEM HAFIZASI 🌟 ---
-    window.userProfile = { 
-        name: "Ege", surname: "Yılmaz", email: "", age: 21,
-        university: "Global University", faculty: "Henüz Fakülte Seçilmedi", year: "2. Sınıf", 
-        bio: "Kampüs hayatını ve teknolojiyi seviyorum.", avatar: "👨‍🎓"
-    };
+    // --- SİSTEM HAFIZASI (GLOBAL DEĞİŞKENLER) ---
+    window.userProfile = { uid: "", name: "", surname: "", email: "", university: "", avatar: "👨‍🎓", faculty: "" };
     window.joinedFaculties = [];
+    
+    let marketDB = [];
+    let confessionsDB = [];
+    let qaDB = [];
+    let chatsDB = [];
+    let currentChatId = null;
 
-    const authScreen = document.getElementById('auth-screen');
-    const appScreen = document.getElementById('app-screen');
-    const mainContent = document.getElementById('main-content');
+    // FAKÜLTE GİRİŞ ŞİFRELERİ
+    const FACULTY_PASSCODES = {
+        "Tıp Fakültesi": "tip1000",
+        "Bilgisayar Fakültesi": "bil1000",
+        "Diş Hekimliği": "dis1000",
+        "Hukuk Fakültesi": "hukuk1000",
+        "Mimarlık Fakültesi": "mim1000",
+        "Eğitim Fakültesi": "egt1000"
+    };
 
-    // --- 🗄️ MOCK VERİTABANLARI 🗄️ ---
     const globalUniversities = [
         "Yakın Doğu Üniversitesi (NEU)", "Doğu Akdeniz Üniversitesi (EMU)", "Girne Amerikan Üniversitesi (GAU)", "Uluslararası Kıbrıs Üniversitesi (CIU)",
         "Orta Doğu Teknik Üniversitesi (ODTÜ)", "Boğaziçi Üniversitesi", "İstanbul Teknik Üniversitesi (İTÜ)", "Bilkent Üniversitesi", "Koç Üniversitesi",
         "Stanford University", "Massachusetts Institute of Technology (MIT)", "Harvard University"
     ];
 
-    const database = [
-        { id: 1, type: "market", title: "IKEA Çalışma Masası", desc: "Çok az kullanıldı.", price: "$45", img: "🪑" },
-        { id: 2, type: "market", title: "Anatomi Atlası (Netter)", desc: "Temiz kitap.", price: "$30", img: "📚" },
-        { id: 3, type: "housing", title: "Kampüse 5dk - Odaya Arkadaş", desc: "Sigara içmeyen ev arkadaşı arıyorum.", price: "$400/Ay", img: "🏠" },
-        { id: 4, type: "market", title: "M1 Macbook Air", desc: "Yazılımcıdan temiz.", price: "$800", img: "💻" }
-    ];
+    const authScreen = document.getElementById('auth-screen');
+    const appScreen = document.getElementById('app-screen');
+    const mainContent = document.getElementById('main-content');
 
-    let confessionsDB = [
-        { id: 1, avatar: "👻", theme: "theme-midnight", user: "Anonim #482", time: "2 saat önce", tag: "📍 Kütüphane", text: "İlk yılım ve henüz hiç arkadaş bulamadım.", likes: 142, comments: 24 },
-        { id: 2, avatar: "🎭", theme: "theme-drama", user: "Anonim #911", time: "5 saat önce", tag: "📍 Vizeler", text: "Fizik 101 hocası gerçekten çok zorluyor.", likes: 89, comments: 12 },
-        { id: 3, avatar: "👽", theme: "theme-love", user: "Anonim #104", time: "1 gün önce", tag: "📍 Yemekhane", text: "Yemekhanedeki vegan menü harika olmuş!", likes: 56, comments: 8 }
-    ];
-
-    let qaDB = [
-        { id: 1, user: "Ayşe K.", avatar: "👩‍🎓", time: "1 saat önce", tag: "Yurtlar", question: "Kredi Yurtlar Kurumu (KYK) çıkış saatleri kaça kadar esnedi, bilen var mı?", answers: [{user: "Mehmet", text: "Gece 12'ye kadar girebiliyorsun."}] },
-        { id: 2, user: "Can T.", avatar: "👨‍💻", time: "3 saat önce", tag: "Ders", question: "Seçmeli olarak İspanyolca 101 alınır mı, hoca çok zorluyor mu?", answers: [] },
-        { id: 3, user: "Elif B.", avatar: "👩‍🔬", time: "Dün", tag: "Genel", question: "Kampüs içi otobüs saatleri değişti mi? Dün 15 dakika durakta bekledim.", answers: [{user: "Ali", text: "Evet, yeni saatler okulun sitesine yüklendi."}] }
-    ];
-
-    let chatsDB = [
-        { 
-            id: "chat1", name: "Sarah B.", avatar: "👩‍⚕️", role: "Tıp Fakültesi • 3. Sınıf",
-            messages: [
-                { type: "received", text: "Merhaba Ege, Anatomi atlası duruyor mu?", time: "13:45" },
-                { type: "sent", text: "Selam Sarah, evet duruyor.", time: "13:48" },
-                { type: "received", text: "Süper! Kampüsteysen yarın teslim alabilirim.", time: "14:05" }
-            ]
-        }
-    ];
-    let currentChatId = "chat1";
-
-    // --- 🚀 1. GİRİŞ / KAYIT EKRANI GEÇİŞLERİ 🚀 ---
+    // ============================================================================
+    // 1. GİRİŞ, KAYIT VE KİMLİK DOĞRULAMA (AUTHENTICATION)
+    // ============================================================================
+    
     bind('show-register-btn', 'click', () => {
-        const loginCard = document.getElementById('login-card');
-        const registerCard = document.getElementById('register-card');
-        if(loginCard && registerCard) { loginCard.style.display = 'none'; registerCard.style.display = 'block'; }
+        document.getElementById('login-card').style.display = 'none'; 
+        document.getElementById('register-card').style.display = 'block';
     });
-
+    
     bind('show-login-btn', 'click', () => {
-        const loginCard = document.getElementById('login-card');
-        const registerCard = document.getElementById('register-card');
-        if(loginCard && registerCard) { registerCard.style.display = 'none'; loginCard.style.display = 'block'; }
+        document.getElementById('register-card').style.display = 'none'; 
+        document.getElementById('login-card').style.display = 'block';
     });
 
-    // --- 🚀 2. FIREBASE: KAYIT OLMA VE DOĞRULAMA (EMAIL VERIFICATION) 🚀 ---
-    bind('register-btn', 'click', async () => {
-        const nameEl = document.getElementById('reg-name');
-        const surnameEl = document.getElementById('reg-surname');
-        const uniEl = document.getElementById('reg-uni');
-        const emailEl = document.getElementById('reg-email');
-        const passwordEl = document.getElementById('reg-password');
-
-        const email = emailEl ? emailEl.value.trim() : '';
-        const password = passwordEl ? passwordEl.value : '';
-
-        if(!nameEl.value || !surnameEl.value || !uniEl.value || !email || !password) {
-            alert("Lütfen tüm alanları (Ad, Soyad, Üniversite, E-posta, Şifre) eksiksiz doldurun.");
-            return;
-        }
-
-        // Güvenlik Kalkanı: .edu kontrolü
-        if(!email.includes(".edu")) {
-            alert("Sisteme sadece onaylı üniversite e-postaları (.edu veya .edu.tr uzantılı) ile kayıt olabilirsiniz.");
-            return;
-        }
-
-        try {
-            // 1. Firebase üzerinde kullanıcıyı oluştur
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-
-            // 2. Doğrulama E-postası gönder
-            await sendEmailVerification(user);
-
-            // 3. Kullanıcıya bilgi ver ve Login ekranına at (Doğrulamadan girmesini engelle)
-            alert("Hesabınız başarıyla oluşturuldu! Lütfen " + email + " adresine gönderdiğimiz doğrulama linkine tıklayarak hesabınızı aktif edin.");
-            
-            await signOut(auth); // İçeri girmesini engeller
-            
-            document.getElementById('register-card').style.display = 'none';
-            document.getElementById('login-card').style.display = 'block';
-
-            // Lokalde geçici profil bilgilerini tutalım (Firebase Firestore'a bağlanana kadar)
-            window.userProfile.name = nameEl.value;
-            window.userProfile.surname = surnameEl.value;
-            window.userProfile.university = uniEl.value;
-            window.userProfile.email = email;
-
-        } catch (error) {
-            alert("Kayıt olurken bir hata oluştu: " + error.message);
-        }
-    });
-
-    // --- 🚀 3. FIREBASE: GİRİŞ YAPMA (LOGIN) 🚀 ---
-    bind('login-btn', 'click', async () => {
-        const emailEl = document.getElementById('login-email');
-        const passwordEl = document.getElementById('login-password');
-        const email = emailEl ? emailEl.value.trim() : '';
-        const password = passwordEl ? passwordEl.value : '';
-
-        if(!email || !password) {
-            alert("Lütfen e-posta ve şifrenizi girin.");
-            return;
-        }
-
-        try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-
-            // Güvenlik Kalkanı: Maili doğrulamamışsa içeri alma!
-            if (!user.emailVerified) {
-                alert("Giriş başarısız: Lütfen önce e-posta adresinize gönderilen doğrulama linkine tıklayın. (Spam/Gereksiz kutusunu kontrol etmeyi unutmayın)");
-                await signOut(auth);
-                return;
-            }
-
-            // GİRİŞ BAŞARILI
-            window.userProfile.email = user.email; // E-postayı profile işle
-            if(authScreen && appScreen) {
-                authScreen.style.display = 'none';
-                appScreen.style.display = 'block';
-                loadPage('home');
-            }
-        } catch (error) {
-            alert("Giriş hatası: E-posta veya şifre yanlış. Lütfen tekrar deneyin.");
-        }
-    });
-
-    // --- 🚀 4. FIREBASE: ÇIKIŞ YAP (LOGOUT) 🚀 ---
-    window.logout = async function() {
-        try {
-            await signOut(auth);
-            if(appScreen && authScreen) { 
-                appScreen.style.display = 'none'; 
-                authScreen.style.display = 'flex'; 
-            }
-            const loginCard = document.getElementById('login-card');
-            const registerCard = document.getElementById('register-card');
-            if(loginCard && registerCard) { 
-                loginCard.style.display = 'block'; 
-                registerCard.style.display = 'none'; 
-            }
-        } catch(error) {
-            console.error("Çıkış yapılırken hata oluştu:", error);
-        }
-    };
-
-    // --- 🚀 5. FIREBASE: OTURUM DURUMU DİNLEYİCİSİ (KALICI OTURUM) 🚀 ---
-    // Kullanıcı sayfayı yenilese bile, maili onaylıysa direkt uygulamaya girer.
-    onAuthStateChanged(auth, (user) => {
-        if (user && user.emailVerified) {
-            window.userProfile.email = user.email;
-            if(authScreen && appScreen) {
-                authScreen.style.display = 'none';
-                appScreen.style.display = 'block';
-                loadPage('home'); // Ana sayfayı yükle
-            }
-        } else {
-            if(appScreen && authScreen) {
-                appScreen.style.display = 'none';
-                authScreen.style.display = 'flex';
-            }
-        }
-    });
-
-    // --- ÜNİVERSİTE AUTOCOMPLETE (ARAMA ÇUBUĞU) ---
+    // Otomatik Tamamlama (Üniversite Arama)
     const uniInput = document.getElementById('reg-uni');
     const uniList = document.getElementById('uni-autocomplete-list');
     if (uniInput && uniList) {
@@ -233,27 +95,181 @@ document.addEventListener("DOMContentLoaded", () => {
         document.addEventListener('click', (e) => { if(e.target !== uniInput) uniList.innerHTML = ''; });
     }
 
-    // --- 🛠️ GENEL MODAL VE MENÜ KONTROLLERİ 🛠️ ---
+    bind('register-btn', 'click', async () => {
+        const name = document.getElementById('reg-name').value.trim();
+        const surname = document.getElementById('reg-surname').value.trim();
+        const uni = document.getElementById('reg-uni').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const password = document.getElementById('reg-password').value;
+
+        if(!name || !surname || !uni || !email || !password) return alert("Lütfen tüm alanları doldurun.");
+        if(!email.includes(".edu")) return alert("Güvenlik nedeniyle sadece onaylı .edu uzantılı üniversite e-postaları kabul edilmektedir.");
+
+        try {
+            const userCred = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCred.user;
+            
+            // Veritabanına kullanıcıyı kaydet
+            await setDoc(doc(db, "users", user.uid), {
+                uid: user.uid, name: name, surname: surname, university: uni, email: email, avatar: "👨‍🎓", isOnline: false, faculty: ""
+            });
+
+            // Sistem Hoş Geldin Mesajını Oluştur
+            await addDoc(collection(db, "chats"), {
+                participants: [user.uid, "system"],
+                participantNames: { [user.uid]: name, "system": "UniLoop Ekibi" },
+                participantAvatars: { [user.uid]: "👨‍🎓", "system": "🌍" },
+                lastUpdated: serverTimestamp(),
+                messages: [{
+                    senderId: "system", 
+                    text: `Merhaba ${name}! UniLoop'a hoş geldin. Burası tüm kampüsün dijital merkezi. İlan verebilir, itirafları okuyabilir ve kampüsün nabzını tutabilirsin.`, 
+                    time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                }]
+            });
+
+            // Doğrulama maili yolla ve çıkış yaptır
+            await sendEmailVerification(user);
+            alert("Kayıt başarılı! Lütfen " + email + " adresine giden doğrulama linkine tıklayarak hesabınızı aktif edin.");
+            await signOut(auth);
+            document.getElementById('show-login-btn').click();
+        } catch (error) {
+            alert("Kayıt olurken bir hata oluştu: " + error.message);
+        }
+    });
+
+    bind('login-btn', 'click', async () => {
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+        if(!email || !password) return alert("E-posta ve şifre girin.");
+
+        try {
+            const userCred = await signInWithEmailAndPassword(auth, email, password);
+            if (!userCred.user.emailVerified) {
+                alert("Lütfen önce e-posta adresinize gönderilen doğrulama linkine tıklayın.");
+                await signOut(auth);
+                return;
+            }
+        } catch (error) {
+            alert("Giriş hatası. E-posta veya şifre yanlış.");
+        }
+    });
+
+    window.logout = async function() {
+        if(window.userProfile.uid) await updateDoc(doc(db, "users", window.userProfile.uid), { isOnline: false });
+        await signOut(auth);
+    };
+
+    // ============================================================================
+    // 2. GERÇEK ZAMANLI VERİ DİNLEYİCİLERİ (REAL-TIME LISTENERS)
+    // ============================================================================
+    
+    onAuthStateChanged(auth, async (user) => {
+        if (user && user.emailVerified) {
+            const docSnap = await getDoc(doc(db, "users", user.uid));
+            if(docSnap.exists()) window.userProfile = docSnap.data();
+            
+            await updateDoc(doc(db, "users", user.uid), { isOnline: true });
+
+            initRealtimeListeners(user.uid);
+
+            if(authScreen && appScreen) { 
+                authScreen.style.display = 'none'; 
+                appScreen.style.display = 'block'; 
+                loadPage('home'); 
+                
+                // Eğer kullanıcının daha önceden katıldığı bir fakülte varsa sol menüye ekle
+                if(window.userProfile.faculty) {
+                    window.joinedFaculties = [{name: window.userProfile.faculty, icon: "🏢", color: "linear-gradient(135deg, #1E3A8A, #4F46E5)"}];
+                    updateMyFacultiesSidebar();
+                }
+            }
+        } else {
+            if(appScreen && authScreen) { 
+                appScreen.style.display = 'none'; 
+                authScreen.style.display = 'flex'; 
+                document.getElementById('login-card').style.display = 'block'; 
+                document.getElementById('register-card').style.display = 'none';
+            }
+        }
+    });
+
+    window.addEventListener("beforeunload", () => {
+        if(window.userProfile.uid) updateDoc(doc(db, "users", window.userProfile.uid), { isOnline: false });
+    });
+
+    function initRealtimeListeners(currentUid) {
+        
+        // 1. İLANLARI DİNLE
+        onSnapshot(query(collection(db, "listings"), orderBy("createdAt", "desc")), (snapshot) => {
+            marketDB = [];
+            snapshot.forEach(doc => marketDB.push({ id: doc.id, ...doc.data() }));
+            const activeTab = document.querySelector('.menu-item.active').getAttribute('data-target');
+            if(activeTab === 'market') renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
+            if(activeTab === 'housing') renderListings('housing', '🔑 Ev Arkadaşı & Yurt', 'İletişime Geç');
+        });
+
+        // 2. İTİRAFLARI DİNLE
+        onSnapshot(query(collection(db, "confessions"), orderBy("createdAt", "desc")), (snapshot) => {
+            confessionsDB = [];
+            snapshot.forEach(doc => confessionsDB.push({ id: doc.id, ...doc.data() }));
+            drawConfessionsGrid();
+        });
+
+        // 3. Soru & Cevap DİNLE
+        onSnapshot(query(collection(db, "qa"), orderBy("createdAt", "desc")), (snapshot) => {
+            qaDB = [];
+            snapshot.forEach(doc => qaDB.push({ id: doc.id, ...doc.data() }));
+            const activeFilter = document.querySelector('.qa-filter-btn.active');
+            drawQAGrid(activeFilter ? activeFilter.getAttribute('data-filter') : 'Genel');
+        });
+
+        // 4. MESAJLARI VE BİLDİRİMLERİ DİNLE
+        onSnapshot(query(collection(db, "chats"), where("participants", "array-contains", currentUid), orderBy("lastUpdated", "desc")), (snapshot) => {
+            chatsDB = [];
+            let totalChats = 0;
+            
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const otherUid = data.participants.find(p => p !== currentUid);
+                const otherName = data.participantNames[otherUid] || "Bilinmeyen";
+                const otherAvatar = data.participantAvatars[otherUid] || "👤";
+                
+                chatsDB.push({ id: doc.id, otherUid, name: otherName, avatar: otherAvatar, messages: data.messages });
+                totalChats++; 
+            });
+
+            // Bildirim Rozeti (Menüdeki)
+            const badge = document.getElementById('msg-badge');
+            if(badge) {
+                if(totalChats > 0) { badge.style.display = 'inline-block'; badge.innerText = totalChats; }
+                else { badge.style.display = 'none'; }
+            }
+
+            const activeTab = document.querySelector('.menu-item.active');
+            if(activeTab && activeTab.getAttribute('data-target') === 'messages') window.renderMessages();
+        });
+    }
+
+    // ============================================================================
+    // 3. MODAL VE ORTAK FONKSİYONLAR
+    // ============================================================================
+
     window.goToMessages = function() {
         const msgTab = document.querySelector('[data-target="messages"]');
         if(msgTab) msgTab.click();
     }
 
     const modal = document.getElementById('app-modal');
-    const modalTitle = document.getElementById('modal-title');
-    const modalBody = document.getElementById('modal-body');
-    
     window.openModal = function(title, contentHTML) { 
-        if(modalTitle) modalTitle.innerText = title; 
-        if(modalBody) modalBody.innerHTML = contentHTML; 
-        if(modal) modal.classList.add('active'); 
+        document.getElementById('modal-title').innerText = title; 
+        document.getElementById('modal-body').innerHTML = contentHTML; 
+        modal.classList.add('active'); 
     }
-    window.closeModal = function() { if(modal) modal.classList.remove('active'); }
-    bind('modal-close', 'click', closeModal);
-    window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+    window.closeModal = function() { modal.classList.remove('active'); }
+    bind('modal-close', 'click', window.closeModal);
+    window.addEventListener('click', (e) => { if (e.target === modal) window.closeModal(); });
 
-    const sidebar = document.getElementById('sidebar');
-    bind('mobile-menu-btn', 'click', () => { if(sidebar) sidebar.classList.toggle('open'); });
+    bind('mobile-menu-btn', 'click', () => { document.getElementById('sidebar').classList.toggle('open'); });
 
     const setupShowMore = (btnId, containerId) => {
         const btn = document.getElementById(btnId);
@@ -268,7 +284,10 @@ document.addEventListener("DOMContentLoaded", () => {
     setupShowMore('desktop-show-more-btn', 'desktop-more-faculties');
     setupShowMore('mobile-show-more-btn', 'mobile-more-faculties');
 
-    // --- 🏠 ANA SAYFA ---
+    // ============================================================================
+    // 4. SAYFA İÇERİKLERİ (HOME, MARKET, HOUSING)
+    // ============================================================================
+
     function getHomeContent() {
         return `
             <div class="card" style="background: linear-gradient(135deg, #1E3A8A, #4F46E5); color: white; border:none;">
@@ -278,414 +297,138 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="card">
                 <h2>✨ AI Kampüs Eşleşmeleri</h2>
                 <div class="match-grid">
-                    <div class="match-card"><div class="avatar">👨‍💻</div><h4>John D.</h4><p>${window.userProfile.year}</p><button class="action-btn" onclick="openModal('Bağlantı Kur', '<p>İstek gönderildi!</p>')">Bağlan</button></div>
+                    <div class="match-card"><div class="avatar">👨‍💻</div><h4>John D.</h4><p>Bilgisayar Müh.</p><button class="action-btn" onclick="openModal('Bağlantı Kur', '<p>İstek gönderildi!</p>')">Bağlan</button></div>
                     <div class="match-card"><div class="avatar">👩‍⚕️</div><h4>Sarah B.</h4><p>Tıp Fakültesi</p><button class="action-btn" onclick="goToMessages()">Mesaj At</button></div>
                 </div>
             </div>
         `;
     }
 
-    // --- 🛒 İLAN LİSTELEYİCİ ---
-    function renderListings(type, title, buttonText) {
+    window.renderListings = function(type, title, buttonText) {
         let html = `
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap:wrap; gap:10px;">
                     <h2 style="margin:0;">${title}</h2>
-                    <button class="btn-primary" style="width:auto; padding: 10px 24px;">+ Yeni İlan</button>
+                    <button class="btn-primary" style="width:auto; padding: 10px 24px;" onclick="openListingForm('${type}')">+ Yeni İlan Ekle</button>
                 </div>
                 <input type="text" id="local-search-input" class="local-search-bar" placeholder="${title} içinde hızlıca ara...">
                 <div class="grid-2col" id="listings-grid-container"></div>
             </div>
         `;
         mainContent.innerHTML = html;
-
-        const container = document.getElementById('listings-grid-container');
+        window.drawListingsGrid(type, buttonText, '');
+        
         const searchInput = document.getElementById('local-search-input');
-        
-        const drawGrid = (filterText = '') => {
-            const filteredData = database.filter(item => item.type === type && (item.title.toLowerCase().includes(filterText) || item.desc.toLowerCase().includes(filterText)));
-            if(filteredData.length === 0) {
-                container.innerHTML = `<p style="grid-column: span 2; color: var(--text-gray); text-align:center; padding: 40px 0;">Sonuç bulunamadı.</p>`; return;
-            }
-            let gridHtml = '';
-            filteredData.forEach(item => {
-                gridHtml += `<div class="item-card"><div class="item-img-large">${item.img}</div><div class="item-details"><div class="item-title">${item.title}</div><div class="item-desc">${item.desc}</div><div class="item-footer"><span class="item-price-large">${item.price}</span><button class="action-btn" style="width:auto;" onclick="goToMessages()">${buttonText}</button></div></div></div>`;
-            });
-            container.innerHTML = gridHtml;
-        };
-
-        drawGrid(); 
-        if(searchInput) searchInput.addEventListener('input', (e) => drawGrid(e.target.value.toLowerCase())); 
+        if(searchInput) searchInput.addEventListener('input', (e) => window.drawListingsGrid(type, buttonText, e.target.value.toLowerCase())); 
     }
 
-    // --- 🤫 YENİ ANONİM KAMPÜS (2 SÜTUNLU KART TASARIMI) ---
-    function renderConfessions() {
-        let html = `
-            <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
-                    <h2 style="margin:0;">🤫 Anonim Kampüs</h2>
-                    <button class="btn-primary" style="width:auto;" onclick="openConfessionForm()">+ İtiraf Yaz</button>
-                </div>
-                <div class="confessions-feed" id="conf-feed"></div>
-            </div>
-        `;
-        mainContent.innerHTML = html;
-        drawConfessionsGrid();
-    }
-
-    window.openConfessionForm = function() {
-        openModal('Yeni Anonim Gönderi', `
-            <div class="form-group">
-                <label>Konum / Etiket</label>
-                <input type="text" id="new-conf-tag" placeholder="Örn: 📍 Kütüphane">
-            </div>
-            <textarea id="new-conf-text" class="form-group" style="width:100%; height:120px; border-radius:12px; padding:15px; font-size:16px; background:#F9FAFB;" placeholder="Aklından ne geçiyor? Tamamen anonimdir..."></textarea>
-            <button class="btn-primary" onclick="submitConfession()">Kampüse Gönder</button>
-        `);
-    }
-
-    window.submitConfession = function() {
-        const textEl = document.getElementById('new-conf-text');
-        const tagEl = document.getElementById('new-conf-tag');
-        if(!textEl || textEl.value.trim() === '') return;
-        
-        const toxicWords = ["intihar", "ölmek", "depresyon", "aptal", "nefret"];
-        const isToxic = toxicWords.some(word => textEl.value.toLowerCase().includes(word));
-
-        if(isToxic) {
-            openModal('⚠️ AI Moderatör Uyarısı', `
-                <div style="text-align:center;">
-                    <h1 style="font-size:40px; margin-bottom:10px;">🛡️</h1>
-                    <p style="color:#DC2626; font-weight:bold; margin-bottom:10px;">Gönderiniz durduruldu.</p>
-                    <p style="font-size:14px; margin-bottom:15px;">Yazdıklarınızda topluluk kurallarına aykırı bir dil tespit edildi.</p>
-                    <div style="background:#FEF2F2; padding:15px; border-radius:8px; border: 1px solid #FCA5A5;">
-                        <p style="font-weight:bold; color:#991B1B;">Yalnız değilsin.</p>
-                        <p style="font-size:13px; color:#7F1D1D; margin-top:5px;">Kampüs psikolojik destek merkezi her zaman seninle konuşmaya hazır.</p>
-                    </div>
-                </div>
-            `);
-        } else {
-            const themes = ["theme-midnight", "theme-love", "theme-drama"];
-            const tagVal = tagEl && tagEl.value ? tagEl.value : "📍 Kampüs";
-            confessionsDB.unshift({ 
-                id: Date.now(), 
-                avatar: ["👻","👽","🤖","🦊","🎭"][Math.floor(Math.random()*5)], 
-                theme: themes[Math.floor(Math.random()*3)],
-                user: "Anonim #"+Math.floor(Math.random()*999), 
-                time: "Şimdi", 
-                tag: tagVal,
-                text: textEl.value,
-                likes: 0,
-                comments: 0
-            });
-            closeModal();
-            drawConfessionsGrid();
-        }
-    }
-
-    function drawConfessionsGrid() {
-        const feed = document.getElementById('conf-feed');
-        if(!feed) return;
-        let html = '';
-        confessionsDB.forEach((post, index) => {
-            html += `
-            <div class="confess-card ${post.theme}" onclick="openConfessionDetail(${index})">
-                <div class="cc-header">
-                    <div class="cc-avatar">${post.avatar}</div>
-                    <div class="cc-meta">
-                        <span class="cc-author">${post.user}</span>
-                        <span class="cc-time">${post.time}</span>
-                        <span class="cc-tag">${post.tag}</span>
-                    </div>
-                </div>
-                <div class="cc-body">"${post.text}"</div>
-                <div class="cc-footer">
-                    <div class="cc-action-btn">🔥 (${post.likes})</div>
-                    <div class="cc-action-btn">💬 (${post.comments})</div>
-                </div>
-            </div>`;
-        });
-        feed.innerHTML = html;
-    }
-
-    window.openConfessionDetail = function(index) {
-        const post = confessionsDB[index];
-        let bgStyle = "";
-        if(post.theme === "theme-midnight") bgStyle = "linear-gradient(135deg, #111827, #374151)";
-        if(post.theme === "theme-love") bgStyle = "linear-gradient(135deg, #4c1d95, #be185d)";
-        if(post.theme === "theme-drama") bgStyle = "linear-gradient(135deg, #7f1d1d, #ea580c)";
-
-        openModal(post.user + ' Diyor ki:', `
-            <div style="background:${bgStyle}; color:white; padding: 30px; border-radius: 16px; font-size: 18px; line-height: 1.6; margin-bottom: 24px; font-style:italic;">
-                <div style="font-size:12px; margin-bottom:10px; opacity:0.8;">${post.tag}</div>
-                "${post.text}"
-            </div>
-            <div style="display:flex; gap:12px;">
-                <button class="action-btn" style="flex:1;" onclick="alert('Beğenildi!')">🔥 Yanıyor</button>
-                <button class="action-btn" style="flex:1;" onclick="alert('Yanıt bölümü açılıyor...')">💬 Yanıtla</button>
-            </div>
-        `);
-    }
-
-    // --- ❓ SORU VE CEVAP MODÜLÜ ---
-    function renderQA() {
-        let html = `
-            <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px; flex-wrap:wrap; gap:10px;">
-                    <h2 style="margin:0;">❓ Kampüs Soru & Cevap</h2>
-                    <button class="btn-primary" style="width:auto; padding: 10px 24px;" onclick="openQAForm()">+ Soru Sor</button>
-                </div>
-                <p style="color:var(--text-gray); font-size:14px; margin-bottom:20px;">Kampüsle, derslerle veya yurtlarla ilgili sorularını sor, deneyimli öğrencilerden cevap al.</p>
-                
-                <div class="qa-filters" id="qa-filters-container">
-                    <button class="qa-filter-btn active" data-filter="Genel">Genel</button>
-                    <button class="qa-filter-btn" data-filter="Yurtlar">Yurtlar</button>
-                    <button class="qa-filter-btn" data-filter="Ders">Ders</button>
-                    <button class="qa-filter-btn" data-filter="Kampüs Yaşamı">Kampüs Yaşamı</button>
-                </div>
-
-                <div id="qa-feed"></div>
-            </div>
-        `;
-        mainContent.innerHTML = html;
-        drawQAGrid('Genel'); 
-
-        const filterBtns = document.querySelectorAll('.qa-filter-btn');
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                filterBtns.forEach(b => b.classList.remove('active'));
-                e.currentTarget.classList.add('active');
-                drawQAGrid(e.currentTarget.getAttribute('data-filter'));
-            });
-        });
-    }
-
-    window.openQAForm = function() {
-        openModal('Yeni Soru Sor', `
-            <div class="form-group">
-                <label>Kategori Seç</label>
-                <select id="new-qa-tag">
-                    <option value="Genel">Genel</option>
-                    <option value="Yurtlar">Yurtlar</option>
-                    <option value="Ders">Ders</option>
-                    <option value="Kampüs Yaşamı">Kampüs Yaşamı</option>
-                </select>
-            </div>
-            <textarea id="new-qa-text" class="form-group" style="width:100%; height:120px; border-radius:12px; padding:15px; font-size:15px;" placeholder="Sorunuzu detaylı bir şekilde yazın..."></textarea>
-            <button class="btn-primary" onclick="submitQA()">Soruyu Yayınla</button>
-        `);
-    }
-
-    window.submitQA = function() {
-        const textEl = document.getElementById('new-qa-text');
-        const tagEl = document.getElementById('new-qa-tag');
-        if(!textEl || textEl.value.trim() === '') return;
-        
-        qaDB.unshift({ 
-            id: Date.now(), avatar: window.userProfile.avatar, user: window.userProfile.name,
-            time: "Şimdi", tag: tagEl.value, question: textEl.value, answers: [] 
-        });
-        closeModal();
-        
-        const activeFilter = document.querySelector('.qa-filter-btn.active');
-        const filterValue = activeFilter ? activeFilter.getAttribute('data-filter') : 'Genel';
-        drawQAGrid(filterValue);
-    }
-
-    window.drawQAGrid = function(filterTag = 'Genel') {
-        const feed = document.getElementById('qa-feed');
-        if(!feed) return;
-        
-        let filteredDB = qaDB;
-        if(filterTag !== 'Genel') {
-            filteredDB = qaDB.filter(q => q.tag === filterTag);
-        }
-
-        if(filteredDB.length === 0) {
-            feed.innerHTML = '<p style="text-align:center; color:var(--text-gray); padding:40px 0; background:#F9FAFB; border-radius:12px;">Bu kategoride henüz soru yok. İlk soran sen ol!</p>';
-            return;
-        }
-
-        let html = '';
-        filteredDB.forEach((q) => {
-            const originalIndex = qaDB.findIndex(item => item.id === q.id);
-            const ansCount = q.answers.length;
-            const statusClass = ansCount > 0 ? 'answered' : '';
-            
-            html += `
-                <div class="qa-card" onclick="openQADetail(${originalIndex})">
-                    <div class="qa-left-stats">
-                        <div class="qa-stat-box ${statusClass}">
-                            <div style="font-size:18px;">${ansCount}</div>
-                            <div style="font-weight:500;">Cevap</div>
-                        </div>
-                    </div>
-                    <div class="qa-right-content">
-                        <div class="qa-title">${q.question}</div>
-                        <div class="qa-meta">
-                            <span class="qa-tag">${q.tag}</span>
-                            <span>Soran: <strong>${q.user}</strong> • ${q.time}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-        feed.innerHTML = html;
-    }
-
-    window.openQADetail = function(index) {
-        const q = qaDB[index];
-        let answersHtml = '';
-        if(q.answers.length === 0) {
-            answersHtml = '<p style="color:var(--text-gray); font-size:14px; text-align:center; padding: 20px 0; background:#F9FAFB; border-radius:12px;">Henüz cevap yok. İlk cevap veren sen ol!</p>';
-        } else {
-            q.answers.forEach(ans => {
-                answersHtml += `
-                    <div style="background:#F9FAFB; padding:16px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border-color);">
-                        <div style="font-weight:bold; font-size:14px; color:var(--primary); margin-bottom:6px;">${ans.user}</div>
-                        <div style="font-size:15px; color:var(--text-dark); line-height:1.5;">${ans.text}</div>
-                    </div>
-                `;
-            });
-        }
-
-        openModal('Soru Detayı', `
-            <div style="margin-bottom: 24px;">
-                <span class="qa-tag" style="font-size:12px;">${q.tag}</span>
-                <div style="font-size:18px; font-weight:800; margin-top:12px; color:#111827; line-height:1.4;">${q.question}</div>
-                <div style="font-size:13px; color:var(--text-gray); margin-top:8px;">Soran: <strong>${q.user}</strong> • ${q.time}</div>
-            </div>
-            
-            <div style="border-top:1px solid var(--border-color); padding-top:24px; margin-bottom:24px;">
-                <h4 style="margin-bottom:16px; font-size:16px;">Cevaplar (${q.answers.length})</h4>
-                ${answersHtml}
-            </div>
-
-            <div style="display:flex; gap:10px; background:#F9FAFB; padding:12px; border-radius:12px;">
-                <input type="text" id="new-answer-input" class="form-group" style="flex:1; margin:0; background:white;" placeholder="Cevabını yaz...">
-                <button class="btn-primary" style="width:auto;" onclick="submitAnswer(${index})">Gönder</button>
-            </div>
-        `);
-    }
-
-    window.submitAnswer = function(index) {
-        const ansInput = document.getElementById('new-answer-input');
-        if(ansInput && ansInput.value.trim() !== '') {
-            qaDB[index].answers.push({ user: window.userProfile.name, text: ansInput.value });
-            openQADetail(index); 
-            
-            const activeFilter = document.querySelector('.qa-filter-btn.active');
-            const filterValue = activeFilter ? activeFilter.getAttribute('data-filter') : 'Genel';
-            drawQAGrid(filterValue); 
-        }
-    }
-
-    // --- 🏢 FAKÜLTE KATILIM SİSTEMİ ---
-    function updateMyFacultiesSidebar() {
-        const container = document.getElementById('my-joined-faculties');
+    window.drawListingsGrid = function(type, buttonText, filterText) {
+        const container = document.getElementById('listings-grid-container');
         if(!container) return;
-        let html = '';
-        window.joinedFaculties.forEach(fac => {
-            html += `<div class="menu-item community-link" data-name="${fac.name}" data-icon="${fac.icon}" data-color="${fac.color}">${fac.icon} ${fac.name}</div>`;
+
+        const filteredData = marketDB.filter(item => item.type === type && (item.title.toLowerCase().includes(filterText) || item.desc.toLowerCase().includes(filterText)));
+        
+        if(filteredData.length === 0) {
+            container.innerHTML = `<p style="grid-column: span 2; color: var(--text-gray); text-align:center; padding: 40px 0;">Henüz ilan yok veya bulunamadı.</p>`; return;
+        }
+
+        let gridHtml = '';
+        filteredData.forEach(item => {
+            const imgHtml = item.imgUrl ? `<img src="${item.imgUrl}" alt="İlan Fotoğrafı" style="width:100%; height:100%; object-fit:cover;">` : `<div style="font-size:48px;">📦</div>`;
+            gridHtml += `
+                <div class="item-card">
+                    <div class="item-img-large" style="overflow:hidden;">${imgHtml}</div>
+                    <div class="item-details">
+                        <div class="item-title">${item.title}</div>
+                        <div class="item-desc">${item.desc}</div>
+                        <div style="font-size:11px; color:var(--text-gray); margin-bottom:10px;">Satıcı: <strong>${item.sellerName}</strong></div>
+                        <div class="item-footer">
+                            <span class="item-price-large">${item.price}</span>
+                            <button class="action-btn" style="width:auto;" onclick="startChat('${item.sellerId}', '${item.sellerName}')">${buttonText}</button>
+                        </div>
+                    </div>
+                </div>`;
         });
-        container.innerHTML = html;
+        container.innerHTML = gridHtml;
     }
 
-    window.joinFaculty = function(name, icon, bgColor) {
-        window.joinedFaculties = [{name: name, icon: icon, color: bgColor}]; 
-        window.userProfile.faculty = name; 
-        closeModal();
-        updateMyFacultiesSidebar();
-        loadFacultyFeed(name, icon, bgColor);
-    }
-
-    window.loadFacultyFeed = function(name, icon, bgColor) {
-        let html = `
-            <div style="margin-bottom: 24px;">
-                <div class="community-banner" style="background: ${bgColor};">
-                    <div class="comm-banner-left">
-                        <h1>${icon} ${name}</h1>
-                        <p>${window.userProfile.university} Ağındasın</p>
-                    </div>
-                    <div class="comm-banner-right">
-                        <div class="member-avatars">
-                            <div class="avatar">👨‍💻</div><div class="avatar">👩‍⚕️</div><div class="avatar">👨‍🎨</div>
-                            <div class="avatar" style="background:white; color:var(--primary); font-size:11px; font-weight:bold;">+1.2K</div>
-                        </div>
-                        <div class="community-stats"><span class="online-dot"></span> 42 Çevrimiçi</div>
-                    </div>
-                </div>
-
-                <div class="create-post-box">
-                    <div class="cp-top">
-                        <div class="avatar" style="background:#F3F4F6; font-size:20px;">${window.userProfile.avatar}</div>
-                        <input type="text" placeholder="${name} ağında bir şeyler paylaş..." onclick="openModal('Gönderi Oluştur', '<textarea class=\\'form-group\\' style=\\'height:150px; font-size:16px;\\' placeholder=\\'Ne düşünüyorsun?\\'></textarea><button class=\\'btn-primary\\' onclick=\\'closeModal()\\'>Paylaş</button>')">
-                    </div>
-                    <div class="cp-bottom">
-                        <div class="cp-actions"><button class="cp-action-btn">📷 Medya</button><button class="cp-action-btn">📊 Anket</button></div>
-                        <button class="cp-post-btn" onclick="alert('Gönderi Paylaşıldı!')">Paylaş</button>
-                    </div>
-                </div>
-
-                <div class="premium-post">
-                    <div class="pp-header">
-                        <div class="pp-user-info">
-                            <div class="avatar" style="background:#E0E7FF;">👨‍🏫</div>
-                            <div>
-                                <div class="pp-name">Fakülte Dekanlığı</div>
-                                <div class="pp-role">Resmi Duyuru Hesabı</div>
-                                <div class="pp-time">2 saat önce</div>
-                            </div>
-                        </div>
-                        <div class="pp-options">•••</div>
-                    </div>
-                    <div class="pp-content">Değerli ${name} öğrencileri,<br><br>Bu hafta sonu gerçekleştirilecek olan etkinlik Amfi 4'e alınmıştır. Katılımınız önemlidir.</div>
-                    <div class="pp-stats"><span>👍 128 Beğeni</span><span>💬 14 Yorum</span></div>
-                    <div class="pp-actions">
-                        <button class="pp-btn" onclick="this.classList.toggle('active');">👍 Beğen</button>
-                        <button class="pp-btn">💬 Yorum Yap</button>
-                        <button class="pp-btn">🔗 Paylaş</button>
-                    </div>
-                </div>
+    window.openListingForm = function(type) {
+        window.openModal('Yeni İlan Oluştur', `
+            <div class="form-group"><input type="text" id="new-item-title" placeholder="İlan Başlığı (Örn: Temiz Çalışma Masası)"></div>
+            <div class="form-group"><input type="text" id="new-item-price" placeholder="Fiyat (Örn: 500 TL veya Ücretsiz)"></div>
+            <div class="form-group"><textarea id="new-item-desc" rows="3" placeholder="İlan detayları ve durumu..."></textarea></div>
+            
+            <div class="upload-btn-wrapper">
+                <button class="btn" style="width:100%;">📷 Fotoğraf Seç / Çek</button>
+                <input type="file" id="new-item-photo" accept="image/*" style="opacity:0; position:absolute; left:0; top:0; height:100%; cursor:pointer;" />
             </div>
-        `;
-        mainContent.innerHTML = html;
-        window.scrollTo(0,0);
+            
+            <button class="btn-primary" onclick="submitListing('${type}')">İlanı Yayınla</button>
+            <p id="upload-status" style="font-size:12px; color:var(--primary); text-align:center; margin-top:10px; display:none;">Yükleniyor, lütfen bekleyin...</p>
+        `);
     }
 
-    window.handleFacultyClick = function(name, icon, bgColor) {
-        document.querySelectorAll('.menu-item[data-target]').forEach(m => m.classList.remove('active'));
-        if(window.innerWidth <= 1024 && sidebar) sidebar.classList.remove('open');
+    window.submitListing = async function(type) {
+        const title = document.getElementById('new-item-title').value;
+        const price = document.getElementById('new-item-price').value;
+        const desc = document.getElementById('new-item-desc').value;
+        const photoFile = document.getElementById('new-item-photo').files[0];
+        const statusEl = document.getElementById('upload-status');
 
-        const isJoined = window.joinedFaculties.some(f => f.name === name);
+        if(!title || !price || !desc) return alert("Lütfen başlık, fiyat ve açıklama girin.");
 
-        if(isJoined) {
-            loadFacultyFeed(name, icon, bgColor);
+        statusEl.style.display = 'block';
+        let imgUrl = "";
+
+        try {
+            if(photoFile) {
+                const storageRef = ref(storage, 'listings/' + Date.now() + '_' + photoFile.name);
+                await uploadBytes(storageRef, photoFile);
+                imgUrl = await getDownloadURL(storageRef);
+            }
+
+            await addDoc(collection(db, "listings"), {
+                type: type, title: title, price: price, desc: desc, imgUrl: imgUrl,
+                sellerId: window.userProfile.uid, sellerName: window.userProfile.name + " " + window.userProfile.surname,
+                createdAt: serverTimestamp()
+            });
+
+            window.closeModal();
+        } catch (error) {
+            console.error(error);
+            alert("Hata oluştu. Firebase ayarlarınızı kontrol edin.");
+            statusEl.style.display = 'none';
+        }
+    }
+
+    // ============================================================================
+    // 5. MESAJLAŞMA SİSTEMİ (CHATS)
+    // ============================================================================
+
+    window.startChat = async function(targetUserId, targetUserName) {
+        if(targetUserId === window.userProfile.uid) return alert("Kendi ilanınıza mesaj atamazsınız!");
+
+        const existingChat = chatsDB.find(chat => chat.otherUid === targetUserId);
+        
+        if(existingChat) {
+            window.goToMessages();
+            setTimeout(() => window.openChatView(existingChat.id), 200);
         } else {
-            mainContent.innerHTML = `
-                <div class="join-faculty-box">
-                    <div class="icon">${icon}</div>
-                    <h2>${name} Ağına Hoş Geldin</h2>
-                    <p>Bu alan öğrencilere ve mezunlara özel, dışarıya kapalı bir ağdır. Katılarak duyuruları takip edebilir, bölümdaşlarınla iletişim kurabilirsin.</p>
-                    <button class="btn-primary" style="max-width:250px; font-size:16px; padding:12px;" onclick="joinFaculty('${name}', '${icon}', '${bgColor}')">Fakülte Ağına Katıl</button>
-                </div>
-            `;
-            window.scrollTo(0,0);
+            try {
+                const newChatRef = await addDoc(collection(db, "chats"), {
+                    participants: [window.userProfile.uid, targetUserId],
+                    participantNames: { [window.userProfile.uid]: window.userProfile.name, [targetUserId]: targetUserName },
+                    participantAvatars: { [window.userProfile.uid]: window.userProfile.avatar, [targetUserId]: "👤" },
+                    lastUpdated: serverTimestamp(),
+                    messages: []
+                });
+                window.goToMessages();
+                setTimeout(() => window.openChatView(newChatRef.id), 500); 
+            } catch (error) { console.error(error); }
         }
     }
 
-    document.body.addEventListener('click', (e) => {
-        const link = e.target.closest('.community-link');
-        if(link) {
-            const name = link.getAttribute('data-name');
-            const icon = link.getAttribute('data-icon');
-            const color = link.getAttribute('data-color');
-            handleFacultyClick(name, icon, color);
-        }
-    });
-
-    // --- 💬 WHATSAPP STİLİ MESAJLAŞMA ---
-    function renderMessages() {
+    window.renderMessages = function() {
         let html = `
             <div class="card" style="padding:0; border:none;">
                 <div class="chat-layout" id="chat-layout-container">
@@ -694,11 +437,12 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         
         chatsDB.forEach(chat => {
-            const lastMsg = chat.messages[chat.messages.length - 1].text;
-            const time = chat.messages[chat.messages.length - 1].time;
+            const lastMsgObj = chat.messages[chat.messages.length - 1];
+            const lastMsg = lastMsgObj ? lastMsgObj.text : "Henüz mesaj yok.";
+            const time = lastMsgObj ? lastMsgObj.time : "";
             const isActive = chat.id === currentChatId ? 'active' : '';
             html += `
-                <div class="chat-contact ${isActive}" data-id="${chat.id}">
+                <div class="chat-contact ${isActive}" data-id="${chat.id}" onclick="openChatView('${chat.id}')">
                     <div class="avatar">${chat.avatar}</div>
                     <div class="chat-contact-info">
                         <div class="chat-contact-top"><span class="chat-contact-name">${chat.name}</span><span class="chat-contact-time">${time}</span></div>
@@ -713,7 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="chat-main" id="chat-main-view">
                         <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--text-gray); opacity:0.7;">
                             <div style="font-size:48px; margin-bottom:10px;">💬</div>
-                            <div>Mesajlaşmaya başlamak için bir kişi seçin.</div>
+                            <div>Mesajlaşmaya başlamak için sol taraftan bir kişi seçin.</div>
                         </div>
                     </div>
                 </div>
@@ -721,150 +465,341 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         
         mainContent.innerHTML = html;
-
-        document.querySelectorAll('.chat-contact').forEach(contact => {
-            contact.addEventListener('click', (e) => { 
-                const chatId = e.currentTarget.getAttribute('data-id');
-                openChatView(chatId);
-            });
-        });
-        
-        if(window.innerWidth > 1024) openChatView(chatsDB[0].id);
+        if(window.innerWidth > 1024 && currentChatId && chatsDB.find(c=>c.id===currentChatId)) window.openChatView(currentChatId);
     }
 
-    function openChatView(chatId) {
+    window.openChatView = function(chatId) {
         currentChatId = chatId;
         const activeChat = chatsDB.find(c => c.id === chatId);
+        if(!activeChat) return;
+
         const container = document.getElementById('chat-main-view');
         const layoutContainer = document.getElementById('chat-layout-container');
-        
         layoutContainer.classList.add('chat-active');
 
         let chatHTML = `
             <div class="chat-header">
-                <button class="back-btn" id="back-to-chats">←</button>
+                <button class="back-btn" onclick="document.getElementById('chat-layout-container').classList.remove('chat-active'); currentChatId=null;">←</button>
                 <div class="avatar" style="width:42px; height:42px; font-size:20px; margin:0;">${activeChat.avatar}</div>
                 <div class="chat-header-info">
                     <div class="chat-header-name">${activeChat.name}</div>
-                    <div class="chat-header-status">çevrimiçi</div>
+                    <div class="chat-header-status">Çevrimiçi olabilir</div>
                 </div>
-                <div class="chat-header-actions">⋮</div>
             </div>
             <div class="chat-messages" id="chat-messages-scroll">
-                <div style="text-align:center; margin-bottom: 20px;">
-                    <span style="background: rgba(0,0,0,0.05); padding: 4px 12px; border-radius: 12px; font-size:11px; font-weight:600; color:var(--text-gray);">Bugün</span>
-                </div>
         `;
         
         activeChat.messages.forEach(msg => { 
-            const ticks = msg.type === 'sent' ? '<span class="ticks">✓✓</span>' : '';
-            chatHTML += `<div class="bubble ${msg.type}"><div class="msg-text">${msg.text}</div><div class="msg-time">${msg.time} ${ticks}</div></div>`; 
+            const type = msg.senderId === window.userProfile.uid ? 'sent' : 'received';
+            const ticks = type === 'sent' ? '<span class="ticks">✓✓</span>' : '';
+            chatHTML += `<div class="bubble ${type}"><div class="msg-text">${msg.text}</div><div class="msg-time">${msg.time} ${ticks}</div></div>`; 
         });
         
         chatHTML += `
             </div>
             <div class="chat-input-area">
-                <button class="chat-attach-btn">+</button>
                 <div class="chat-input-wrapper">
                     <input type="text" id="chat-input-field" placeholder="Bir mesaj yazın...">
                 </div>
-                <button class="chat-send-btn" id="chat-send-btn">➤</button>
+                <button class="chat-send-btn" onclick="sendMsg('${chatId}')">➤</button>
             </div>
         `;
-        
         container.innerHTML = chatHTML;
         
         const scrollBox = document.getElementById('chat-messages-scroll');
         if(scrollBox) scrollBox.scrollTop = scrollBox.scrollHeight;
 
-        bind('back-to-chats', 'click', () => { layoutContainer.classList.remove('chat-active'); });
-
-        const sendMsg = () => {
-            const input = document.getElementById('chat-input-field');
-            if(input && input.value.trim() !== '') {
-                const now = new Date();
-                const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-                activeChat.messages.push({ type: 'sent', text: input.value, time: timeStr });
-                openChatView(chatId); 
-            }
-        };
-        bind('chat-send-btn', 'click', sendMsg);
         const inputField = document.getElementById('chat-input-field');
         if(inputField) {
-            inputField.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMsg(); });
+            inputField.addEventListener('keypress', (e) => { if(e.key === 'Enter') window.sendMsg(chatId); });
         }
     }
 
-    // --- 👤 PROFİL VE AYARLAR ---
-    function renderProfile() {
-        mainContent.innerHTML = `
+    window.sendMsg = async function(chatId) {
+        const input = document.getElementById('chat-input-field');
+        if(input && input.value.trim() !== '') {
+            const text = input.value.trim();
+            input.value = '';
+            const timeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            await updateDoc(doc(db, "chats", chatId), {
+                messages: arrayUnion({ senderId: window.userProfile.uid, text: text, time: timeStr }),
+                lastUpdated: serverTimestamp()
+            });
+        }
+    };
+
+    // ============================================================================
+    // 6. İTİRAFLAR (ANONİM KAMPÜS)
+    // ============================================================================
+
+    window.renderConfessions = function() {
+        let html = `
             <div class="card">
-                <h2>👤 Profil Bilgilerim</h2>
-                <div style="background: #F9FAFB; padding: 24px; border-radius: 16px; border: 1px solid var(--border-color);">
-                    <div class="grid-2col" style="margin-top:0;">
-                        <div class="form-group"><label>Ad</label><input type="text" id="prof-name" value="${window.userProfile.name}"></div>
-                        <div class="form-group"><label>Soyad</label><input type="text" id="prof-surname" value="${window.userProfile.surname}"></div>
-                    </div>
-                    <div class="form-group">
-                        <label>Bağlı Olduğun Üniversite</label>
-                        <input type="text" disabled value="${window.userProfile.university}" style="background:#E5E7EB; cursor:not-allowed; opacity:0.7;">
-                    </div>
-                    <div class="form-group">
-                        <label>Okul E-posta Adresi</label>
-                        <input type="email" disabled value="${window.userProfile.email}" style="background:#E5E7EB; cursor:not-allowed; opacity:0.7;">
-                    </div>
-                    <div class="grid-2col" style="margin-top:0;">
-                        <div class="form-group"><label>Yaş</label><input type="number" id="prof-age" value="${window.userProfile.age}"></div>
-                        <div class="form-group"><label>Sınıf / Yıl</label><input type="text" id="prof-year" value="${window.userProfile.year}" placeholder="Örn: 3. Sınıf"></div>
-                    </div>
-                    <div class="form-group">
-                        <label>Kampüs Bio'n</label>
-                        <textarea id="prof-bio" rows="3">${window.userProfile.bio}</textarea>
-                    </div>
-                    <button class="btn-primary" id="save-profile-btn" style="padding:12px; font-size:15px;">Profilimi Kaydet</button>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                    <h2 style="margin:0;">🤫 Anonim Kampüs</h2>
+                    <button class="btn-primary" style="width:auto;" onclick="openConfessionForm()">+ İtiraf Yaz</button>
                 </div>
+                <div class="confessions-feed" id="conf-feed"></div>
             </div>
         `;
+        mainContent.innerHTML = html;
+        window.drawConfessionsGrid();
+    }
 
-        bind('save-profile-btn', 'click', () => {
-            window.userProfile.name = document.getElementById('prof-name').value;
-            window.userProfile.surname = document.getElementById('prof-surname').value;
-            window.userProfile.age = document.getElementById('prof-age').value;
-            window.userProfile.year = document.getElementById('prof-year').value;
-            window.userProfile.bio = document.getElementById('prof-bio').value;
-            openModal('Başarılı', '<div style="text-align:center;"><div style="font-size:50px; margin-bottom:10px;">✅</div><p style="font-weight:bold; font-size:18px;">Profilin güncellendi!</p></div>');
+    window.openConfessionForm = function() {
+        window.openModal('Yeni Anonim Gönderi', `
+            <div class="form-group"><input type="text" id="new-conf-tag" placeholder="Örn: 📍 Kütüphane"></div>
+            <textarea id="new-conf-text" class="form-group" style="width:100%; height:120px; border-radius:12px; padding:15px; font-size:16px;" placeholder="Aklından ne geçiyor?"></textarea>
+            <button class="btn-primary" onclick="submitConfession()">Kampüse Gönder</button>
+        `);
+    }
+
+    window.submitConfession = async function() {
+        const textEl = document.getElementById('new-conf-text');
+        const tagEl = document.getElementById('new-conf-tag');
+        if(!textEl || textEl.value.trim() === '') return;
+        
+        const toxicWords = ["intihar", "ölmek", "depresyon", "aptal", "nefret"];
+        if(toxicWords.some(word => textEl.value.toLowerCase().includes(word))) {
+            window.openModal('⚠️ Uyarı', '<div style="text-align:center;"><p style="color:#DC2626; font-weight:bold;">Topluluk kurallarına aykırı dil tespit edildi.</p></div>');
+            return;
+        }
+
+        const themes = ["theme-midnight", "theme-love", "theme-drama"];
+        const tagVal = tagEl && tagEl.value ? tagEl.value : "📍 Kampüs";
+        
+        try {
+            await addDoc(collection(db, "confessions"), {
+                avatar: ["👻","👽","🤖","🦊","🎭"][Math.floor(Math.random()*5)], 
+                theme: themes[Math.floor(Math.random()*3)],
+                user: "Anonim #"+Math.floor(Math.random()*9999), time: "Şimdi", tag: tagVal, text: textEl.value, likes: 0, comments: 0, createdAt: serverTimestamp()
+            });
+            window.closeModal();
+        } catch(e) { alert("Hata: " + e.message); }
+    }
+
+    window.drawConfessionsGrid = function() {
+        const feed = document.getElementById('conf-feed');
+        if(!feed) return;
+        let html = '';
+        confessionsDB.forEach((post, index) => {
+            html += `
+            <div class="confess-card ${post.theme}" onclick="openConfessionDetail(${index})">
+                <div class="cc-header">
+                    <div class="cc-avatar">${post.avatar}</div>
+                    <div class="cc-meta">
+                        <span class="cc-author">${post.user}</span><span class="cc-time">${post.time}</span><span class="cc-tag">${post.tag}</span>
+                    </div>
+                </div>
+                <div class="cc-body">"${post.text}"</div>
+                <div class="cc-footer">
+                    <div class="cc-action-btn">🔥 (${post.likes})</div><div class="cc-action-btn">💬 (${post.comments})</div>
+                </div>
+            </div>`;
         });
+        feed.innerHTML = html;
     }
 
-    function renderSettings() {
-        mainContent.innerHTML = `
+    window.openConfessionDetail = function(index) {
+        const post = confessionsDB[index];
+        let bgStyle = post.theme === "theme-midnight" ? "linear-gradient(135deg, #111827, #374151)" : post.theme === "theme-love" ? "linear-gradient(135deg, #4c1d95, #be185d)" : "linear-gradient(135deg, #7f1d1d, #ea580c)";
+
+        window.openModal(post.user + ' Diyor ki:', `
+            <div style="background:${bgStyle}; color:white; padding: 30px; border-radius: 16px; font-size: 18px; line-height: 1.6; margin-bottom: 24px; font-style:italic;">
+                <div style="font-size:12px; margin-bottom:10px; opacity:0.8;">${post.tag}</div>"${post.text}"
+            </div>
+            <div style="display:flex; gap:12px;">
+                <button class="action-btn" style="flex:1;" onclick="alert('Beğenildi!')">🔥 Yanıyor</button>
+            </div>
+        `);
+    }
+
+    // ============================================================================
+    // 7. SORU VE CEVAP MODÜLÜ (Q&A)
+    // ============================================================================
+
+    window.renderQA = function() {
+        let html = `
             <div class="card">
-                <h2>⚙️ Uygulama Ayarları</h2>
-                <div style="background: #F9FAFB; padding: 24px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--border-color);">
-                    <div class="form-group">
-                        <label>Dil Seçimi</label>
-                        <select><option>Türkçe</option><option>English</option></select>
-                    </div>
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label>Uygulama Teması</label>
-                        <select><option>Aydınlık Mod</option><option>Karanlık Mod (Yakında)</option></select>
-                    </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px; flex-wrap:wrap; gap:10px;">
+                    <h2 style="margin:0;">❓ Kampüs Soru & Cevap</h2>
+                    <button class="btn-primary" style="width:auto; padding: 10px 24px;" onclick="openQAForm()">+ Soru Sor</button>
                 </div>
-                <button class="btn-danger" id="logout-settings-btn">🚪 Güvenli Çıkış Yap</button>
+                <div class="qa-filters" id="qa-filters-container">
+                    <button class="qa-filter-btn active" data-filter="Genel" onclick="filterQA(this, 'Genel')">Genel</button>
+                    <button class="qa-filter-btn" data-filter="Yurtlar" onclick="filterQA(this, 'Yurtlar')">Yurtlar</button>
+                    <button class="qa-filter-btn" data-filter="Ders" onclick="filterQA(this, 'Ders')">Ders</button>
+                    <button class="qa-filter-btn" data-filter="Kampüs Yaşamı" onclick="filterQA(this, 'Kampüs Yaşamı')">Kampüs Yaşamı</button>
+                </div>
+                <div id="qa-feed"></div>
             </div>
         `;
-        bind('logout-settings-btn', 'click', window.logout);
+        mainContent.innerHTML = html;
+        window.drawQAGrid('Genel'); 
     }
 
-    // --- 🧭 SAYFA GEÇİŞ (ROUTING) YÖNETİMİ ---
-    function loadPage(pageName) {
+    window.filterQA = function(btn, filterName) {
+        document.querySelectorAll('.qa-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        window.drawQAGrid(filterName);
+    }
+
+    window.openQAForm = function() {
+        window.openModal('Yeni Soru Sor', `
+            <div class="form-group">
+                <label>Kategori Seç</label>
+                <select id="new-qa-tag"><option>Genel</option><option>Yurtlar</option><option>Ders</option><option>Kampüs Yaşamı</option></select>
+            </div>
+            <textarea id="new-qa-text" class="form-group" style="width:100%; height:120px; border-radius:12px; padding:15px; font-size:15px;" placeholder="Sorunuzu detaylı yazın..."></textarea>
+            <button class="btn-primary" onclick="submitQA()">Soruyu Yayınla</button>
+        `);
+    }
+
+    window.submitQA = async function() {
+        const textEl = document.getElementById('new-qa-text');
+        const tagEl = document.getElementById('new-qa-tag');
+        if(!textEl || textEl.value.trim() === '') return;
+        
+        try {
+            await addDoc(collection(db, "qa"), {
+                avatar: window.userProfile.avatar, user: window.userProfile.name, time: "Şimdi", tag: tagEl.value, question: textEl.value, answers: [], createdAt: serverTimestamp()
+            });
+            window.closeModal();
+        } catch(e) { alert("Hata: "+e.message); }
+    }
+
+    window.drawQAGrid = function(filterTag = 'Genel') {
+        const feed = document.getElementById('qa-feed');
+        if(!feed) return;
+        
+        let filteredDB = filterTag === 'Genel' ? qaDB : qaDB.filter(q => q.tag === filterTag);
+        if(filteredDB.length === 0) { feed.innerHTML = '<p style="text-align:center;">Henüz soru yok.</p>'; return; }
+
+        let html = '';
+        filteredDB.forEach((q) => {
+            const statusClass = q.answers.length > 0 ? 'answered' : '';
+            html += `
+                <div class="qa-card" onclick="openQADetail('${q.id}')">
+                    <div class="qa-left-stats"><div class="qa-stat-box ${statusClass}"><div style="font-size:18px;">${q.answers.length}</div><div style="font-weight:500;">Cevap</div></div></div>
+                    <div class="qa-right-content">
+                        <div class="qa-title">${q.question}</div>
+                        <div class="qa-meta"><span class="qa-tag">${q.tag}</span><span>Soran: <strong>${q.user}</strong></span></div>
+                    </div>
+                </div>`;
+        });
+        feed.innerHTML = html;
+    }
+
+    window.openQADetail = function(docId) {
+        const q = qaDB.find(item => item.id === docId);
+        if(!q) return;
+        let answersHtml = q.answers.length === 0 ? '<p style="text-align:center;">İlk cevap veren sen ol!</p>' : '';
+        q.answers.forEach(ans => { answersHtml += `<div style="background:#F9FAFB; padding:16px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border-color);"><div style="font-weight:bold; color:var(--primary); margin-bottom:6px;">${ans.user}</div><div style="font-size:15px;">${ans.text}</div></div>`; });
+
+        window.openModal('Soru Detayı', `
+            <div style="margin-bottom: 24px;"><span class="qa-tag" style="font-size:12px;">${q.tag}</span><div style="font-size:18px; font-weight:800; margin-top:12px;">${q.question}</div></div>
+            <div style="border-top:1px solid var(--border-color); padding-top:24px; margin-bottom:24px;"><h4>Cevaplar (${q.answers.length})</h4>${answersHtml}</div>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="new-answer-input" class="form-group" style="flex:1; margin:0;" placeholder="Cevabını yaz...">
+                <button class="btn-primary" style="width:auto;" onclick="submitAnswer('${q.id}')">Gönder</button>
+            </div>
+        `);
+    }
+
+    window.submitAnswer = async function(docId) {
+        const ansInput = document.getElementById('new-answer-input');
+        if(ansInput && ansInput.value.trim() !== '') {
+            try {
+                await updateDoc(doc(db, "qa", docId), { answers: arrayUnion({ user: window.userProfile.name, text: ansInput.value.trim() }) });
+                window.closeModal(); 
+            } catch(e) { console.error(e); }
+        }
+    }
+
+    // ============================================================================
+    // 8. FAKÜLTE SİSTEMİ (GERÇEK VERİ VE ŞİFRELER)
+    // ============================================================================
+
+    window.updateMyFacultiesSidebar = function() {
+        const container = document.getElementById('my-joined-faculties');
+        if(!container) return;
+        let html = '';
+        window.joinedFaculties.forEach(fac => { html += `<div class="menu-item community-link" data-name="${fac.name}" data-icon="${fac.icon}" data-color="${fac.color}" onclick="handleFacultyClick('${fac.name}', '${fac.icon}', '${fac.color}')">${fac.icon} ${fac.name}</div>`; });
+        container.innerHTML = html;
+    }
+
+    window.handleFacultyClick = async function(name, icon, bgColor) {
+        document.querySelectorAll('.menu-item[data-target]').forEach(m => m.classList.remove('active'));
+        if(window.innerWidth <= 1024) document.getElementById('sidebar').classList.remove('open');
+
+        const isJoined = window.joinedFaculties.some(f => f.name === name);
+
+        if(isJoined) {
+            window.loadFacultyFeed(name, icon, bgColor);
+        } else {
+            mainContent.innerHTML = `
+                <div class="join-faculty-box">
+                    <div class="icon">${icon}</div><h2>${name} Ağına Hoş Geldin</h2>
+                    <p>Bu alan kapalı bir ağdır. Girmek için dekanlıktan veya öğrenci temsilcinden aldığın kodu girmelisin.</p>
+                    <button class="btn-primary" style="max-width:250px; font-size:16px; padding:12px;" onclick="promptJoinFaculty('${name}', '${icon}', '${bgColor}')">Kodu Gir ve Katıl</button>
+                </div>
+            `;
+            window.scrollTo(0,0);
+        }
+    }
+
+    window.promptJoinFaculty = function(name, icon, bgColor) {
+        const code = prompt(`${name} Giriş Kodunu Yazın:`);
+        if (code === FACULTY_PASSCODES[name]) {
+            alert("Şifre doğru! Kabilene hoş geldin.");
+            window.joinedFaculties = [{name: name, icon: icon, color: bgColor}]; 
+            updateMyFacultiesSidebar();
+            updateDoc(doc(db, "users", window.userProfile.uid), { faculty: name });
+            window.loadFacultyFeed(name, icon, bgColor);
+        } else { alert("Hatalı kod girdiniz."); }
+    }
+
+    window.loadFacultyFeed = async function(name, icon, bgColor) {
+        let totalMembers = 0; let onlineMembers = 0;
+        try {
+            const q = query(collection(db, "users"), where("faculty", "==", name));
+            const querySnapshot = await getDocs(q);
+            totalMembers = querySnapshot.size;
+            querySnapshot.forEach((doc) => { if(doc.data().isOnline) onlineMembers++; });
+        } catch (e) { console.error(e); }
+        
+        if(totalMembers === 0) totalMembers = 1; if(onlineMembers === 0) onlineMembers = 1;
+
+        mainContent.innerHTML = `
+            <div style="margin-bottom: 24px;">
+                <div class="community-banner" style="background: ${bgColor};">
+                    <div class="comm-banner-left"><h1>${icon} ${name}</h1><p>Küresel Ağa Bağlısın</p></div>
+                    <div class="comm-banner-right">
+                        <div class="member-avatars"><div class="avatar">👨‍💻</div><div class="avatar" style="background:white; color:var(--primary); font-size:11px; font-weight:bold;">+${totalMembers}</div></div>
+                        <div class="community-stats"><span class="online-dot"></span> Gerçek Çevrimiçi: ${onlineMembers}</div>
+                    </div>
+                </div>
+                <div class="create-post-box">
+                    <div class="cp-top"><div class="avatar" style="background:#F3F4F6; font-size:20px;">${window.userProfile.avatar}</div><input type="text" placeholder="${name} ağında paylaşım yap..." onclick="alert('Yakında eklenecek!')"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    // ============================================================================
+    // 9. SAYFA YÖNLENDİRME, PROFİL VE AYARLAR
+    // ============================================================================
+
+    window.loadPage = function(pageName) {
         if (pageName === 'home') mainContent.innerHTML = getHomeContent();
-        else if (pageName === 'market') renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
-        else if (pageName === 'housing') renderListings('housing', '🔑 Ev Arkadaşı & Yurt', 'İletişime Geç');
-        else if (pageName === 'confessions') renderConfessions();
-        else if (pageName === 'qa') renderQA(); 
-        else if (pageName === 'messages') renderMessages(); 
-        else if (pageName === 'settings') renderSettings();
+        else if (pageName === 'market') window.renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
+        else if (pageName === 'housing') window.renderListings('housing', '🔑 Ev Arkadaşı & Yurt', 'İletişime Geç');
+        else if (pageName === 'confessions') window.renderConfessions();
+        else if (pageName === 'qa') window.renderQA(); 
+        else if (pageName === 'messages') window.renderMessages(); 
+        else if (pageName === 'settings') window.renderSettings();
+        else if (pageName === 'profile') window.renderProfile();
         
         if(window.innerWidth <= 1024 && sidebar) sidebar.classList.remove('open');
         window.scrollTo(0,0);
@@ -875,22 +810,50 @@ document.addEventListener("DOMContentLoaded", () => {
             if(e.currentTarget.getAttribute('data-target')) {
                 document.querySelectorAll('.menu-item[data-target]').forEach(m => m.classList.remove('active'));
                 e.currentTarget.classList.add('active');
-                loadPage(e.currentTarget.getAttribute('data-target'));
+                window.loadPage(e.currentTarget.getAttribute('data-target'));
             }
         });
     });
 
-    bind('logo-btn', 'click', () => {
-        document.querySelectorAll('.menu-item[data-target]').forEach(m => m.classList.remove('active'));
-        const homeTab = document.querySelector('[data-target="home"]');
-        if(homeTab) homeTab.classList.add('active');
-        loadPage('home');
-    });
-    
-    bind('profile-btn', 'click', () => {
-        document.querySelectorAll('.menu-item[data-target]').forEach(m => m.classList.remove('active'));
-        renderProfile();
-        if(window.innerWidth <= 1024 && sidebar) sidebar.classList.remove('open');
-    });
+    bind('logo-btn', 'click', () => { document.querySelector('[data-target="home"]').click(); });
+    bind('profile-btn', 'click', () => { window.loadPage('profile'); });
 
+    window.renderProfile = function() {
+        mainContent.innerHTML = `
+            <div class="card">
+                <h2>👤 Profil Bilgilerim</h2>
+                <div style="background: #F9FAFB; padding: 24px; border-radius: 16px; border: 1px solid var(--border-color);">
+                    <div class="grid-2col" style="margin-top:0;">
+                        <div class="form-group"><label>Ad</label><input type="text" id="prof-name" value="${window.userProfile.name}"></div>
+                        <div class="form-group"><label>Soyad</label><input type="text" id="prof-surname" value="${window.userProfile.surname}"></div>
+                    </div>
+                    <div class="form-group"><label>Üniversite</label><input type="text" disabled value="${window.userProfile.university}" style="background:#E5E7EB; cursor:not-allowed;"></div>
+                    <div class="form-group"><label>E-posta</label><input type="email" disabled value="${window.userProfile.email}" style="background:#E5E7EB; cursor:not-allowed;"></div>
+                    <button class="btn-primary" onclick="saveProfile()" style="padding:12px; margin-bottom: 15px;">Profilimi Kaydet</button>
+                    <button class="btn-danger" onclick="logout()">🚪 Güvenli Çıkış Yap</button>
+                </div>
+            </div>
+        `;
+    }
+
+    window.saveProfile = async function() {
+        const name = document.getElementById('prof-name').value;
+        const surname = document.getElementById('prof-surname').value;
+        window.userProfile.name = name; window.userProfile.surname = surname;
+        await updateDoc(doc(db, "users", window.userProfile.uid), { name: name, surname: surname });
+        window.openModal('Başarılı', '<div style="text-align:center;"><p style="font-size:40px; margin:0;">✅</p><p>Profil güncellendi!</p></div>');
+    }
+
+    window.renderSettings = function() {
+        mainContent.innerHTML = `
+            <div class="card">
+                <h2>⚙️ Uygulama Ayarları</h2>
+                <div style="background: #F9FAFB; padding: 24px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--border-color);">
+                    <div class="form-group"><label>Dil Seçimi</label><select><option>Türkçe</option><option>English</option></select></div>
+                    <div class="form-group"><label>Tema</label><select><option>Aydınlık Mod</option><option>Karanlık Mod (Yakında)</option></select></div>
+                </div>
+                <button class="btn-danger" onclick="logout()">🚪 Güvenli Çıkış Yap</button>
+            </div>
+        `;
+    }
 });
