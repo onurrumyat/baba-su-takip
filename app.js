@@ -460,7 +460,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ============================================================================
-    // 4. İLAN YÖNETİMİ VE ÇOKLU FOTOĞRAF YÜKLEME (KAMERA/GALERİ ENTEGRELİ)
+    // 4. İLAN YÖNETİMİ, PARA BİRİMİ VE ÇOKLU FOTOĞRAF YÜKLEME 
     // ============================================================================
 
     window.renderListings = function(type, title, buttonText) {
@@ -498,6 +498,9 @@ document.addEventListener("DOMContentLoaded", () => {
         filteredData.forEach(item => {
             let imgHtml = '';
             let indicatorsHtml = '';
+            
+            // Eski ilanlarda para birimi yoksa varsayılan olarak TL (₺) göster
+            const displayCurrency = item.currency || '₺';
 
             // Kaydırılabilir Çoklu Fotoğraf Galerisi
             if (item.imgUrls && item.imgUrls.length > 0) {
@@ -522,7 +525,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (item.sellerId === window.userProfile.uid) {
                  actionButtonsHtml = `
                     <div style="display:flex; gap:10px;">
-                        <button class="action-btn" style="flex:1; padding:8px; font-size:12px;" onclick="editListing('${item.id}', '${item.title}', '${item.price}')">✏️ Düzenle</button>
+                        <button class="action-btn" style="flex:1; padding:8px; font-size:12px;" onclick="editListing('${item.id}', '${item.title}', '${item.price}')">✏️ Fiyatı Güncelle</button>
                         <button class="btn-danger" style="flex:1; padding:8px; font-size:12px;" onclick="deleteListing('${item.id}')">🗑️ Sil</button>
                     </div>
                  `;
@@ -538,7 +541,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="item-desc">${item.desc}</div>
                         <div style="font-size:11px; color:var(--text-gray); margin-bottom:10px;">Satıcı: <strong>${item.sellerName}</strong></div>
                         <div class="item-footer">
-                            <span class="item-price-large">${item.price} ₺</span>
+                            <span class="item-price-large">${item.price} ${displayCurrency}</span>
                             ${actionButtonsHtml}
                         </div>
                     </div>
@@ -555,31 +558,40 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert("İlan başarıyla silindi!");
             } catch(e) {
                 console.error(e);
+                alert("Silinirken bir hata oluştu: " + e.message);
             }
         }
     }
 
     window.editListing = function(docId, oldTitle, oldPrice) {
-        let newPrice = prompt(`"${oldTitle}" için yeni fiyatı girin:`, oldPrice);
+        let newPrice = prompt(`"${oldTitle}" için yeni fiyatı girin (Sadece rakam):`, oldPrice);
         if(newPrice !== null && newPrice.trim() !== "") {
             try {
                 updateDoc(doc(db, "listings", docId), { price: newPrice.trim() });
-                alert("İlan güncellendi!");
+                alert("İlan fiyatı güncellendi!");
             } catch(e) {
                 console.error(e);
             }
         }
     }
 
-    // 🌟 KAMERA VE GALERİ İÇİN FOTOĞRAF YÜKLEME 🌟
+    // 🌟 PARA BİRİMİ SEÇİMİ VE FOTOĞRAF YÜKLEME ALANI 🌟
     window.openListingForm = function(type) {
         window.openModal('Yeni İlan Oluştur', `
             <div class="form-group">
                 <input type="text" id="new-item-title" placeholder="İlan Başlığı (Örn: Temiz Çalışma Masası)">
             </div>
-            <div class="form-group">
-                <input type="number" id="new-item-price" placeholder="Fiyat (₺)">
+            
+            <div class="form-group" style="display: flex; gap: 10px;">
+                <input type="number" id="new-item-price" placeholder="Fiyat" style="flex: 2;">
+                <select id="new-item-currency" style="flex: 1;">
+                    <option value="₺">TL (₺)</option>
+                    <option value="$">Dolar ($)</option>
+                    <option value="€">Euro (€)</option>
+                    <option value="£">Sterlin (£)</option>
+                </select>
             </div>
+            
             <div class="form-group">
                 <textarea id="new-item-desc" rows="3" placeholder="İlan detayları ve durumu..."></textarea>
             </div>
@@ -592,7 +604,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div id="preview-container" class="preview-container"></div>
             
             <button class="btn-primary" id="publish-listing-btn" onclick="submitListing('${type}')">İlanı Yayınla</button>
-            <p id="upload-status" style="font-size:12px; color:var(--primary); text-align:center; margin-top:10px; display:none;">Fotoğraflar Yükleniyor, lütfen bekleyin...</p>
+            <p id="upload-status" style="font-size:12px; color:var(--primary); text-align:center; margin-top:10px; display:none; font-weight:bold;">Fotoğraflar Yükleniyor, lütfen bekleyin...</p>
         `);
 
         setTimeout(() => {
@@ -621,27 +633,23 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 100);
     }
 
-    // İLANI FIREBASE'E KAYDETME (TAM DÜZELTİLDİ)
+    // İLANI FIREBASE'E KAYDETME VE YÜKLEME TAKILMA SORUNU ÇÖZÜMÜ
     window.submitListing = async function(type) {
-        // DOM Elemanlarını seçme
         const titleEl = document.getElementById('new-item-title');
         const priceEl = document.getElementById('new-item-price');
+        const currencyEl = document.getElementById('new-item-currency');
         const descEl = document.getElementById('new-item-desc');
         const photoInput = document.getElementById('new-item-photo');
         const statusEl = document.getElementById('upload-status');
         const btn = document.getElementById('publish-listing-btn');
 
-        // Elemanlar ekranda yoksa işlemi durdur
-        if (!titleEl || !priceEl || !descEl) {
-            console.error("DOM elemanları okunamadı.");
-            return;
-        }
+        if (!titleEl || !priceEl || !descEl || !currencyEl) return;
 
         const title = titleEl.value.trim();
         const price = priceEl.value.trim();
+        const currency = currencyEl.value;
         const desc = descEl.value.trim();
 
-        // Değerlerin dolu olup olmadığını kesin kontrol et
         if (title === "" || price === "" || desc === "") {
             return alert("Lütfen başlık, fiyat ve açıklama alanlarını eksiksiz doldurun.");
         }
@@ -655,27 +663,37 @@ document.addEventListener("DOMContentLoaded", () => {
             return alert("Lütfen en az 1 fotoğraf seçin veya çekin.");
         }
 
-        // Yükleme sırasında butonu kilitle
         btn.disabled = true;
         statusEl.style.display = 'block';
+        statusEl.innerText = "Fotoğraflar Yükleniyor, lütfen bekleyin...";
+        statusEl.style.color = "var(--primary)";
 
         let imgUrlsArray = [];
 
         try {
-            // 1. Fotoğrafları Storage'a Yükle
-            for (let file of files) {
-                const fileName = Date.now() + '_' + file.name.replace(/\s/g, ''); 
-                const storageRef = ref(storage, 'listings/' + window.userProfile.uid + '/' + fileName);
-                await uploadBytes(storageRef, file);
-                const url = await getDownloadURL(storageRef);
-                imgUrlsArray.push(url);
-            }
+            // Promise.race ile güvenlik kalkanı (15 saniye içinde yüklenmezse iptal et)
+            const uploadTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Yükleme süresi doldu. Firebase Storage izinlerinizi (Rules) kontrol edin.")), 15000));
 
-            // 2. Veritabanına Yaz
+            // Fotoğrafları Storage'a Yükleme İşlemi
+            const uploadProcess = async () => {
+                for (let file of files) {
+                    const fileName = Date.now() + '_' + file.name.replace(/\s/g, ''); 
+                    const storageRef = ref(storage, 'listings/' + window.userProfile.uid + '/' + fileName);
+                    await uploadBytes(storageRef, file);
+                    const url = await getDownloadURL(storageRef);
+                    imgUrlsArray.push(url);
+                }
+            };
+
+            // Yükleme veya Timeout'tan hangisi önce biterse
+            await Promise.race([uploadProcess(), uploadTimeout]);
+
+            // Veritabanına Yaz
             await addDoc(collection(db, "listings"), {
                 type: type, 
                 title: title, 
                 price: price, 
+                currency: currency, // Para Birimi Eklendi
                 desc: desc, 
                 imgUrls: imgUrlsArray, 
                 imgUrl: imgUrlsArray.length > 0 ? imgUrlsArray[0] : "", 
@@ -689,9 +707,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (error) {
             console.error("İlan eklenirken hata:", error);
-            alert("İlan yayınlanırken hata oluştu! Konsolu kontrol edin.");
+            statusEl.innerText = "HATA: " + error.message;
+            statusEl.style.color = "red";
+            alert("İlan yayınlanamadı! Hata: " + error.message);
         } finally {
-            statusEl.style.display = 'none';
+            if(statusEl.innerText !== "HATA: " + error.message) {
+                statusEl.style.display = 'none';
+            }
             btn.disabled = false;
         }
     }
