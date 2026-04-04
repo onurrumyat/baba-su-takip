@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const password = document.getElementById('reg-password').value;
 
         if(!name || !surname || !uni || !email || !password) return alert("Lütfen tüm alanları doldurun.");
-        if(!email.includes(".edu")) return alert("Güvenlik nedeniyle sadece onaylı .edu uzantılı üniversite e-postaları kabul edilmektedir.");
+        if(!email.includes(".edu")) return alert("Sadece .edu uzantılı mailler kabul edilmektedir.");
 
         try {
             const userCred = await createUserWithEmailAndPassword(auth, email, password);
@@ -122,10 +122,11 @@ document.addEventListener("DOMContentLoaded", () => {
             await signOut(auth);
             document.getElementById('show-login-btn').click();
         } catch (error) {
-            alert("Kayıt olurken bir hata oluştu: " + error.message);
+            alert("Kayıt olurken hata: " + error.message);
         }
     });
 
+    // 💡 EKRANDA DONMA HATASI İÇİN FIX
     bind('login-btn', 'click', async () => {
         const email = document.getElementById('login-email').value.trim();
         const password = document.getElementById('login-password').value;
@@ -138,6 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.disabled = true;
 
         try {
+            // Sadece girişi tetikler, ekran yönlendirmesini onAuthStateChanged halledecek.
             await signInWithEmailAndPassword(auth, email, password);
         } catch (error) {
             console.error("Giriş Hatası:", error);
@@ -156,16 +158,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 authScreen.style.display = 'flex';
                 document.getElementById('login-card').style.display = 'block';
                 document.getElementById('register-card').style.display = 'none';
+                
+                const btn = document.getElementById('login-btn');
+                if(btn) { btn.innerText = "Giriş Yap"; btn.disabled = false; }
             }
         } catch(error) { console.error("Çıkış hatası:", error); }
     };
 
     // ============================================================================
-    // 2. OTURUM DURUMU (PROFİL BİLGİLERİ KAYDEDİLMESİ)
+    // 2. OTURUM DURUMU (VERİLERİN ÇEKİLMESİ VE EKRANIN AÇILMASI)
     // ============================================================================
 
     onAuthStateChanged(auth, async (user) => {
         if (user) { 
+            // 💡 EKRANI ANINDA AÇIYORUZ
+            if(authScreen && appScreen) {
+                authScreen.style.display = 'none';
+                appScreen.style.display = 'block';
+            }
+
             try {
                 const userDocRef = doc(db, "users", user.uid);
                 const docSnap = await getDoc(userDocRef);
@@ -186,24 +197,29 @@ document.addEventListener("DOMContentLoaded", () => {
                 await updateDoc(userDocRef, { isOnline: true });
                 initRealtimeListeners(user.uid);
 
-                if(authScreen && appScreen) { 
-                    authScreen.style.display = 'none'; 
-                    appScreen.style.display = 'block'; 
-                    
-                    // 💡 PROFİLE KAYDEDİLMİŞ FAKÜLTE VARSA OTOMATİK EKLE
-                    if(window.userProfile.faculty) {
-                        window.joinedFaculties = [{name: window.userProfile.faculty, icon: "🏢", color: "linear-gradient(135deg, #1E3A8A, #4F46E5)"}];
-                        window.updateMyFacultiesSidebar();
-                    }
-
-                    const activeTab = document.querySelector('.menu-item.active');
+                // Profil dolduğu an ANA SAYFAYI YÜKLE
+                const activeTab = document.querySelector('.menu-item.active');
+                if(typeof window.loadPage === 'function') {
                     window.loadPage(activeTab ? activeTab.getAttribute('data-target') : 'home'); 
                 }
-                // Butonu düzelt
+
+                // Önceden kayıtlı fakülte varsa sol menüye mühürle
+                if(window.userProfile.faculty && typeof window.updateMyFacultiesSidebar === 'function') {
+                    window.joinedFaculties = [{name: window.userProfile.faculty, icon: "🏢", color: "linear-gradient(135deg, #1E3A8A, #4F46E5)"}];
+                    window.updateMyFacultiesSidebar();
+                }
+                
+                // Butonu eski haline getir
                 const btn = document.getElementById('login-btn');
                 if(btn) { btn.innerText = "Giriş Yap"; btn.disabled = false; }
 
-            } catch(error) { console.error("Kullanıcı verisi yüklenirken hata:", error); }
+            } catch(error) { 
+                console.error("Kullanıcı verisi hatası (Firestore kapalı olabilir):", error);
+                alert("Bağlantı Hatası: Lütfen Firebase Firestore'u 'Test Modunda' kurduğunuzdan emin olun.");
+                // Fallback profil (sistem çökmesin diye)
+                window.userProfile = { uid: user.uid, name: "Misafir", surname: "", email: user.email, university: "Bağlantı Hatası", avatar: "⚠️", faculty: "" };
+                if(typeof window.loadPage === 'function') window.loadPage('home'); 
+            }
         }
     });
 
@@ -277,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     window.closeModal = function() { 
         modal.classList.remove('active'); 
-        document.getElementById('modal-body').innerHTML = ''; // Temizlik
+        document.getElementById('modal-body').innerHTML = ''; // Modalı temizler
     }
     bind('modal-close', 'click', window.closeModal);
     window.addEventListener('click', (e) => { if (e.target === modal) window.closeModal(); });
@@ -427,7 +443,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 100);
     }
 
-    // HATA BURADA ÇÖZÜLDÜ: Fotoğraf olmasa bile ilan yayınlanır, hata fırlatmaz.
+    // 💡 ÇÖZÜM: Fotoğraf seçilmese bile ilanı sorunsuz kaydeden mantık
     window.submitListing = async function(type) {
         const title = document.getElementById('new-item-title').value;
         const price = document.getElementById('new-item-price').value;
@@ -449,12 +465,13 @@ document.addEventListener("DOMContentLoaded", () => {
         let imgUrlsArray = [];
 
         try {
-            // Eğer dosya seçildiyse storage'a yükle
-            for (let file of files) {
-                const storageRef = ref(storage, 'listings/' + Date.now() + '_' + file.name);
-                await uploadBytes(storageRef, file);
-                const url = await getDownloadURL(storageRef);
-                imgUrlsArray.push(url);
+            if(files.length > 0) {
+                for (let file of files) {
+                    const storageRef = ref(storage, 'listings/' + Date.now() + '_' + file.name);
+                    await uploadBytes(storageRef, file);
+                    const url = await getDownloadURL(storageRef);
+                    imgUrlsArray.push(url);
+                }
             }
 
             await addDoc(collection(db, "listings"), {
@@ -472,7 +489,7 @@ document.addEventListener("DOMContentLoaded", () => {
             window.closeModal();
         } catch (error) {
             console.error("İlan eklenirken hata:", error);
-            alert("İlan yayınlanırken bir hata oluştu.");
+            alert("İlan yayınlanırken hata oluştu! Storage ayarlarınızı kontrol edin.");
             statusEl.style.display = 'none';
             btn.disabled = false;
         }
@@ -607,7 +624,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // ============================================================================
-    // 6. İTİRAFLAR (HATA ÇÖZÜLDÜ)
+    // 6. İTİRAFLAR (ANONİM KAMPÜS)
     // ============================================================================
 
     window.renderConfessions = function() {
@@ -687,14 +704,11 @@ document.addEventListener("DOMContentLoaded", () => {
             <div style="background:${bgStyle}; color:white; padding: 30px; border-radius: 16px; font-size: 18px; line-height: 1.6; margin-bottom: 24px; font-style:italic;">
                 <div style="font-size:12px; margin-bottom:10px; opacity:0.8;">${post.tag}</div>"${post.text}"
             </div>
-            <div style="display:flex; gap:12px;">
-                <button class="action-btn" style="flex:1;" onclick="alert('Beğenildi!')">🔥 Yanıyor</button>
-            </div>
         `);
     }
 
     // ============================================================================
-    // 7. SORU VE CEVAP MODÜLÜ (HATA ÇÖZÜLDÜ)
+    // 7. SORU VE CEVAP MODÜLÜ (Q&A)
     // ============================================================================
 
     window.renderQA = function() {
@@ -801,31 +815,33 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ============================================================================
-    // 8. FAKÜLTE SİSTEMİ (KALICI VE ESTETİK)
+    // 8. FAKÜLTE SİSTEMİ (KALICI VE ANINDA AÇILAN EKRAN - FIX)
     // ============================================================================
 
     window.updateMyFacultiesSidebar = function() {
         const container = document.getElementById('my-joined-faculties');
         if(!container) return;
         let html = '';
-        window.joinedFaculties.forEach(fac => { html += `<div class="menu-item community-link" data-name="${fac.name}" data-icon="${fac.icon}" data-color="${fac.color}" onclick="handleFacultyClick('${fac.name}', '${fac.icon}', '${fac.color}')">${fac.icon} ${fac.name}</div>`; });
+        window.joinedFaculties.forEach(fac => { 
+            html += `<div class="menu-item community-link" data-name="${fac.name}" data-icon="${fac.icon}" data-color="${fac.color}" onclick="handleFacultyClick('${fac.name}', '${fac.icon}', '${fac.color}')">${fac.icon} ${fac.name}</div>`; 
+        });
         container.innerHTML = html;
     }
 
-    // 💡 Tıklanınca eğer daha önce girmişse (şifre girmişse) direkt açar
     window.handleFacultyClick = async function(name, icon, bgColor) {
         document.querySelectorAll('.menu-item[data-target]').forEach(m => m.classList.remove('active'));
         if(window.innerWidth <= 1024) document.getElementById('sidebar').classList.remove('open');
 
-        // Fakülte kayıtlı mı?
-        const isJoined = window.joinedFaculties.some(f => f.name === name);
+        // 💡 Kullanıcı daha önceden kaydolduysa veya yeni katıldıysa DİREKT AÇAR
+        const isJoined = window.joinedFaculties.some(f => f.name === name) || window.userProfile.faculty === name;
 
         if(isJoined) {
             window.loadFacultyFeed(name, icon, bgColor);
         } else {
             mainContent.innerHTML = `
                 <div class="join-faculty-box">
-                    <div class="icon">${icon}</div><h2>${name} Ağına Hoş Geldin</h2>
+                    <div class="icon">${icon}</div>
+                    <h2>${name} Ağına Hoş Geldin</h2>
                     <p>Bu alan kapalı bir ağdır. Girmek için fakülte kodunu girmelisin.</p>
                     <div style="max-width: 300px; margin: 0 auto 20px auto;">
                         <input type="text" id="faculty-passcode-input" class="form-group" style="width: 100%; text-align:center; font-size:18px; font-weight:bold; letter-spacing:2px; padding: 15px; border: 2px solid var(--border-color); border-radius: 12px; outline:none;" placeholder="Giriş Kodunu Yazın">
@@ -837,7 +853,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // 💡 Şifre doğruysa KİLİTLER VE DİREKT AÇAR
+    // 💡 Şifre doğruysa KİLİTLER VE EKRANI ANINDA DEĞİŞTİRİR
     window.verifyFacultyCode = async function(name, icon, bgColor) {
         const inputCode = document.getElementById('faculty-passcode-input').value.trim();
         if (inputCode.toLowerCase() === FACULTY_PASSCODES[name].toLowerCase()) {
@@ -847,7 +863,7 @@ document.addEventListener("DOMContentLoaded", () => {
             window.joinedFaculties = [{name: name, icon: icon, color: bgColor}]; 
             window.updateMyFacultiesSidebar();
             
-            // 2. Veritabanına Kalıcı Olarak Kaydet
+            // 2. Veritabanına Kalıcı Olarak Kaydet (Persistence)
             await updateDoc(doc(db, "users", window.userProfile.uid), { faculty: name });
             
             // 3. EKRANI ANINDA FAKÜLTE İÇİNE ÇEVİR
