@@ -1,14 +1,33 @@
+// 🌟 YENİ: FIREBASE KÜTÜPHANELERİ (Type="module" olarak çağrılmalı) 🌟
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+// 🌟 SENİN FIREBASE YAPILANDIRMAN (Sistemin Kalbi) 🌟
+const firebaseConfig = {
+  apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
+  authDomain: "voice2post-9e8ca.firebaseapp.com",
+  projectId: "voice2post-9e8ca",
+  storageBucket: "voice2post-9e8ca.firebasestorage.app",
+  messagingSenderId: "511446656614",
+  appId: "1:511446656614:web:32101ee70299543c716fa7",
+  measurementId: "G-36ZHRLMK5T"
+};
+
+// Firebase'i Başlat
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
 document.addEventListener("DOMContentLoaded", () => {
     
-    // --- 🛡️ DEFENSIVE PROGRAMMING ---
+    // --- 🛡️ DEFENSIVE PROGRAMMING (ZIRHLI BAĞLAMA) ---
     const bind = (id, event, callback) => {
         const el = document.getElementById(id);
         if (el) el.addEventListener(event, callback);
     };
 
-    // --- 🌟 KULLANICI PROFİLİ 🌟 ---
+    // --- 🌟 KULLANICI PROFİLİ VE SİSTEM HAFIZASI 🌟 ---
     window.userProfile = { 
-        name: "Ege", surname: "Yılmaz", email: "ege.yilmaz@uniloop.edu", age: 21,
+        name: "Ege", surname: "Yılmaz", email: "", age: 21,
         university: "Global University", faculty: "Henüz Fakülte Seçilmedi", year: "2. Sınıf", 
         bio: "Kampüs hayatını ve teknolojiyi seviyorum.", avatar: "👨‍🎓"
     };
@@ -18,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const appScreen = document.getElementById('app-screen');
     const mainContent = document.getElementById('main-content');
 
-    // --- MOCK VERİTABANLARI ---
+    // --- 🗄️ MOCK VERİTABANLARI 🗄️ ---
     const globalUniversities = [
         "Yakın Doğu Üniversitesi (NEU)", "Doğu Akdeniz Üniversitesi (EMU)", "Girne Amerikan Üniversitesi (GAU)", "Uluslararası Kıbrıs Üniversitesi (CIU)",
         "Orta Doğu Teknik Üniversitesi (ODTÜ)", "Boğaziçi Üniversitesi", "İstanbul Teknik Üniversitesi (İTÜ)", "Bilkent Üniversitesi", "Koç Üniversitesi",
@@ -32,7 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 4, type: "market", title: "M1 Macbook Air", desc: "Yazılımcıdan temiz.", price: "$800", img: "💻" }
     ];
 
-    // YENİ İTİRAF KARTLARI VERİTABANI (Temalar ile)
     let confessionsDB = [
         { id: 1, avatar: "👻", theme: "theme-midnight", user: "Anonim #482", time: "2 saat önce", tag: "📍 Kütüphane", text: "İlk yılım ve henüz hiç arkadaş bulamadım.", likes: 142, comments: 24 },
         { id: 2, avatar: "🎭", theme: "theme-drama", user: "Anonim #911", time: "5 saat önce", tag: "📍 Vizeler", text: "Fizik 101 hocası gerçekten çok zorluyor.", likes: 89, comments: 12 },
@@ -57,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
     let currentChatId = "chat1";
 
-    // --- 🌟 GİRİŞ / KAYIT SİSTEMİ 🌟 ---
+    // --- 🚀 1. GİRİŞ / KAYIT EKRANI GEÇİŞLERİ 🚀 ---
     bind('show-register-btn', 'click', () => {
         const loginCard = document.getElementById('login-card');
         const registerCard = document.getElementById('register-card');
@@ -70,10 +88,128 @@ document.addEventListener("DOMContentLoaded", () => {
         if(loginCard && registerCard) { registerCard.style.display = 'none'; loginCard.style.display = 'block'; }
     });
 
-    bind('login-btn', 'click', () => {
-        if(authScreen && appScreen) { authScreen.style.display = 'none'; appScreen.style.display = 'block'; loadPage('home'); }
+    // --- 🚀 2. FIREBASE: KAYIT OLMA VE DOĞRULAMA (EMAIL VERIFICATION) 🚀 ---
+    bind('register-btn', 'click', async () => {
+        const nameEl = document.getElementById('reg-name');
+        const surnameEl = document.getElementById('reg-surname');
+        const uniEl = document.getElementById('reg-uni');
+        const emailEl = document.getElementById('reg-email');
+        const passwordEl = document.getElementById('reg-password');
+
+        const email = emailEl ? emailEl.value.trim() : '';
+        const password = passwordEl ? passwordEl.value : '';
+
+        if(!nameEl.value || !surnameEl.value || !uniEl.value || !email || !password) {
+            alert("Lütfen tüm alanları (Ad, Soyad, Üniversite, E-posta, Şifre) eksiksiz doldurun.");
+            return;
+        }
+
+        // Güvenlik Kalkanı: .edu kontrolü
+        if(!email.includes(".edu")) {
+            alert("Sisteme sadece onaylı üniversite e-postaları (.edu veya .edu.tr uzantılı) ile kayıt olabilirsiniz.");
+            return;
+        }
+
+        try {
+            // 1. Firebase üzerinde kullanıcıyı oluştur
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // 2. Doğrulama E-postası gönder
+            await sendEmailVerification(user);
+
+            // 3. Kullanıcıya bilgi ver ve Login ekranına at (Doğrulamadan girmesini engelle)
+            alert("Hesabınız başarıyla oluşturuldu! Lütfen " + email + " adresine gönderdiğimiz doğrulama linkine tıklayarak hesabınızı aktif edin.");
+            
+            await signOut(auth); // İçeri girmesini engeller
+            
+            document.getElementById('register-card').style.display = 'none';
+            document.getElementById('login-card').style.display = 'block';
+
+            // Lokalde geçici profil bilgilerini tutalım (Firebase Firestore'a bağlanana kadar)
+            window.userProfile.name = nameEl.value;
+            window.userProfile.surname = surnameEl.value;
+            window.userProfile.university = uniEl.value;
+            window.userProfile.email = email;
+
+        } catch (error) {
+            alert("Kayıt olurken bir hata oluştu: " + error.message);
+        }
     });
 
+    // --- 🚀 3. FIREBASE: GİRİŞ YAPMA (LOGIN) 🚀 ---
+    bind('login-btn', 'click', async () => {
+        const emailEl = document.getElementById('login-email');
+        const passwordEl = document.getElementById('login-password');
+        const email = emailEl ? emailEl.value.trim() : '';
+        const password = passwordEl ? passwordEl.value : '';
+
+        if(!email || !password) {
+            alert("Lütfen e-posta ve şifrenizi girin.");
+            return;
+        }
+
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Güvenlik Kalkanı: Maili doğrulamamışsa içeri alma!
+            if (!user.emailVerified) {
+                alert("Giriş başarısız: Lütfen önce e-posta adresinize gönderilen doğrulama linkine tıklayın. (Spam/Gereksiz kutusunu kontrol etmeyi unutmayın)");
+                await signOut(auth);
+                return;
+            }
+
+            // GİRİŞ BAŞARILI
+            window.userProfile.email = user.email; // E-postayı profile işle
+            if(authScreen && appScreen) {
+                authScreen.style.display = 'none';
+                appScreen.style.display = 'block';
+                loadPage('home');
+            }
+        } catch (error) {
+            alert("Giriş hatası: E-posta veya şifre yanlış. Lütfen tekrar deneyin.");
+        }
+    });
+
+    // --- 🚀 4. FIREBASE: ÇIKIŞ YAP (LOGOUT) 🚀 ---
+    window.logout = async function() {
+        try {
+            await signOut(auth);
+            if(appScreen && authScreen) { 
+                appScreen.style.display = 'none'; 
+                authScreen.style.display = 'flex'; 
+            }
+            const loginCard = document.getElementById('login-card');
+            const registerCard = document.getElementById('register-card');
+            if(loginCard && registerCard) { 
+                loginCard.style.display = 'block'; 
+                registerCard.style.display = 'none'; 
+            }
+        } catch(error) {
+            console.error("Çıkış yapılırken hata oluştu:", error);
+        }
+    };
+
+    // --- 🚀 5. FIREBASE: OTURUM DURUMU DİNLEYİCİSİ (KALICI OTURUM) 🚀 ---
+    // Kullanıcı sayfayı yenilese bile, maili onaylıysa direkt uygulamaya girer.
+    onAuthStateChanged(auth, (user) => {
+        if (user && user.emailVerified) {
+            window.userProfile.email = user.email;
+            if(authScreen && appScreen) {
+                authScreen.style.display = 'none';
+                appScreen.style.display = 'block';
+                loadPage('home'); // Ana sayfayı yükle
+            }
+        } else {
+            if(appScreen && authScreen) {
+                appScreen.style.display = 'none';
+                authScreen.style.display = 'flex';
+            }
+        }
+    });
+
+    // --- ÜNİVERSİTE AUTOCOMPLETE (ARAMA ÇUBUĞU) ---
     const uniInput = document.getElementById('reg-uni');
     const uniList = document.getElementById('uni-autocomplete-list');
     if (uniInput && uniList) {
@@ -97,28 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.addEventListener('click', (e) => { if(e.target !== uniInput) uniList.innerHTML = ''; });
     }
 
-    bind('register-btn', 'click', () => {
-        const nameEl = document.getElementById('reg-name');
-        const surnameEl = document.getElementById('reg-surname');
-        const uniEl = document.getElementById('reg-uni');
-        const emailEl = document.getElementById('reg-email');
-
-        if(nameEl && nameEl.value) window.userProfile.name = nameEl.value;
-        if(surnameEl && surnameEl.value) window.userProfile.surname = surnameEl.value;
-        if(uniEl && uniEl.value) window.userProfile.university = uniEl.value;
-        if(emailEl && emailEl.value) window.userProfile.email = emailEl.value;
-
-        if(authScreen && appScreen) { authScreen.style.display = 'none'; appScreen.style.display = 'block'; loadPage('home'); }
-    });
-
-    window.logout = function() {
-        if(appScreen && authScreen) { appScreen.style.display = 'none'; authScreen.style.display = 'flex'; }
-        const loginCard = document.getElementById('login-card');
-        const registerCard = document.getElementById('register-card');
-        if(loginCard && registerCard) { loginCard.style.display = 'block'; registerCard.style.display = 'none'; }
-    };
-
-    // --- GENEL MODAL VE MENÜ KONTROLLERİ ---
+    // --- 🛠️ GENEL MODAL VE MENÜ KONTROLLERİ 🛠️ ---
     window.goToMessages = function() {
         const msgTab = document.querySelector('[data-target="messages"]');
         if(msgTab) msgTab.click();
@@ -153,7 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupShowMore('desktop-show-more-btn', 'desktop-more-faculties');
     setupShowMore('mobile-show-more-btn', 'mobile-more-faculties');
 
-    // --- 1. ANA SAYFA ---
+    // --- 🏠 ANA SAYFA ---
     function getHomeContent() {
         return `
             <div class="card" style="background: linear-gradient(135deg, #1E3A8A, #4F46E5); color: white; border:none;">
@@ -170,7 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     }
 
-    // --- 2. İLAN LİSTELEYİCİ ---
+    // --- 🛒 İLAN LİSTELEYİCİ ---
     function renderListings(type, title, buttonText) {
         let html = `
             <div class="card">
@@ -203,7 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(searchInput) searchInput.addEventListener('input', (e) => drawGrid(e.target.value.toLowerCase())); 
     }
 
-    // --- 🤫 3. YENİ ANONİM KAMPÜS (2 SÜTUNLU KART TASARIMI) ---
+    // --- 🤫 YENİ ANONİM KAMPÜS (2 SÜTUNLU KART TASARIMI) ---
     function renderConfessions() {
         let html = `
             <div class="card">
@@ -234,7 +349,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const tagEl = document.getElementById('new-conf-tag');
         if(!textEl || textEl.value.trim() === '') return;
         
-        // AI MODERATÖR SİSTEMİ (Güvenlik Kontrolü)
         const toxicWords = ["intihar", "ölmek", "depresyon", "aptal", "nefret"];
         const isToxic = toxicWords.some(word => textEl.value.toLowerCase().includes(word));
 
@@ -313,7 +427,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `);
     }
 
-    // --- ❓ 4. SORU VE CEVAP MODÜLÜ ---
+    // --- ❓ SORU VE CEVAP MODÜLÜ ---
     function renderQA() {
         let html = `
             <div class="card">
@@ -466,7 +580,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- 🏢 5. FAKÜLTE KATILIM SİSTEMİ ---
+    // --- 🏢 FAKÜLTE KATILIM SİSTEMİ ---
     function updateMyFacultiesSidebar() {
         const container = document.getElementById('my-joined-faculties');
         if(!container) return;
@@ -570,7 +684,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 💬 6. WHATSAPP STİLİ MESAJLAŞMA ---
+    // --- 💬 WHATSAPP STİLİ MESAJLAŞMA ---
     function renderMessages() {
         let html = `
             <div class="card" style="padding:0; border:none;">
@@ -681,7 +795,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- 👤 7. PROFİL VE AYARLAR ---
+    // --- 👤 PROFİL VE AYARLAR ---
     function renderProfile() {
         mainContent.innerHTML = `
             <div class="card">
@@ -742,7 +856,7 @@ document.addEventListener("DOMContentLoaded", () => {
         bind('logout-settings-btn', 'click', window.logout);
     }
 
-    // --- 🧭 8. SAYFA GEÇİŞ (ROUTING) YÖNETİMİ ---
+    // --- 🧭 SAYFA GEÇİŞ (ROUTING) YÖNETİMİ ---
     function loadPage(pageName) {
         if (pageName === 'home') mainContent.innerHTML = getHomeContent();
         else if (pageName === 'market') renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
