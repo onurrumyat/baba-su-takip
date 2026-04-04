@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 🌟 YENİ VERİTABANI: SORU & CEVAP 🌟
     let qaDB = [
         { id: 1, user: "Ayşe K.", avatar: "👩‍🎓", time: "1 saat önce", tag: "Yurtlar", question: "Kredi Yurtlar Kurumu (KYK) çıkış saatleri kaça kadar esnedi, bilen var mı?", answers: [{user: "Mehmet", text: "Gece 12'ye kadar girebiliyorsun."}] },
-        { id: 2, user: "Can T.", avatar: "👨‍💻", time: "3 saat önce", tag: "Ders Seçimi", question: "Seçmeli olarak İspanyolca 101 alınır mı, hoca çok zorluyor mu?", answers: [] },
+        { id: 2, user: "Can T.", avatar: "👨‍💻", time: "3 saat önce", tag: "Ders Kaydı", question: "Seçmeli olarak İspanyolca 101 alınır mı, hoca çok zorluyor mu?", answers: [] },
         { id: 3, user: "Elif B.", avatar: "👩‍🔬", time: "Dün", tag: "Kariyer", question: "Bilgisayar Mühendisliği 2. sınıfım, yaz stajı bulmak için nereden başlamalıyım?", answers: [{user: "Ali", text: "LinkedIn'den okul mezunlarına yaz."}, {user: "Cem", text: "Kariyer günlerini kaçırma."}] }
     ];
 
@@ -231,13 +231,31 @@ document.addEventListener("DOMContentLoaded", () => {
         const textEl = document.getElementById('new-conf-text');
         if(!textEl || textEl.value.trim() === '') return;
         
-        const pastelColors = ["#FEF3C7", "#E0E7FF", "#D1FAE5", "#FCE7F3", "#F3E8FF"];
-        confessionsDB.unshift({ 
-            id: Date.now(), avatar: ["👻","👽","🤖","🦊","🎭"][Math.floor(Math.random()*5)], color: pastelColors[Math.floor(Math.random()*5)],
-            user: "Anonim #"+Math.floor(Math.random()*999), time: "Şimdi", text: textEl.value 
-        });
-        closeModal();
-        drawConfessionsGrid();
+        // AI MODERATÖR SİSTEMİ (Güvenlik Kontrolü)
+        const toxicWords = ["intihar", "ölmek", "depresyon", "aptal", "nefret"];
+        const isToxic = toxicWords.some(word => textEl.value.toLowerCase().includes(word));
+
+        if(isToxic) {
+            openModal('⚠️ AI Moderatör Uyarısı', `
+                <div style="text-align:center;">
+                    <h1 style="font-size:40px; margin-bottom:10px;">🛡️</h1>
+                    <p style="color:#DC2626; font-weight:bold; margin-bottom:10px;">Gönderiniz durduruldu.</p>
+                    <p style="font-size:14px; margin-bottom:15px;">Yazdıklarınızda topluluk kurallarına aykırı bir dil tespit edildi.</p>
+                    <div style="background:#FEF2F2; padding:15px; border-radius:8px; border: 1px solid #FCA5A5;">
+                        <p style="font-weight:bold; color:#991B1B;">Yalnız değilsin.</p>
+                        <p style="font-size:13px; color:#7F1D1D; margin-top:5px;">Kampüs psikolojik destek merkezi her zaman seninle konuşmaya hazır.</p>
+                    </div>
+                </div>
+            `);
+        } else {
+            const pastelColors = ["#FEF3C7", "#E0E7FF", "#D1FAE5", "#FCE7F3", "#F3E8FF"];
+            confessionsDB.unshift({ 
+                id: Date.now(), avatar: ["👻","👽","🤖","🦊","🎭"][Math.floor(Math.random()*5)], color: pastelColors[Math.floor(Math.random()*5)],
+                user: "Anonim #"+Math.floor(Math.random()*999), time: "Şimdi", text: textEl.value 
+            });
+            closeModal();
+            drawConfessionsGrid();
+        }
     }
 
     function drawConfessionsGrid() {
@@ -258,35 +276,54 @@ document.addEventListener("DOMContentLoaded", () => {
         `);
     }
 
-    // --- 🌟 4. YENİ: SORU VE CEVAP MODÜLÜ 🌟 ---
+    // --- 🌟 4. YENİ EKLENEN: SORU VE CEVAP MODÜLÜ 🌟 ---
     function renderQA() {
         let html = `
             <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px; flex-wrap:wrap; gap:10px;">
                     <h2 style="margin:0;">❓ Kampüs Soru & Cevap</h2>
-                    <button class="btn-primary" style="width:auto;" onclick="openQAForm()">+ Soru Sor</button>
+                    <button class="btn-primary" style="width:auto; padding: 10px 24px;" onclick="openQAForm()">+ Soru Sor</button>
                 </div>
                 <p style="color:var(--text-gray); font-size:14px; margin-bottom:20px;">Kampüsle, derslerle veya yurtlarla ilgili sorularını sor, deneyimli öğrencilerden cevap al.</p>
+                
+                <div class="qa-filters" id="qa-filters-container">
+                    <button class="qa-filter-btn active" data-filter="Tümü">Tümü</button>
+                    <button class="qa-filter-btn" data-filter="Yurtlar">Yurtlar</button>
+                    <button class="qa-filter-btn" data-filter="Ders Kaydı">Ders Kaydı</button>
+                    <button class="qa-filter-btn" data-filter="Kariyer">Kariyer</button>
+                    <button class="qa-filter-btn" data-filter="Kampüs Yaşamı">Kampüs Yaşamı</button>
+                </div>
+
                 <div id="qa-feed"></div>
             </div>
         `;
         mainContent.innerHTML = html;
-        drawQAGrid();
+        drawQAGrid('Tümü');
+
+        // Filtre Dinleyicileri
+        const filterBtns = document.querySelectorAll('.qa-filter-btn');
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                drawQAGrid(e.currentTarget.getAttribute('data-filter'));
+            });
+        });
     }
 
     window.openQAForm = function() {
-        openModal('Soru Sor', `
+        openModal('Yeni Soru Sor', `
             <div class="form-group">
                 <label>Kategori (Etiket)</label>
                 <select id="new-qa-tag">
                     <option>Yurtlar</option>
                     <option>Ders Kaydı</option>
-                    <option>Teknoloji</option>
                     <option>Kariyer</option>
                     <option>Kampüs Yaşamı</option>
+                    <option>Teknoloji</option>
                 </select>
             </div>
-            <textarea id="new-qa-text" class="form-group" style="width:100%; height:100px; border-radius:12px; padding:15px; font-size:16px;" placeholder="Sorunuzu detaylı bir şekilde yazın..."></textarea>
+            <textarea id="new-qa-text" class="form-group" style="width:100%; height:120px; border-radius:12px; padding:15px; font-size:15px;" placeholder="Sorunuzu detaylı bir şekilde yazın..."></textarea>
             <button class="btn-primary" onclick="submitQA()">Soruyu Yayınla</button>
         `);
     }
@@ -301,29 +338,47 @@ document.addEventListener("DOMContentLoaded", () => {
             time: "Şimdi", tag: tagEl.value, question: textEl.value, answers: [] 
         });
         closeModal();
-        drawQAGrid();
+        
+        // Aktif filtreyi bulup listeyi o filtreyle yenile
+        const activeFilter = document.querySelector('.qa-filter-btn.active');
+        const filterValue = activeFilter ? activeFilter.getAttribute('data-filter') : 'Tümü';
+        drawQAGrid(filterValue);
     }
 
-    function drawQAGrid() {
+    window.drawQAGrid = function(filterTag = 'Tümü') {
         const feed = document.getElementById('qa-feed');
         if(!feed) return;
+        
+        let filteredDB = qaDB;
+        if(filterTag !== 'Tümü') {
+            filteredDB = qaDB.filter(q => q.tag === filterTag);
+        }
+
+        if(filteredDB.length === 0) {
+            feed.innerHTML = '<p style="text-align:center; color:var(--text-gray); padding:40px 0; background:#F9FAFB; border-radius:12px;">Bu kategoride henüz soru yok. İlk soran sen ol!</p>';
+            return;
+        }
+
         let html = '';
-        qaDB.forEach((q, index) => {
+        filteredDB.forEach((q) => {
+            const originalIndex = qaDB.findIndex(item => item.id === q.id);
+            const ansCount = q.answers.length;
+            const statusClass = ansCount > 0 ? 'answered' : '';
+            
             html += `
-                <div class="premium-post" style="cursor:pointer; margin-bottom:15px;" onclick="openQADetail(${index})">
-                    <div class="pp-header" style="margin-bottom:10px;">
-                        <div class="pp-user-info">
-                            <div class="avatar" style="width:40px;height:40px;font-size:18px;">${q.avatar}</div>
-                            <div>
-                                <div class="pp-name">${q.user} <span style="font-size:11px; background:#EEF2FF; color:var(--primary); padding:4px 8px; border-radius:12px; margin-left:8px; font-weight:600;">${q.tag}</span></div>
-                                <div class="pp-time">${q.time}</div>
-                            </div>
+                <div class="qa-card" onclick="openQADetail(${originalIndex})">
+                    <div class="qa-left-stats">
+                        <div class="qa-stat-box ${statusClass}">
+                            <div style="font-size:18px;">${ansCount}</div>
+                            <div style="font-weight:500;">Cevap</div>
                         </div>
                     </div>
-                    <div class="pp-content" style="font-weight:700; font-size:16px; color:#111827; margin-bottom:15px;">${q.question}</div>
-                    <div class="pp-stats" style="border:none; margin:0; padding:0;">
-                        <span style="font-weight:bold; color:${q.answers.length > 0 ? '#10B981' : 'var(--text-gray)'}">💬 ${q.answers.length} Cevap</span>
-                        <span style="color:var(--primary); font-weight:bold;">Cevapları Gör ➔</span>
+                    <div class="qa-right-content">
+                        <div class="qa-title">${q.question}</div>
+                        <div class="qa-meta">
+                            <span class="qa-tag">${q.tag}</span>
+                            <span>Soran: <strong>${q.user}</strong> • ${q.time}</span>
+                        </div>
                     </div>
                 </div>
             `;
@@ -335,32 +390,32 @@ document.addEventListener("DOMContentLoaded", () => {
         const q = qaDB[index];
         let answersHtml = '';
         if(q.answers.length === 0) {
-            answersHtml = '<p style="color:var(--text-gray); font-size:14px; text-align:center; margin: 20px 0;">Henüz cevap yok. İlk cevap veren sen ol!</p>';
+            answersHtml = '<p style="color:var(--text-gray); font-size:14px; text-align:center; padding: 20px 0; background:#F9FAFB; border-radius:12px;">Henüz cevap yok. İlk cevap veren sen ol!</p>';
         } else {
             q.answers.forEach(ans => {
                 answersHtml += `
-                    <div style="background:#F9FAFB; padding:15px; border-radius:12px; margin-bottom:10px; border:1px solid var(--border-color);">
-                        <div style="font-weight:bold; font-size:13px; color:var(--primary); margin-bottom:5px;">${ans.user}</div>
-                        <div style="font-size:14px; color:var(--text-dark); line-height:1.5;">${ans.text}</div>
+                    <div style="background:#F9FAFB; padding:16px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border-color);">
+                        <div style="font-weight:bold; font-size:14px; color:var(--primary); margin-bottom:6px;">${ans.user}</div>
+                        <div style="font-size:15px; color:var(--text-dark); line-height:1.5;">${ans.text}</div>
                     </div>
                 `;
             });
         }
 
         openModal('Soru Detayı', `
-            <div style="margin-bottom: 20px;">
-                <span style="font-size:11px; background:#EEF2FF; color:var(--primary); padding:4px 8px; border-radius:12px; font-weight:600;">${q.tag}</span>
-                <div style="font-size:18px; font-weight:bold; margin-top:10px; color:#111827; line-height:1.4;">${q.question}</div>
-                <div style="font-size:12px; color:var(--text-gray); margin-top:5px;">Soran: ${q.user} • ${q.time}</div>
+            <div style="margin-bottom: 24px;">
+                <span class="qa-tag" style="font-size:12px;">${q.tag}</span>
+                <div style="font-size:18px; font-weight:800; margin-top:12px; color:#111827; line-height:1.4;">${q.question}</div>
+                <div style="font-size:13px; color:var(--text-gray); margin-top:8px;">Soran: <strong>${q.user}</strong> • ${q.time}</div>
             </div>
             
-            <div style="border-top:1px solid var(--border-color); padding-top:20px; margin-bottom:20px;">
-                <h4 style="margin-bottom:15px; font-size:15px;">Cevaplar (${q.answers.length})</h4>
+            <div style="border-top:1px solid var(--border-color); padding-top:24px; margin-bottom:24px;">
+                <h4 style="margin-bottom:16px; font-size:16px;">Cevaplar (${q.answers.length})</h4>
                 ${answersHtml}
             </div>
 
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="new-answer-input" class="form-group" style="flex:1; margin:0;" placeholder="Cevabını yaz...">
+            <div style="display:flex; gap:10px; background:#F9FAFB; padding:12px; border-radius:12px;">
+                <input type="text" id="new-answer-input" class="form-group" style="flex:1; margin:0; background:white;" placeholder="Cevabını yaz...">
                 <button class="btn-primary" style="width:auto;" onclick="submitAnswer(${index})">Gönder</button>
             </div>
         `);
@@ -370,8 +425,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const ansInput = document.getElementById('new-answer-input');
         if(ansInput && ansInput.value.trim() !== '') {
             qaDB[index].answers.push({ user: window.userProfile.name, text: ansInput.value });
-            openQADetail(index); // Modal'ı güncel veriyle yenile
-            drawQAGrid(); // Arka plandaki listeyi yenile
+            openQADetail(index); // Modalı güncel veriyle yenile
+            
+            const activeFilter = document.querySelector('.qa-filter-btn.active');
+            const filterValue = activeFilter ? activeFilter.getAttribute('data-filter') : 'Tümü';
+            drawQAGrid(filterValue); // Arka plandaki listeyi yenile
         }
     }
 
@@ -479,19 +537,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 6. WHATSAPP STİLİ MESAJLAŞMA ---
+    // --- 6. PREMIUM MESAJLAŞMA SİSTEMİ ---
     function renderMessages() {
         let html = `
-            <div class="card" style="padding:0; overflow:hidden;">
+            <div class="card" style="padding:0; border:none;">
                 <div class="chat-layout" id="chat-layout-container">
                     <div class="chat-sidebar">
-                        <div class="chat-sidebar-header">Sohbetler</div>
+                        <div class="chat-sidebar-header">Mesajlar</div>
         `;
         
         chatsDB.forEach(chat => {
             const lastMsg = chat.messages[chat.messages.length - 1].text;
+            const time = chat.messages[chat.messages.length - 1].time;
             const isActive = chat.id === currentChatId ? 'active' : '';
-            html += `<div class="chat-contact ${isActive}" data-id="${chat.id}"><div class="avatar">${chat.avatar}</div><div class="chat-contact-info"><div class="chat-contact-top"><span class="chat-contact-name">${chat.name}</span></div><div class="chat-contact-last">${lastMsg}</div></div></div>`;
+            html += `
+                <div class="chat-contact ${isActive}" data-id="${chat.id}">
+                    <div class="avatar">${chat.avatar}</div>
+                    <div class="chat-contact-info">
+                        <div class="chat-contact-top"><span class="chat-contact-name">${chat.name}</span><span class="chat-contact-time">${time}</span></div>
+                        <div class="chat-contact-last">${lastMsg}</div>
+                    </div>
+                </div>
+            `;
         });
         
         html += `
@@ -581,7 +648,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- 7. PROFİL VE AYARLAR ---
+    // --- 7. PROFİL VE AYARLAR EKRANI ---
     function renderProfile() {
         mainContent.innerHTML = `
             <div class="card">
@@ -648,7 +715,7 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (pageName === 'market') renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
         else if (pageName === 'housing') renderListings('housing', '🔑 Ev Arkadaşı & Yurt', 'İletişime Geç');
         else if (pageName === 'confessions') renderConfessions();
-        else if (pageName === 'qa') renderQA(); // YENİ EKLENEN SAYFA YÖNLENDİRMESİ
+        else if (pageName === 'qa') renderQA(); // 🌟 Soru-Cevap Sayfası Bağlandı
         else if (pageName === 'messages') renderMessages(); 
         else if (pageName === 'settings') renderSettings();
         
