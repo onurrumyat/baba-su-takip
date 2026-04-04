@@ -140,23 +140,28 @@ document.addEventListener("DOMContentLoaded", () => {
     bind('login-btn', 'click', async () => {
         const email = document.getElementById('login-email').value.trim();
         const password = document.getElementById('login-password').value;
-        if(!email || !password) return alert("E-posta ve şifre girin.");
+        if(!email || !password) return alert("Lütfen e-posta ve şifrenizi girin.");
 
         try {
             const userCred = await signInWithEmailAndPassword(auth, email, password);
             if (!userCred.user.emailVerified) {
-                alert("Lütfen önce e-posta adresinize gönderilen doğrulama linkine tıklayın.");
+                alert("Giriş Başarısız: Lütfen önce e-posta adresinize gönderilen doğrulama linkine tıklayın. (Spam kutusuna da bakmayı unutmayın)");
                 await signOut(auth);
                 return;
             }
         } catch (error) {
-            alert("Giriş hatası. E-posta veya şifre yanlış.");
+            console.error("Giriş Hatası:", error);
+            alert("Giriş başarısız! E-posta veya şifreniz yanlış.");
         }
     });
 
     window.logout = async function() {
-        if(window.userProfile.uid) await updateDoc(doc(db, "users", window.userProfile.uid), { isOnline: false });
-        await signOut(auth);
+        try {
+            if(window.userProfile.uid) await updateDoc(doc(db, "users", window.userProfile.uid), { isOnline: false });
+            await signOut(auth);
+        } catch(error) {
+            console.error("Çıkış hatası:", error);
+        }
     };
 
     // ============================================================================
@@ -165,23 +170,42 @@ document.addEventListener("DOMContentLoaded", () => {
     
     onAuthStateChanged(auth, async (user) => {
         if (user && user.emailVerified) {
-            const docSnap = await getDoc(doc(db, "users", user.uid));
-            if(docSnap.exists()) window.userProfile = docSnap.data();
-            
-            await updateDoc(doc(db, "users", user.uid), { isOnline: true });
-
-            initRealtimeListeners(user.uid);
-
-            if(authScreen && appScreen) { 
-                authScreen.style.display = 'none'; 
-                appScreen.style.display = 'block'; 
-                loadPage('home'); 
+            try {
+                const userDocRef = doc(db, "users", user.uid);
+                const docSnap = await getDoc(userDocRef);
                 
-                // Eğer kullanıcının daha önceden katıldığı bir fakülte varsa sol menüye ekle
-                if(window.userProfile.faculty) {
-                    window.joinedFaculties = [{name: window.userProfile.faculty, icon: "🏢", color: "linear-gradient(135deg, #1E3A8A, #4F46E5)"}];
-                    updateMyFacultiesSidebar();
+                if(docSnap.exists()) {
+                    window.userProfile = docSnap.data();
+                } else {
+                    // 🛡️ KURTARMA KALKANI (RESCUE BLOCK): KONSOLDAN EKLENEN KULLANICILAR İÇİN
+                    window.userProfile = { 
+                        uid: user.uid, 
+                        name: "Kampüs", 
+                        surname: "Öğrencisi", 
+                        email: user.email, 
+                        university: "UniLoop Ağı", 
+                        avatar: "👨‍🎓", 
+                        faculty: "",
+                        isOnline: true
+                    };
+                    await setDoc(userDocRef, window.userProfile);
                 }
+                
+                await updateDoc(userDocRef, { isOnline: true });
+                initRealtimeListeners(user.uid);
+
+                if(authScreen && appScreen) { 
+                    authScreen.style.display = 'none'; 
+                    appScreen.style.display = 'block'; 
+                    window.loadPage('home'); 
+                    
+                    if(window.userProfile.faculty) {
+                        window.joinedFaculties = [{name: window.userProfile.faculty, icon: "🏢", color: "linear-gradient(135deg, #1E3A8A, #4F46E5)"}];
+                        window.updateMyFacultiesSidebar();
+                    }
+                }
+            } catch(error) {
+                console.error("Kullanıcı verisi yüklenirken hata oluştu:", error);
             }
         } else {
             if(appScreen && authScreen) { 
@@ -203,16 +227,16 @@ document.addEventListener("DOMContentLoaded", () => {
         onSnapshot(query(collection(db, "listings"), orderBy("createdAt", "desc")), (snapshot) => {
             marketDB = [];
             snapshot.forEach(doc => marketDB.push({ id: doc.id, ...doc.data() }));
-            const activeTab = document.querySelector('.menu-item.active').getAttribute('data-target');
-            if(activeTab === 'market') renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
-            if(activeTab === 'housing') renderListings('housing', '🔑 Ev Arkadaşı & Yurt', 'İletişime Geç');
+            const activeTab = document.querySelector('.menu-item.active');
+            if(activeTab && activeTab.getAttribute('data-target') === 'market') window.renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
+            if(activeTab && activeTab.getAttribute('data-target') === 'housing') window.renderListings('housing', '🔑 Ev Arkadaşı & Yurt', 'İletişime Geç');
         });
 
         // 2. İTİRAFLARI DİNLE
         onSnapshot(query(collection(db, "confessions"), orderBy("createdAt", "desc")), (snapshot) => {
             confessionsDB = [];
             snapshot.forEach(doc => confessionsDB.push({ id: doc.id, ...doc.data() }));
-            drawConfessionsGrid();
+            window.drawConfessionsGrid();
         });
 
         // 3. Soru & Cevap DİNLE
@@ -220,7 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
             qaDB = [];
             snapshot.forEach(doc => qaDB.push({ id: doc.id, ...doc.data() }));
             const activeFilter = document.querySelector('.qa-filter-btn.active');
-            drawQAGrid(activeFilter ? activeFilter.getAttribute('data-filter') : 'Genel');
+            window.drawQAGrid(activeFilter ? activeFilter.getAttribute('data-filter') : 'Genel');
         });
 
         // 4. MESAJLARI VE BİLDİRİMLERİ DİNLE
@@ -396,7 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
             window.closeModal();
         } catch (error) {
             console.error(error);
-            alert("Hata oluştu. Firebase ayarlarınızı kontrol edin.");
+            alert("Hata oluştu. Fotoğraf yüklenemedi, ayarları kontrol edin.");
             statusEl.style.display = 'none';
         }
     }
@@ -544,7 +568,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
         mainContent.innerHTML = html;
-        window.drawConfessionsGrid();
+        if(confessionsDB) window.drawConfessionsGrid();
     }
 
     window.openConfessionForm = function() {
@@ -674,7 +698,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(!feed) return;
         
         let filteredDB = filterTag === 'Genel' ? qaDB : qaDB.filter(q => q.tag === filterTag);
-        if(filteredDB.length === 0) { feed.innerHTML = '<p style="text-align:center;">Henüz soru yok.</p>'; return; }
+        if(filteredDB.length === 0) { feed.innerHTML = '<p style="text-align:center; padding: 30px 0; color:var(--text-gray);">Bu kategoride henüz soru yok.</p>'; return; }
 
         let html = '';
         filteredDB.forEach((q) => {
@@ -694,7 +718,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.openQADetail = function(docId) {
         const q = qaDB.find(item => item.id === docId);
         if(!q) return;
-        let answersHtml = q.answers.length === 0 ? '<p style="text-align:center;">İlk cevap veren sen ol!</p>' : '';
+        let answersHtml = q.answers.length === 0 ? '<p style="text-align:center; padding:20px; color:var(--text-gray);">İlk cevap veren sen ol!</p>' : '';
         q.answers.forEach(ans => { answersHtml += `<div style="background:#F9FAFB; padding:16px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border-color);"><div style="font-weight:bold; color:var(--primary); margin-bottom:6px;">${ans.user}</div><div style="font-size:15px;">${ans.text}</div></div>`; });
 
         window.openModal('Soru Detayı', `
@@ -754,7 +778,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (code === FACULTY_PASSCODES[name]) {
             alert("Şifre doğru! Kabilene hoş geldin.");
             window.joinedFaculties = [{name: name, icon: icon, color: bgColor}]; 
-            updateMyFacultiesSidebar();
+            window.updateMyFacultiesSidebar();
             updateDoc(doc(db, "users", window.userProfile.uid), { faculty: name });
             window.loadFacultyFeed(name, icon, bgColor);
         } else { alert("Hatalı kod girdiniz."); }
@@ -781,7 +805,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                 </div>
                 <div class="create-post-box">
-                    <div class="cp-top"><div class="avatar" style="background:#F3F4F6; font-size:20px;">${window.userProfile.avatar}</div><input type="text" placeholder="${name} ağında paylaşım yap..." onclick="alert('Yakında eklenecek!')"></div>
+                    <div class="cp-top"><div class="avatar" style="background:#F3F4F6; font-size:20px;">${window.userProfile.avatar}</div><input type="text" placeholder="${name} ağında paylaşım yap..." onclick="alert('Bu özellik yakında eklenecektir.')"></div>
                 </div>
             </div>
         `;
