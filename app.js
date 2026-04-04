@@ -139,18 +139,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            if(authScreen && appScreen) {
-                authScreen.style.display = 'none';
-                appScreen.style.display = 'block';
-                if(typeof window.loadPage === 'function') window.loadPage('home');
-            }
         } catch (error) {
             console.error("Giriş Hatası:", error);
             alert("Giriş başarısız! E-posta veya şifreniz yanlış.");
-        } finally {
             btn.innerText = originalText;
             btn.disabled = false;
-        }
+        } 
     });
 
     window.logout = async function() {
@@ -167,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // ============================================================================
-    // 2. OTURUM DURUMU VE DİNLEYİCİLER
+    // 2. OTURUM DURUMU (PROFİL BİLGİLERİ KAYDEDİLMESİ)
     // ============================================================================
 
     onAuthStateChanged(auth, async (user) => {
@@ -195,14 +189,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 if(authScreen && appScreen) { 
                     authScreen.style.display = 'none'; 
                     appScreen.style.display = 'block'; 
-                    const activeTab = document.querySelector('.menu-item.active');
-                    window.loadPage(activeTab ? activeTab.getAttribute('data-target') : 'home'); 
                     
+                    // 💡 PROFİLE KAYDEDİLMİŞ FAKÜLTE VARSA OTOMATİK EKLE
                     if(window.userProfile.faculty) {
                         window.joinedFaculties = [{name: window.userProfile.faculty, icon: "🏢", color: "linear-gradient(135deg, #1E3A8A, #4F46E5)"}];
-                        if(typeof window.updateMyFacultiesSidebar === 'function') window.updateMyFacultiesSidebar();
+                        window.updateMyFacultiesSidebar();
                     }
+
+                    const activeTab = document.querySelector('.menu-item.active');
+                    window.loadPage(activeTab ? activeTab.getAttribute('data-target') : 'home'); 
                 }
+                // Butonu düzelt
+                const btn = document.getElementById('login-btn');
+                if(btn) { btn.innerText = "Giriş Yap"; btn.disabled = false; }
+
             } catch(error) { console.error("Kullanıcı verisi yüklenirken hata:", error); }
         }
     });
@@ -275,7 +275,10 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('modal-body').innerHTML = contentHTML; 
         modal.classList.add('active'); 
     }
-    window.closeModal = function() { modal.classList.remove('active'); }
+    window.closeModal = function() { 
+        modal.classList.remove('active'); 
+        document.getElementById('modal-body').innerHTML = ''; // Temizlik
+    }
     bind('modal-close', 'click', window.closeModal);
     window.addEventListener('click', (e) => { if (e.target === modal) window.closeModal(); });
 
@@ -321,7 +324,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ============================================================================
-    // 4. İLAN YÖNETİMİ (MARKET, HOUSING VE ÇOKLU FOTOĞRAF)
+    // 4. İLAN YÖNETİMİ VE GÖNDERİ OLUŞTURMA (HATA ÇÖZÜLDÜ)
     // ============================================================================
 
     window.renderListings = function(type, title, buttonText) {
@@ -341,7 +344,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if(searchInput) searchInput.addEventListener('input', (e) => window.drawListingsGrid(type, buttonText, e.target.value.toLowerCase())); 
     }
 
-    // KAYDIRILABİLİR (SWIPE) GALERİ RENDER KISMI
     window.drawListingsGrid = function(type, buttonText, filterText) {
         const container = document.getElementById('listings-grid-container');
         if(!container) return;
@@ -357,7 +359,6 @@ document.addEventListener("DOMContentLoaded", () => {
             let imgHtml = '';
             let indicatorsHtml = '';
 
-            // Birden fazla fotoğraf varsa Scroll Galeri oluştur
             if (item.imgUrls && item.imgUrls.length > 0) {
                 imgHtml += '<div class="image-gallery">';
                 item.imgUrls.forEach((url, i) => {
@@ -365,12 +366,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     indicatorsHtml += `<div class="gallery-dot ${i===0 ? 'active' : ''}"></div>`;
                 });
                 imgHtml += '</div>';
-                
-                // Birden fazlaysa nokta (dot) göster
-                if(item.imgUrls.length > 1) {
-                    imgHtml += `<div class="gallery-indicators">${indicatorsHtml}</div>`;
-                }
-            } else if (item.imgUrl) { // Eski kayıtlar için geriye dönük uyumluluk
+                if(item.imgUrls.length > 1) { imgHtml += `<div class="gallery-indicators">${indicatorsHtml}</div>`; }
+            } else if (item.imgUrl) { 
                 imgHtml = `<img src="${item.imgUrl}" alt="İlan" style="width:100%; height:100%; object-fit:cover;">`;
             } else {
                 imgHtml = `<div style="font-size:48px; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">📦</div>`;
@@ -393,7 +390,6 @@ document.addEventListener("DOMContentLoaded", () => {
         container.innerHTML = gridHtml;
     }
 
-    // 3 FOTOĞRAFLI YÜKLEME EKRANI VE ÖNİZLEME (PREVIEW)
     window.openListingForm = function(type) {
         window.openModal('Yeni İlan Oluştur', `
             <div class="form-group"><input type="text" id="new-item-title" placeholder="İlan Başlığı (Örn: Temiz Çalışma Masası)"></div>
@@ -401,24 +397,23 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="form-group"><textarea id="new-item-desc" rows="3" placeholder="İlan detayları ve durumu..."></textarea></div>
             
             <div class="upload-btn-wrapper">
-                <button class="btn" style="width:100%;">📷 En Fazla 3 Fotoğraf Seç</button>
+                <button class="action-btn" style="width:100%; justify-content:center;">📷 En Fazla 3 Fotoğraf Seç</button>
                 <input type="file" id="new-item-photo" accept="image/*" multiple style="opacity:0; position:absolute; left:0; top:0; height:100%; width:100%; cursor:pointer;" />
             </div>
             
             <div id="preview-container" class="preview-container"></div>
             
-            <button class="btn-primary" onclick="submitListing('${type}')">İlanı Yayınla</button>
-            <p id="upload-status" style="font-size:12px; color:var(--primary); text-align:center; margin-top:10px; display:none;">Fotoğraflar yükleniyor, lütfen bekleyin...</p>
+            <button class="btn-primary" id="publish-listing-btn" onclick="submitListing('${type}')">İlanı Yayınla</button>
+            <p id="upload-status" style="font-size:12px; color:var(--primary); text-align:center; margin-top:10px; display:none;">Yükleniyor, lütfen bekleyin...</p>
         `);
 
-        // DOM'a eklendikten sonra File Listener'ı bağla
         setTimeout(() => {
             const photoInput = document.getElementById('new-item-photo');
             if(photoInput) {
                 photoInput.addEventListener('change', function(e) {
-                    const files = Array.from(e.target.files).slice(0, 3); // Maksimum 3 dosya sınırı
+                    const files = Array.from(e.target.files).slice(0, 3); 
                     const previewContainer = document.getElementById('preview-container');
-                    previewContainer.innerHTML = ''; // Eski önizlemeyi temizle
+                    previewContainer.innerHTML = ''; 
                     
                     files.forEach(file => {
                         const reader = new FileReader();
@@ -432,26 +427,29 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 100);
     }
 
-    // ÇOKLU FOTOĞRAFI FIREBASE STORAGE'A YÜKLE
+    // HATA BURADA ÇÖZÜLDÜ: Fotoğraf olmasa bile ilan yayınlanır, hata fırlatmaz.
     window.submitListing = async function(type) {
         const title = document.getElementById('new-item-title').value;
         const price = document.getElementById('new-item-price').value;
         const desc = document.getElementById('new-item-desc').value;
         const photoInput = document.getElementById('new-item-photo');
         const statusEl = document.getElementById('upload-status');
+        const btn = document.getElementById('publish-listing-btn');
 
         if(!title || !price || !desc) return alert("Lütfen başlık, fiyat ve açıklama girin.");
 
+        btn.disabled = true;
+        statusEl.style.display = 'block';
+
         let files = [];
-        if(photoInput.files.length > 0) {
-            files = Array.from(photoInput.files).slice(0, 3); // Sınırı koru
+        if(photoInput && photoInput.files && photoInput.files.length > 0) {
+            files = Array.from(photoInput.files).slice(0, 3);
         }
 
-        statusEl.style.display = 'block';
         let imgUrlsArray = [];
 
         try {
-            // Seçilen tüm dosyaları döngüyle Storage'a yükle
+            // Eğer dosya seçildiyse storage'a yükle
             for (let file of files) {
                 const storageRef = ref(storage, 'listings/' + Date.now() + '_' + file.name);
                 await uploadBytes(storageRef, file);
@@ -464,8 +462,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 title: title, 
                 price: price, 
                 desc: desc, 
-                imgUrls: imgUrlsArray, // Yeni dizi formatı
-                imgUrl: imgUrlsArray.length > 0 ? imgUrlsArray[0] : "", // Eski tasarımlar çökmesin diye ilk fotoyu string olarak da tut
+                imgUrls: imgUrlsArray, 
+                imgUrl: imgUrlsArray.length > 0 ? imgUrlsArray[0] : "", 
                 sellerId: window.userProfile.uid, 
                 sellerName: window.userProfile.name + " " + window.userProfile.surname,
                 createdAt: serverTimestamp()
@@ -473,9 +471,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             window.closeModal();
         } catch (error) {
-            console.error(error);
-            alert("Hata oluştu. Firebase Storage kurallarınızın 'Test Mode' olduğundan emin olun.");
+            console.error("İlan eklenirken hata:", error);
+            alert("İlan yayınlanırken bir hata oluştu.");
             statusEl.style.display = 'none';
+            btn.disabled = false;
         }
     }
 
@@ -608,7 +607,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // ============================================================================
-    // 6. İTİRAFLAR VE DİĞER MODÜLLER
+    // 6. İTİRAFLAR (HATA ÇÖZÜLDÜ)
     // ============================================================================
 
     window.renderConfessions = function() {
@@ -629,15 +628,18 @@ document.addEventListener("DOMContentLoaded", () => {
         window.openModal('Yeni Anonim Gönderi', `
             <div class="form-group"><input type="text" id="new-conf-tag" placeholder="Örn: 📍 Kütüphane"></div>
             <textarea id="new-conf-text" class="form-group" style="width:100%; height:120px; border-radius:12px; padding:15px; font-size:16px;" placeholder="Aklından ne geçiyor?"></textarea>
-            <button class="btn-primary" onclick="submitConfession()">Kampüse Gönder</button>
+            <button class="btn-primary" id="publish-conf-btn" onclick="submitConfession()">Kampüse Gönder</button>
         `);
     }
 
     window.submitConfession = async function() {
         const textEl = document.getElementById('new-conf-text');
         const tagEl = document.getElementById('new-conf-tag');
+        const btn = document.getElementById('publish-conf-btn');
         if(!textEl || textEl.value.trim() === '') return;
         
+        btn.disabled = true;
+
         const themes = ["theme-midnight", "theme-love", "theme-drama"];
         const tagVal = tagEl && tagEl.value ? tagEl.value : "📍 Kampüs";
         
@@ -648,7 +650,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 user: "Anonim #"+Math.floor(Math.random()*9999), time: "Şimdi", tag: tagVal, text: textEl.value, likes: 0, comments: 0, createdAt: serverTimestamp()
             });
             window.closeModal();
-        } catch(e) { alert("Hata: " + e.message); }
+        } catch(e) { 
+            alert("Hata: " + e.message); 
+            btn.disabled = false;
+        }
     }
 
     window.drawConfessionsGrid = function() {
@@ -682,8 +687,15 @@ document.addEventListener("DOMContentLoaded", () => {
             <div style="background:${bgStyle}; color:white; padding: 30px; border-radius: 16px; font-size: 18px; line-height: 1.6; margin-bottom: 24px; font-style:italic;">
                 <div style="font-size:12px; margin-bottom:10px; opacity:0.8;">${post.tag}</div>"${post.text}"
             </div>
+            <div style="display:flex; gap:12px;">
+                <button class="action-btn" style="flex:1;" onclick="alert('Beğenildi!')">🔥 Yanıyor</button>
+            </div>
         `);
     }
+
+    // ============================================================================
+    // 7. SORU VE CEVAP MODÜLÜ (HATA ÇÖZÜLDÜ)
+    // ============================================================================
 
     window.renderQA = function() {
         let html = `
@@ -718,28 +730,35 @@ document.addEventListener("DOMContentLoaded", () => {
                 <select id="new-qa-tag"><option>Genel</option><option>Yurtlar</option><option>Ders</option><option>Kampüs Yaşamı</option></select>
             </div>
             <textarea id="new-qa-text" class="form-group" style="width:100%; height:120px; border-radius:12px; padding:15px; font-size:15px;" placeholder="Sorunuzu detaylı yazın..."></textarea>
-            <button class="btn-primary" onclick="submitQA()">Soruyu Yayınla</button>
+            <button class="btn-primary" id="publish-qa-btn" onclick="submitQA()">Soruyu Yayınla</button>
         `);
     }
 
     window.submitQA = async function() {
         const textEl = document.getElementById('new-qa-text');
         const tagEl = document.getElementById('new-qa-tag');
+        const btn = document.getElementById('publish-qa-btn');
         if(!textEl || textEl.value.trim() === '') return;
         
+        btn.disabled = true;
         try {
             await addDoc(collection(db, "qa"), {
                 avatar: window.userProfile.avatar, user: window.userProfile.name, time: "Şimdi", tag: tagEl.value, question: textEl.value, answers: [], createdAt: serverTimestamp()
             });
             window.closeModal();
-        } catch(e) { alert("Hata: "+e.message); }
+        } catch(e) { 
+            alert("Hata: "+e.message); 
+            btn.disabled = false;
+        }
     }
 
     window.drawQAGrid = function(filterTag = 'Genel') {
         const feed = document.getElementById('qa-feed');
         if(!feed) return;
+        
         let filteredDB = filterTag === 'Genel' ? qaDB : qaDB.filter(q => q.tag === filterTag);
         if(filteredDB.length === 0) { feed.innerHTML = '<p style="text-align:center; padding: 30px 0; color:var(--text-gray);">Bu kategoride henüz soru yok.</p>'; return; }
+
         let html = '';
         filteredDB.forEach((q) => {
             const statusClass = q.answers.length > 0 ? 'answered' : '';
@@ -781,6 +800,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // ============================================================================
+    // 8. FAKÜLTE SİSTEMİ (KALICI VE ESTETİK)
+    // ============================================================================
+
     window.updateMyFacultiesSidebar = function() {
         const container = document.getElementById('my-joined-faculties');
         if(!container) return;
@@ -789,10 +812,12 @@ document.addEventListener("DOMContentLoaded", () => {
         container.innerHTML = html;
     }
 
+    // 💡 Tıklanınca eğer daha önce girmişse (şifre girmişse) direkt açar
     window.handleFacultyClick = async function(name, icon, bgColor) {
         document.querySelectorAll('.menu-item[data-target]').forEach(m => m.classList.remove('active'));
         if(window.innerWidth <= 1024) document.getElementById('sidebar').classList.remove('open');
 
+        // Fakülte kayıtlı mı?
         const isJoined = window.joinedFaculties.some(f => f.name === name);
 
         if(isJoined) {
@@ -812,15 +837,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    window.verifyFacultyCode = function(name, icon, bgColor) {
+    // 💡 Şifre doğruysa KİLİTLER VE DİREKT AÇAR
+    window.verifyFacultyCode = async function(name, icon, bgColor) {
         const inputCode = document.getElementById('faculty-passcode-input').value.trim();
         if (inputCode.toLowerCase() === FACULTY_PASSCODES[name].toLowerCase()) {
-            alert("Şifre doğru! Kabilene hoş geldin.");
+            
+            // 1. Profiline mühürle
+            window.userProfile.faculty = name; 
             window.joinedFaculties = [{name: name, icon: icon, color: bgColor}]; 
             window.updateMyFacultiesSidebar();
-            updateDoc(doc(db, "users", window.userProfile.uid), { faculty: name });
+            
+            // 2. Veritabanına Kalıcı Olarak Kaydet
+            await updateDoc(doc(db, "users", window.userProfile.uid), { faculty: name });
+            
+            // 3. EKRANI ANINDA FAKÜLTE İÇİNE ÇEVİR
             window.loadFacultyFeed(name, icon, bgColor);
-        } else { alert("Hatalı kod girdiniz. Lütfen tekrar deneyin."); }
+            
+        } else { 
+            alert("Hatalı kod girdiniz. Lütfen tekrar deneyin."); 
+        }
     }
 
     window.loadFacultyFeed = async function(name, icon, bgColor) {
@@ -844,14 +879,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                 </div>
                 <div class="create-post-box">
-                    <div class="cp-top"><div class="avatar" style="background:#F3F4F6; font-size:20px;">${window.userProfile.avatar}</div><input type="text" placeholder="${name} ağında paylaşım yap..." onclick="alert('Bu özellik yakında eklenecektir.')"></div>
+                    <div class="cp-top"><div class="avatar" style="background:#F3F4F6; font-size:20px;">${window.userProfile.avatar}</div><input type="text" placeholder="${name} ağında paylaşım yap..." onclick="alert('Bu özellik premium sürüme (v2) saklanmıştır.')"></div>
                 </div>
             </div>
         `;
     }
 
     // ============================================================================
-    // 9. SAYFA YÖNLENDİRME (ROUTING)
+    // 9. SAYFA YÖNLENDİRME, PROFİL VE AYARLAR
     // ============================================================================
 
     window.loadPage = function(pageName) {
