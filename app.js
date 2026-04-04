@@ -1,10 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
     
-    // --- 🌟 KULLANICI PROFİLİ 🌟 ---
+    // --- 🌟 KULLANICI PROFİLİ VE SİSTEM DURUMU 🌟 ---
     let userProfile = { 
         name: "Ege", surname: "Yılmaz", email: "ege.yilmaz@uniloop.edu", age: 21,
-        university: "Global University", // Kayıt olunca otomatik değişecek
-        faculty: "Henüz Fakülte Seçilmedi", year: "2. Sınıf", 
+        university: "Global University", faculty: "Henüz Fakülte Seçilmedi", year: "2. Sınıf", 
         bio: "Kampüs hayatını ve teknolojiyi seviyorum.", avatar: "👨‍🎓"
     };
     let joinedFaculties = [];
@@ -21,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Yakın Doğu Üniversitesi (NEU)", "Doğu Akdeniz Üniversitesi (EMU)", "Girne Amerikan Üniversitesi (GAU)", "Uluslararası Kıbrıs Üniversitesi (CIU)",
         "Orta Doğu Teknik Üniversitesi (ODTÜ)", "Boğaziçi Üniversitesi", "İstanbul Teknik Üniversitesi (İTÜ)", "Bilkent Üniversitesi", "Koç Üniversitesi",
         "Stanford University", "Massachusetts Institute of Technology (MIT)", "Harvard University", "University of Oxford", "University of Cambridge",
-        "Technical University of Munich (TUM)", "ETH Zurich", "University of Toronto", "UCL (University College London)", "UCLA", "Yale University"
+        "Technical University of Munich (TUM)", "ETH Zurich", "University of Toronto", "UCL", "UCLA", "Yale University"
     ];
 
     const database = [
@@ -35,6 +34,24 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 1, avatar: "👻", color: "#FEF3C7", user: "Anonim #482", time: "2 saat önce", text: "İlk yılım ve henüz hiç arkadaş bulamadım. Kütüphanede tek oturuyorum." },
         { id: 2, avatar: "🎭", color: "#E0E7FF", user: "Anonim #911", time: "5 saat önce", text: "Fizik 101 hocası gerçekten çok zorluyor. Vizeler berbat geçti." },
         { id: 3, avatar: "👽", color: "#D1FAE5", user: "Anonim #104", time: "1 gün önce", text: "Yemekhanedeki vegan menü harika olmuş!" }
+    ];
+
+    // 🌟 YENİ: SORU-CEVAP (Q&A) VERİTABANI 🌟
+    let qnaDB = [
+        { 
+            id: 1, author: "Gizli Kullanıcı", time: "1 saat önce", 
+            title: "Kütüphanede sabaha kadar çalışmak için en sessiz köşe neresi?", 
+            tags: ["Kütüphane", "Tavsiye"], 
+            answers: [{author: "Ayşe K.", time: "45 dk önce", text: "İkinci kat cam kenarı harika. Prizlere de çok yakın, sabah güneş de oradan doğuyor."}], 
+            votes: 12 
+        },
+        { 
+            id: 2, author: "Caner T.", time: "3 saat önce", 
+            title: "Bilgisayar Mühendisliği 1. sınıf için hangi laptopu almalıyım? Mac mi Windows mu?", 
+            tags: ["Bilgisayar", "Soru"], 
+            answers: [], 
+            votes: 5 
+        }
     ];
 
     let chatsDB = [
@@ -55,25 +72,20 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
     let currentChatId = "chat1";
 
-    // --- 🌟 GİRİŞ / KAYIT SİSTEMİ VE AUTOCOMPLETE 🌟 ---
+    // --- 🌟 GİRİŞ / KAYIT SİSTEMİ (AUTOCOMPLETE) 🌟 ---
     document.getElementById('show-register-btn').addEventListener('click', () => {
-        loginCard.style.display = 'none';
-        registerCard.style.display = 'block';
+        loginCard.style.display = 'none'; registerCard.style.display = 'block';
     });
 
     document.getElementById('show-login-btn').addEventListener('click', () => {
-        registerCard.style.display = 'none';
-        loginCard.style.display = 'block';
+        registerCard.style.display = 'none'; loginCard.style.display = 'block';
     });
 
     document.getElementById('login-btn').addEventListener('click', () => {
-        // Mevcut Profili Kullan (Demo)
-        authScreen.style.display = 'none';
-        appScreen.style.display = 'block';
-        loadPage('home');
+        authScreen.style.display = 'none'; appScreen.style.display = 'block'; loadPage('home');
     });
 
-    // Üniversite Autocomplete (Arama Çubuğu) Mantığı
+    // Autocomplete Logic
     const uniInput = document.getElementById('reg-uni');
     const uniList = document.getElementById('uni-autocomplete-list');
 
@@ -83,55 +95,34 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!val) return false;
         
         const matches = globalUniversities.filter(u => u.toLowerCase().includes(val.toLowerCase()));
-        
         matches.forEach(match => {
             const div = document.createElement('div');
-            // Eşleşen kısmı kalın yap
             const regex = new RegExp(`(${val})`, "gi");
             div.innerHTML = match.replace(regex, "<strong>$1</strong>");
-            
             div.addEventListener('click', function() {
-                uniInput.value = match; // Tıklananı inputa yaz
-                uniList.innerHTML = ''; // Listeyi temizle
+                uniInput.value = match; 
+                uniList.innerHTML = ''; 
             });
             uniList.appendChild(div);
         });
     });
+    document.addEventListener('click', (e) => { if(e.target !== uniInput) uniList.innerHTML = ''; });
 
-    // Dışarı tıklayınca listeyi kapat
-    document.addEventListener('click', (e) => {
-        if(e.target !== uniInput) uniList.innerHTML = '';
-    });
-
-    // Kayıt Ol Butonu
     document.getElementById('register-btn').addEventListener('click', () => {
         const name = document.getElementById('reg-name').value;
         const surname = document.getElementById('reg-surname').value;
         const uni = document.getElementById('reg-uni').value;
         const email = document.getElementById('reg-email').value;
 
-        if(!name || !uni || !email) {
-            alert("Lütfen ad, üniversite ve e-posta alanlarını doldurun.");
-            return;
-        }
+        if(!name || !uni || !email) { alert("Lütfen gerekli alanları doldurun."); return; }
 
-        // Profili Güncelle
-        userProfile.name = name;
-        userProfile.surname = surname;
-        userProfile.university = uni;
-        userProfile.email = email;
-
-        // Uygulamaya Gir
-        authScreen.style.display = 'none';
-        appScreen.style.display = 'block';
-        loadPage('home');
+        userProfile.name = name; userProfile.surname = surname; userProfile.university = uni; userProfile.email = email;
+        authScreen.style.display = 'none'; appScreen.style.display = 'block'; loadPage('home');
     });
 
     window.logout = function() {
-        appScreen.style.display = 'none';
-        authScreen.style.display = 'flex';
-        loginCard.style.display = 'block';
-        registerCard.style.display = 'none';
+        appScreen.style.display = 'none'; authScreen.style.display = 'flex';
+        loginCard.style.display = 'block'; registerCard.style.display = 'none';
     };
 
     // --- MODAL YÖNETİMİ ---
@@ -143,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('modal-close').addEventListener('click', closeModal);
     window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
-    // --- MOBİL MENÜ ---
+    // --- MOBİL MENÜ YÖNETİMİ ---
     const sidebar = document.getElementById('sidebar');
     document.getElementById('mobile-menu-btn').addEventListener('click', () => { sidebar.classList.toggle('open'); });
 
@@ -211,7 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
         searchInput.addEventListener('input', (e) => drawGrid(e.target.value.toLowerCase())); 
     }
 
-    // --- 3. ANONİM KAMPÜS ---
+    // --- 3. ANONİM KAMPÜS (KARE TASARIM) ---
     function renderConfessions() {
         let html = `
             <div class="card">
@@ -236,13 +227,32 @@ document.addEventListener("DOMContentLoaded", () => {
     window.submitConfession = function() {
         const text = document.getElementById('new-conf-text').value;
         if(text.trim() === '') return;
-        const pastelColors = ["#FEF3C7", "#E0E7FF", "#D1FAE5", "#FCE7F3", "#F3E8FF"];
-        confessionsDB.unshift({ 
-            id: Date.now(), avatar: ["👻","👽","🤖","🦊","🎭"][Math.floor(Math.random()*5)], color: pastelColors[Math.floor(Math.random()*5)],
-            user: "Anonim #"+Math.floor(Math.random()*999), time: "Şimdi", text: text 
-        });
-        closeModal();
-        drawConfessionsGrid();
+        
+        // AI MODERATÖR SİSTEMİ
+        const toxicWords = ["intihar", "ölmek", "depresyon", "aptal", "nefret"];
+        const isToxic = toxicWords.some(word => text.toLowerCase().includes(word));
+
+        if(isToxic) {
+            openModal('⚠️ AI Moderatör Uyarısı', `
+                <div style="text-align:center;">
+                    <h1 style="font-size:40px; margin-bottom:10px;">🛡️</h1>
+                    <p style="color:#DC2626; font-weight:bold; margin-bottom:10px;">Gönderiniz durduruldu.</p>
+                    <p style="font-size:14px; margin-bottom:15px;">Yazdıklarınızda topluluk kurallarına aykırı bir dil tespit edildi.</p>
+                    <div style="background:#FEF2F2; padding:15px; border-radius:8px; border: 1px solid #FCA5A5;">
+                        <p style="font-weight:bold; color:#991B1B;">Yalnız değilsin.</p>
+                        <p style="font-size:13px; color:#7F1D1D; margin-top:5px;">Kampüs psikolojik destek merkezi her zaman seninle konuşmaya hazır.</p>
+                    </div>
+                </div>
+            `);
+        } else {
+            const pastelColors = ["#FEF3C7", "#E0E7FF", "#D1FAE5", "#FCE7F3", "#F3E8FF"];
+            confessionsDB.unshift({ 
+                id: Date.now(), avatar: ["👻","👽","🤖","🦊","🎭"][Math.floor(Math.random()*5)], color: pastelColors[Math.floor(Math.random()*5)],
+                user: "Anonim #"+Math.floor(Math.random()*999), time: "Şimdi", text: text 
+            });
+            closeModal();
+            drawConfessionsGrid();
+        }
     }
 
     function drawConfessionsGrid() {
@@ -262,7 +272,118 @@ document.addEventListener("DOMContentLoaded", () => {
         `);
     }
 
-    // --- 4. FAKÜLTE KATILIM SİSTEMİ ---
+    // --- 🌟 4. YENİ: SORU & CEVAP (GUTEFRAGE MANTIĞI) 🌟 ---
+    function renderQnA() {
+        let html = `
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap:wrap; gap:10px;">
+                    <h2 style="margin:0;">❓ Kampüs Soru & Cevap</h2>
+                    <button class="btn-primary" style="width:auto; padding: 10px 24px;" onclick="openQnAForm()">+ Soru Sor</button>
+                </div>
+                <input type="text" id="qna-search" class="local-search-bar" placeholder="Merak ettiğin konuyu ara...">
+                <div id="qna-feed"></div>
+            </div>
+        `;
+        mainContent.innerHTML = html;
+        drawQnAList();
+
+        document.getElementById('qna-search').addEventListener('input', (e) => drawQnAList(e.target.value.toLowerCase()));
+    }
+
+    function drawQnAList(filterText = '') {
+        const feed = document.getElementById('qna-feed');
+        const filtered = qnaDB.filter(q => q.title.toLowerCase().includes(filterText) || q.tags.some(t => t.toLowerCase().includes(filterText)));
+        
+        if(filtered.length === 0) {
+            feed.innerHTML = `<p style="text-align:center; color:var(--text-gray); padding: 40px 0;">Soru bulunamadı.</p>`; return;
+        }
+
+        let html = '';
+        filtered.forEach(q => {
+            html += `
+                <div class="qna-card" onclick="openQnADetail(${q.id})">
+                    <div class="qna-header"><span>👤 ${q.author}</span><span>⏰ ${q.time}</span></div>
+                    <div class="qna-title">${q.title}</div>
+                    <div class="qna-tags">${q.tags.map(t => `<span class="qna-tag">#${t}</span>`).join('')}</div>
+                    <div class="qna-footer">
+                        <div class="qna-stats"><span>👍 ${q.votes} Oy</span><span>💬 ${q.answers.length} Cevap</span></div>
+                        <button class="action-btn" style="width:auto; padding: 8px 16px; font-size:13px;">Cevapla</button>
+                    </div>
+                </div>
+            `;
+        });
+        feed.innerHTML = html;
+    }
+
+    window.openQnAForm = function() {
+        openModal('Yeni Soru Sor', `
+            <div class="form-group"><label>Sorunuz</label><textarea id="new-q-title" style="height:80px;" placeholder="Net ve anlaşılır bir soru cümlesi yazın..."></textarea></div>
+            <div class="form-group"><label>Etiketler (Virgülle ayırın)</label><input type="text" id="new-q-tags" placeholder="Örn: Yurt, Ders Seçimi, Burs"></div>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; font-size:14px; font-weight:600; color:var(--text-dark);">
+                <input type="checkbox" id="new-q-anon" style="width:auto; transform: scale(1.2);"> <label for="new-q-anon" style="margin:0; cursor:pointer;">Gizli (Anonim) Olarak Sor</label>
+            </div>
+            <button class="btn-primary" onclick="submitQnA()">Soruyu Yayınla</button>
+        `);
+    }
+
+    window.submitQnA = function() {
+        const title = document.getElementById('new-q-title').value;
+        const tagsInput = document.getElementById('new-q-tags').value;
+        const isAnon = document.getElementById('new-q-anon').checked;
+        
+        if(title.trim() === '') return;
+        
+        const tags = tagsInput.split(',').map(t => t.trim()).filter(t => t !== '');
+        const author = isAnon ? "Gizli Kullanıcı" : userProfile.name + " " + userProfile.surname[0] + ".";
+
+        qnaDB.unshift({ id: Date.now(), author: author, time: "Şimdi", title: title, tags: tags, answers: [], votes: 0 });
+        closeModal();
+        drawQnAList();
+    }
+
+    window.openQnADetail = function(id) {
+        const q = qnaDB.find(x => x.id === id);
+        let answersHtml = q.answers.map(a => `
+            <div class="qna-answer">
+                <div class="qna-answer-header"><span>👤 ${a.author}</span><span>${a.time}</span></div>
+                <div class="qna-answer-text">${a.text}</div>
+            </div>
+        `).join('');
+
+        if(q.answers.length === 0) answersHtml = `<p style="color:var(--text-gray); font-size:14px; text-align:center; padding:20px 0;">Henüz cevap yok. İlk cevaplayan sen ol!</p>`;
+
+        openModal('Soru Detayı', `
+            <div style="margin-bottom: 24px;">
+                <div class="qna-header" style="font-size:14px;"><span>👤 ${q.author}</span><span>⏰ ${q.time}</span></div>
+                <h3 style="font-size:20px; margin-bottom:12px; color:var(--text-dark); line-height:1.4;">${q.title}</h3>
+                <div class="qna-tags">${q.tags.map(t => `<span class="qna-tag">#${t}</span>`).join('')}</div>
+            </div>
+            <div style="border-top: 1px solid var(--border-color); padding-top: 20px; margin-bottom: 20px;">
+                <h4 style="font-size:15px; margin-bottom:15px;">Cevaplar (${q.answers.length})</h4>
+                <div style="max-height:300px; overflow-y:auto; padding-right:10px; margin-bottom:20px;">
+                    ${answersHtml}
+                </div>
+                <div style="display:flex; gap:12px;">
+                    <input type="text" id="answer-input-${q.id}" class="form-group" style="flex:1; margin:0;" placeholder="Cevabını yaz...">
+                    <button class="btn-primary" style="width:auto; padding:0 24px;" onclick="submitAnswer(${q.id})">Gönder</button>
+                </div>
+            </div>
+        `);
+    }
+
+    window.submitAnswer = function(id) {
+        const input = document.getElementById('answer-input-' + id);
+        const text = input.value;
+        if(text.trim() === '') return;
+
+        const q = qnaDB.find(x => x.id === id);
+        q.answers.push({ author: userProfile.name, time: "Şimdi", text: text });
+        
+        openQnADetail(id); // Modalı yenile
+        drawQnAList();     // Listeyi yenile ki sayı artsın
+    }
+
+    // --- 5. FAKÜLTE KATILIM SİSTEMİ ---
     function updateMyFacultiesSidebar() {
         const container = document.getElementById('my-joined-faculties');
         let html = '';
@@ -303,10 +424,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <input type="text" placeholder="${name} ağında bir şeyler paylaş..." onclick="openModal('Gönderi Oluştur', '<textarea class=\\'form-group\\' style=\\'height:150px; font-size:16px;\\' placeholder=\\'Ne düşünüyorsun?\\'></textarea><button class=\\'btn-primary\\' onclick=\\'closeModal()\\'>Paylaş</button>')">
                     </div>
                     <div class="cp-bottom">
-                        <div class="cp-actions">
-                            <button class="cp-action-btn">📷 Medya</button>
-                            <button class="cp-action-btn">📊 Anket</button>
-                        </div>
+                        <div class="cp-actions"><button class="cp-action-btn">📷 Medya</button><button class="cp-action-btn">📊 Anket</button></div>
                         <button class="cp-post-btn" onclick="alert('Gönderi Paylaşıldı!')">Paylaş</button>
                     </div>
                 </div>
@@ -323,13 +441,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                         <div class="pp-options">•••</div>
                     </div>
-                    <div class="pp-content">
-                        Değerli ${name} öğrencileri,<br><br>Bu hafta sonu gerçekleştirilecek olan etkinlik Amfi 4'e alınmıştır. Katılımınız önemlidir.
-                    </div>
-                    <div class="pp-stats">
-                        <span>👍 128 Beğeni</span>
-                        <span>💬 14 Yorum</span>
-                    </div>
+                    <div class="pp-content">Değerli ${name} öğrencileri,<br><br>Bu hafta sonu gerçekleştirilecek olan etkinlik Amfi 4'e alınmıştır. Katılımınız önemlidir.</div>
+                    <div class="pp-stats"><span>👍 128 Beğeni</span><span>💬 14 Yorum</span></div>
                     <div class="pp-actions">
                         <button class="pp-btn" onclick="this.classList.toggle('active');">👍 Beğen</button>
                         <button class="pp-btn">💬 Yorum Yap</button>
@@ -373,10 +486,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 5. PREMIUM MESAJLAŞMA SİSTEMİ ---
+    // --- 6. PREMIUM MESAJLAŞMA SİSTEMİ ---
     function renderMessages() {
         let html = `
-            <div class="card" style="padding:0; border:none;">
+            <div class="card" style="padding:0; overflow:hidden;">
                 <div class="chat-layout" id="chat-layout-container">
                     <div class="chat-sidebar">
                         <div class="chat-sidebar-header">Mesajlar</div>
@@ -481,7 +594,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('chat-input-field').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMsg(); });
     }
 
-    // --- 6. PROFİL VE AYARLAR EKRANI ---
+    // --- 7. PROFİL VE AYARLAR ---
     function renderProfile() {
         mainContent.innerHTML = `
             <div class="card">
@@ -541,12 +654,13 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     }
 
-    // --- 7. SAYFA GEÇİŞ (ROUTING) ---
+    // --- 8. SAYFA GEÇİŞ (ROUTING) ---
     function loadPage(pageName) {
         if (pageName === 'home') mainContent.innerHTML = getHomeContent();
         else if (pageName === 'market') renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
         else if (pageName === 'housing') renderListings('housing', '🔑 Ev Arkadaşı & Yurt', 'İletişime Geç');
         else if (pageName === 'confessions') renderConfessions();
+        else if (pageName === 'qna') renderQnA(); // YENİ: Soru-Cevap Sayfası
         else if (pageName === 'messages') renderMessages(); 
         else if (pageName === 'settings') renderSettings();
         
@@ -557,23 +671,4 @@ document.addEventListener("DOMContentLoaded", () => {
     menuItems.forEach(item => {
         item.addEventListener('click', (e) => {
             if(e.currentTarget.getAttribute('data-target')) {
-                menuItems.forEach(m => m.classList.remove('active'));
-                e.currentTarget.classList.add('active');
-                loadPage(e.currentTarget.getAttribute('data-target'));
-            }
-        });
-    });
-
-    document.getElementById('logo-btn').addEventListener('click', () => {
-        menuItems.forEach(m => m.classList.remove('active'));
-        document.querySelector('[data-target="home"]').classList.add('active');
-        loadPage('home');
-    });
-    
-    document.getElementById('profile-btn').addEventListener('click', () => {
-        menuItems.forEach(m => m.classList.remove('active'));
-        renderProfile();
-        if(window.innerWidth <= 1024) sidebar.classList.remove('open');
-    });
-
-});
+                menuItems.forEach
