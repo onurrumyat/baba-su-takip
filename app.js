@@ -3,32 +3,46 @@
 // ============================================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, setDoc, getDoc, updateDoc, arrayUnion, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
+// --- FIREBASE YAPILANDIRMASI ---
 const firebaseConfig = {
-  apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
-  authDomain: "voice2post-9e8ca.firebaseapp.com",
-  projectId: "voice2post-9e8ca",
-  storageBucket: "voice2post-9e8ca.firebasestorage.app",
-  messagingSenderId: "511446656614",
-  appId: "1:511446656614:web:32101ee70299543c716fa7"
+    apiKey: "AIzaSyDaZ3eZsoAKW3ZazFPebAd-b147KaW5wOA",
+    authDomain: "voice2post-9e8ca.firebaseapp.com",
+    projectId: "voice2post-9e8ca",
+    storageBucket: "voice2post-9e8ca.firebasestorage.app",
+    messagingSenderId: "511446656614",
+    appId: "1:511446656614:web:32101ee70299543c716fa7"
 };
 
+// Firebase Servislerini Başlat
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
+// DOM Yüklendikten Sonra Çalışacak Ana Blok
 document.addEventListener("DOMContentLoaded", () => {
     
+    // Olay Dinleyicisi (Event Listener) Kısayolu
     const bind = (id, event, callback) => { 
         const el = document.getElementById(id); 
         if (el) el.addEventListener(event, callback); 
     };
 
-    window.userProfile = { uid: "", name: "", surname: "", email: "", university: "", avatar: "👨‍🎓", faculty: "" };
+    // --- SİSTEM HAFIZASI (GLOBAL DEĞİŞKENLER) ---
+    window.userProfile = { 
+        uid: "", 
+        name: "", 
+        surname: "", 
+        email: "", 
+        university: "", 
+        avatar: "👨‍🎓", 
+        faculty: "" 
+    };
+    
     window.joinedFaculties = [];
     
     let marketDB = [];
@@ -37,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let chatsDB = [];
     let currentChatId = null;
 
+    // FAKÜLTE GİRİŞ ŞİFRELERİ
     const FACULTY_PASSCODES = {
         "Tıp Fakültesi": "tıpfak100",
         "Bilgisayar Fakültesi": "bil1000",
@@ -46,14 +61,18 @@ document.addEventListener("DOMContentLoaded", () => {
         "Eğitim Fakültesi": "egt1000"
     };
 
-    const globalUniversities = ["Yakın Doğu Üniversitesi (NEU)", "Doğu Akdeniz Üniversitesi (EMU)", "Girne Amerikan Üniversitesi (GAU)", "Uluslararası Kıbrıs Üniversitesi (CIU)", "Orta Doğu Teknik Üniversitesi (ODTÜ)", "Boğaziçi Üniversitesi", "İstanbul Teknik Üniversitesi (İTÜ)", "Bilkent Üniversitesi", "Koç Üniversitesi", "Stanford University", "Massachusetts Institute of Technology (MIT)", "Harvard University"];
+    const globalUniversities = [
+        "Yakın Doğu Üniversitesi (NEU)", "Doğu Akdeniz Üniversitesi (EMU)", "Girne Amerikan Üniversitesi (GAU)", "Uluslararası Kıbrıs Üniversitesi (CIU)",
+        "Orta Doğu Teknik Üniversitesi (ODTÜ)", "Boğaziçi Üniversitesi", "İstanbul Teknik Üniversitesi (İTÜ)", "Bilkent Üniversitesi", "Koç Üniversitesi",
+        "Stanford University", "Massachusetts Institute of Technology (MIT)", "Harvard University"
+    ];
 
     const authScreen = document.getElementById('auth-screen');
     const appScreen = document.getElementById('app-screen');
     const mainContent = document.getElementById('main-content');
 
     // ============================================================================
-    // 1. GİRİŞ & KAYIT
+    // 1. GİRİŞ, KAYIT VE ŞİFREMİ UNUTTUM
     // ============================================================================
     
     bind('show-register-btn', 'click', () => {
@@ -66,6 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('login-card').style.display = 'block';
     });
 
+    // Otomatik Tamamlama (Üniversite Arama)
     const uniInput = document.getElementById('reg-uni');
     const uniList = document.getElementById('uni-autocomplete-list');
     if (uniInput && uniList) {
@@ -73,20 +93,25 @@ document.addEventListener("DOMContentLoaded", () => {
             const val = this.value;
             uniList.innerHTML = '';
             if (!val) return false;
+            
             const matches = globalUniversities.filter(u => u.toLowerCase().includes(val.toLowerCase()));
             matches.forEach(match => {
                 const div = document.createElement('div');
                 const regex = new RegExp(`(${val})`, "gi");
                 div.innerHTML = match.replace(regex, "<strong>$1</strong>");
                 div.addEventListener('click', function() {
-                    uniInput.value = match; uniList.innerHTML = ''; 
+                    uniInput.value = match; 
+                    uniList.innerHTML = ''; 
                 });
                 uniList.appendChild(div);
             });
         });
-        document.addEventListener('click', (e) => { if(e.target !== uniInput) uniList.innerHTML = ''; });
+        document.addEventListener('click', (e) => { 
+            if(e.target !== uniInput) uniList.innerHTML = ''; 
+        });
     }
 
+    // KAYIT OLMA İŞLEMİ
     bind('register-btn', 'click', async () => {
         const name = document.getElementById('reg-name').value.trim();
         const surname = document.getElementById('reg-surname').value.trim();
@@ -94,17 +119,30 @@ document.addEventListener("DOMContentLoaded", () => {
         const email = document.getElementById('reg-email').value.trim();
         const password = document.getElementById('reg-password').value;
 
-        if(!name || !surname || !uni || !email || !password) return alert("Lütfen tüm alanları doldurun.");
-        if(!email.includes(".edu")) return alert("Sadece .edu uzantılı mailler kabul edilmektedir.");
+        if(!name || !surname || !uni || !email || !password) {
+            return alert("Lütfen tüm alanları eksiksiz doldurun.");
+        }
+        if(!email.includes(".edu")) {
+            return alert("Güvenlik nedeniyle sadece onaylı .edu uzantılı üniversite e-postaları kabul edilmektedir.");
+        }
 
         try {
             const userCred = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCred.user;
             
+            // Veritabanına kullanıcıyı kaydet
             await setDoc(doc(db, "users", user.uid), {
-                uid: user.uid, name: name, surname: surname, university: uni, email: email, avatar: "👨‍🎓", isOnline: false, faculty: ""
+                uid: user.uid, 
+                name: name, 
+                surname: surname, 
+                university: uni, 
+                email: email, 
+                avatar: "👨‍🎓", 
+                isOnline: false, 
+                faculty: ""
             });
 
+            // Sistem Hoş Geldin Mesajını Oluştur
             await addDoc(collection(db, "chats"), {
                 participants: [user.uid, "system"],
                 participantNames: { [user.uid]: name, "system": "UniLoop Ekibi" },
@@ -112,21 +150,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 lastUpdated: serverTimestamp(),
                 messages: [{
                     senderId: "system", 
-                    text: `Merhaba ${name}! UniLoop'a hoş geldin. İlan verebilir, itirafları okuyabilir ve kampüsün nabzını tutabilirsin.`, 
+                    text: `Merhaba ${name}! UniLoop'a hoş geldin. Burası tüm kampüsün dijital merkezi. İlan verebilir, itirafları okuyabilir ve kampüsün nabzını tutabilirsin.`, 
                     time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
                 }]
             });
 
+            // Doğrulama maili yolla ve çıkış yaptır
             await sendEmailVerification(user);
             alert("Kayıt başarılı! Lütfen " + email + " adresine giden doğrulama linkine tıklayarak hesabınızı aktif edin.");
             await signOut(auth);
             document.getElementById('show-login-btn').click();
         } catch (error) {
-            alert("Kayıt olurken hata: " + error.message);
+            alert("Kayıt olurken bir hata oluştu: " + error.message);
         }
     });
 
-    // 💡 EKRANDA DONMA HATASI İÇİN FIX
+    // GİRİŞ YAPMA İŞLEMİ (Dondurma Hatası Çözüldü)
     bind('login-btn', 'click', async () => {
         const email = document.getElementById('login-email').value.trim();
         const password = document.getElementById('login-password').value;
@@ -139,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.disabled = true;
 
         try {
-            // Sadece girişi tetikler, ekran yönlendirmesini onAuthStateChanged halledecek.
+            // Giriş başarılı olursa onAuthStateChanged ekranı değiştirecek
             await signInWithEmailAndPassword(auth, email, password);
         } catch (error) {
             console.error("Giriş Hatası:", error);
@@ -149,10 +188,27 @@ document.addEventListener("DOMContentLoaded", () => {
         } 
     });
 
+    // ŞİFREMİ UNUTTUM İŞLEMİ
+    bind('forgot-password-btn', 'click', async () => {
+        const email = prompt("Şifrenizi sıfırlamak için kayıtlı e-posta adresinizi girin:");
+        if(!email) return;
+        
+        try {
+            await sendPasswordResetEmail(auth, email);
+            alert("Şifre sıfırlama bağlantısı e-posta adresinize başarıyla gönderildi! Lütfen gelen kutunuzu (ve Spam klasörünü) kontrol edin.");
+        } catch (error) {
+            alert("Hata: " + error.message);
+        }
+    });
+
+    // ÇIKIŞ YAPMA İŞLEMİ
     window.logout = async function() {
         try {
-            if(window.userProfile.uid) await updateDoc(doc(db, "users", window.userProfile.uid), { isOnline: false });
+            if(window.userProfile.uid) {
+                await updateDoc(doc(db, "users", window.userProfile.uid), { isOnline: false });
+            }
             await signOut(auth);
+            
             if(authScreen && appScreen) {
                 appScreen.style.display = 'none';
                 authScreen.style.display = 'flex';
@@ -160,18 +216,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById('register-card').style.display = 'none';
                 
                 const btn = document.getElementById('login-btn');
-                if(btn) { btn.innerText = "Giriş Yap"; btn.disabled = false; }
+                if(btn) { 
+                    btn.innerText = "Giriş Yap"; 
+                    btn.disabled = false; 
+                }
             }
-        } catch(error) { console.error("Çıkış hatası:", error); }
+        } catch(error) {
+            console.error("Çıkış hatası:", error);
+        }
     };
 
     // ============================================================================
-    // 2. OTURUM DURUMU (VERİLERİN ÇEKİLMESİ VE EKRANIN AÇILMASI)
+    // 2. OTURUM DURUMU KONTROLÜ (PERSISTENCE & RESCUE BLOCK)
     // ============================================================================
 
     onAuthStateChanged(auth, async (user) => {
         if (user) { 
-            // 💡 EKRANI ANINDA AÇIYORUZ
+            // Kullanıcı algılandığı an ekranı hemen aç (Bekletme yapma)
             if(authScreen && appScreen) {
                 authScreen.style.display = 'none';
                 appScreen.style.display = 'block';
@@ -184,68 +245,110 @@ document.addEventListener("DOMContentLoaded", () => {
                 if(docSnap.exists()) {
                     window.userProfile = docSnap.data();
                 } else {
+                    // KURTARMA KALKANI: Firebase kuralları kapalıysa veya konsoldan eklendiyse
                     window.userProfile = { 
-                        uid: user.uid, name: "Kampüs", surname: "Öğrencisi", email: user.email, 
-                        university: "UniLoop Ağı", avatar: "👨‍🎓", faculty: "", isOnline: true
+                        uid: user.uid, 
+                        name: "Öğrenci", 
+                        surname: "", 
+                        email: user.email, 
+                        university: "UniLoop Kampüsü", 
+                        avatar: "👨‍🎓", 
+                        faculty: "",
+                        isOnline: true
                     };
                     await setDoc(userDocRef, window.userProfile);
                 }
                 
+                // Güvenlik amaçlı boş verileri doldur
                 if(!window.userProfile.email) window.userProfile.email = user.email;
-                if(!window.userProfile.university) window.userProfile.university = "UniLoop Ağı";
+                if(!window.userProfile.university) window.userProfile.university = "UniLoop Kampüsü";
 
+                // Kullanıcıyı Çevrimiçi Yap
                 await updateDoc(userDocRef, { isOnline: true });
+                
+                // Gerçek zamanlı veritabanı dinleyicilerini başlat
                 initRealtimeListeners(user.uid);
 
-                // Profil dolduğu an ANA SAYFAYI YÜKLE
+                // Ana Sayfayı veya aktif olan sekmeyi yükle
                 const activeTab = document.querySelector('.menu-item.active');
                 if(typeof window.loadPage === 'function') {
                     window.loadPage(activeTab ? activeTab.getAttribute('data-target') : 'home'); 
                 }
 
-                // Önceden kayıtlı fakülte varsa sol menüye mühürle
+                // Fakülte hafızası: Daha önce girmişse sol menüde göster
                 if(window.userProfile.faculty && typeof window.updateMyFacultiesSidebar === 'function') {
-                    window.joinedFaculties = [{name: window.userProfile.faculty, icon: "🏢", color: "linear-gradient(135deg, #1E3A8A, #4F46E5)"}];
+                    window.joinedFaculties = [{
+                        name: window.userProfile.faculty, 
+                        icon: "🏢", 
+                        color: "linear-gradient(135deg, #1E3A8A, #4F46E5)"
+                    }];
                     window.updateMyFacultiesSidebar();
                 }
                 
-                // Butonu eski haline getir
+                // Giriş butonunu eski haline getir
                 const btn = document.getElementById('login-btn');
-                if(btn) { btn.innerText = "Giriş Yap"; btn.disabled = false; }
+                if(btn) { 
+                    btn.innerText = "Giriş Yap"; 
+                    btn.disabled = false; 
+                }
 
             } catch(error) { 
-                console.error("Kullanıcı verisi hatası (Firestore kapalı olabilir):", error);
-                alert("Bağlantı Hatası: Lütfen Firebase Firestore'u 'Test Modunda' kurduğunuzdan emin olun.");
-                // Fallback profil (sistem çökmesin diye)
-                window.userProfile = { uid: user.uid, name: "Misafir", surname: "", email: user.email, university: "Bağlantı Hatası", avatar: "⚠️", faculty: "" };
+                // EĞER FIREBASE KURALLARI KİLİTLİYSE BURASI ÇALIŞIR VE SİSTEM ÇÖKMEZ
+                window.userProfile = { 
+                    uid: user.uid, 
+                    name: "Misafir", 
+                    surname: "", 
+                    email: user.email, 
+                    university: "Lütfen Firestore'u Test Moduna Alın", 
+                    avatar: "⚠️", 
+                    faculty: "", 
+                    isOnline: true 
+                };
                 if(typeof window.loadPage === 'function') window.loadPage('home'); 
+                console.error("Firestore'a erişim reddedildi. Rules ayarlarını kontrol edin.");
             }
         }
     });
 
+    // Kullanıcı sekmeyi kapattığında onu offline yap
     window.addEventListener("beforeunload", () => {
-        if(window.userProfile.uid) updateDoc(doc(db, "users", window.userProfile.uid), { isOnline: false });
+        if(window.userProfile.uid) {
+            updateDoc(doc(db, "users", window.userProfile.uid), { isOnline: false });
+        }
     });
 
     function initRealtimeListeners(currentUid) {
+        
+        // 1. İLANLARI DİNLE (Market ve Yurt)
         onSnapshot(query(collection(db, "listings"), orderBy("createdAt", "desc")), (snapshot) => {
             marketDB = [];
             snapshot.forEach(doc => marketDB.push({ id: doc.id, ...doc.data() }));
+            
             const activeTab = document.querySelector('.menu-item.active');
-            if(activeTab && activeTab.getAttribute('data-target') === 'market') window.renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
-            if(activeTab && activeTab.getAttribute('data-target') === 'housing') window.renderListings('housing', '🔑 Ev Arkadaşı & Yurt', 'İletişime Geç');
+            if(activeTab && activeTab.getAttribute('data-target') === 'market') {
+                window.renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
+            }
+            if(activeTab && activeTab.getAttribute('data-target') === 'housing') {
+                window.renderListings('housing', '🔑 Ev Arkadaşı & Yurt', 'İletişime Geç');
+            }
         });
 
+        // 2. İTİRAFLARI DİNLE
         onSnapshot(query(collection(db, "confessions"), orderBy("createdAt", "desc")), (snapshot) => {
             confessionsDB = [];
             snapshot.forEach(doc => confessionsDB.push({ id: doc.id, ...doc.data() }));
+            
             const activeTab = document.querySelector('.menu-item.active');
-            if(activeTab && activeTab.getAttribute('data-target') === 'confessions') window.drawConfessionsGrid();
+            if(activeTab && activeTab.getAttribute('data-target') === 'confessions') {
+                window.drawConfessionsGrid();
+            }
         });
 
+        // 3. S&C DİNLE
         onSnapshot(query(collection(db, "qa"), orderBy("createdAt", "desc")), (snapshot) => {
             qaDB = [];
             snapshot.forEach(doc => qaDB.push({ id: doc.id, ...doc.data() }));
+            
             const activeTab = document.querySelector('.menu-item.active');
             if(activeTab && activeTab.getAttribute('data-target') === 'qa') {
                 const activeFilter = document.querySelector('.qa-filter-btn.active');
@@ -253,31 +356,47 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        // 4. MESAJLARI DİNLE VE BİLDİRİM ROZETİNİ GÜNCELLE
         onSnapshot(query(collection(db, "chats"), where("participants", "array-contains", currentUid), orderBy("lastUpdated", "desc")), (snapshot) => {
             chatsDB = [];
             let totalChats = 0;
+            
             snapshot.forEach(doc => {
                 const data = doc.data();
                 const otherUid = data.participants.find(p => p !== currentUid);
                 const otherName = data.participantNames[otherUid] || "Bilinmeyen";
                 const otherAvatar = data.participantAvatars[otherUid] || "👤";
-                chatsDB.push({ id: doc.id, otherUid, name: otherName, avatar: otherAvatar, messages: data.messages });
+                
+                chatsDB.push({ 
+                    id: doc.id, 
+                    otherUid, 
+                    name: otherName, 
+                    avatar: otherAvatar, 
+                    messages: data.messages 
+                });
                 totalChats++; 
             });
 
+            // Bildirim Rozetini Güncelle
             const badge = document.getElementById('msg-badge');
             if(badge) {
-                if(totalChats > 0) { badge.style.display = 'inline-block'; badge.innerText = totalChats; }
-                else { badge.style.display = 'none'; }
+                if(totalChats > 0) { 
+                    badge.style.display = 'inline-block'; 
+                    badge.innerText = totalChats; 
+                } else { 
+                    badge.style.display = 'none'; 
+                }
             }
 
             const activeTab = document.querySelector('.menu-item.active');
-            if(activeTab && activeTab.getAttribute('data-target') === 'messages') window.renderMessages();
+            if(activeTab && activeTab.getAttribute('data-target') === 'messages') {
+                window.renderMessages();
+            }
         });
     }
 
     // ============================================================================
-    // 3. MODAL VE ORTAK FONKSİYONLAR
+    // 3. AÇILIR PENCERELER (MODALS) VE MENÜ FONKSİYONLARI
     // ============================================================================
 
     window.goToMessages = function() {
@@ -291,22 +410,31 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('modal-body').innerHTML = contentHTML; 
         modal.classList.add('active'); 
     }
+    
     window.closeModal = function() { 
         modal.classList.remove('active'); 
-        document.getElementById('modal-body').innerHTML = ''; // Modalı temizler
+        document.getElementById('modal-body').innerHTML = ''; 
     }
+    
     bind('modal-close', 'click', window.closeModal);
-    window.addEventListener('click', (e) => { if (e.target === modal) window.closeModal(); });
+    window.addEventListener('click', (e) => { 
+        if (e.target === modal) window.closeModal(); 
+    });
 
-    bind('mobile-menu-btn', 'click', () => { document.getElementById('sidebar').classList.toggle('open'); });
+    bind('mobile-menu-btn', 'click', () => { 
+        document.getElementById('sidebar').classList.toggle('open'); 
+    });
 
+    // Dinamik Fakülte Linklerine Tıklama Olayı
     document.body.addEventListener('click', (e) => {
         const link = e.target.closest('.community-link');
         if(link) {
             const name = link.getAttribute('data-name');
             const icon = link.getAttribute('data-icon');
             const color = link.getAttribute('data-color');
-            if(typeof window.handleFacultyClick === 'function') window.handleFacultyClick(name, icon, color);
+            if(typeof window.handleFacultyClick === 'function') {
+                window.handleFacultyClick(name, icon, color);
+            }
         }
     });
 
@@ -315,8 +443,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const container = document.getElementById(containerId);
         if(btn && container) {
             btn.addEventListener('click', () => {
-                if(container.style.display === 'none') { container.style.display = 'block'; btn.innerText = 'Daha Az Göster'; }
-                else { container.style.display = 'none'; btn.innerText = 'Daha Fazla Göster'; }
+                if(container.style.display === 'none') { 
+                    container.style.display = 'block'; 
+                    btn.innerText = 'Daha Az Göster'; 
+                } else { 
+                    container.style.display = 'none'; 
+                    btn.innerText = 'Daha Fazla Göster'; 
+                }
             });
         }
     }
@@ -340,7 +473,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ============================================================================
-    // 4. İLAN YÖNETİMİ VE GÖNDERİ OLUŞTURMA (HATA ÇÖZÜLDÜ)
+    // 4. İLAN YÖNETİMİ VE ÇOKLU FOTOĞRAF YÜKLEME
     // ============================================================================
 
     window.renderListings = function(type, title, buttonText) {
@@ -356,8 +489,11 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         mainContent.innerHTML = html;
         window.drawListingsGrid(type, buttonText, '');
+        
         const searchInput = document.getElementById('local-search-input');
-        if(searchInput) searchInput.addEventListener('input', (e) => window.drawListingsGrid(type, buttonText, e.target.value.toLowerCase())); 
+        if(searchInput) {
+            searchInput.addEventListener('input', (e) => window.drawListingsGrid(type, buttonText, e.target.value.toLowerCase())); 
+        }
     }
 
     window.drawListingsGrid = function(type, buttonText, filterText) {
@@ -367,7 +503,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const filteredData = marketDB.filter(item => item.type === type && (item.title.toLowerCase().includes(filterText) || item.desc.toLowerCase().includes(filterText)));
         
         if(filteredData.length === 0) {
-            container.innerHTML = `<p style="grid-column: span 2; color: var(--text-gray); text-align:center; padding: 40px 0;">Henüz ilan yok veya bulunamadı.</p>`; return;
+            container.innerHTML = `<p style="grid-column: span 2; color: var(--text-gray); text-align:center; padding: 40px 0;">Henüz ilan yok veya bulunamadı.</p>`; 
+            return;
         }
 
         let gridHtml = '';
@@ -375,6 +512,7 @@ document.addEventListener("DOMContentLoaded", () => {
             let imgHtml = '';
             let indicatorsHtml = '';
 
+            // Kaydırılabilir Çoklu Fotoğraf Galerisi
             if (item.imgUrls && item.imgUrls.length > 0) {
                 imgHtml += '<div class="image-gallery">';
                 item.imgUrls.forEach((url, i) => {
@@ -382,7 +520,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     indicatorsHtml += `<div class="gallery-dot ${i===0 ? 'active' : ''}"></div>`;
                 });
                 imgHtml += '</div>';
-                if(item.imgUrls.length > 1) { imgHtml += `<div class="gallery-indicators">${indicatorsHtml}</div>`; }
+                
+                if(item.imgUrls.length > 1) { 
+                    imgHtml += `<div class="gallery-indicators">${indicatorsHtml}</div>`; 
+                }
             } else if (item.imgUrl) { 
                 imgHtml = `<img src="${item.imgUrl}" alt="İlan" style="width:100%; height:100%; object-fit:cover;">`;
             } else {
@@ -406,11 +547,18 @@ document.addEventListener("DOMContentLoaded", () => {
         container.innerHTML = gridHtml;
     }
 
+    // 🌟 İLAN OLUŞTURMA VE 3 FOTOĞRAF ÖNİZLEMESİ 🌟
     window.openListingForm = function(type) {
         window.openModal('Yeni İlan Oluştur', `
-            <div class="form-group"><input type="text" id="new-item-title" placeholder="İlan Başlığı (Örn: Temiz Çalışma Masası)"></div>
-            <div class="form-group"><input type="text" id="new-item-price" placeholder="Fiyat (Örn: 500 TL veya Ücretsiz)"></div>
-            <div class="form-group"><textarea id="new-item-desc" rows="3" placeholder="İlan detayları ve durumu..."></textarea></div>
+            <div class="form-group">
+                <input type="text" id="new-item-title" placeholder="İlan Başlığı (Örn: Temiz Çalışma Masası)">
+            </div>
+            <div class="form-group">
+                <input type="text" id="new-item-price" placeholder="Fiyat (Örn: 500 TL veya Ücretsiz)">
+            </div>
+            <div class="form-group">
+                <textarea id="new-item-desc" rows="3" placeholder="İlan detayları ve durumu..."></textarea>
+            </div>
             
             <div class="upload-btn-wrapper">
                 <button class="action-btn" style="width:100%; justify-content:center;">📷 En Fazla 3 Fotoğraf Seç</button>
@@ -420,14 +568,15 @@ document.addEventListener("DOMContentLoaded", () => {
             <div id="preview-container" class="preview-container"></div>
             
             <button class="btn-primary" id="publish-listing-btn" onclick="submitListing('${type}')">İlanı Yayınla</button>
-            <p id="upload-status" style="font-size:12px; color:var(--primary); text-align:center; margin-top:10px; display:none;">Yükleniyor, lütfen bekleyin...</p>
+            <p id="upload-status" style="font-size:12px; color:var(--primary); text-align:center; margin-top:10px; display:none;">Fotoğraflar Yükleniyor, lütfen bekleyin...</p>
         `);
 
+        // DOM yüklendikten sonra File Listener'ı çalıştırır
         setTimeout(() => {
             const photoInput = document.getElementById('new-item-photo');
             if(photoInput) {
                 photoInput.addEventListener('change', function(e) {
-                    const files = Array.from(e.target.files).slice(0, 3); 
+                    const files = Array.from(e.target.files).slice(0, 3); // Max 3 fotoğraf
                     const previewContainer = document.getElementById('preview-container');
                     previewContainer.innerHTML = ''; 
                     
@@ -443,7 +592,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 100);
     }
 
-    // 💡 ÇÖZÜM: Fotoğraf seçilmese bile ilanı sorunsuz kaydeden mantık
+    // İLANI FIREBASE'E KAYDETME (Hatalar çözüldü)
     window.submitListing = async function(type) {
         const title = document.getElementById('new-item-title').value;
         const price = document.getElementById('new-item-price').value;
@@ -465,6 +614,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let imgUrlsArray = [];
 
         try {
+            // Fotoğrafları Storage'a Yükle
             if(files.length > 0) {
                 for (let file of files) {
                     const storageRef = ref(storage, 'listings/' + Date.now() + '_' + file.name);
@@ -474,6 +624,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
+            // Veritabanına Yaz
             await addDoc(collection(db, "listings"), {
                 type: type, 
                 title: title, 
@@ -489,18 +640,20 @@ document.addEventListener("DOMContentLoaded", () => {
             window.closeModal();
         } catch (error) {
             console.error("İlan eklenirken hata:", error);
-            alert("İlan yayınlanırken hata oluştu! Storage ayarlarınızı kontrol edin.");
+            alert("İlan yayınlanırken hata oluştu! Firebase Storage kurallarınızı 'Test Moduna' alın.");
             statusEl.style.display = 'none';
             btn.disabled = false;
         }
     }
 
     // ============================================================================
-    // 5. MESAJLAŞMA SİSTEMİ (CHATS)
+    // 5. MESAJLAŞMA (CHATS)
     // ============================================================================
 
     window.startChat = async function(targetUserId, targetUserName) {
-        if(targetUserId === window.userProfile.uid) return alert("Kendi ilanınıza mesaj atamazsınız!");
+        if(targetUserId === window.userProfile.uid) {
+            return alert("Kendi ilanınıza mesaj atamazsınız!");
+        }
 
         const existingChat = chatsDB.find(chat => chat.otherUid === targetUserId);
         
@@ -535,11 +688,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const lastMsg = lastMsgObj ? lastMsgObj.text : "Henüz mesaj yok.";
             const time = lastMsgObj ? lastMsgObj.time : "";
             const isActive = chat.id === currentChatId ? 'active' : '';
+            
             html += `
                 <div class="chat-contact ${isActive}" data-id="${chat.id}" onclick="openChatView('${chat.id}')">
                     <div class="avatar">${chat.avatar}</div>
                     <div class="chat-contact-info">
-                        <div class="chat-contact-top"><span class="chat-contact-name">${chat.name}</span><span class="chat-contact-time">${time}</span></div>
+                        <div class="chat-contact-top">
+                            <span class="chat-contact-name">${chat.name}</span>
+                            <span class="chat-contact-time">${time}</span>
+                        </div>
                         <div class="chat-contact-last">${lastMsg}</div>
                     </div>
                 </div>
@@ -559,7 +716,9 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         
         mainContent.innerHTML = html;
-        if(window.innerWidth > 1024 && currentChatId && chatsDB.find(c=>c.id===currentChatId)) window.openChatView(currentChatId);
+        if(window.innerWidth > 1024 && currentChatId && chatsDB.find(c=>c.id===currentChatId)) {
+            window.openChatView(currentChatId);
+        }
     }
 
     window.openChatView = function(chatId) {
@@ -586,7 +745,12 @@ document.addEventListener("DOMContentLoaded", () => {
         activeChat.messages.forEach(msg => { 
             const type = msg.senderId === window.userProfile.uid ? 'sent' : 'received';
             const ticks = type === 'sent' ? '<span class="ticks">✓✓</span>' : '';
-            chatHTML += `<div class="bubble ${type}"><div class="msg-text">${msg.text}</div><div class="msg-time">${msg.time} ${ticks}</div></div>`; 
+            chatHTML += `
+                <div class="bubble ${type}">
+                    <div class="msg-text">${msg.text}</div>
+                    <div class="msg-time">${msg.time} ${ticks}</div>
+                </div>
+            `; 
         });
         
         chatHTML += `
@@ -605,7 +769,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const inputField = document.getElementById('chat-input-field');
         if(inputField) {
-            inputField.addEventListener('keypress', (e) => { if(e.key === 'Enter') window.sendMsg(chatId); });
+            inputField.addEventListener('keypress', (e) => { 
+                if(e.key === 'Enter') window.sendMsg(chatId); 
+            });
         }
     }
 
@@ -643,7 +809,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.openConfessionForm = function() {
         window.openModal('Yeni Anonim Gönderi', `
-            <div class="form-group"><input type="text" id="new-conf-tag" placeholder="Örn: 📍 Kütüphane"></div>
+            <div class="form-group">
+                <input type="text" id="new-conf-tag" placeholder="Örn: 📍 Kütüphane">
+            </div>
             <textarea id="new-conf-text" class="form-group" style="width:100%; height:120px; border-radius:12px; padding:15px; font-size:16px;" placeholder="Aklından ne geçiyor?"></textarea>
             <button class="btn-primary" id="publish-conf-btn" onclick="submitConfession()">Kampüse Gönder</button>
         `);
@@ -653,6 +821,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const textEl = document.getElementById('new-conf-text');
         const tagEl = document.getElementById('new-conf-tag');
         const btn = document.getElementById('publish-conf-btn');
+        
         if(!textEl || textEl.value.trim() === '') return;
         
         btn.disabled = true;
@@ -664,11 +833,17 @@ document.addEventListener("DOMContentLoaded", () => {
             await addDoc(collection(db, "confessions"), {
                 avatar: ["👻","👽","🤖","🦊","🎭"][Math.floor(Math.random()*5)], 
                 theme: themes[Math.floor(Math.random()*3)],
-                user: "Anonim #"+Math.floor(Math.random()*9999), time: "Şimdi", tag: tagVal, text: textEl.value, likes: 0, comments: 0, createdAt: serverTimestamp()
+                user: "Anonim #"+Math.floor(Math.random()*9999), 
+                time: "Şimdi", 
+                tag: tagVal, 
+                text: textEl.value, 
+                likes: 0, 
+                comments: 0, 
+                createdAt: serverTimestamp()
             });
             window.closeModal();
         } catch(e) { 
-            alert("Hata: " + e.message); 
+            alert("Hata: Firebase kurallarını kontrol edin."); 
             btn.disabled = false;
         }
     }
@@ -683,12 +858,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="cc-header">
                     <div class="cc-avatar">${post.avatar}</div>
                     <div class="cc-meta">
-                        <span class="cc-author">${post.user}</span><span class="cc-time">${post.time}</span><span class="cc-tag">${post.tag}</span>
+                        <span class="cc-author">${post.user}</span>
+                        <span class="cc-time">${post.time}</span>
+                        <span class="cc-tag">${post.tag}</span>
                     </div>
                 </div>
                 <div class="cc-body">"${post.text}"</div>
                 <div class="cc-footer">
-                    <div class="cc-action-btn">🔥 (${post.likes})</div><div class="cc-action-btn">💬 (${post.comments})</div>
+                    <div class="cc-action-btn">🔥 (${post.likes})</div>
+                    <div class="cc-action-btn">💬 (${post.comments})</div>
                 </div>
             </div>`;
         });
@@ -698,17 +876,21 @@ document.addEventListener("DOMContentLoaded", () => {
     window.openConfessionDetail = function(docId) {
         const post = confessionsDB.find(p => p.id === docId);
         if(!post) return;
+        
         let bgStyle = post.theme === "theme-midnight" ? "linear-gradient(135deg, #111827, #374151)" : post.theme === "theme-love" ? "linear-gradient(135deg, #4c1d95, #be185d)" : "linear-gradient(135deg, #7f1d1d, #ea580c)";
 
         window.openModal(post.user + ' Diyor ki:', `
             <div style="background:${bgStyle}; color:white; padding: 30px; border-radius: 16px; font-size: 18px; line-height: 1.6; margin-bottom: 24px; font-style:italic;">
                 <div style="font-size:12px; margin-bottom:10px; opacity:0.8;">${post.tag}</div>"${post.text}"
             </div>
+            <div style="display:flex; gap:12px;">
+                <button class="action-btn" style="flex:1;" onclick="alert('Beğenildi!')">🔥 Yanıyor</button>
+            </div>
         `);
     }
 
     // ============================================================================
-    // 7. SORU VE CEVAP MODÜLÜ (Q&A)
+    // 7. SORU VE CEVAP (Q&A)
     // ============================================================================
 
     window.renderQA = function() {
@@ -741,7 +923,12 @@ document.addEventListener("DOMContentLoaded", () => {
         window.openModal('Yeni Soru Sor', `
             <div class="form-group">
                 <label>Kategori Seç</label>
-                <select id="new-qa-tag"><option>Genel</option><option>Yurtlar</option><option>Ders</option><option>Kampüs Yaşamı</option></select>
+                <select id="new-qa-tag">
+                    <option>Genel</option>
+                    <option>Yurtlar</option>
+                    <option>Ders</option>
+                    <option>Kampüs Yaşamı</option>
+                </select>
             </div>
             <textarea id="new-qa-text" class="form-group" style="width:100%; height:120px; border-radius:12px; padding:15px; font-size:15px;" placeholder="Sorunuzu detaylı yazın..."></textarea>
             <button class="btn-primary" id="publish-qa-btn" onclick="submitQA()">Soruyu Yayınla</button>
@@ -757,11 +944,17 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.disabled = true;
         try {
             await addDoc(collection(db, "qa"), {
-                avatar: window.userProfile.avatar, user: window.userProfile.name, time: "Şimdi", tag: tagEl.value, question: textEl.value, answers: [], createdAt: serverTimestamp()
+                avatar: window.userProfile.avatar, 
+                user: window.userProfile.name, 
+                time: "Şimdi", 
+                tag: tagEl.value, 
+                question: textEl.value, 
+                answers: [], 
+                createdAt: serverTimestamp()
             });
             window.closeModal();
         } catch(e) { 
-            alert("Hata: "+e.message); 
+            alert("Hata: Firebase kilitlerini kontrol edin."); 
             btn.disabled = false;
         }
     }
@@ -771,17 +964,29 @@ document.addEventListener("DOMContentLoaded", () => {
         if(!feed) return;
         
         let filteredDB = filterTag === 'Genel' ? qaDB : qaDB.filter(q => q.tag === filterTag);
-        if(filteredDB.length === 0) { feed.innerHTML = '<p style="text-align:center; padding: 30px 0; color:var(--text-gray);">Bu kategoride henüz soru yok.</p>'; return; }
+        
+        if(filteredDB.length === 0) { 
+            feed.innerHTML = '<p style="text-align:center; padding: 30px 0; color:var(--text-gray);">Bu kategoride henüz soru yok.</p>'; 
+            return; 
+        }
 
         let html = '';
         filteredDB.forEach((q) => {
             const statusClass = q.answers.length > 0 ? 'answered' : '';
             html += `
                 <div class="qa-card" onclick="openQADetail('${q.id}')">
-                    <div class="qa-left-stats"><div class="qa-stat-box ${statusClass}"><div style="font-size:18px;">${q.answers.length}</div><div style="font-weight:500;">Cevap</div></div></div>
+                    <div class="qa-left-stats">
+                        <div class="qa-stat-box ${statusClass}">
+                            <div style="font-size:18px;">${q.answers.length}</div>
+                            <div style="font-weight:500;">Cevap</div>
+                        </div>
+                    </div>
                     <div class="qa-right-content">
                         <div class="qa-title">${q.question}</div>
-                        <div class="qa-meta"><span class="qa-tag">${q.tag}</span><span>Soran: <strong>${q.user}</strong></span></div>
+                        <div class="qa-meta">
+                            <span class="qa-tag">${q.tag}</span>
+                            <span>Soran: <strong>${q.user}</strong></span>
+                        </div>
                     </div>
                 </div>`;
         });
@@ -791,12 +996,21 @@ document.addEventListener("DOMContentLoaded", () => {
     window.openQADetail = function(docId) {
         const q = qaDB.find(item => item.id === docId);
         if(!q) return;
+        
         let answersHtml = q.answers.length === 0 ? '<p style="text-align:center; padding:20px; color:var(--text-gray);">İlk cevap veren sen ol!</p>' : '';
-        q.answers.forEach(ans => { answersHtml += `<div style="background:#F9FAFB; padding:16px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border-color);"><div style="font-weight:bold; color:var(--primary); margin-bottom:6px;">${ans.user}</div><div style="font-size:15px;">${ans.text}</div></div>`; });
+        q.answers.forEach(ans => { 
+            answersHtml += `<div style="background:#F9FAFB; padding:16px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border-color);"><div style="font-weight:bold; color:var(--primary); margin-bottom:6px;">${ans.user}</div><div style="font-size:15px;">${ans.text}</div></div>`; 
+        });
 
         window.openModal('Soru Detayı', `
-            <div style="margin-bottom: 24px;"><span class="qa-tag" style="font-size:12px;">${q.tag}</span><div style="font-size:18px; font-weight:800; margin-top:12px;">${q.question}</div></div>
-            <div style="border-top:1px solid var(--border-color); padding-top:24px; margin-bottom:24px;"><h4>Cevaplar (${q.answers.length})</h4>${answersHtml}</div>
+            <div style="margin-bottom: 24px;">
+                <span class="qa-tag" style="font-size:12px;">${q.tag}</span>
+                <div style="font-size:18px; font-weight:800; margin-top:12px;">${q.question}</div>
+            </div>
+            <div style="border-top:1px solid var(--border-color); padding-top:24px; margin-bottom:24px;">
+                <h4>Cevaplar (${q.answers.length})</h4>
+                ${answersHtml}
+            </div>
             <div style="display:flex; gap:10px;">
                 <input type="text" id="new-answer-input" class="form-group" style="flex:1; margin:0;" placeholder="Cevabını yaz...">
                 <button class="btn-primary" style="width:auto;" onclick="submitAnswer('${q.id}')">Gönder</button>
@@ -808,19 +1022,24 @@ document.addEventListener("DOMContentLoaded", () => {
         const ansInput = document.getElementById('new-answer-input');
         if(ansInput && ansInput.value.trim() !== '') {
             try {
-                await updateDoc(doc(db, "qa", docId), { answers: arrayUnion({ user: window.userProfile.name, text: ansInput.value.trim() }) });
+                await updateDoc(doc(db, "qa", docId), { 
+                    answers: arrayUnion({ user: window.userProfile.name, text: ansInput.value.trim() }) 
+                });
                 window.closeModal(); 
-            } catch(e) { console.error(e); }
+            } catch(e) { 
+                console.error(e); 
+            }
         }
     }
 
     // ============================================================================
-    // 8. FAKÜLTE SİSTEMİ (KALICI VE ANINDA AÇILAN EKRAN - FIX)
+    // 8. FAKÜLTE SİSTEMİ (KALICI VE ESTETİK GEÇİŞ)
     // ============================================================================
 
     window.updateMyFacultiesSidebar = function() {
         const container = document.getElementById('my-joined-faculties');
         if(!container) return;
+        
         let html = '';
         window.joinedFaculties.forEach(fac => { 
             html += `<div class="menu-item community-link" data-name="${fac.name}" data-icon="${fac.icon}" data-color="${fac.color}" onclick="handleFacultyClick('${fac.name}', '${fac.icon}', '${fac.color}')">${fac.icon} ${fac.name}</div>`; 
@@ -832,7 +1051,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll('.menu-item[data-target]').forEach(m => m.classList.remove('active'));
         if(window.innerWidth <= 1024) document.getElementById('sidebar').classList.remove('open');
 
-        // 💡 Kullanıcı daha önceden kaydolduysa veya yeni katıldıysa DİREKT AÇAR
         const isJoined = window.joinedFaculties.some(f => f.name === name) || window.userProfile.faculty === name;
 
         if(isJoined) {
@@ -853,56 +1071,70 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // 💡 Şifre doğruysa KİLİTLER VE EKRANI ANINDA DEĞİŞTİRİR
     window.verifyFacultyCode = async function(name, icon, bgColor) {
         const inputCode = document.getElementById('faculty-passcode-input').value.trim();
+        
         if (inputCode.toLowerCase() === FACULTY_PASSCODES[name].toLowerCase()) {
-            
-            // 1. Profiline mühürle
+            // Profil Mühürleme
             window.userProfile.faculty = name; 
             window.joinedFaculties = [{name: name, icon: icon, color: bgColor}]; 
             window.updateMyFacultiesSidebar();
             
-            // 2. Veritabanına Kalıcı Olarak Kaydet (Persistence)
+            // Veritabanına Kalıcı Kayıt
             await updateDoc(doc(db, "users", window.userProfile.uid), { faculty: name });
             
-            // 3. EKRANI ANINDA FAKÜLTE İÇİNE ÇEVİR
+            // Ekranı Anında Çevir
             window.loadFacultyFeed(name, icon, bgColor);
-            
         } else { 
             alert("Hatalı kod girdiniz. Lütfen tekrar deneyin."); 
         }
     }
 
     window.loadFacultyFeed = async function(name, icon, bgColor) {
-        let totalMembers = 0; let onlineMembers = 0;
+        let totalMembers = 0; 
+        let onlineMembers = 0;
+        
         try {
             const q = query(collection(db, "users"), where("faculty", "==", name));
             const querySnapshot = await getDocs(q);
             totalMembers = querySnapshot.size;
-            querySnapshot.forEach((doc) => { if(doc.data().isOnline) onlineMembers++; });
-        } catch (e) { console.error(e); }
+            querySnapshot.forEach((doc) => { 
+                if(doc.data().isOnline) onlineMembers++; 
+            });
+        } catch (e) { 
+            console.error(e); 
+        }
         
-        if(totalMembers === 0) totalMembers = 1; if(onlineMembers === 0) onlineMembers = 1;
+        if(totalMembers === 0) totalMembers = 1; 
+        if(onlineMembers === 0) onlineMembers = 1;
 
         mainContent.innerHTML = `
             <div style="margin-bottom: 24px;">
                 <div class="community-banner" style="background: ${bgColor};">
-                    <div class="comm-banner-left"><h1>${icon} ${name}</h1><p>Küresel Ağa Bağlısın</p></div>
+                    <div class="comm-banner-left">
+                        <h1>${icon} ${name}</h1>
+                        <p>Küresel Ağa Bağlısın</p>
+                    </div>
                     <div class="comm-banner-right">
-                        <div class="member-avatars"><div class="avatar">👨‍💻</div><div class="avatar" style="background:white; color:var(--primary); font-size:11px; font-weight:bold;">+${totalMembers}</div></div>
+                        <div class="member-avatars">
+                            <div class="avatar">👨‍💻</div>
+                            <div class="avatar" style="background:white; color:var(--primary); font-size:11px; font-weight:bold;">+${totalMembers}</div>
+                        </div>
                         <div class="community-stats"><span class="online-dot"></span> Gerçek Çevrimiçi: ${onlineMembers}</div>
                     </div>
                 </div>
                 <div class="create-post-box">
-                    <div class="cp-top"><div class="avatar" style="background:#F3F4F6; font-size:20px;">${window.userProfile.avatar}</div><input type="text" placeholder="${name} ağında paylaşım yap..." onclick="alert('Bu özellik premium sürüme (v2) saklanmıştır.')"></div>
+                    <div class="cp-top">
+                        <div class="avatar" style="background:#F3F4F6; font-size:20px;">${window.userProfile.avatar}</div>
+                        <input type="text" placeholder="${name} ağında paylaşım yap..." onclick="alert('Bu özellik premium sürüme (v2) saklanmıştır.')">
+                    </div>
                 </div>
             </div>
         `;
     }
 
     // ============================================================================
-    // 9. SAYFA YÖNLENDİRME, PROFİL VE AYARLAR
+    // 9. SAYFA YÖNLENDİRME (ROUTING) VE PROFİL YÖNETİMİ
     // ============================================================================
 
     window.loadPage = function(pageName) {
@@ -915,7 +1147,9 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (pageName === 'settings') window.renderSettings();
         else if (pageName === 'profile') window.renderProfile();
         
-        if(window.innerWidth <= 1024 && sidebar) sidebar.classList.remove('open');
+        if(window.innerWidth <= 1024 && document.getElementById('sidebar')) {
+            document.getElementById('sidebar').classList.remove('open');
+        }
         window.scrollTo(0,0);
     }
 
@@ -949,8 +1183,14 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="form-group"><label>Ad</label><input type="text" id="prof-name" value="${window.userProfile.name}"></div>
                         <div class="form-group"><label>Soyad</label><input type="text" id="prof-surname" value="${window.userProfile.surname}"></div>
                     </div>
-                    <div class="form-group"><label>Üniversite</label><input type="text" disabled value="${window.userProfile.university}" style="background:#E5E7EB; cursor:not-allowed;"></div>
-                    <div class="form-group"><label>E-posta</label><input type="email" disabled value="${window.userProfile.email}" style="background:#E5E7EB; cursor:not-allowed;"></div>
+                    <div class="form-group">
+                        <label>Üniversite</label>
+                        <input type="text" disabled value="${window.userProfile.university}" style="background:#E5E7EB; cursor:not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label>E-posta</label>
+                        <input type="email" disabled value="${window.userProfile.email}" style="background:#E5E7EB; cursor:not-allowed;">
+                    </div>
                     <button class="btn-primary" onclick="saveProfile()" style="padding:12px; margin-bottom: 15px;">Profilimi Kaydet</button>
                     <button class="btn-danger" onclick="logout()">🚪 Güvenli Çıkış Yap</button>
                 </div>
@@ -961,8 +1201,14 @@ document.addEventListener("DOMContentLoaded", () => {
     window.saveProfile = async function() {
         const name = document.getElementById('prof-name').value;
         const surname = document.getElementById('prof-surname').value;
-        window.userProfile.name = name; window.userProfile.surname = surname;
-        await updateDoc(doc(db, "users", window.userProfile.uid), { name: name, surname: surname });
+        window.userProfile.name = name; 
+        window.userProfile.surname = surname;
+        
+        await updateDoc(doc(db, "users", window.userProfile.uid), { 
+            name: name, 
+            surname: surname 
+        });
+        
         window.openModal('Başarılı', '<div style="text-align:center;"><p style="font-size:40px; margin:0;">✅</p><p>Profil güncellendi!</p></div>');
     }
 
@@ -971,8 +1217,14 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="card">
                 <h2>⚙️ Uygulama Ayarları</h2>
                 <div style="background: #F9FAFB; padding: 24px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--border-color);">
-                    <div class="form-group"><label>Dil Seçimi</label><select><option>Türkçe</option><option>English</option></select></div>
-                    <div class="form-group"><label>Tema</label><select><option>Aydınlık Mod</option><option>Karanlık Mod (Yakında)</option></select></div>
+                    <div class="form-group">
+                        <label>Dil Seçimi</label>
+                        <select><option>Türkçe</option><option>English</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tema</label>
+                        <select><option>Aydınlık Mod</option><option>Karanlık Mod (Yakında)</option></select>
+                    </div>
                 </div>
                 <button class="btn-danger" onclick="logout()">🚪 Güvenli Çıkış Yap</button>
             </div>
