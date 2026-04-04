@@ -1,12 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
     
-    // --- 🛡️ DEFENSIVE PROGRAMMING ---
+    // --- 🛡️ DEFENSIVE PROGRAMMING (ZIRHLI BAĞLAMA) ---
+    // Bu fonksiyon sayesinde HTML'de bir buton silinse bile JavaScript asla çökmez.
     const bind = (id, event, callback) => {
         const el = document.getElementById(id);
         if (el) el.addEventListener(event, callback);
     };
 
-    // --- 🌟 KULLANICI PROFİLİ 🌟 ---
+    // --- 🌟 KULLANICI PROFİLİ VE SİSTEM HAFIZASI 🌟 ---
     window.userProfile = { 
         name: "Ege", surname: "Yılmaz", email: "ege.yilmaz@uniloop.edu", age: 21,
         university: "Global University", faculty: "Henüz Fakülte Seçilmedi", year: "2. Sınıf", 
@@ -18,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const appScreen = document.getElementById('app-screen');
     const mainContent = document.getElementById('main-content');
 
-    // --- MOCK VERİTABANLARI ---
+    // --- 🗄️ MOCK VERİTABANLARI 🗄️ ---
     const globalUniversities = [
         "Yakın Doğu Üniversitesi (NEU)", "Doğu Akdeniz Üniversitesi (EMU)", "Girne Amerikan Üniversitesi (GAU)", "Uluslararası Kıbrıs Üniversitesi (CIU)",
         "Orta Doğu Teknik Üniversitesi (ODTÜ)", "Boğaziçi Üniversitesi", "İstanbul Teknik Üniversitesi (İTÜ)", "Bilkent Üniversitesi", "Koç Üniversitesi",
@@ -38,8 +39,6 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 3, avatar: "👽", color: "#D1FAE5", user: "Anonim #104", time: "1 gün önce", text: "Yemekhanedeki vegan menü harika olmuş!" }
     ];
 
-    // 🌟 YENİ VERİTABANI: İSTENEN 4 KATEGORİLİ SORU & CEVAP 🌟
-    // Kategoriler SADECE: Genel, Yurtlar, Ders, Kampüs Yaşamı
     let qaDB = [
         { id: 1, user: "Ayşe K.", avatar: "👩‍🎓", time: "1 saat önce", tag: "Yurtlar", question: "Kredi Yurtlar Kurumu (KYK) çıkış saatleri kaça kadar esnedi, bilen var mı?", answers: [{user: "Mehmet", text: "Gece 12'ye kadar girebiliyorsun."}] },
         { id: 2, user: "Can T.", avatar: "👨‍💻", time: "3 saat önce", tag: "Ders", question: "Seçmeli olarak İspanyolca 101 alınır mı, hoca çok zorluyor mu?", answers: [] },
@@ -58,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
     let currentChatId = "chat1";
 
-    // --- 🌟 GİRİŞ / KAYIT SİSTEMİ 🌟 ---
+    // --- 🚀 1. GİRİŞ / KAYIT SİSTEMİ (AUTOCOMPLETE) 🚀 ---
     bind('show-register-btn', 'click', () => {
         const loginCard = document.getElementById('login-card');
         const registerCard = document.getElementById('register-card');
@@ -119,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(loginCard && registerCard) { loginCard.style.display = 'block'; registerCard.style.display = 'none'; }
     };
 
-    // --- GENEL MODAL VE MENÜ KONTROLLERİ ---
+    // --- 🛠️ 2. GENEL MODAL VE MENÜ KONTROLLERİ 🛠️ ---
     window.goToMessages = function() {
         const msgTab = document.querySelector('[data-target="messages"]');
         if(msgTab) msgTab.click();
@@ -154,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupShowMore('desktop-show-more-btn', 'desktop-more-faculties');
     setupShowMore('mobile-show-more-btn', 'mobile-more-faculties');
 
-    // --- 1. ANA SAYFA ---
+    // --- 🏠 3. ANA SAYFA ---
     function getHomeContent() {
         return `
             <div class="card" style="background: linear-gradient(135deg, #1E3A8A, #4F46E5); color: white; border:none;">
@@ -171,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     }
 
-    // --- 2. İLAN LİSTELEYİCİ ---
+    // --- 🛒 4. İLAN LİSTELEYİCİ ---
     function renderListings(type, title, buttonText) {
         let html = `
             <div class="card">
@@ -204,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(searchInput) searchInput.addEventListener('input', (e) => drawGrid(e.target.value.toLowerCase())); 
     }
 
-    // --- 3. ANONİM KAMPÜS ---
+    // --- 🤫 5. ANONİM KAMPÜS ---
     function renderConfessions() {
         let html = `
             <div class="card">
@@ -274,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `);
     }
 
-    // --- 🌟 4. YENİ EKLENEN: TAM FONKSİYONEL SORU VE CEVAP MODÜLÜ 🌟 ---
+    // --- ❓ 6. SORU VE CEVAP MODÜLÜ ---
     function renderQA() {
         let html = `
             <div class="card">
@@ -295,7 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
         mainContent.innerHTML = html;
-        drawQAGrid('Genel'); // İlk açılışta Genel akışı gösterilir
+        drawQAGrid('Genel'); 
 
         const filterBtns = document.querySelectorAll('.qa-filter-btn');
         filterBtns.forEach(btn => {
@@ -343,7 +342,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const feed = document.getElementById('qa-feed');
         if(!feed) return;
         
-        // Eğer seçilen 'Genel' ise tümünü göster (Ana Feed mantığı), değilse filtrele.
         let filteredDB = qaDB;
         if(filterTag !== 'Genel') {
             filteredDB = qaDB.filter(q => q.tag === filterTag);
@@ -420,15 +418,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const ansInput = document.getElementById('new-answer-input');
         if(ansInput && ansInput.value.trim() !== '') {
             qaDB[index].answers.push({ user: window.userProfile.name, text: ansInput.value });
-            openQADetail(index); // Modalı güncel veriyle yenile
+            openQADetail(index); 
             
             const activeFilter = document.querySelector('.qa-filter-btn.active');
             const filterValue = activeFilter ? activeFilter.getAttribute('data-filter') : 'Genel';
-            drawQAGrid(filterValue); // Arka plandaki listeyi yenile
+            drawQAGrid(filterValue); 
         }
     }
 
-    // --- 5. FAKÜLTE KATILIM SİSTEMİ ---
+    // --- 🏢 7. FAKÜLTE KATILIM SİSTEMİ ---
     function updateMyFacultiesSidebar() {
         const container = document.getElementById('my-joined-faculties');
         if(!container) return;
@@ -440,7 +438,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     window.joinFaculty = function(name, icon, bgColor) {
-        window.joinedFaculties = [{name: name, icon: icon, color: bgColor}]; // Sadece 1 fakülte kuralı
+        window.joinedFaculties = [{name: name, icon: icon, color: bgColor}]; 
         window.userProfile.faculty = name; 
         closeModal();
         updateMyFacultiesSidebar();
@@ -532,7 +530,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 6. WHATSAPP STİLİ MESAJLAŞMA ---
+    // --- 💬 8. MESAJLAŞMA SİSTEMİ ---
     function renderMessages() {
         let html = `
             <div class="card" style="padding:0; border:none;">
@@ -643,7 +641,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- 7. PROFİL VE AYARLAR EKRANI ---
+    // --- 👤 9. PROFİL VE AYARLAR ---
     function renderProfile() {
         mainContent.innerHTML = `
             <div class="card">
@@ -704,13 +702,13 @@ document.addEventListener("DOMContentLoaded", () => {
         bind('logout-settings-btn', 'click', window.logout);
     }
 
-    // --- 8. SAYFA GEÇİŞ (ROUTING) YÖNETİMİ ---
+    // --- 🧭 10. SAYFA GEÇİŞ (ROUTING) YÖNETİMİ ---
     function loadPage(pageName) {
         if (pageName === 'home') mainContent.innerHTML = getHomeContent();
         else if (pageName === 'market') renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
         else if (pageName === 'housing') renderListings('housing', '🔑 Ev Arkadaşı & Yurt', 'İletişime Geç');
         else if (pageName === 'confessions') renderConfessions();
-        else if (pageName === 'qa') renderQA(); // 🌟 Soru-Cevap Sayfası
+        else if (pageName === 'qa') renderQA(); 
         else if (pageName === 'messages') renderMessages(); 
         else if (pageName === 'settings') renderSettings();
         
