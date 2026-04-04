@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // GİRİŞ YAPMA İŞLEMİ (Dondurma Hatası Çözüldü)
+    // GİRİŞ YAPMA İŞLEMİ
     bind('login-btn', 'click', async () => {
         const email = document.getElementById('login-email').value.trim();
         const password = document.getElementById('login-password').value;
@@ -178,7 +178,6 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.disabled = true;
 
         try {
-            // Giriş başarılı olursa onAuthStateChanged ekranı değiştirecek
             await signInWithEmailAndPassword(auth, email, password);
         } catch (error) {
             console.error("Giriş Hatası:", error);
@@ -227,12 +226,11 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // ============================================================================
-    // 2. OTURUM DURUMU KONTROLÜ (PERSISTENCE & RESCUE BLOCK)
+    // 2. OTURUM DURUMU KONTROLÜ
     // ============================================================================
 
     onAuthStateChanged(auth, async (user) => {
         if (user) { 
-            // Kullanıcı algılandığı an ekranı hemen aç (Bekletme yapma)
             if(authScreen && appScreen) {
                 authScreen.style.display = 'none';
                 appScreen.style.display = 'block';
@@ -245,7 +243,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 if(docSnap.exists()) {
                     window.userProfile = docSnap.data();
                 } else {
-                    // KURTARMA KALKANI: Firebase kuralları kapalıysa veya konsoldan eklendiyse
                     window.userProfile = { 
                         uid: user.uid, 
                         name: "Öğrenci", 
@@ -259,23 +256,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     await setDoc(userDocRef, window.userProfile);
                 }
                 
-                // Güvenlik amaçlı boş verileri doldur
                 if(!window.userProfile.email) window.userProfile.email = user.email;
                 if(!window.userProfile.university) window.userProfile.university = "UniLoop Kampüsü";
 
-                // Kullanıcıyı Çevrimiçi Yap
                 await updateDoc(userDocRef, { isOnline: true });
                 
-                // Gerçek zamanlı veritabanı dinleyicilerini başlat
                 initRealtimeListeners(user.uid);
 
-                // Ana Sayfayı veya aktif olan sekmeyi yükle
                 const activeTab = document.querySelector('.menu-item.active');
                 if(typeof window.loadPage === 'function') {
                     window.loadPage(activeTab ? activeTab.getAttribute('data-target') : 'home'); 
                 }
 
-                // Fakülte hafızası: Daha önce girmişse sol menüde göster
                 if(window.userProfile.faculty && typeof window.updateMyFacultiesSidebar === 'function') {
                     window.joinedFaculties = [{
                         name: window.userProfile.faculty, 
@@ -285,7 +277,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     window.updateMyFacultiesSidebar();
                 }
                 
-                // Giriş butonunu eski haline getir
                 const btn = document.getElementById('login-btn');
                 if(btn) { 
                     btn.innerText = "Giriş Yap"; 
@@ -293,7 +284,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
             } catch(error) { 
-                // EĞER FIREBASE KURALLARI KİLİTLİYSE BURASI ÇALIŞIR VE SİSTEM ÇÖKMEZ
                 window.userProfile = { 
                     uid: user.uid, 
                     name: "Misafir", 
@@ -310,7 +300,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Kullanıcı sekmeyi kapattığında onu offline yap
     window.addEventListener("beforeunload", () => {
         if(window.userProfile.uid) {
             updateDoc(doc(db, "users", window.userProfile.uid), { isOnline: false });
@@ -319,7 +308,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function initRealtimeListeners(currentUid) {
         
-        // 1. İLANLARI DİNLE (Market ve Yurt)
+        // 1. İLANLARI DİNLE
         onSnapshot(query(collection(db, "listings"), orderBy("createdAt", "desc")), (snapshot) => {
             marketDB = [];
             snapshot.forEach(doc => marketDB.push({ id: doc.id, ...doc.data() }));
@@ -356,7 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // 4. MESAJLARI DİNLE VE BİLDİRİM ROZETİNİ GÜNCELLE
+        // 4. MESAJLARI DİNLE
         onSnapshot(query(collection(db, "chats"), where("participants", "array-contains", currentUid), orderBy("lastUpdated", "desc")), (snapshot) => {
             chatsDB = [];
             let totalChats = 0;
@@ -377,7 +366,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 totalChats++; 
             });
 
-            // Bildirim Rozetini Güncelle
             const badge = document.getElementById('msg-badge');
             if(badge) {
                 if(totalChats > 0) { 
@@ -425,7 +413,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('sidebar').classList.toggle('open'); 
     });
 
-    // Dinamik Fakülte Linklerine Tıklama Olayı
     document.body.addEventListener('click', (e) => {
         const link = e.target.closest('.community-link');
         if(link) {
@@ -473,7 +460,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ============================================================================
-    // 4. İLAN YÖNETİMİ VE ÇOKLU FOTOĞRAF YÜKLEME
+    // 4. İLAN YÖNETİMİ VE ÇOKLU FOTOĞRAF YÜKLEME (KAMERA/GALERİ ENTEGRELİ)
     // ============================================================================
 
     window.renderListings = function(type, title, buttonText) {
@@ -530,6 +517,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 imgHtml = `<div style="font-size:48px; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">📦</div>`;
             }
 
+            // Düzenle/Sil Butonları Sadece İlan Sahibine Görünür
+            let actionButtonsHtml = '';
+            if (item.sellerId === window.userProfile.uid) {
+                 actionButtonsHtml = `
+                    <div style="display:flex; gap:10px;">
+                        <button class="action-btn" style="flex:1; padding:8px; font-size:12px;" onclick="editListing('${item.id}', '${item.title}', '${item.price}')">✏️ Düzenle</button>
+                        <button class="btn-danger" style="flex:1; padding:8px; font-size:12px;" onclick="deleteListing('${item.id}')">🗑️ Sil</button>
+                    </div>
+                 `;
+            } else {
+                 actionButtonsHtml = `<button class="action-btn" style="width:auto;" onclick="startChat('${item.sellerId}', '${item.sellerName}')">${buttonText}</button>`;
+            }
+
             gridHtml += `
                 <div class="item-card">
                     <div class="item-img-large" style="overflow:hidden; position:relative;">${imgHtml}</div>
@@ -538,8 +538,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="item-desc">${item.desc}</div>
                         <div style="font-size:11px; color:var(--text-gray); margin-bottom:10px;">Satıcı: <strong>${item.sellerName}</strong></div>
                         <div class="item-footer">
-                            <span class="item-price-large">${item.price}</span>
-                            <button class="action-btn" style="width:auto;" onclick="startChat('${item.sellerId}', '${item.sellerName}')">${buttonText}</button>
+                            <span class="item-price-large">${item.price} ₺</span>
+                            ${actionButtonsHtml}
                         </div>
                     </div>
                 </div>`;
@@ -547,22 +547,47 @@ document.addEventListener("DOMContentLoaded", () => {
         container.innerHTML = gridHtml;
     }
 
-    // 🌟 İLAN OLUŞTURMA VE 3 FOTOĞRAF ÖNİZLEMESİ 🌟
+    // 🌟 İLAN SİLME VE DÜZENLEME 🌟
+    window.deleteListing = async function(docId) {
+        if(confirm("Bu ilanı tamamen silmek istediğinize emin misiniz?")) {
+            try {
+                // Not: Storage'daki fotoğrafları silmek için ekstra backend kodu gerekir, şimdilik sadece Firestore'dan siliyoruz.
+                await deleteDoc(doc(db, "listings", docId));
+                alert("İlan başarıyla silindi!");
+            } catch(e) {
+                console.error(e);
+            }
+        }
+    }
+
+    window.editListing = function(docId, oldTitle, oldPrice) {
+        let newPrice = prompt(`"${oldTitle}" için yeni fiyatı girin:`, oldPrice);
+        if(newPrice !== null && newPrice.trim() !== "") {
+            try {
+                updateDoc(doc(db, "listings", docId), { price: newPrice.trim() });
+                alert("İlan güncellendi!");
+            } catch(e) {
+                console.error(e);
+            }
+        }
+    }
+
+    // 🌟 KAMERA VE GALERİ İÇİN FOTOĞRAF YÜKLEME 🌟
     window.openListingForm = function(type) {
         window.openModal('Yeni İlan Oluştur', `
             <div class="form-group">
                 <input type="text" id="new-item-title" placeholder="İlan Başlığı (Örn: Temiz Çalışma Masası)">
             </div>
             <div class="form-group">
-                <input type="text" id="new-item-price" placeholder="Fiyat (Örn: 500 TL veya Ücretsiz)">
+                <input type="number" id="new-item-price" placeholder="Fiyat (₺)">
             </div>
             <div class="form-group">
                 <textarea id="new-item-desc" rows="3" placeholder="İlan detayları ve durumu..."></textarea>
             </div>
             
             <div class="upload-btn-wrapper">
-                <button class="action-btn" style="width:100%; justify-content:center;">📷 En Fazla 3 Fotoğraf Seç</button>
-                <input type="file" id="new-item-photo" accept="image/*" multiple style="opacity:0; position:absolute; left:0; top:0; height:100%; width:100%; cursor:pointer;" />
+                <button class="action-btn" id="photo-trigger-btn" style="width:100%; justify-content:center;">📷 Fotoğraf Çek / Galeriden Seç (Max 3)</button>
+                <input type="file" id="new-item-photo" accept="image/*" multiple style="display:none;" />
             </div>
             
             <div id="preview-container" class="preview-container"></div>
@@ -573,8 +598,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // DOM yüklendikten sonra File Listener'ı çalıştırır
         setTimeout(() => {
+            const photoBtn = document.getElementById('photo-trigger-btn');
             const photoInput = document.getElementById('new-item-photo');
-            if(photoInput) {
+            
+            if(photoBtn && photoInput) {
+                // Butona tıklandığında gizli input'u tetikle
+                photoBtn.addEventListener('click', () => {
+                    photoInput.click();
+                });
+
+                // Dosya seçildiğinde önizleme oluştur
                 photoInput.addEventListener('change', function(e) {
                     const files = Array.from(e.target.files).slice(0, 3); // Max 3 fotoğraf
                     const previewContainer = document.getElementById('preview-container');
@@ -592,39 +625,41 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 100);
     }
 
-    // İLANI FIREBASE'E KAYDETME (Hatalar çözüldü)
+    // İLANI FIREBASE'E KAYDETME
     window.submitListing = async function(type) {
-        const title = document.getElementById('new-item-title').value;
-        const price = document.getElementById('new-item-price').value;
-        const desc = document.getElementById('new-item-desc').value;
+        const title = document.getElementById('new-item-title').value.trim();
+        const price = document.getElementById('new-item-price').value.trim();
+        const desc = document.getElementById('new-item-desc').value.trim();
         const photoInput = document.getElementById('new-item-photo');
         const statusEl = document.getElementById('upload-status');
         const btn = document.getElementById('publish-listing-btn');
 
         if(!title || !price || !desc) return alert("Lütfen başlık, fiyat ve açıklama girin.");
 
-        btn.disabled = true;
-        statusEl.style.display = 'block';
-
         let files = [];
         if(photoInput && photoInput.files && photoInput.files.length > 0) {
             files = Array.from(photoInput.files).slice(0, 3);
         }
 
+        if(files.length === 0) return alert("Lütfen en az 1 fotoğraf seçin veya çekin.");
+
+        btn.disabled = true;
+        statusEl.style.display = 'block';
+
         let imgUrlsArray = [];
 
         try {
-            // Fotoğrafları Storage'a Yükle
-            if(files.length > 0) {
-                for (let file of files) {
-                    const storageRef = ref(storage, 'listings/' + Date.now() + '_' + file.name);
-                    await uploadBytes(storageRef, file);
-                    const url = await getDownloadURL(storageRef);
-                    imgUrlsArray.push(url);
-                }
+            // 1. Fotoğrafları Storage'a Yükle
+            for (let file of files) {
+                // Dosya ismini benzersiz yapıyoruz
+                const fileName = Date.now() + '_' + file.name.replace(/\s/g, ''); 
+                const storageRef = ref(storage, 'listings/' + window.userProfile.uid + '/' + fileName);
+                await uploadBytes(storageRef, file);
+                const url = await getDownloadURL(storageRef);
+                imgUrlsArray.push(url);
             }
 
-            // Veritabanına Yaz
+            // 2. Veritabanına Yaz
             await addDoc(collection(db, "listings"), {
                 type: type, 
                 title: title, 
@@ -638,9 +673,12 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             window.closeModal();
+            alert("İlanınız başarıyla fotoğraflarıyla birlikte yayınlandı!");
+
         } catch (error) {
             console.error("İlan eklenirken hata:", error);
-            alert("İlan yayınlanırken hata oluştu! Firebase Storage kurallarınızı 'Test Moduna' alın.");
+            alert("İlan yayınlanırken hata oluştu! Konsolu kontrol edin.");
+        } finally {
             statusEl.style.display = 'none';
             btn.disabled = false;
         }
