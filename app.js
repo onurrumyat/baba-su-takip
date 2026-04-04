@@ -1,13 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
     
-    // --- 🛡️ DEFENSIVE PROGRAMMING (GÜVENLİ BAĞLAMA) 🛡️ ---
-    // Eğer HTML'de bir ID silinirse bile JS'in çökmesini engeller
+    // --- 🛡️ DEFENSIVE PROGRAMMING ---
     const bind = (id, event, callback) => {
         const el = document.getElementById(id);
         if (el) el.addEventListener(event, callback);
     };
 
-    // --- 🌟 KULLANICI PROFİLİ (GLOBAL) 🌟 ---
+    // --- 🌟 KULLANICI PROFİLİ 🌟 ---
     window.userProfile = { 
         name: "Ege", surname: "Yılmaz", email: "ege.yilmaz@uniloop.edu", age: 21,
         university: "Global University", faculty: "Henüz Fakülte Seçilmedi", year: "2. Sınıf", 
@@ -23,20 +22,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const globalUniversities = [
         "Yakın Doğu Üniversitesi (NEU)", "Doğu Akdeniz Üniversitesi (EMU)", "Girne Amerikan Üniversitesi (GAU)", "Uluslararası Kıbrıs Üniversitesi (CIU)",
         "Orta Doğu Teknik Üniversitesi (ODTÜ)", "Boğaziçi Üniversitesi", "İstanbul Teknik Üniversitesi (İTÜ)", "Bilkent Üniversitesi", "Koç Üniversitesi",
-        "Stanford University", "Massachusetts Institute of Technology (MIT)", "Harvard University", "University of Oxford", "University of Cambridge"
+        "Stanford University", "Massachusetts Institute of Technology (MIT)", "Harvard University"
     ];
 
     const database = [
-        { id: 1, type: "market", title: "IKEA Çalışma Masası", desc: "Çok az kullanıldı, çiziksiz.", price: "$45", img: "🪑" },
-        { id: 2, type: "market", title: "Anatomi Atlası (Netter)", desc: "Tıp öğrencileri için tertemiz kitap.", price: "$30", img: "📚" },
-        { id: 3, type: "housing", title: "Kampüse 5dk - Odaya Arkadaş", desc: "Sigara içmeyen bir ev arkadaşı arıyorum.", price: "$400/Ay", img: "🏠" },
+        { id: 1, type: "market", title: "IKEA Çalışma Masası", desc: "Çok az kullanıldı.", price: "$45", img: "🪑" },
+        { id: 2, type: "market", title: "Anatomi Atlası (Netter)", desc: "Temiz kitap.", price: "$30", img: "📚" },
+        { id: 3, type: "housing", title: "Kampüse 5dk - Odaya Arkadaş", desc: "Sigara içmeyen ev arkadaşı arıyorum.", price: "$400/Ay", img: "🏠" },
         { id: 4, type: "market", title: "M1 Macbook Air", desc: "Yazılımcıdan temiz.", price: "$800", img: "💻" }
     ];
 
     let confessionsDB = [
         { id: 1, avatar: "👻", color: "#FEF3C7", user: "Anonim #482", time: "2 saat önce", text: "İlk yılım ve henüz hiç arkadaş bulamadım." },
-        { id: 2, avatar: "🎭", color: "#E0E7FF", user: "Anonim #911", time: "5 saat önce", text: "Fizik 101 hocası gerçekten çok zorluyor. Vizeler berbat geçti." },
+        { id: 2, avatar: "🎭", color: "#E0E7FF", user: "Anonim #911", time: "5 saat önce", text: "Fizik 101 hocası gerçekten çok zorluyor." },
         { id: 3, avatar: "👽", color: "#D1FAE5", user: "Anonim #104", time: "1 gün önce", text: "Yemekhanedeki vegan menü harika olmuş!" }
+    ];
+
+    // 🌟 YENİ VERİTABANI: SORU & CEVAP 🌟
+    let qaDB = [
+        { id: 1, user: "Ayşe K.", avatar: "👩‍🎓", time: "1 saat önce", tag: "Yurtlar", question: "Kredi Yurtlar Kurumu (KYK) çıkış saatleri kaça kadar esnedi, bilen var mı?", answers: [{user: "Mehmet", text: "Gece 12'ye kadar girebiliyorsun."}] },
+        { id: 2, user: "Can T.", avatar: "👨‍💻", time: "3 saat önce", tag: "Ders Seçimi", question: "Seçmeli olarak İspanyolca 101 alınır mı, hoca çok zorluyor mu?", answers: [] },
+        { id: 3, user: "Elif B.", avatar: "👩‍🔬", time: "Dün", tag: "Kariyer", question: "Bilgisayar Mühendisliği 2. sınıfım, yaz stajı bulmak için nereden başlamalıyım?", answers: [{user: "Ali", text: "LinkedIn'den okul mezunlarına yaz."}, {user: "Cem", text: "Kariyer günlerini kaçırma."}] }
     ];
 
     let chatsDB = [
@@ -113,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(loginCard && registerCard) { loginCard.style.display = 'block'; registerCard.style.display = 'none'; }
     };
 
-    // --- GENEL FONKSİYONLAR ---
+    // --- GENEL MODAL VE MENÜ KONTROLLERİ ---
     window.goToMessages = function() {
         const msgTab = document.querySelector('[data-target="messages"]');
         if(msgTab) msgTab.click();
@@ -252,7 +258,124 @@ document.addEventListener("DOMContentLoaded", () => {
         `);
     }
 
-    // --- 4. FAKÜLTE KATILIM SİSTEMİ ---
+    // --- 🌟 4. YENİ: SORU VE CEVAP MODÜLÜ 🌟 ---
+    function renderQA() {
+        let html = `
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                    <h2 style="margin:0;">❓ Kampüs Soru & Cevap</h2>
+                    <button class="btn-primary" style="width:auto;" onclick="openQAForm()">+ Soru Sor</button>
+                </div>
+                <p style="color:var(--text-gray); font-size:14px; margin-bottom:20px;">Kampüsle, derslerle veya yurtlarla ilgili sorularını sor, deneyimli öğrencilerden cevap al.</p>
+                <div id="qa-feed"></div>
+            </div>
+        `;
+        mainContent.innerHTML = html;
+        drawQAGrid();
+    }
+
+    window.openQAForm = function() {
+        openModal('Soru Sor', `
+            <div class="form-group">
+                <label>Kategori (Etiket)</label>
+                <select id="new-qa-tag">
+                    <option>Yurtlar</option>
+                    <option>Ders Kaydı</option>
+                    <option>Teknoloji</option>
+                    <option>Kariyer</option>
+                    <option>Kampüs Yaşamı</option>
+                </select>
+            </div>
+            <textarea id="new-qa-text" class="form-group" style="width:100%; height:100px; border-radius:12px; padding:15px; font-size:16px;" placeholder="Sorunuzu detaylı bir şekilde yazın..."></textarea>
+            <button class="btn-primary" onclick="submitQA()">Soruyu Yayınla</button>
+        `);
+    }
+
+    window.submitQA = function() {
+        const textEl = document.getElementById('new-qa-text');
+        const tagEl = document.getElementById('new-qa-tag');
+        if(!textEl || textEl.value.trim() === '') return;
+        
+        qaDB.unshift({ 
+            id: Date.now(), avatar: window.userProfile.avatar, user: window.userProfile.name,
+            time: "Şimdi", tag: tagEl.value, question: textEl.value, answers: [] 
+        });
+        closeModal();
+        drawQAGrid();
+    }
+
+    function drawQAGrid() {
+        const feed = document.getElementById('qa-feed');
+        if(!feed) return;
+        let html = '';
+        qaDB.forEach((q, index) => {
+            html += `
+                <div class="premium-post" style="cursor:pointer; margin-bottom:15px;" onclick="openQADetail(${index})">
+                    <div class="pp-header" style="margin-bottom:10px;">
+                        <div class="pp-user-info">
+                            <div class="avatar" style="width:40px;height:40px;font-size:18px;">${q.avatar}</div>
+                            <div>
+                                <div class="pp-name">${q.user} <span style="font-size:11px; background:#EEF2FF; color:var(--primary); padding:4px 8px; border-radius:12px; margin-left:8px; font-weight:600;">${q.tag}</span></div>
+                                <div class="pp-time">${q.time}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pp-content" style="font-weight:700; font-size:16px; color:#111827; margin-bottom:15px;">${q.question}</div>
+                    <div class="pp-stats" style="border:none; margin:0; padding:0;">
+                        <span style="font-weight:bold; color:${q.answers.length > 0 ? '#10B981' : 'var(--text-gray)'}">💬 ${q.answers.length} Cevap</span>
+                        <span style="color:var(--primary); font-weight:bold;">Cevapları Gör ➔</span>
+                    </div>
+                </div>
+            `;
+        });
+        feed.innerHTML = html;
+    }
+
+    window.openQADetail = function(index) {
+        const q = qaDB[index];
+        let answersHtml = '';
+        if(q.answers.length === 0) {
+            answersHtml = '<p style="color:var(--text-gray); font-size:14px; text-align:center; margin: 20px 0;">Henüz cevap yok. İlk cevap veren sen ol!</p>';
+        } else {
+            q.answers.forEach(ans => {
+                answersHtml += `
+                    <div style="background:#F9FAFB; padding:15px; border-radius:12px; margin-bottom:10px; border:1px solid var(--border-color);">
+                        <div style="font-weight:bold; font-size:13px; color:var(--primary); margin-bottom:5px;">${ans.user}</div>
+                        <div style="font-size:14px; color:var(--text-dark); line-height:1.5;">${ans.text}</div>
+                    </div>
+                `;
+            });
+        }
+
+        openModal('Soru Detayı', `
+            <div style="margin-bottom: 20px;">
+                <span style="font-size:11px; background:#EEF2FF; color:var(--primary); padding:4px 8px; border-radius:12px; font-weight:600;">${q.tag}</span>
+                <div style="font-size:18px; font-weight:bold; margin-top:10px; color:#111827; line-height:1.4;">${q.question}</div>
+                <div style="font-size:12px; color:var(--text-gray); margin-top:5px;">Soran: ${q.user} • ${q.time}</div>
+            </div>
+            
+            <div style="border-top:1px solid var(--border-color); padding-top:20px; margin-bottom:20px;">
+                <h4 style="margin-bottom:15px; font-size:15px;">Cevaplar (${q.answers.length})</h4>
+                ${answersHtml}
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="new-answer-input" class="form-group" style="flex:1; margin:0;" placeholder="Cevabını yaz...">
+                <button class="btn-primary" style="width:auto;" onclick="submitAnswer(${index})">Gönder</button>
+            </div>
+        `);
+    }
+
+    window.submitAnswer = function(index) {
+        const ansInput = document.getElementById('new-answer-input');
+        if(ansInput && ansInput.value.trim() !== '') {
+            qaDB[index].answers.push({ user: window.userProfile.name, text: ansInput.value });
+            openQADetail(index); // Modal'ı güncel veriyle yenile
+            drawQAGrid(); // Arka plandaki listeyi yenile
+        }
+    }
+
+    // --- 5. FAKÜLTE KATILIM SİSTEMİ ---
     function updateMyFacultiesSidebar() {
         const container = document.getElementById('my-joined-faculties');
         if(!container) return;
@@ -346,7 +469,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Event Delegation ile tüm topluluk linkleri her zaman çalışır
     document.body.addEventListener('click', (e) => {
         const link = e.target.closest('.community-link');
         if(link) {
@@ -357,28 +479,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 5. PREMIUM MESAJLAŞMA SİSTEMİ ---
+    // --- 6. WHATSAPP STİLİ MESAJLAŞMA ---
     function renderMessages() {
         let html = `
-            <div class="card" style="padding:0; border:none;">
+            <div class="card" style="padding:0; overflow:hidden;">
                 <div class="chat-layout" id="chat-layout-container">
                     <div class="chat-sidebar">
-                        <div class="chat-sidebar-header">Mesajlar</div>
+                        <div class="chat-sidebar-header">Sohbetler</div>
         `;
         
         chatsDB.forEach(chat => {
             const lastMsg = chat.messages[chat.messages.length - 1].text;
-            const time = chat.messages[chat.messages.length - 1].time;
             const isActive = chat.id === currentChatId ? 'active' : '';
-            html += `
-                <div class="chat-contact ${isActive}" data-id="${chat.id}">
-                    <div class="avatar">${chat.avatar}</div>
-                    <div class="chat-contact-info">
-                        <div class="chat-contact-top"><span class="chat-contact-name">${chat.name}</span><span class="chat-contact-time">${time}</span></div>
-                        <div class="chat-contact-last">${lastMsg}</div>
-                    </div>
-                </div>
-            `;
+            html += `<div class="chat-contact ${isActive}" data-id="${chat.id}"><div class="avatar">${chat.avatar}</div><div class="chat-contact-info"><div class="chat-contact-top"><span class="chat-contact-name">${chat.name}</span></div><div class="chat-contact-last">${lastMsg}</div></div></div>`;
         });
         
         html += `
@@ -468,7 +581,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- 6. PROFİL VE AYARLAR EKRANI ---
+    // --- 7. PROFİL VE AYARLAR ---
     function renderProfile() {
         mainContent.innerHTML = `
             <div class="card">
@@ -483,7 +596,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <input type="text" disabled value="${window.userProfile.university}" style="background:#E5E7EB; cursor:not-allowed; opacity:0.7;">
                     </div>
                     <div class="form-group">
-                        <label>Okul E-posta Adresi <span style="color:var(--text-gray); font-size:11px;">(Onaylı)</span></label>
+                        <label>Okul E-posta Adresi</label>
                         <input type="email" disabled value="${window.userProfile.email}" style="background:#E5E7EB; cursor:not-allowed; opacity:0.7;">
                     </div>
                     <div class="grid-2col" style="margin-top:0;">
@@ -529,12 +642,13 @@ document.addEventListener("DOMContentLoaded", () => {
         bind('logout-settings-btn', 'click', window.logout);
     }
 
-    // --- 7. SAYFA GEÇİŞ (ROUTING) ---
+    // --- 8. SAYFA GEÇİŞ (ROUTING) YÖNETİMİ ---
     function loadPage(pageName) {
         if (pageName === 'home') mainContent.innerHTML = getHomeContent();
         else if (pageName === 'market') renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
         else if (pageName === 'housing') renderListings('housing', '🔑 Ev Arkadaşı & Yurt', 'İletişime Geç');
         else if (pageName === 'confessions') renderConfessions();
+        else if (pageName === 'qa') renderQA(); // YENİ EKLENEN SAYFA YÖNLENDİRMESİ
         else if (pageName === 'messages') renderMessages(); 
         else if (pageName === 'settings') renderSettings();
         
@@ -542,7 +656,6 @@ document.addEventListener("DOMContentLoaded", () => {
         window.scrollTo(0,0);
     }
 
-    // Sol Menü Tıklamaları
     document.querySelectorAll('.menu-item[data-target]').forEach(item => {
         item.addEventListener('click', (e) => {
             if(e.currentTarget.getAttribute('data-target')) {
