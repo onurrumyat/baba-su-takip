@@ -38,11 +38,12 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 3, avatar: "👽", color: "#D1FAE5", user: "Anonim #104", time: "1 gün önce", text: "Yemekhanedeki vegan menü harika olmuş!" }
     ];
 
-    // 🌟 YENİ VERİTABANI: SORU & CEVAP 🌟
+    // 🌟 YENİ VERİTABANI: İSTENEN 4 KATEGORİLİ SORU & CEVAP 🌟
+    // Kategoriler SADECE: Genel, Yurtlar, Ders, Kampüs Yaşamı
     let qaDB = [
         { id: 1, user: "Ayşe K.", avatar: "👩‍🎓", time: "1 saat önce", tag: "Yurtlar", question: "Kredi Yurtlar Kurumu (KYK) çıkış saatleri kaça kadar esnedi, bilen var mı?", answers: [{user: "Mehmet", text: "Gece 12'ye kadar girebiliyorsun."}] },
-        { id: 2, user: "Can T.", avatar: "👨‍💻", time: "3 saat önce", tag: "Ders Kaydı", question: "Seçmeli olarak İspanyolca 101 alınır mı, hoca çok zorluyor mu?", answers: [] },
-        { id: 3, user: "Elif B.", avatar: "👩‍🔬", time: "Dün", tag: "Kariyer", question: "Bilgisayar Mühendisliği 2. sınıfım, yaz stajı bulmak için nereden başlamalıyım?", answers: [{user: "Ali", text: "LinkedIn'den okul mezunlarına yaz."}, {user: "Cem", text: "Kariyer günlerini kaçırma."}] }
+        { id: 2, user: "Can T.", avatar: "👨‍💻", time: "3 saat önce", tag: "Ders", question: "Seçmeli olarak İspanyolca 101 alınır mı, hoca çok zorluyor mu?", answers: [] },
+        { id: 3, user: "Elif B.", avatar: "👩‍🔬", time: "Dün", tag: "Genel", question: "Kampüs içi otobüs saatleri değişti mi? Dün 15 dakika durakta bekledim.", answers: [{user: "Ali", text: "Evet, yeni saatler okulun sitesine yüklendi."}] }
     ];
 
     let chatsDB = [
@@ -74,7 +75,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if(authScreen && appScreen) { authScreen.style.display = 'none'; appScreen.style.display = 'block'; loadPage('home'); }
     });
 
-    // Autocomplete Logic
     const uniInput = document.getElementById('reg-uni');
     const uniList = document.getElementById('uni-autocomplete-list');
     if (uniInput && uniList) {
@@ -141,7 +141,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.getElementById('sidebar');
     bind('mobile-menu-btn', 'click', () => { if(sidebar) sidebar.classList.toggle('open'); });
 
-    // Daha Fazla Göster
     const setupShowMore = (btnId, containerId) => {
         const btn = document.getElementById(btnId);
         const container = document.getElementById(containerId);
@@ -231,7 +230,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const textEl = document.getElementById('new-conf-text');
         if(!textEl || textEl.value.trim() === '') return;
         
-        // AI MODERATÖR SİSTEMİ (Güvenlik Kontrolü)
         const toxicWords = ["intihar", "ölmek", "depresyon", "aptal", "nefret"];
         const isToxic = toxicWords.some(word => textEl.value.toLowerCase().includes(word));
 
@@ -276,7 +274,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `);
     }
 
-    // --- 🌟 4. YENİ EKLENEN: SORU VE CEVAP MODÜLÜ 🌟 ---
+    // --- 🌟 4. YENİ EKLENEN: TAM FONKSİYONEL SORU VE CEVAP MODÜLÜ 🌟 ---
     function renderQA() {
         let html = `
             <div class="card">
@@ -287,10 +285,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 <p style="color:var(--text-gray); font-size:14px; margin-bottom:20px;">Kampüsle, derslerle veya yurtlarla ilgili sorularını sor, deneyimli öğrencilerden cevap al.</p>
                 
                 <div class="qa-filters" id="qa-filters-container">
-                    <button class="qa-filter-btn active" data-filter="Tümü">Tümü</button>
+                    <button class="qa-filter-btn active" data-filter="Genel">Genel</button>
                     <button class="qa-filter-btn" data-filter="Yurtlar">Yurtlar</button>
-                    <button class="qa-filter-btn" data-filter="Ders Kaydı">Ders Kaydı</button>
-                    <button class="qa-filter-btn" data-filter="Kariyer">Kariyer</button>
+                    <button class="qa-filter-btn" data-filter="Ders">Ders</button>
                     <button class="qa-filter-btn" data-filter="Kampüs Yaşamı">Kampüs Yaşamı</button>
                 </div>
 
@@ -298,9 +295,8 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
         mainContent.innerHTML = html;
-        drawQAGrid('Tümü');
+        drawQAGrid('Genel'); // İlk açılışta Genel akışı gösterilir
 
-        // Filtre Dinleyicileri
         const filterBtns = document.querySelectorAll('.qa-filter-btn');
         filterBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -314,13 +310,12 @@ document.addEventListener("DOMContentLoaded", () => {
     window.openQAForm = function() {
         openModal('Yeni Soru Sor', `
             <div class="form-group">
-                <label>Kategori (Etiket)</label>
+                <label>Kategori Seç</label>
                 <select id="new-qa-tag">
-                    <option>Yurtlar</option>
-                    <option>Ders Kaydı</option>
-                    <option>Kariyer</option>
-                    <option>Kampüs Yaşamı</option>
-                    <option>Teknoloji</option>
+                    <option value="Genel">Genel</option>
+                    <option value="Yurtlar">Yurtlar</option>
+                    <option value="Ders">Ders</option>
+                    <option value="Kampüs Yaşamı">Kampüs Yaşamı</option>
                 </select>
             </div>
             <textarea id="new-qa-text" class="form-group" style="width:100%; height:120px; border-radius:12px; padding:15px; font-size:15px;" placeholder="Sorunuzu detaylı bir şekilde yazın..."></textarea>
@@ -339,18 +334,18 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         closeModal();
         
-        // Aktif filtreyi bulup listeyi o filtreyle yenile
         const activeFilter = document.querySelector('.qa-filter-btn.active');
-        const filterValue = activeFilter ? activeFilter.getAttribute('data-filter') : 'Tümü';
+        const filterValue = activeFilter ? activeFilter.getAttribute('data-filter') : 'Genel';
         drawQAGrid(filterValue);
     }
 
-    window.drawQAGrid = function(filterTag = 'Tümü') {
+    window.drawQAGrid = function(filterTag = 'Genel') {
         const feed = document.getElementById('qa-feed');
         if(!feed) return;
         
+        // Eğer seçilen 'Genel' ise tümünü göster (Ana Feed mantığı), değilse filtrele.
         let filteredDB = qaDB;
-        if(filterTag !== 'Tümü') {
+        if(filterTag !== 'Genel') {
             filteredDB = qaDB.filter(q => q.tag === filterTag);
         }
 
@@ -428,7 +423,7 @@ document.addEventListener("DOMContentLoaded", () => {
             openQADetail(index); // Modalı güncel veriyle yenile
             
             const activeFilter = document.querySelector('.qa-filter-btn.active');
-            const filterValue = activeFilter ? activeFilter.getAttribute('data-filter') : 'Tümü';
+            const filterValue = activeFilter ? activeFilter.getAttribute('data-filter') : 'Genel';
             drawQAGrid(filterValue); // Arka plandaki listeyi yenile
         }
     }
@@ -537,7 +532,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 6. PREMIUM MESAJLAŞMA SİSTEMİ ---
+    // --- 6. WHATSAPP STİLİ MESAJLAŞMA ---
     function renderMessages() {
         let html = `
             <div class="card" style="padding:0; border:none;">
@@ -715,7 +710,7 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (pageName === 'market') renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
         else if (pageName === 'housing') renderListings('housing', '🔑 Ev Arkadaşı & Yurt', 'İletişime Geç');
         else if (pageName === 'confessions') renderConfessions();
-        else if (pageName === 'qa') renderQA(); // 🌟 Soru-Cevap Sayfası Bağlandı
+        else if (pageName === 'qa') renderQA(); // 🌟 Soru-Cevap Sayfası
         else if (pageName === 'messages') renderMessages(); 
         else if (pageName === 'settings') renderSettings();
         
