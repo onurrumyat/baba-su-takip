@@ -54,7 +54,7 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
 .card { background: var(--card-bg); padding: 24px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 .card h2 { font-size: 20px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; font-weight: 700; flex-wrap: wrap; gap: 10px;}
 
-/* DÜZELTME: BUTONLARIN TIKLANABİLİRLİĞİ (HITBOX) ARTIRILDI */
+/* BUTONLAR (GÜVENLİ TIKLAMA ALANI) */
 .btn-primary, .action-btn, .btn-danger { 
     display: inline-flex; justify-content: center; align-items: center; text-align: center;
     border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; width: 100%; 
@@ -66,8 +66,7 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
 .action-btn:hover { background: #E0E7FF; transform: translateY(-1px); }
 .btn-danger { background: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5; }
 .btn-danger:hover { background: #FEE2E2; }
-/* Buton içindeki ikonların tıklamayı yutmasını engeller */
-.btn-primary *, .action-btn *, .btn-danger * { pointer-events: none; }
+.btn-primary *, .action-btn *, .btn-danger * { pointer-events: none; } /* İçindeki yazının tıklamayı yutmasını engeller */
 
 .form-group { margin-bottom: 16px; text-align: left; width: 100%;}
 .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: var(--text-dark); }
@@ -122,6 +121,7 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
 .theme-midnight { background: linear-gradient(135deg, #111827, #374151); }
 .theme-love { background: linear-gradient(135deg, #4c1d95, #be185d); }
 .theme-drama { background: linear-gradient(135deg, #7f1d1d, #ea580c); }
+.confess-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%); pointer-events: none; }
 
 .cc-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; position: relative; z-index: 2; }
 .cc-avatar { font-size: 18px; background: rgba(255, 255, 255, 0.1); width: 36px; height: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
@@ -180,8 +180,9 @@ header { background-color: var(--card-bg); padding: 15px 5%; display: flex; just
 .chat-input-wrapper:focus-within { border-color: var(--primary); background: #FFFFFF; }
 .chat-input-wrapper input { width: 100%; border: none; background: transparent; outline: none; font-size: 15px; color: var(--text-dark); }
 .chat-send-btn { background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 16px; transition: 0.2s; box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3); }
+.chat-send-btn:hover { transform: scale(1.05); background: var(--primary-hover); }
 
-/* FAKÜLTE AĞI */
+/* FAKÜLTE AĞI VE ESTETİK KAPISI */
 .community-banner { background: linear-gradient(135deg, #1E3A8A, #4F46E5); padding: 40px 30px; border-radius: 16px; margin-bottom: 24px; color: white; display: flex; justify-content: space-between; align-items: flex-end; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
 .comm-banner-left h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 .comm-banner-left p { font-size: 15px; font-weight: 500; opacity: 0.9; }
