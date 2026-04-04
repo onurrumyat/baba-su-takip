@@ -1,13 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
     
-    // --- 🛡️ DEFENSIVE PROGRAMMING (ZIRHLI BAĞLAMA) ---
-    // Bu fonksiyon sayesinde HTML'de bir buton silinse bile JavaScript asla çökmez.
+    // --- 🛡️ DEFENSIVE PROGRAMMING ---
     const bind = (id, event, callback) => {
         const el = document.getElementById(id);
         if (el) el.addEventListener(event, callback);
     };
 
-    // --- 🌟 KULLANICI PROFİLİ VE SİSTEM HAFIZASI 🌟 ---
+    // --- 🌟 KULLANICI PROFİLİ 🌟 ---
     window.userProfile = { 
         name: "Ege", surname: "Yılmaz", email: "ege.yilmaz@uniloop.edu", age: 21,
         university: "Global University", faculty: "Henüz Fakülte Seçilmedi", year: "2. Sınıf", 
@@ -19,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const appScreen = document.getElementById('app-screen');
     const mainContent = document.getElementById('main-content');
 
-    // --- 🗄️ MOCK VERİTABANLARI 🗄️ ---
+    // --- MOCK VERİTABANLARI ---
     const globalUniversities = [
         "Yakın Doğu Üniversitesi (NEU)", "Doğu Akdeniz Üniversitesi (EMU)", "Girne Amerikan Üniversitesi (GAU)", "Uluslararası Kıbrıs Üniversitesi (CIU)",
         "Orta Doğu Teknik Üniversitesi (ODTÜ)", "Boğaziçi Üniversitesi", "İstanbul Teknik Üniversitesi (İTÜ)", "Bilkent Üniversitesi", "Koç Üniversitesi",
@@ -33,10 +32,11 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 4, type: "market", title: "M1 Macbook Air", desc: "Yazılımcıdan temiz.", price: "$800", img: "💻" }
     ];
 
+    // YENİ İTİRAF KARTLARI VERİTABANI (Temalar ile)
     let confessionsDB = [
-        { id: 1, avatar: "👻", color: "#FEF3C7", user: "Anonim #482", time: "2 saat önce", text: "İlk yılım ve henüz hiç arkadaş bulamadım." },
-        { id: 2, avatar: "🎭", color: "#E0E7FF", user: "Anonim #911", time: "5 saat önce", text: "Fizik 101 hocası gerçekten çok zorluyor." },
-        { id: 3, avatar: "👽", color: "#D1FAE5", user: "Anonim #104", time: "1 gün önce", text: "Yemekhanedeki vegan menü harika olmuş!" }
+        { id: 1, avatar: "👻", theme: "theme-midnight", user: "Anonim #482", time: "2 saat önce", tag: "📍 Kütüphane", text: "İlk yılım ve henüz hiç arkadaş bulamadım.", likes: 142, comments: 24 },
+        { id: 2, avatar: "🎭", theme: "theme-drama", user: "Anonim #911", time: "5 saat önce", tag: "📍 Vizeler", text: "Fizik 101 hocası gerçekten çok zorluyor.", likes: 89, comments: 12 },
+        { id: 3, avatar: "👽", theme: "theme-love", user: "Anonim #104", time: "1 gün önce", tag: "📍 Yemekhane", text: "Yemekhanedeki vegan menü harika olmuş!", likes: 56, comments: 8 }
     ];
 
     let qaDB = [
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
     let currentChatId = "chat1";
 
-    // --- 🚀 1. GİRİŞ / KAYIT SİSTEMİ (AUTOCOMPLETE) 🚀 ---
+    // --- 🌟 GİRİŞ / KAYIT SİSTEMİ 🌟 ---
     bind('show-register-btn', 'click', () => {
         const loginCard = document.getElementById('login-card');
         const registerCard = document.getElementById('register-card');
@@ -118,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(loginCard && registerCard) { loginCard.style.display = 'block'; registerCard.style.display = 'none'; }
     };
 
-    // --- 🛠️ 2. GENEL MODAL VE MENÜ KONTROLLERİ 🛠️ ---
+    // --- GENEL MODAL VE MENÜ KONTROLLERİ ---
     window.goToMessages = function() {
         const msgTab = document.querySelector('[data-target="messages"]');
         if(msgTab) msgTab.click();
@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupShowMore('desktop-show-more-btn', 'desktop-more-faculties');
     setupShowMore('mobile-show-more-btn', 'mobile-more-faculties');
 
-    // --- 🏠 3. ANA SAYFA ---
+    // --- 1. ANA SAYFA ---
     function getHomeContent() {
         return `
             <div class="card" style="background: linear-gradient(135deg, #1E3A8A, #4F46E5); color: white; border:none;">
@@ -170,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     }
 
-    // --- 🛒 4. İLAN LİSTELEYİCİ ---
+    // --- 2. İLAN LİSTELEYİCİ ---
     function renderListings(type, title, buttonText) {
         let html = `
             <div class="card">
@@ -203,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(searchInput) searchInput.addEventListener('input', (e) => drawGrid(e.target.value.toLowerCase())); 
     }
 
-    // --- 🤫 5. ANONİM KAMPÜS ---
+    // --- 🤫 3. YENİ ANONİM KAMPÜS (2 SÜTUNLU KART TASARIMI) ---
     function renderConfessions() {
         let html = `
             <div class="card">
@@ -211,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <h2 style="margin:0;">🤫 Anonim Kampüs</h2>
                     <button class="btn-primary" style="width:auto;" onclick="openConfessionForm()">+ İtiraf Yaz</button>
                 </div>
-                <div class="confessions-grid" id="conf-feed"></div>
+                <div class="confessions-feed" id="conf-feed"></div>
             </div>
         `;
         mainContent.innerHTML = html;
@@ -220,6 +220,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.openConfessionForm = function() {
         openModal('Yeni Anonim Gönderi', `
+            <div class="form-group">
+                <label>Konum / Etiket</label>
+                <input type="text" id="new-conf-tag" placeholder="Örn: 📍 Kütüphane">
+            </div>
             <textarea id="new-conf-text" class="form-group" style="width:100%; height:120px; border-radius:12px; padding:15px; font-size:16px; background:#F9FAFB;" placeholder="Aklından ne geçiyor? Tamamen anonimdir..."></textarea>
             <button class="btn-primary" onclick="submitConfession()">Kampüse Gönder</button>
         `);
@@ -227,8 +231,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.submitConfession = function() {
         const textEl = document.getElementById('new-conf-text');
+        const tagEl = document.getElementById('new-conf-tag');
         if(!textEl || textEl.value.trim() === '') return;
         
+        // AI MODERATÖR SİSTEMİ (Güvenlik Kontrolü)
         const toxicWords = ["intihar", "ölmek", "depresyon", "aptal", "nefret"];
         const isToxic = toxicWords.some(word => textEl.value.toLowerCase().includes(word));
 
@@ -245,10 +251,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `);
         } else {
-            const pastelColors = ["#FEF3C7", "#E0E7FF", "#D1FAE5", "#FCE7F3", "#F3E8FF"];
+            const themes = ["theme-midnight", "theme-love", "theme-drama"];
+            const tagVal = tagEl && tagEl.value ? tagEl.value : "📍 Kampüs";
             confessionsDB.unshift({ 
-                id: Date.now(), avatar: ["👻","👽","🤖","🦊","🎭"][Math.floor(Math.random()*5)], color: pastelColors[Math.floor(Math.random()*5)],
-                user: "Anonim #"+Math.floor(Math.random()*999), time: "Şimdi", text: textEl.value 
+                id: Date.now(), 
+                avatar: ["👻","👽","🤖","🦊","🎭"][Math.floor(Math.random()*5)], 
+                theme: themes[Math.floor(Math.random()*3)],
+                user: "Anonim #"+Math.floor(Math.random()*999), 
+                time: "Şimdi", 
+                tag: tagVal,
+                text: textEl.value,
+                likes: 0,
+                comments: 0
             });
             closeModal();
             drawConfessionsGrid();
@@ -260,20 +274,46 @@ document.addEventListener("DOMContentLoaded", () => {
         if(!feed) return;
         let html = '';
         confessionsDB.forEach((post, index) => {
-            html += `<div class="confession-square" style="background:${post.color};" onclick="openConfessionDetail(${index})"><div class="confession-square-header"><div class="confession-square-avatar">${post.avatar}</div><div class="confession-square-time">${post.time}</div></div><div class="confession-square-text">${post.text}</div></div>`;
+            html += `
+            <div class="confess-card ${post.theme}" onclick="openConfessionDetail(${index})">
+                <div class="cc-header">
+                    <div class="cc-avatar">${post.avatar}</div>
+                    <div class="cc-meta">
+                        <span class="cc-author">${post.user}</span>
+                        <span class="cc-time">${post.time}</span>
+                        <span class="cc-tag">${post.tag}</span>
+                    </div>
+                </div>
+                <div class="cc-body">"${post.text}"</div>
+                <div class="cc-footer">
+                    <div class="cc-action-btn">🔥 (${post.likes})</div>
+                    <div class="cc-action-btn">💬 (${post.comments})</div>
+                </div>
+            </div>`;
         });
         feed.innerHTML = html;
     }
 
     window.openConfessionDetail = function(index) {
         const post = confessionsDB[index];
+        let bgStyle = "";
+        if(post.theme === "theme-midnight") bgStyle = "linear-gradient(135deg, #111827, #374151)";
+        if(post.theme === "theme-love") bgStyle = "linear-gradient(135deg, #4c1d95, #be185d)";
+        if(post.theme === "theme-drama") bgStyle = "linear-gradient(135deg, #7f1d1d, #ea580c)";
+
         openModal(post.user + ' Diyor ki:', `
-            <div style="background:${post.color}; padding: 30px; border-radius: 16px; font-size: 18px; line-height: 1.6; margin-bottom: 24px; color:#1F2937; font-weight:500;">${post.text}</div>
-            <div style="display:flex; gap:12px;"><button class="action-btn" style="flex:1;" onclick="alert('Beğenildi!')">👍 Beğen</button><button class="action-btn" style="flex:1;" onclick="alert('Yanıt bölümü açılıyor...')">💬 Yanıtla</button></div>
+            <div style="background:${bgStyle}; color:white; padding: 30px; border-radius: 16px; font-size: 18px; line-height: 1.6; margin-bottom: 24px; font-style:italic;">
+                <div style="font-size:12px; margin-bottom:10px; opacity:0.8;">${post.tag}</div>
+                "${post.text}"
+            </div>
+            <div style="display:flex; gap:12px;">
+                <button class="action-btn" style="flex:1;" onclick="alert('Beğenildi!')">🔥 Yanıyor</button>
+                <button class="action-btn" style="flex:1;" onclick="alert('Yanıt bölümü açılıyor...')">💬 Yanıtla</button>
+            </div>
         `);
     }
 
-    // --- ❓ 6. SORU VE CEVAP MODÜLÜ ---
+    // --- ❓ 4. SORU VE CEVAP MODÜLÜ ---
     function renderQA() {
         let html = `
             <div class="card">
@@ -426,7 +466,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- 🏢 7. FAKÜLTE KATILIM SİSTEMİ ---
+    // --- 🏢 5. FAKÜLTE KATILIM SİSTEMİ ---
     function updateMyFacultiesSidebar() {
         const container = document.getElementById('my-joined-faculties');
         if(!container) return;
@@ -530,7 +570,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 💬 8. MESAJLAŞMA SİSTEMİ ---
+    // --- 💬 6. WHATSAPP STİLİ MESAJLAŞMA ---
     function renderMessages() {
         let html = `
             <div class="card" style="padding:0; border:none;">
@@ -641,7 +681,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- 👤 9. PROFİL VE AYARLAR ---
+    // --- 👤 7. PROFİL VE AYARLAR ---
     function renderProfile() {
         mainContent.innerHTML = `
             <div class="card">
@@ -702,7 +742,7 @@ document.addEventListener("DOMContentLoaded", () => {
         bind('logout-settings-btn', 'click', window.logout);
     }
 
-    // --- 🧭 10. SAYFA GEÇİŞ (ROUTING) YÖNETİMİ ---
+    // --- 🧭 8. SAYFA GEÇİŞ (ROUTING) YÖNETİMİ ---
     function loadPage(pageName) {
         if (pageName === 'home') mainContent.innerHTML = getHomeContent();
         else if (pageName === 'market') renderListings('market', '🛒 Kampüs Market', 'Satıcıya Yaz');
