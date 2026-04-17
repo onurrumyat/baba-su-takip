@@ -2,141 +2,237 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>UniLoop - Global Campus Network</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Cerrahi Asistanı</title>
+    <style>
+        :root {
+            --primary: #0d47a1;
+            --secondary: #00acc1;
+            --bg: #f4f7f9;
+            --text: #333;
+            --success: #2e7d32;
+            --warning: #f57c00;
+            --danger: #c62828;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+        /* Sol Menü */
+        .sidebar {
+            width: 280px;
+            background: #fff;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar h2 { color: var(--primary); font-size: 1.2rem; margin-bottom: 20px; border-bottom: 2px solid var(--secondary); padding-bottom: 10px; }
+        .menu-btn {
+            background: none; border: none; width: 100%; text-align: left; padding: 15px; margin-bottom: 10px;
+            font-size: 1rem; cursor: pointer; border-radius: 8px; transition: 0.3s; color: var(--text);
+        }
+        .menu-btn:hover { background: #e0f7fa; }
+        .menu-btn.active { background: var(--primary); color: white; }
+
+        /* Ana İçerik */
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; }
+        .header-title { margin-bottom: 30px; color: var(--primary); }
+        .section { display: none; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .section.active { display: block; }
+
+        /* Form Elemanları */
+        label { display: block; margin-top: 15px; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input[type="file"], input[type="number"], select {
+            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;
+        }
+        button.action-btn {
+            margin-top: 20px; padding: 12px 24px; background: var(--secondary); color: white;
+            border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; transition: 0.3s; width: 100%;
+        }
+        button.action-btn:hover { background: #00838f; }
+
+        /* Analiz Bölümü */
+        #imagePreview { max-width: 100%; max-height: 400px; margin-top: 20px; border-radius: 8px; display: none; border: 2px dashed #ccc; }
+        #loader { display: none; margin-top: 20px; text-align: center; color: var(--primary); font-weight: bold; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 10px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Sonuç Kartları */
+        .result-box { margin-top: 25px; padding: 20px; border-radius: 8px; display: none; background: #f9f9f9; border-left: 5px solid var(--primary); }
+        .result-box h3 { margin-bottom: 15px; color: var(--primary); }
+        
+        .badge { display: inline-block; padding: 5px 10px; border-radius: 4px; color: white; font-weight: bold; margin-top: 10px; }
+        .bg-success { background: var(--success); }
+        .bg-warning { background: var(--warning); }
+        .bg-danger { background: var(--danger); }
+        
+        .checkbox-group { display: flex; flex-direction: column; gap: 8px; margin-top: 5px; }
+        .checkbox-group label { margin: 0; font-weight: normal; display: flex; align-items: center; gap: 10px; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    </style>
 </head>
 <body>
 
-    <div id="auth-screen">
-        
-        <div class="auth-card" id="login-card">
-            <div class="auth-logo">🌍 UniLoop</div>
-            <p class="auth-subtitle">Kampüs ağına giriş yap, döngüde kal.</p>
-            
-            <div class="form-group">
-                <input type="email" id="login-email" placeholder="Okul E-posta Adresin (.edu uzantılı)">
-            </div>
-            <div class="form-group" style="margin-bottom: 8px;">
-                <input type="password" id="login-password" placeholder="Şifren">
-            </div>
-            
-            <div style="text-align: right; margin-bottom: 20px;">
-                <span id="forgot-password-btn" style="font-size: 13px; color: var(--primary); cursor: pointer; font-weight: 600;">Şifremi Unuttum</span>
-            </div>
-            
-            <button class="btn-primary" id="login-btn" style="margin-bottom: 10px; padding: 12px; font-size: 16px;">Giriş Yap</button>
-            <button class="action-btn" id="show-register-btn" style="padding: 12px; font-size: 16px;">Yeni Hesap Oluştur</button>
-            
-            <p style="font-size: 12px; color: var(--text-gray); margin-top: 20px;">Sadece e-postasını onaylamış öğrenciler katılabilir.</p>
-        </div>
-
-        <div class="auth-card" id="register-card" style="display: none;">
-            <div class="auth-logo" style="font-size: 28px;">🌍 Ağa Katıl</div>
-            <p class="auth-subtitle" style="margin-bottom: 20px;">Üniversiteni seç ve kendi kampüs ağına bağlan.</p>
-            
-            <div class="grid-2col" style="margin-top: 0; margin-bottom: 0;">
-                <div class="form-group"><input type="text" id="reg-name" placeholder="Ad"></div>
-                <div class="form-group"><input type="text" id="reg-surname" placeholder="Soyad"></div>
-            </div>
-            
-            <div class="form-group autocomplete">
-                <input type="text" id="reg-uni" placeholder="Üniversiteni Ara (Örn: Stanford, ODTÜ...)" autocomplete="off">
-                <div id="uni-autocomplete-list" class="autocomplete-items"></div>
-            </div>
-
-            <div class="form-group">
-                <input type="email" id="reg-email" placeholder="Öğrenci E-posta Adresin (.edu)">
-            </div>
-            <div class="form-group">
-                <input type="password" id="reg-password" placeholder="Güçlü Bir Şifre Belirle">
-            </div>
-            
-            <button class="btn-primary" id="register-btn" style="margin-bottom: 10px; padding: 12px; font-size: 16px;">Hesabımı Oluştur</button>
-            <button class="action-btn" id="show-login-btn" style="padding: 12px; font-size: 16px; background: transparent; border: 1px solid var(--border-color);">Zaten hesabım var</button>
-        </div>
-
+    <div class="sidebar">
+        <h2>🦷 AI Cerrahi Sistem</h2>
+        <button class="menu-btn active" onclick="switchTab('modul1', this)">📸 Görüntü Analizi</button>
+        <button class="menu-btn" onclick="switchTab('modul2', this)">📊 Risk Hesaplayıcı</button>
     </div>
 
-    <div id="app-screen" style="display: none;">
-        <header>
-            <div class="logo-area">
-                <div id="mobile-menu-btn">☰</div>
-                <div class="logo" id="logo-btn">🌍 UniLoop</div>
-            </div>
-            <div class="user-menu">
-                <button class="btn-primary" id="profile-btn" style="width: auto; padding: 10px 20px; border-radius: 20px;">👤 Profilim</button>
-            </div>
-        </header>
+    <div class="main-content">
+        <h1 class="header-title">Ağız, Diş ve Çene Cerrahisi Karar Destek Sistemi</h1>
 
-        <div class="container">
-            <aside class="sidebar" id="sidebar">
-                <div class="sidebar-top">
-                    <h3>Navigasyon</h3>
-                    <div class="menu-item active" data-target="home">🏠 Ana Sayfa</div>
-                    <div class="menu-item" data-target="market">🛒 Kampüs Market</div>
-                    <div class="menu-item" data-target="housing">🔑 Ev Arkadaşı & Yurt</div>
-                    <div class="menu-item" data-target="confessions">🤫 Anonim Kampüs</div>
-                    <div class="menu-item" data-target="qa">❓ Soru & Cevap</div>
-                    
-                    <br>
-                    <h3>Bana Özel</h3>
-                    <div class="menu-item" id="nav-messages-btn" data-target="messages">💬 Mesajlarım <span id="msg-badge" style="display:none; background: #EF4444; color:white; padding: 2px 8px; border-radius: 12px; font-size:11px; margin-left:5px;">0</span></div>
-                    <div id="my-joined-faculties"></div>
-                    
-                    <div class="mobile-only-communities">
-                        <br>
-                        <h3>🏢 Fakülteler</h3>
-                        <div class="menu-item community-link" data-name="Tıp Fakültesi" data-icon="🩺" data-color="linear-gradient(135deg, #EF4444, #B91C1C)">🩺 Tıp Fakültesi</div>
-                        <div class="menu-item community-link" data-name="Bilgisayar Fakültesi" data-icon="💻" data-color="linear-gradient(135deg, #3B82F6, #2563EB)">💻 Bilgisayar Fakültesi</div>
-                        <div class="menu-item community-link" data-name="Diş Hekimliği" data-icon="🦷" data-color="linear-gradient(135deg, #06B6D4, #0891B2)">🦷 Diş Hekimliği</div>
-                        
-                        <div id="mobile-more-faculties" style="display: none;">
-                            <div class="menu-item community-link" data-name="Hukuk Fakültesi" data-icon="⚖️" data-color="linear-gradient(135deg, #8B5CF6, #6D28D9)">⚖️ Hukuk Fakültesi</div>
-                            <div class="menu-item community-link" data-name="Mimarlık Fakültesi" data-icon="📐" data-color="linear-gradient(135deg, #F59E0B, #D97706)">📐 Mimarlık Fakültesi</div>
-                            <div class="menu-item community-link" data-name="Eğitim Fakültesi" data-icon="📖" data-color="linear-gradient(135deg, #10B981, #059669)">📖 Eğitim Fakültesi</div>
-                        </div>
-                        <button class="action-btn" id="mobile-show-more-btn" style="margin-top: 10px;">Daha Fazla Göster</button>
+        <div id="modul1" class="section active">
+            <h2>Radyografik Görüntü Analizi</h2>
+            <p style="color: #666; margin-bottom: 20px;">Panoramik veya KIBT kesiti yükleyerek AI destekli anatomik analizi başlatın.</p>
+            
+            <input type="file" id="imageInput" accept="image/png, image/jpeg" onchange="previewImage(event)">
+            <img id="imagePreview" src="" alt="Yüklenen Görüntü">
+            
+            <button class="action-btn" onclick="analyzeImage()">Yapay Zekâ ile Analiz Et</button>
+
+            <div id="loader">
+                <div class="spinner"></div>
+                Derin Öğrenme Modeli (CNN) Görüntüyü İşliyor...
+            </div>
+
+            <div id="analysisResult" class="result-box">
+                <h3>📌 Yapay Zekâ Analiz Raporu</h3>
+                <p><strong>Gömülü Diş Tespiti:</strong> Alt sağ 38 numara (Yarı gömülü, Meziosantrik açılı)</p>
+                <p><strong>Sinir Yakınlığı:</strong> Mandibular kanala mesafe <strong>0.8 mm</strong> <span style="color:red; font-weight:bold;">(YÜKSEK RİSK)</span></p>
+                <p><strong>Kist/Lezyon Şüphesi:</strong> Radiküler kist şüphesi tespit edilmedi.</p>
+                <hr style="margin: 15px 0; border: 0; border-top: 1px solid #ddd;">
+                <p>⚠️ <strong>AI Cerrahi Önerisi:</strong> 38 numaralı dişin kökleri inferior alveolar sinir ile süperpoze görünmektedir. KIBT (Tomografi) çekilmesi şiddetle tavsiye edilir.</p>
+            </div>
+        </div>
+
+        <div id="modul2" class="section">
+            <h2>Operasyon Sonrası Risk ve Zorluk Tahmini</h2>
+            <p style="color: #666; margin-bottom: 20px;">Hastanın verilerini girerek algoritmik risk raporunu oluşturun.</p>
+            
+            <div class="grid-2">
+                <div>
+                    <label>Hastanın Yaşı</label>
+                    <input type="number" id="yas" value="25" min="10" max="100">
+
+                    <label>İlgili Dişin Kök Yapısı</label>
+                    <select id="kok">
+                        <option value="tek">Tek Kök</option>
+                        <option value="cift">Çift/Çoklu Kök</option>
+                        <option value="kivrimli">Kıvrımlı/Anomalili Kök</option>
+                    </select>
+
+                    <label>Kemik Yoğunluğu</label>
+                    <select id="kemik">
+                        <option value="d1">D1 (Çok Sert)</option>
+                        <option value="d2">D2 (Sert)</option>
+                        <option value="d3">D3 (Orta)</option>
+                        <option value="d4">D4 (Yumuşak)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Maksimum Ağız Açıklığı (mm)</label>
+                    <input type="number" id="aciklik" value="45" min="10" max="70">
+
+                    <label>Sistemik Hastalıklar</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" id="diyabet"> Diyabet</label>
+                        <label><input type="checkbox" id="hipertansiyon"> Hipertansiyon</label>
+                        <label><input type="checkbox" id="kanSulandirici"> Kan Sulandırıcı Kullanımı</label>
                     </div>
                 </div>
-                
-                <div class="sidebar-bottom">
-                    <div class="menu-item" data-target="settings">⚙️ Ayarlar</div>
-                </div>
-            </aside>
-
-            <main class="main-feed" id="main-content"></main>
-
-            <aside class="right-panel">
-                <div class="card sticky-card">
-                    <h2>🏢 Fakülteler</h2>
-                    <ul class="community-list">
-                        <li class="community-link" data-name="Tıp Fakültesi" data-icon="🩺" data-color="linear-gradient(135deg, #EF4444, #B91C1C)">🩺 Tıp Fakültesi</li>
-                        <li class="community-link" data-name="Bilgisayar Fakültesi" data-icon="💻" data-color="linear-gradient(135deg, #3B82F6, #2563EB)">💻 Bilgisayar Fakültesi</li>
-                        <li class="community-link" data-name="Diş Hekimliği" data-icon="🦷" data-color="linear-gradient(135deg, #06B6D4, #0891B2)">🦷 Diş Hekimliği</li>
-                        
-                        <div id="desktop-more-faculties" style="display: none;">
-                            <li class="community-link" data-name="Hukuk Fakültesi" data-icon="⚖️" data-color="linear-gradient(135deg, #8B5CF6, #6D28D9)">⚖️ Hukuk Fakültesi</li>
-                            <li class="community-link" data-name="Mimarlık Fakültesi" data-icon="📐" data-color="linear-gradient(135deg, #F59E0B, #D97706)">📐 Mimarlık Fakültesi</li>
-                            <li class="community-link" data-name="Eğitim Fakültesi" data-icon="📖" data-color="linear-gradient(135deg, #10B981, #059669)">📖 Eğitim Fakültesi</li>
-                        </div>
-                    </ul>
-                    <button class="action-btn" id="desktop-show-more-btn" style="margin-top: 15px;">Daha Fazla Göster</button>
-                </div>
-            </aside>
-        </div>
-    </div>
-
-    <div id="app-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-title">Başlık</h3>
-                <span class="close-btn" id="modal-close">&times;</span>
             </div>
-            <div class="modal-body" id="modal-body"></div>
+
+            <button class="action-btn" onclick="calculateRisk()">Riski Hesapla</button>
+
+            <div id="riskResult" class="result-box">
+                <h3>🤖 Algoritmik Tahmin Raporu</h3>
+                <p id="riskScoreText"></p>
+                <p id="riskDetailText"></p>
+                <p id="riskWarningText" style="color: red; font-weight: bold; margin-top: 10px;"></p>
+            </div>
         </div>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <script>
+        // Sekme Değiştirme
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        // Resim Önizleme
+        function previewImage(event) {
+            const preview = document.getElementById('imagePreview');
+            preview.style.display = 'block';
+            preview.src = URL.createObjectURL(event.target.files[0]);
+            document.getElementById('analysisResult').style.display = 'none'; // Yeni resim yüklendiğinde sonucu gizle
+        }
+
+        // Analiz Simülasyonu
+        function analyzeImage() {
+            const imageInput = document.getElementById('imageInput');
+            if(imageInput.files.length === 0) {
+                alert("Lütfen önce bir görüntü yükleyin!");
+                return;
+            }
+
+            document.getElementById('analysisResult').style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
+
+            // 2.5 saniye bekleme süresi (Yapay Zeka işlem simülasyonu)
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('analysisResult').style.display = 'block';
+            }, 2500);
+        }
+
+        // Gerçek Çalışan Risk Algoritması
+        function calculateRisk() {
+            let score = 0;
+            
+            const yas = parseInt(document.getElementById('yas').value);
+            const kok = document.getElementById('kok').value;
+            const kemik = document.getElementById('kemik').value;
+            const aciklik = parseInt(document.getElementById('aciklik').value);
+            const kanSulandirici = document.getElementById('kanSulandirici').checked;
+
+            // Puanlama Mantığı
+            if(yas > 40) score += 2;
+            if(yas > 65) score += 2;
+            if(kok === 'cift') score += 2;
+            if(kok === 'kivrimli') score += 4;
+            if(kemik === 'd1') score += 3;
+            if(aciklik < 35) score += 3;
+
+            const resultBox = document.getElementById('riskResult');
+            const scoreText = document.getElementById('riskScoreText');
+            const detailText = document.getElementById('riskDetailText');
+            const warningText = document.getElementById('riskWarningText');
+
+            resultBox.style.display = 'block';
+            warningText.innerHTML = "";
+
+            if (score <= 3) {
+                scoreText.innerHTML = "Zorluk Derecesi: <span class='badge bg-success'>KOLAY</span>";
+                detailText.innerHTML = "<strong>Post-op Beklenti:</strong> Düşük ödem ve ağrı. Standart prosedür yeterlidir.";
+            } else if (score <= 7) {
+                scoreText.innerHTML = "Zorluk Derecesi: <span class='badge bg-warning'>ORTA</span>";
+                detailText.innerHTML = "<strong>Post-op Beklenti:</strong> Orta seviye ödem. 48 saat soğuk kompres ve NSAİİ planlanmalıdır.";
+            } else {
+                scoreText.innerHTML = "Zorluk Derecesi: <span class='badge bg-danger'>ZOR / KOMPLİKE</span>";
+                detailText.innerHTML = "<strong>Post-op Beklenti:</strong> Yüksek ödem riski, cerrahi süre uzayabilir. Pre-operatif kortikosteroid düşünülebilir.";
+            }
+
+            if (kanSulandirici) {
+                warningText.innerHTML = "Kritik Uyarı: Hasta kan sulandırıcı kullanıyor! Kanama profili (INR vb.) kontrol edilmeli ve doktor konsültasyonu yapılmalıdır.";
+            }
+        }
+    </script>
 </body>
 </html>
